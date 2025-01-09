@@ -1,0 +1,204 @@
+<!-- company-tax-details.component.html -->
+<div class="container mt-4">
+    <!-- Fecha de inicio de operaciones y Selección de Registro -->
+    <div class="row mb-3">
+      <!-- Fecha de inicio de operaciones -->
+      <div class="col-md-6">
+        <div class="form-group">
+          <label for="startDate" class="form-label">Fecha de inicio de operaciones:</label>
+          <input 
+            id="startDate" 
+            type="text" 
+            class="form-control" 
+            [value]="fechaInicioOperaciones || 'No disponible'"
+            readonly />
+        </div>
+      </div>
+  
+      <!-- Selección de Registro -->
+      <div class="col-md-6 text-end">
+        <div class="form-group">
+          <label for="infoSelect" class="form-label">Ver Información:</label>
+          <nb-select 
+            id="infoSelect" 
+            class="form-select" 
+            placeholder="Selecciona una opción" 
+            (selectionChange)="onRegistroSeleccionado($event.value)">
+            <!-- Opción predeterminada -->
+            <nb-option value="" disabled selected>Selecciona una opción</nb-option>
+            <!-- Opciones basadas en companyData -->
+            <nb-option 
+              *ngFor="let item of companyData; let idx = index" 
+              [value]="idx">
+              Registro {{ idx + 1 }}
+            </nb-option>
+          </nb-select>
+        </div>
+      </div>
+    </div>
+  
+    <!-- Datos de Identificación del Contribuyente -->
+    <div class="mb-4">
+      <h5>Datos de Identificación del Contribuyente</h5>
+      <table class="table table-bordered">
+        <tbody>
+          <tr>
+            <td><strong>CURP:</strong></td>
+            <td>{{ datosIdentificacion?.curp || 'No aplica' }}</td>
+          </tr>
+          <tr>
+            <td><strong>RFC:</strong></td>
+            <td>{{ datosIdentificacion?.rfc || 'No disponible' }}</td>
+          </tr>
+          <tr>
+            <td><strong>Nombre:</strong></td>
+            <td>{{ datosIdentificacion?.nombre || 'No aplica' }}</td>
+          </tr>
+          <tr>
+            <td><strong>Primer Apellido:</strong></td>
+            <td>{{ datosIdentificacion?.primerApellido || 'No aplica' }}</td>
+          </tr>
+          <tr>
+            <td><strong>Segundo Apellido:</strong></td>
+            <td>{{ datosIdentificacion?.segundoApellido || 'No aplica' }}</td>
+          </tr>
+          <tr>
+            <td><strong>Denominación o Razón Social:</strong></td>
+            <td>{{ datosIdentificacion?.razonSocial || 'No aplica' }}</td>
+          </tr>
+          <tr>
+            <td><strong>Régimen de Capital:</strong></td>
+            <td>{{ datosIdentificacion?.regimenCapital || 'No aplica' }}</td>
+          </tr>
+          <tr>
+            <td><strong>Nombre Comercial:</strong></td>
+            <td>{{ datosIdentificacion?.nombreComercial || 'No aplica' }}</td>
+          </tr>
+          <tr>
+            <td><strong>Fecha de Inicio de Operaciones:</strong></td>
+            <td>{{ fechaInicioOperaciones || 'No disponible' }}</td>
+          </tr>
+          <tr>
+            <td><strong>Estatus en el Padrón:</strong></td>
+            <td>{{ datosIdentificacion?.estatus || 'No disponible' }}</td>
+          </tr>
+          <tr>
+            <td><strong>Fecha de Último Cambio de Estado:</strong></td>
+            <td>{{ datosIdentificacion?.fechaCambioEstado || 'No disponible' }}</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  
+    <!-- Datos del Domicilio Registrado -->
+    <div class="mb-4">
+      <h5>Datos del Domicilio Registrado</h5>
+      <table class="table table-bordered">
+        <tbody>
+          <tr>
+            <td><strong>Código Postal:</strong></td>
+            <td>{{ domicilio?.codigoPostal || 'No disponible' }}</td>
+          </tr>
+          <tr>
+            <td><strong>Tipo de Vialidad:</strong></td>
+            <td>{{ domicilio?.tipoVialidad || 'No disponible' }}</td>
+          </tr>
+          <tr>
+            <td><strong>Nombre de Vialidad:</strong></td>
+            <td>{{ domicilio?.nombreVialidad || 'No disponible' }}</td>
+          </tr>
+          <tr>
+            <td><strong>Número Exterior:</strong></td>
+            <td>{{ domicilio?.numeroExterior || 'No disponible' }}</td>
+          </tr>
+          <tr>
+            <td><strong>Número Interior:</strong></td>
+            <td>{{ domicilio?.numeroInterior || 'No aplica' }}</td>
+          </tr>
+          <tr>
+            <td><strong>Colonia:</strong></td>
+            <td>{{ domicilio?.colonia || 'No disponible' }}</td>
+          </tr>
+          <tr>
+            <td><strong>Localidad:</strong></td>
+            <td>{{ domicilio?.localidad || 'No disponible' }}</td>
+          </tr>
+          <tr>
+            <td><strong>Municipio:</strong></td>
+            <td>{{ domicilio?.municipio || 'No disponible' }}</td>
+          </tr>
+          <tr>
+            <td><strong>Entidad Federativa:</strong></td>
+            <td>{{ domicilio?.entidadFederativa || 'No disponible' }}</td>
+          </tr>
+          <tr>
+            <td><strong>Entre Calle:</strong></td>
+            <td>{{ domicilio?.entreCalle || 'No disponible' }}</td>
+          </tr>
+          <tr>
+            <td><strong>Y Calle:</strong></td>
+            <td>{{ domicilio?.yCalle || 'No disponible' }}</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  
+    <!-- Actividades Económicas -->
+    <div class="mb-4">
+      <h5>Actividades Económicas</h5>
+      <ng2-smart-table 
+        [settings]="settingsActividadesEconomicas" 
+        [source]="actividadesEconomicas" 
+        (userRowSelect)="onRowSelectActividad($event)">
+      </ng2-smart-table>
+    </div>
+  
+    <!-- Regímenes -->
+    <div class="mb-4">
+      <h5>Regímenes</h5>
+      <ng2-smart-table 
+        [settings]="settingsRegimenes" 
+        [source]="regimenes" 
+        (userRowSelect)="onRowSelectRegimen($event)">
+      </ng2-smart-table>
+    </div>
+  
+    <!-- Obligaciones -->
+    <div class="mb-4">
+      <h5>Obligaciones</h5>
+      <ng2-smart-table 
+        [settings]="settingsObligaciones" 
+        [source]="obligaciones" 
+        (userRowSelect)="onRowSelectObligacion($event)">
+      </ng2-smart-table>
+    </div>
+  
+    <!-- Sección para cargar archivo PDF -->
+    <div class="container mt-4">
+      <!-- Botón para cargar el archivo PDF -->
+      <div class="mb-3">
+        <div class="form-group">
+          <label for="pdfFile" class="form-label">Cargar archivo PDF:</label>
+          <input 
+            type="file" 
+            id="pdfFile" 
+            (change)="onFileSelected($event)" 
+            accept="application/pdf"
+            class="form-control" />
+        </div>
+      </div>
+  
+      <!-- Botón para abrir el modal con los datos extraídos -->
+      <div *ngIf="extractedData">
+        <button 
+          nbButton 
+          status="primary" 
+          (click)="mostrarDatosEnModal()" 
+          class="mt-2">
+          Ver y Guardar Datos Extraídos
+        </button>
+      </div>
+    </div>
+  </div>
+
+  

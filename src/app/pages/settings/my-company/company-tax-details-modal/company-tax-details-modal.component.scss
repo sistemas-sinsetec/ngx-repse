@@ -1,0 +1,22 @@
+nb-card {
+    max-height: 80vh; /* Altura máxima del modal */
+    overflow: hidden;
+  }
+  
+  nb-card-body {
+    max-height: 65vh; /* Altura máxima para el cuerpo con scroll */
+    overflow-y: auto; /* Scroll vertical habilitado */
+  }
+  
+  .table {
+    width: 100%;
+  }
+  
+  .mb-3, .mb-4 {
+    margin-bottom: 1rem;
+  }
+  
+  .text-center {
+    text-align: center;
+  }
+  

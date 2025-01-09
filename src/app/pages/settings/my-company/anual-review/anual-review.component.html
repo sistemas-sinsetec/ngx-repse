@@ -1,0 +1,93 @@
+<!-- company-documents.component.html -->
+<nb-layout>
+    <nb-layout-column>
+      <nb-card>
+        <nb-card-header>
+          <div class="d-flex justify-content-between align-items-center">
+            <span class="header-title">Revisar documentos anuales</span>
+            <div class="text-center">
+              <h5>{{ authService.selectedCompany }}</h5>
+            </div>
+          </div>
+        </nb-card-header>
+  
+        <nb-card-body>
+          <!-- Botones de Filtrado -->
+          <div class="text-center mb-3">
+            <nb-button-group>
+              <button 
+                nbButton 
+                status="secondary" 
+                [class.active]="filter === 'cargados'" 
+                (click)="setFilter('cargados')">
+                Cargados
+              </button>
+              <button 
+                nbButton 
+                status="success" 
+                [class.active]="filter === 'aceptados'" 
+                (click)="setFilter('aceptados')">
+                Aceptados
+              </button>
+              <button 
+                nbButton 
+                status="danger" 
+                [class.active]="filter === 'rechazados'" 
+                (click)="setFilter('rechazados')">
+                Rechazados
+              </button>
+            </nb-button-group>
+          </div>
+  
+          <!-- Tablas de Documentos -->
+          <div *ngIf="filter === 'cargados'" class="mb-4">
+            <nb-card>
+              <nb-card-header>Cargados</nb-card-header>
+              <nb-card-body>
+                <ng2-smart-table 
+                  [settings]="settingsCargados" 
+                  [source]="archivosCargados" 
+                  (userRowSelect)="revisarInformacionAdicional($event.data)">
+                </ng2-smart-table>
+              </nb-card-body>
+            </nb-card>
+          </div>
+  
+          <div *ngIf="filter === 'aceptados'" class="mb-4">
+            <nb-card>
+              <nb-card-header>Aceptados</nb-card-header>
+              <nb-card-body>
+                <ng2-smart-table 
+                  [settings]="settingsAceptados" 
+                  [source]="archivosAceptados" 
+                  (userRowSelect)="revisarInformacionAdicional($event.data)">
+                </ng2-smart-table>
+              </nb-card-body>
+            </nb-card>
+          </div>
+  
+          <div *ngIf="filter === 'rechazados'" class="mb-4">
+            <nb-card>
+              <nb-card-header>Rechazados</nb-card-header>
+              <nb-card-body>
+                <ng2-smart-table 
+                  [settings]="settingsRechazados" 
+                  [source]="archivosRechazados" 
+                  (userRowSelect)="revisarInformacionAdicional($event.data)">
+                </ng2-smart-table>
+              </nb-card-body>
+            </nb-card>
+          </div>
+  
+          <!-- Badges Informativos -->
+          <div class="text-center mb-4">
+            <nb-badge status="success" class="m-2">Cargados: {{ cargados }}</nb-badge>
+            <nb-badge status="primary" class="m-2">Completos: {{ completos }}</nb-badge>
+            <nb-badge status="danger" class="m-2">Incompletos: {{ incompletos }}</nb-badge>
+            <nb-badge status="warning" class="m-2">No cargados: {{ noCargados }}</nb-badge>
+          </div>
+        </nb-card-body>
+      </nb-card>
+    </nb-layout-column>
+  </nb-layout>
+  

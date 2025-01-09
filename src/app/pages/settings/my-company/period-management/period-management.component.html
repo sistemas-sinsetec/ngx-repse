@@ -1,0 +1,216 @@
+<!-- catalogo-periodos.component.html -->
+<div class="container mt-4">
+  <div class="d-flex justify-content-center mb-4">
+    <h5><strong>Catálogo de Periodos</strong></h5>
+  </div>
+  <div class="row justify-content-center">
+    <!-- Columna de la lista de tipos de periodos -->
+    <div class="col-md-4">
+      <div class="sticky-top">
+        <nb-list class="period-list">
+          <!-- Lista de Tipos de Periodo -->
+          <nb-list-item 
+            *ngFor="let tipo of periodTypes" 
+            (click)="selectPeriodType(tipo)" 
+            class="pointer">
+            <div>
+              <h2>{{ tipo.period_type_name }}</h2>
+              <nb-list>
+                <!-- Lista de Años para cada Tipo de Periodo -->
+                <nb-list-item 
+                  *ngFor="let year of tipo.years" 
+                  (click)="selectYear(year); $event.stopPropagation()" 
+                  class="pointer ml-3">
+                  {{ year }}
+                </nb-list-item>
+              </nb-list>
+            </div>
+          </nb-list-item>
+        </nb-list>
+      </div>
+    </div>
+
+    <!-- Columna de la tabla de periodos y formulario -->
+    <div class="col-md-8">
+      <!-- Tarjeta que muestra los periodos del año seleccionado -->
+      <nb-card *ngIf="selectedYearPeriods.length > 0">
+        <nb-card-header>
+          <nb-card-title class="text-center">Periodos de {{ selectedYear }}</nb-card-title>
+        </nb-card-header>
+        <nb-card-body>
+          <!-- Tabla de Periodos usando ng2-smart-table -->
+          <ng2-smart-table 
+            [settings]="settings" 
+            [source]="source" 
+            (userRowSelect)="onRowSelect($event)">
+          </ng2-smart-table>
+
+          <!-- Formulario de Periodos -->
+          <nb-card class="mt-4">
+            <nb-card-header>Detalles del Periodo</nb-card-header>
+            <nb-card-body>
+              <form (ngSubmit)="guardarPeriodo()" #periodForm="ngForm">
+                <!-- Número del Periodo -->
+                <div class="form-group">
+                  <label for="numero-periodo">Número del Periodo</label>
+                  <input 
+                    type="number" 
+                    id="numero-periodo"
+                    nbInput 
+                    fullWidth 
+                    placeholder="Ingrese el número del periodo" 
+                    [(ngModel)]="form.numeroPeriodo" 
+                    name="numero-periodo" 
+                    class="form-control"
+                    required>
+                </div>
+
+                <!-- Fecha Inicio -->
+                <div class="form-group">
+                  <label for="fecha-inicio">Fecha de Inicio</label>
+                  <input 
+                    nbInput 
+                    fullWidth 
+                    placeholder="Seleccione la fecha de inicio" 
+                    [nbDatepicker]="startDatePicker" 
+                    [(ngModel)]="form.fechaInicio" 
+                    name="fecha-inicio" 
+                    id="fecha-inicio"
+                    class="form-control"
+                    required>
+                  <nb-datepicker #startDatePicker></nb-datepicker>
+                </div>
+
+                <!-- Fecha Fin -->
+                <div class="form-group">
+                  <label for="fecha-fin">Fecha de Fin</label>
+                  <input 
+                    nbInput 
+                    fullWidth 
+                    placeholder="Seleccione la fecha de fin" 
+                    [nbDatepicker]="endDatePicker" 
+                    [(ngModel)]="form.fechaFin" 
+                    name="fecha-fin" 
+                    id="fecha-fin"
+                    class="form-control"
+                    required>
+                  <nb-datepicker #endDatePicker></nb-datepicker>
+                </div>
+
+                <!-- Ejercicio -->
+                <div class="form-group">
+                  <label for="ejercicio">Ejercicio</label>
+                  <input 
+                    type="number" 
+                    id="ejercicio"
+                    nbInput 
+                    fullWidth 
+                    placeholder="Ingrese el ejercicio" 
+                    [(ngModel)]="form.ejercicio" 
+                    name="ejercicio" 
+                    class="form-control"
+                    required>
+                </div>
+
+                <!-- Mes -->
+                <div class="form-group">
+                  <label for="mes">Mes</label>
+                  <input 
+                    type="number" 
+                    id="mes"
+                    nbInput 
+                    fullWidth 
+                    placeholder="Ingrese el mes" 
+                    [(ngModel)]="form.mes" 
+                    name="mes" 
+                    class="form-control"
+                    required>
+                </div>
+
+                <!-- Días de Pago -->
+                <div class="form-group">
+                  <label for="dias-pago">Días de Pago</label>
+                  <input 
+                    type="number" 
+                    id="dias-pago"
+                    nbInput 
+                    fullWidth 
+                    placeholder="Ingrese los días de pago" 
+                    [(ngModel)]="form.diasPago" 
+                    name="dias-pago" 
+                    class="form-control"
+                    required>
+                </div>
+
+                <!-- Inicio de Mes -->
+                <div class="form-group d-flex align-items-center">
+                  <nb-checkbox 
+                    [(ngModel)]="form.inicioMes" 
+                    name="inicio-mes" 
+                    id="inicio-mes">
+                  </nb-checkbox>
+                  <label for="inicio-mes" class="ml-2 mb-0">Inicio de mes</label>
+                </div>
+
+                <!-- Fin de Mes -->
+                <div class="form-group d-flex align-items-center">
+                  <nb-checkbox 
+                    [(ngModel)]="form.finMes" 
+                    name="fin-mes" 
+                    id="fin-mes">
+                  </nb-checkbox>
+                  <label for="fin-mes" class="ml-2 mb-0">Fin de mes</label>
+                </div>
+
+                <!-- Inicio Bimestre IMSS -->
+                <div class="form-group d-flex align-items-center">
+                  <nb-checkbox 
+                    [(ngModel)]="form.inicioBimestreIMSS" 
+                    name="inicio-bimestre-imss" 
+                    id="inicio-bimestre-imss">
+                  </nb-checkbox>
+                  <label for="inicio-bimestre-imss" class="ml-2 mb-0">Inicio bimestre IMSS</label>
+                </div>
+
+                <!-- Fin Bimestre IMSS -->
+                <div class="form-group d-flex align-items-center">
+                  <nb-checkbox 
+                    [(ngModel)]="form.finBimestreIMSS" 
+                    name="fin-bimestre-imss" 
+                    id="fin-bimestre-imss">
+                  </nb-checkbox>
+                  <label for="fin-bimestre-imss" class="ml-2 mb-0">Fin bimestre IMSS</label>
+                </div>
+
+                <!-- Inicio de Ejercicio -->
+                <div class="form-group d-flex align-items-center">
+                  <nb-checkbox 
+                    [(ngModel)]="form.inicioEjercicio" 
+                    name="inicio-ejercicio" 
+                    id="inicio-ejercicio">
+                  </nb-checkbox>
+                  <label for="inicio-ejercicio" class="ml-2 mb-0">Inicio de ejercicio</label>
+                </div>
+
+                <!-- Fin de Ejercicio -->
+                <div class="form-group d-flex align-items-center">
+                  <nb-checkbox 
+                    [(ngModel)]="form.finEjercicio" 
+                    name="fin-ejercicio" 
+                    id="fin-ejercicio">
+                  </nb-checkbox>
+                  <label for="fin-ejercicio" class="ml-2 mb-0">Fin de ejercicio</label>
+                </div>
+
+                <!-- Botón de Guardar -->
+                <button nbButton status="success" fullWidth type="submit">
+                  Guardar
+                </button>
+              </form>
+            </nb-card-body>
+          </nb-card>
+        </nb-card-body>
+      </nb-card>
+    </div>
+  </div>
+</div>

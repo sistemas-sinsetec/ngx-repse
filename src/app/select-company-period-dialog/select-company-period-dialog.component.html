@@ -1,0 +1,38 @@
+<nb-card>
+  <nb-card-header>Seleccionar Empresa y Período</nb-card-header>
+  <nb-card-body>
+
+    <!-- Selector Empresa -->
+    <label>Empresa</label>
+    <nb-select
+      placeholder="Seleccionar Empresa"
+      fullWidth
+      [(selected)]="selectedCompanyId"
+      (selectedChange)="onCompanyChange()"
+      style="margin-bottom: 1rem;"
+    >
+    <nb-option *ngFor="let company of companies" [value]="company.id">
+      {{ company.name }}
+    </nb-option>
+    
+    </nb-select>
+
+    <!-- Selector Periodo -->
+    <label>Período</label>
+    <nb-select
+      placeholder="Seleccionar Período"
+      fullWidth
+      [(selected)]="selectedPeriodId"
+    >
+    <nb-option *ngFor="let period of periods" [value]="period.id">
+      {{ period.name }} - {{ period.year }}
+    </nb-option>
+    </nb-select>
+
+  </nb-card-body>
+  <nb-card-footer style="text-align: right;">
+    <button nbButton status="primary" (click)="confirm()" style="margin-right: 1rem;">
+      Confirmar
+    </button>
+  </nb-card-footer>
+</nb-card>

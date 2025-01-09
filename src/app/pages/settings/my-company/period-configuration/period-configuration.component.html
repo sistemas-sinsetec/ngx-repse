@@ -1,0 +1,215 @@
+<div class="container mt-4">
+  <div class="d-flex justify-content-center mb-4">
+    <h5><strong>{{ selectedPeriod.period_type_id ? 'Editar Periodo' : 'Crear Nuevo Periodo' }}</strong></h5>
+  </div>
+  <div class="row justify-content-center">
+    <!-- Columna de la lista de periodos -->
+    <div class="col-md-4">
+      <div class="sticky-top">
+        <nb-list class="period-list">
+          <nb-list-item 
+            *ngFor="let period of periods" 
+            (click)="selectPeriod(period)" 
+            [class.selected]="period === selectedPeriod"
+            class="pointer">
+            {{ period.period_type_name }}
+          </nb-list-item>
+          <nb-list-item (click)="createNewPeriod()" class="pointer">
+            <nb-icon icon="plus-circle-outline" pack="eva"></nb-icon>
+            Nuevo Periodo
+          </nb-list-item>
+        </nb-list>
+      </div>
+    </div>
+
+    <!-- Columna del formulario de configuración -->
+    <div class="col-md-8">
+      <form (ngSubmit)="savePeriodConfig()">
+        <nb-card>
+          <nb-card-body>
+            <!-- Fecha de inicio del ejercicio -->
+            <div class="form-group">
+              <label>Fecha de inicio del ejercicio</label>
+              <input 
+                type="date" 
+                nbInput 
+                fullWidth 
+                placeholder="DD/MM/YYYY" 
+                [(ngModel)]="selectedPeriod.fiscal_year_start" 
+                [min]="minDate" 
+                [max]="maxDate" 
+                name="fiscal_year_start"
+                class="form-control">
+              <small class="form-text text-muted">Selecciona la fecha en la que inicia el ejercicio fiscal para este periodo.</small>
+            </div>
+
+            <!-- Nombre del Periodo -->
+            <div class="form-group">
+              <label>Nombre</label>
+              <input 
+                type="text" 
+                nbInput 
+                fullWidth 
+                placeholder="Nombre del Periodo" 
+                [(ngModel)]="selectedPeriod.period_type_name" 
+                name="period_type_name" 
+                class="form-control">
+              <small class="form-text text-muted">Introduce un nombre descriptivo para este tipo de periodo, como "Semanal", "Quincenal", o "Personalizado".</small>
+            </div>
+
+            <!-- Días del periodo para opciones predefinidas -->
+            <div class="form-group" *ngIf="selectedPeriod.payment_frequency !== '99'">
+              <label>Días del periodo</label>
+              <input 
+                type="number" 
+                nbInput 
+                fullWidth 
+                placeholder="Días del Periodo" 
+                [(ngModel)]="selectedPeriod.period_days" 
+                name="period_days" 
+                (change)="updatePayrollPosition()"
+                class="form-control">
+              <small class="form-text text-muted">Indica cuántos días dura cada periodo, por ejemplo, 7 para un periodo semanal.</small>
+            </div>
+
+            <!-- Longitud del periodo personalizado para la opción 'Otra Periodicidad' -->
+            <div class="form-group" *ngIf="selectedPeriod.payment_frequency === '99'">
+              <label>Longitud del periodo personalizado</label>
+              <input 
+                type="number" 
+                nbInput 
+                fullWidth 
+                placeholder="Longitud del Periodo" 
+                [(ngModel)]="selectedPeriod.custom_period_length" 
+                name="custom_period_length" 
+                (change)="updatePayrollPosition()"
+                class="form-control">
+              <small class="form-text text-muted">Define la duración del periodo personalizado en días, semanas o meses.</small>
+            </div>
+
+            <!-- Días de Pago -->
+            <div class="form-group">
+              <label>Días de Pago</label>
+              <input 
+                type="number" 
+                nbInput 
+                fullWidth 
+                placeholder="Días de Pago" 
+                [(ngModel)]="selectedPeriod.payment_days" 
+                name="payment_days" 
+                class="form-control">
+              <small class="form-text text-muted">Especifica cuántos días después del fin del periodo se realizará el pago.</small>
+            </div>
+
+            <!-- Periodo de trabajo -->
+            <div class="form-group">
+              <label>Periodo de trabajo</label>
+              <input 
+                type="number" 
+                nbInput 
+                fullWidth 
+                placeholder="Periodo de Trabajo" 
+                [(ngModel)]="selectedPeriod.work_period" 
+                name="work_period" 
+                class="form-control">
+              <small class="form-text text-muted">Define la cantidad de días laborables dentro de cada periodo.</small>
+            </div>
+
+            <!-- Ajustar al mes calendario -->
+            <div class="form-group">
+              <label>Ajustar al mes calendario</label>
+              <nb-select 
+                fullWidth
+                placeholder="Selecciona una opción" 
+                [(ngModel)]="selectedPeriod.adjust_calendar_periods" 
+                name="adjust_calendar_periods">
+                <nb-option value="1">Sí</nb-option>
+                <nb-option value="0">No</nb-option>
+              </nb-select>
+              <small class="form-text text-muted">Indica si el periodo debe ajustarse para coincidir con el fin de mes calendario.</small>
+            </div>
+
+            <!-- Posición de los séptimos días -->
+            <div class="form-group">
+              <label>Posición de los séptimos días</label>
+              <input 
+                type="date" 
+                nbInput 
+                fullWidth 
+                placeholder="Posición de los Séptimos Días" 
+                [(ngModel)]="selectedPeriod.rest_days_position" 
+                name="rest_days_position" 
+                (change)="updateRestDays()"
+                [min]="minDate" 
+                [max]="maxDate" 
+                class="form-control">
+              <small class="form-text text-muted">
+                Especifica la posición del séptimo día (día de descanso) dentro del periodo. Solo puedes seleccionar fechas dentro del rango de días del periodo.
+              </small>
+            </div>
+
+            <!-- Posición del día de pago -->
+            <div class="form-group">
+              <label>Posición del día de pago</label>
+              <input 
+                type="number" 
+                nbInput 
+                fullWidth 
+                placeholder="Posición del Día de Pago" 
+                [(ngModel)]="selectedPeriod.payroll_position" 
+                name="payroll_position" 
+                class="form-control">
+              <small class="form-text text-muted">Este campo se rellena automáticamente, pero puedes modificarlo si es necesario.</small>
+            </div>
+
+            <!-- Periodicidad de pago -->
+            <div class="form-group">
+              <label>Periodicidad de pago</label>
+              <nb-select 
+                fullWidth
+                placeholder="Selecciona una frecuencia" 
+                [(ngModel)]="selectedPeriod.payment_frequency" 
+                name="payment_frequency">
+                <nb-option value="01">Diario</nb-option>
+                <nb-option value="02">Semanal</nb-option>
+                <nb-option value="03">Catorcenal</nb-option>
+                <nb-option value="04">Quincenal</nb-option>
+                <nb-option value="05">Mensual</nb-option>
+                <nb-option value="99">Otra Periodicidad</nb-option>
+              </nb-select>
+              <small class="form-text text-muted">Selecciona la frecuencia con la que se realizarán los pagos. Si es personalizada, selecciona "Otra Periodicidad".</small>
+            </div>
+
+            <!-- Tipo de periodo personalizado -->
+            <div class="form-group" *ngIf="selectedPeriod.payment_frequency === '99'">
+              <label>Tipo de periodo personalizado</label>
+              <nb-select 
+                fullWidth
+                placeholder="Selecciona un tipo" 
+                [(ngModel)]="selectedPeriod.custom_period_type" 
+                name="custom_period_type">
+                <nb-option value="días">Días</nb-option>
+                <nb-option value="semanas">Semanas</nb-option>
+                <nb-option value="meses">Meses</nb-option>
+              </nb-select>
+              <small class="form-text text-muted">Selecciona si el periodo personalizado está basado en días, semanas o meses.</small>
+            </div>
+
+            <!-- Botones de acción -->
+            <button nbButton status="primary" fullWidth type="submit">
+              {{ selectedPeriod.period_type_id ? 'Guardar Cambios' : 'Crear Periodo' }}
+            </button>
+            <button 
+              nbButton 
+              status="danger" 
+              fullWidth 
+              (click)="deletePeriod()" 
+              *ngIf="selectedPeriod.period_type_id">
+              Borrar Periodo
+            </button>
+          </nb-card-body>
+        </nb-card>
+      </form>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,227 @@
+<!-- datos-extraidos.component.html -->
+<nb-card>
+    <nb-card-header>
+      <div class="d-flex justify-content-between align-items-center">
+        <span>Detalles Extraídos del PDF</span>
+        <button nbButton ghost status="danger" size="small" (click)="close()">Cerrar</button>
+      </div>
+    </nb-card-header>
+  
+    <nb-card-body>
+      <div class="container mt-4">
+        <!-- Fecha de inicio de operaciones y idCIF -->
+        <div class="row mb-3">
+          <div class="col-md-6">
+            <div class="form-group">
+              <label for="startDate" class="form-label">Fecha de inicio de operaciones:</label>
+              <input 
+                id="startDate" 
+                type="text" 
+                class="form-control" 
+                [value]="data.DatosIdentificacion.FechaInicio" 
+                readonly />
+            </div>
+          </div>
+          <div class="col-md-6">
+            <div class="form-group">
+              <label for="idCIF" class="form-label">idCIF:</label>
+              <input 
+                id="idCIF" 
+                type="text" 
+                class="form-control" 
+                [value]="data.DatosIdentificacion.idCIF" 
+                readonly />
+            </div>
+          </div>
+        </div>
+  
+        <!-- Datos de Identificación del Contribuyente -->
+        <div class="mb-4">
+          <h5>Datos de Identificación del Contribuyente</h5>
+          <table class="table table-bordered">
+            <tbody>
+              <tr>
+                <td><strong>CURP:</strong></td>
+                <td>{{ data.DatosIdentificacion.CURP }}</td>
+              </tr>
+              <tr>
+                <td><strong>RFC:</strong></td>
+                <td>{{ data.DatosIdentificacion.RFC }}</td>
+              </tr>
+              <tr>
+                <td><strong>Nombre:</strong></td>
+                <td>{{ data.DatosIdentificacion.Nombre }}</td>
+              </tr>
+              <tr>
+                <td><strong>Primer Apellido:</strong></td>
+                <td>{{ data.DatosIdentificacion.PrimerApellido }}</td>
+              </tr>
+              <tr>
+                <td><strong>Segundo Apellido:</strong></td>
+                <td>{{ data.DatosIdentificacion.SegundoApellido }}</td>
+              </tr>
+              <tr>
+                <td><strong>Denominación o Razón Social:</strong></td>
+                <td>{{ data.DatosIdentificacion.RazonSocial }}</td>
+              </tr>
+              <tr>
+                <td><strong>Régimen de Capital:</strong></td>
+                <td>{{ data.DatosIdentificacion.RegimenCapital }}</td>
+              </tr>
+              <tr>
+                <td><strong>Nombre Comercial:</strong></td>
+                <td>{{ data.DatosIdentificacion.NombreComercial }}</td>
+              </tr>
+              <tr>
+                <td><strong>Fecha de Inicio de Operaciones:</strong></td>
+                <td>{{ data.DatosIdentificacion.FechaInicio }}</td>
+              </tr>
+              <tr>
+                <td><strong>Estatus en el Padrón:</strong></td>
+                <td>{{ data.DatosIdentificacion.Estatus }}</td>
+              </tr>
+              <tr>
+                <td><strong>Fecha de Último Cambio de Estado:</strong></td>
+                <td>{{ data.DatosIdentificacion.FechaCambioEstado }}</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+  
+        <!-- Datos del Domicilio Registrado -->
+        <div class="mb-4">
+          <h5>Datos del Domicilio Registrado</h5>
+          <table class="table table-bordered">
+            <tbody>
+              <tr>
+                <td><strong>Código Postal:</strong></td>
+                <td>{{ data.Domicilio.CodigoPostal }}</td>
+              </tr>
+              <tr>
+                <td><strong>Tipo de Vialidad:</strong></td>
+                <td>{{ data.Domicilio.TipoVialidad }}</td>
+              </tr>
+              <tr>
+                <td><strong>Nombre de Vialidad:</strong></td>
+                <td>{{ data.Domicilio.NombreVialidad }}</td>
+              </tr>
+              <tr>
+                <td><strong>Número Exterior:</strong></td>
+                <td>{{ data.Domicilio.NumeroExterior }}</td>
+              </tr>
+              <tr>
+                <td><strong>Número Interior:</strong></td>
+                <td>{{ data.Domicilio.NumeroInterior }}</td>
+              </tr>
+              <tr>
+                <td><strong>Colonia:</strong></td>
+                <td>{{ data.Domicilio.Colonia }}</td>
+              </tr>
+              <tr>
+                <td><strong>Localidad:</strong></td>
+                <td>{{ data.Domicilio.Localidad }}</td>
+              </tr>
+              <tr>
+                <td><strong>Municipio:</strong></td>
+                <td>{{ data.Domicilio.Municipio }}</td>
+              </tr>
+              <tr>
+                <td><strong>Entidad Federativa:</strong></td>
+                <td>{{ data.Domicilio.EntidadFederativa }}</td>
+              </tr>
+              <tr>
+                <td><strong>Entre Calle:</strong></td>
+                <td>{{ data.Domicilio.EntreCalle }}</td>
+              </tr>
+              <tr>
+                <td><strong>Y Calle:</strong></td>
+                <td>{{ data.Domicilio.YCalle }}</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+  
+        <!-- Actividades Económicas -->
+        <div class="mb-4">
+          <h5>Actividades Económicas</h5>
+          <table class="table table-bordered">
+            <thead>
+              <tr>
+                <th>Orden</th>
+                <th>Actividad</th>
+                <th>%</th>
+                <th>Fecha Inicio</th>
+                <th>Fecha Fin</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let actividad of data.ActividadesEconomicas">
+                <td>{{ actividad.Orden }}</td>
+                <td>{{ actividad.Actividad }}</td>
+                <td>{{ actividad.Porcentaje }}%</td>
+                <td>{{ actividad.FechaInicio }}</td>
+                <td>{{ actividad.FechaFin }}</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+  
+        <!-- Regímenes -->
+        <div class="mb-4">
+          <h5>Regímenes</h5>
+          <table class="table table-striped">
+            <thead>
+              <tr>
+                <th>Régimen</th>
+                <th>Fecha Inicio</th>
+                <th>Fecha Fin</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let regimen of data.Regimenes">
+                <td>{{ regimen.Regimen }}</td>
+                <td>{{ regimen.FechaInicio }}</td>
+                <td>{{ regimen.FechaFin }}</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+  
+        <!-- Obligaciones -->
+        <div class="mb-4">
+          <h5>Obligaciones</h5>
+          <table class="table table-bordered">
+            <thead>
+              <tr>
+                <th>Descripción</th>
+                <th>Vencimiento</th>
+                <th>Fecha Inicio</th>
+                <th>Fecha Fin</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let obligacion of data.Obligaciones">
+                <td>{{ obligacion.Descripcion }}</td>
+                <td>{{ obligacion.Vencimiento }}</td>
+                <td>{{ obligacion.FechaInicio }}</td>
+                <td>{{ obligacion.FechaFin }}</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+  
+        <!-- Sello SAT -->
+        <div class="mb-3">
+          <h6>Sello SAT</h6>
+          <p><strong>Cadena Original Sello:</strong> {{ data.SATSello.CadenaOriginalSello }}</p>
+          <p><strong>Sello Digital:</strong> {{ data.SATSello.SelloDigital }}</p>
+        </div>
+  
+        <!-- Botón para confirmar y actualizar los datos -->
+        <div class="text-center mt-3">
+          <button nbButton status="primary" (click)="guardarDatos()">Guardar y Actualizar Datos</button>
+        </div>
+      </div>
+    </nb-card-body>
+  </nb-card>
+  
