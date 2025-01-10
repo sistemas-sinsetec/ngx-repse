@@ -8,6 +8,8 @@ import { Afil01ModalComponent } from '../afil01-modal/afil01-modal.component';
 import { AutorizacionStpsModalComponent } from '../autorizacion-stps-modal/autorizacion-stps-modal.component';
 import { EstablecimientosModalComponent } from '../establecimientos-modal/establecimientos-modal.component';
 import { ContratoModalComponent } from '../contrato-modal/contrato-modal.component';
+import { CompanyService } from '../../../../services/company.service';
+
 
 
 
@@ -45,6 +47,7 @@ export class AnualUploadComponent implements OnInit {
   constructor(
     private http: HttpClient,
     public authService: AuthService,
+    public companyService: CompanyService,
     private nbDialogService: NbDialogService
   ) {}
 
