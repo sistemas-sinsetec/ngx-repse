@@ -1,1 +1,77 @@
-<p>anual-upload works!</p>
+<nb-layout>
+    <nb-layout-column>
+      <div class="container">
+        <!-- Título Principal -->
+        <h2 class="header-title">Subir documentos anuales</h2>
+  
+        <!-- Empresa Seleccionada -->
+        <div class="text-center mb-4">
+          <h5>{{ companyService.selectedCompany.name }}</h5>
+        </div>
+  
+        <!-- Alerta de Información -->
+        <nb-alert status="warning" class="text-center">
+          Primero suba la información requerida en el formulario antes de subir el documento.
+        </nb-alert>
+  
+        <!-- Tabla de Tareas -->
+        <div class="table-responsive mt-4">
+          <table class="table table-striped table-hover">
+            <thead>
+              <tr>
+                <th>Tarea</th>
+                <th>Archivo</th>
+                <th>Status</th>
+                <th>Estado</th>
+                <th>Comentarios</th>
+                <th>Acciones</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let tarea of tareas" [ngClass]="{
+                      'cargado': tarea.estado === 'cargado',
+                      'completo': tarea.estado === 'aceptado',
+                      'rechazado': tarea.estado === 'rechazado',
+                      'pendiente': tarea.estado === 'pendiente' || !tarea.estado
+                    }">
+                <td>{{ tarea.nombre }}</td>
+                <td>
+                  <input type="file" (change)="onFileSelected($event, tarea)" style="display: none;"
+                    id="fileInput{{tarea.id}}">
+                  <button nbButton status="info" (click)="triggerFileInput(tarea.id)"
+                    [disabled]="tarea.estado === 'aceptado' || tarea.estado === 'cargado'">
+                    Cargar documento
+                  </button>
+                </td>
+                <td>
+                  <nb-checkbox [checked]="tarea.cargado" disabled></nb-checkbox>
+                </td>
+                <td>{{ tarea.estado || 'No cargado' }}</td>
+                <td>{{ tarea.comentario || 'Sin comentarios' }}</td>
+                <td>
+                  <div class="d-flex flex-column">
+                    <button nbButton status="primary" class="mb-2" (click)="openModal(tarea)"
+                      [disabled]="tarea.estado === 'aceptado' || tarea.estado === 'cargado'">
+                      Subir Información
+                    </button>
+                    <button nbButton status="secondary" (click)="descargarArchivo(tarea)">
+                      Descargar documento
+                    </button>
+                  </div>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+  
+        <!-- Badges de Estado -->
+        <div class="text-center mt-4">
+          <nb-badge class="m-2" status="success" text="Cargados: {{ cargados }}"></nb-badge>
+          <nb-badge class="m-2" status="primary" text="Completos: {{ completos }}"></nb-badge>
+          <nb-badge class="m-2" status="danger" text="Incompletos: {{ incompletos }}"></nb-badge>
+          <nb-badge class="m-2" status="warning" text="No cargados: {{ noCargados }}"></nb-badge>
+        </div>
+      </div>
+    </nb-layout-column>
+  </nb-layout>
+  

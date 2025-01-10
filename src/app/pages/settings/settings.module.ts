@@ -12,14 +12,15 @@ import {
   NbCalendarRangeModule,
   NbSelectModule,
   NbOptionModule,
-
+  NbDatepickerModule,
+  NbBadgeModule, // Importa NbBadgeModule aquí
+  NbLayoutModule, // Importa NbLayoutModule si usas nb-layout
 } from '@nebular/theme';
 
 import { ThemeModule } from '../../@theme/theme.module';
 import { SettingsRoutingModule } from './settings-routing.module';
 import { SettingsComponent } from './settings.component';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
-import { NbDatepickerModule } from '@nebular/theme';
 import { Ng2SmartTableModule } from 'ng2-smart-table';
 import { UploadLogoComponent } from './my-company/upload-logo/upload-logo.component';
 import { CodeCompanyComponent } from './my-company/code-company/code-company.component';
@@ -33,6 +34,7 @@ import { CompanyTaxDetailsComponent } from './my-company/company-tax-details/com
 import { CompanyTaxDetailsModalComponent } from './my-company/company-tax-details-modal/company-tax-details-modal.component';
 import { AnualReviewComponent } from './my-company/anual-review/anual-review.component';
 import { AnualUploadComponent } from './my-company/anual-upload/anual-upload.component';
+
 @NgModule({
   imports: [
     ThemeModule,
@@ -51,7 +53,9 @@ import { AnualUploadComponent } from './my-company/anual-upload/anual-upload.com
     NbDatepickerModule.forRoot(),
     NbOptionModule, // Aquí añadimos el Datepicker
     Ng2SmartTableModule,
-    NbSelectModule
+    NbSelectModule,
+    NbBadgeModule, // Añade NbBadgeModule aquí
+    NbLayoutModule, // Añade NbLayoutModule si usas nb-layout
   ],
   declarations: [
     SettingsComponent,
