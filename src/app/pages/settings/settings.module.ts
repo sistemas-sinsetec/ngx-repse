@@ -38,6 +38,7 @@ import { AnualReviewComponent } from './my-company/anual-review/anual-review.com
 import { AnualUploadComponent } from './my-company/anual-upload/anual-upload.component';
 import { ReviewInfoModalComponent } from './my-company/review-info-modal/review-info-modal.component';
 import { RejectionDialogComponent } from './my-company/rejection-dialog/rejection-dialog.component';
+import { PermissionsSectionsComponent } from './permissions-sections/permissions-sections.component';
 
 @NgModule({
   imports: [
@@ -76,6 +77,7 @@ import { RejectionDialogComponent } from './my-company/rejection-dialog/rejectio
     AnualUploadComponent,
     ReviewInfoModalComponent,
     RejectionDialogComponent,
+    PermissionsSectionsComponent,
   ],
 })
 export class SettingsModule { }
