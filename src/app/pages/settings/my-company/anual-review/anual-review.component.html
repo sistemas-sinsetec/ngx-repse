@@ -1,0 +1,86 @@
+<!-- revisa-documentos.component.html -->
+<nb-layout>
+    <nb-layout-column>
+      <nb-card>
+        <nb-card-header class="header-title">Revisar documentos anuales</nb-card-header>
+        <nb-card-body>
+          <div class="text-center">
+            <h5>{{ companyService.selectedCompany.name }}</h5>
+          </div>
+  
+          <div class="text-center mb-3">
+            <div class="btn-group">
+              <button
+                nbButton
+                status="secondary"
+                size="small"
+                [class.active]="filter === 'cargados'"
+                (click)="setFilter('cargados')"
+                class="btn-group-button"
+              >
+                Cargados
+              </button>
+              <button
+                nbButton
+                status="success"
+                size="small"
+                [class.active]="filter === 'aceptados'"
+                (click)="setFilter('aceptados')"
+                class="btn-group-button"
+              >
+                Aceptados
+              </button>
+              <button
+                nbButton
+                status="danger"
+                size="small"
+                [class.active]="filter === 'rechazados'"
+                (click)="setFilter('rechazados')"
+                class="btn-group-button"
+              >
+                Rechazados
+              </button>
+            </div>
+          </div>
+  
+          <!-- Tabla Cargados -->
+          <div *ngIf="filter === 'cargados'" class="table-container">
+            <h3>Cargados</h3>
+            <ng2-smart-table
+              [settings]="settingsCargados"
+              [source]="archivosCargados"
+            ></ng2-smart-table>
+          </div>
+  
+          <!-- Tabla Aceptados -->
+          <div *ngIf="filter === 'aceptados'" class="table-container">
+            <h3>Aceptados</h3>
+            <ng2-smart-table
+              [settings]="settingsAceptados"
+              [source]="archivosAceptados"
+            ></ng2-smart-table>
+          </div>
+  
+          <!-- Tabla Rechazados -->
+          <div *ngIf="filter === 'rechazados'" class="table-container">
+            <h3>Rechazados</h3>
+            <ng2-smart-table
+              [settings]="settingsRechazados"
+              [source]="archivosRechazados"
+            ></ng2-smart-table>
+          </div>
+  
+          <!-- Badges -->
+          <div class="text-center mb-4">
+            <nb-badge status="success" text="Cargados: {{ cargados }}" class="m-2"></nb-badge>
+            <nb-badge status="primary" text="Completos: {{ completos }}" class="m-2"></nb-badge>
+            <nb-badge status="danger" text="Incompletos: {{ incompletos }}" class="m-2"></nb-badge>
+            <nb-badge status="warning" text="No cargados: {{ noCargados }}" class="m-2"></nb-badge>
+          </div>
+        </nb-card-body>
+      </nb-card>
+    </nb-layout-column>
+  </nb-layout>
+  
+
+  

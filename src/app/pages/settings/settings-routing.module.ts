@@ -10,6 +10,8 @@ import { InitialPeriodsComponent } from './my-company/initial-periods/initial-pe
 import { PeriodConfigurationComponent } from './my-company/period-configuration/period-configuration.component';
 import { PeriodManagementComponent } from './my-company/period-management/period-management.component';
 import { CompanyTaxDetailsComponent } from './my-company/company-tax-details/company-tax-details.component';
+import { AnualUploadComponent } from './my-company/anual-upload/anual-upload.component';
+import { AnualReviewComponent } from './my-company/anual-review/anual-review.component';
 const routes: Routes = [
   {
     path: '',
@@ -44,8 +46,13 @@ const routes: Routes = [
         component: CompanyTaxDetailsComponent
       },
       {
-        path: 'my-company/anual-up',
-        component: CompanyTaxDetailsComponent
+        path: 'my-company/anual-review',
+        component: AnualReviewComponent
+      },
+      
+      {
+        path: 'my-company/anual-upload',
+        component: AnualUploadComponent
       }
     ],
   },

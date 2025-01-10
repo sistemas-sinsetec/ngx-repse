@@ -57,7 +57,7 @@ export class AnualUploadComponent implements OnInit {
   }
 
   configurarTareas() {
-    if (this.authService.selectedRFC.length === 12) {
+    if (this.companyService.selectedCompany.rfc.length === 12) {
       this.tareas = [
         { id: 1, nombre: 'Acta Constitutiva', status: false },
         { id: 2, nombre: 'RFC', status: false },
@@ -66,7 +66,7 @@ export class AnualUploadComponent implements OnInit {
         { id: 5, nombre: 'Establecimientos', status: false },
         { id: 6, nombre: 'Contrato', status: false },
       ];
-    } else if (this.authService.selectedRFC.length === 13) {
+    } else if (this.companyService.selectedCompany.rfc.length === 13) {
       this.tareas = [
         { id: 2, nombre: 'RFC', status: false },
         { id: 3, nombre: 'AFIL01', status: false },
@@ -110,7 +110,7 @@ export class AnualUploadComponent implements OnInit {
       context: {
         tarea: tarea,
         userId: this.authService.userId,
-        companyId: this.authService.selectedId,
+        companyId: this.companyService.selectedCompany.id,
       },
     });
   }
@@ -139,7 +139,7 @@ export class AnualUploadComponent implements OnInit {
       const formData: FormData = new FormData();
       formData.append('file', tarea.archivo);
       formData.append('userId', this.authService.userId);
-      formData.append('companyId', this.authService.selectedId);
+      formData.append('companyId', this.companyService.selectedCompany.id);
       formData.append('tareaId', tarea.id.toString());
 
       this.http.post('https://siinad.mx/php/documentUpload.php', formData)
@@ -174,7 +174,7 @@ export class AnualUploadComponent implements OnInit {
   }
 
   obtenerEstadoArchivos() {
-    const companyId = this.authService.selectedId;
+    const companyId = this.companyService.selectedCompany.id;
 
     if (!companyId) {
       console.error('Company ID is missing.');

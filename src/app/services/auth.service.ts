@@ -11,18 +11,6 @@ export class AuthService {
   userId: string = '';
   avatar: string = '';
 
-  principalCompanies: { id: string, name: string, role: string, rfc: string, levelUser: string }[] = [];
-  nonPrincipalCompanies: { id: string, name: string, role: string, rfc: string, status: string, levelUser: string }[] = [];
-  selectedId: string = '';
-  selectedCompany: string = '';
-  selectedRFC: string = '';
-  selectedLevelUser: string = '';
-  selectedRole: string = '';
-
-  electedPeriod: any = null;
-  periodTypes: any[] = []; // Para almacenar los tipos de periodos disponibles
-
-
   constructor(private http: HttpClient) {
     // Verificar el estado de la sesión al cargar la aplicación
     this.isLoggedIn = this.checkAuthStatus();

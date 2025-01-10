@@ -219,13 +219,13 @@ export const MENU_ITEMS: CustomMenuItem[] = [
           },
           {
             title: 'Expedientes digitales',
-            link: '',
+            link: '/pages/settings/my-company/anual-review',
             hidden: false,
             permission: { section: 'Configuracion de mi empresa', subSection: 'Confirmar expendientes digitales' },
           },
           {
             title: 'Subir expedientes digitales',
-            link: '',
+            link: '/pages/settings/my-company/anual-upload',
             hidden: false,
             permission: { section: 'Configuracion de mi empresa', subSection: 'Subir expendientes digitales' },
           },
