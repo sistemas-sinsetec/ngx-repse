@@ -1,0 +1,18 @@
+<nb-card>
+    <nb-card-header>Rechazar Archivo</nb-card-header>
+    <nb-card-body>
+      <form (ngSubmit)="rechazar()">
+        <div class="form-group">
+          <label for="comentario">Comentario</label>
+          <nb-form-field>
+            <textarea nbInput id="comentario" [(ngModel)]="comentario" name="comentario" required></textarea>
+          </nb-form-field>
+        </div>
+        <div class="text-right mt-3">
+          <button nbButton status="danger" type="button" (click)="close()">Cancelar</button>
+          <button nbButton status="primary" type="submit" [disabled]="comentario.trim() === ''">Rechazar</button>
+        </div>
+      </form>
+    </nb-card-body>
+  </nb-card>
+  

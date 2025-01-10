@@ -1,0 +1,301 @@
+<nb-card>
+    <nb-card-header>Formulario de Subida</nb-card-header>
+    <nb-card-body>
+      <form (ngSubmit)="onSubmit()" class="form-horizontal">
+        <!-- Mensaje de Error -->
+        <nb-alert *ngIf="error" status="danger">{{ error }}</nb-alert>
+  
+        <!-- Actas Constitutivas -->
+        <div *ngIf="actasConstitutivas.length > 0" class="mb-4">
+          <h3>Actas Constitutivas</h3>
+          <div *ngFor="let acta of actasConstitutivas" class="border rounded p-3 mb-3">
+            <!-- Domicilio Social -->
+            <div class="form-group row">
+              <label class="col-sm-4 col-form-label">Domicilio Social</label>
+              <div class="col-sm-8">
+                <nb-form-field>
+                  <input nbInput type="text" class="form-control" [(ngModel)]="acta.domicilioSocial" name="domicilioSocial{{acta.id}}">
+                </nb-form-field>
+              </div>
+            </div>
+            <!-- Nombre Representante -->
+            <div class="form-group row">
+              <label class="col-sm-4 col-form-label">Nombre Representante</label>
+              <div class="col-sm-8">
+                <nb-form-field>
+                  <input nbInput type="text" class="form-control" [(ngModel)]="acta.nombreRepresentante" name="nombreRepresentante{{acta.id}}">
+                </nb-form-field>
+              </div>
+            </div>
+            <!-- Número de Escritura -->
+            <div class="form-group row">
+              <label class="col-sm-4 col-form-label">Número de Escritura</label>
+              <div class="col-sm-8">
+                <nb-form-field>
+                  <input nbInput type="text" class="form-control" [(ngModel)]="acta.numeroEscritura" name="numeroEscritura{{acta.id}}">
+                </nb-form-field>
+              </div>
+            </div>
+            <!-- Folio Mercantil -->
+            <div class="form-group row">
+              <label class="col-sm-4 col-form-label">Folio Mercantil</label>
+              <div class="col-sm-8">
+                <nb-form-field>
+                  <input nbInput type="text" class="form-control" [(ngModel)]="acta.folioMercantil" name="folioMercantil{{acta.id}}">
+                </nb-form-field>
+              </div>
+            </div>
+            <!-- Fecha de Constitución -->
+            <div class="form-group row">
+              <label class="col-sm-4 col-form-label">Fecha de Constitución</label>
+              <div class="col-sm-8">
+                <nb-form-field>
+                  <input nbInput type="text" placeholder="YYYY-MM-DD" class="form-control" [(ngModel)]="acta.fechaConstitucion" name="fechaConstitucion{{acta.id}}" nbDatepicker>
+                  <nb-datepicker #datePicker></nb-datepicker>
+                  <button nbButton status="primary" (click)="datePicker.toggle()" type="button">Seleccionar Fecha</button>
+                </nb-form-field>
+              </div>
+            </div>
+            <!-- Nombre del Notario -->
+            <div class="form-group row">
+              <label class="col-sm-4 col-form-label">Nombre del Notario</label>
+              <div class="col-sm-8">
+                <nb-form-field>
+                  <input nbInput type="text" class="form-control" [(ngModel)]="acta.nombreNotario" name="nombreNotario{{acta.id}}">
+                </nb-form-field>
+              </div>
+            </div>
+            <!-- Nombre de la Notaría -->
+            <div class="form-group row">
+              <label class="col-sm-4 col-form-label">Nombre de la Notaría</label>
+              <div class="col-sm-8">
+                <nb-form-field>
+                  <input nbInput type="text" class="form-control" [(ngModel)]="acta.nombreNotaria" name="nombreNotaria{{acta.id}}">
+                </nb-form-field>
+              </div>
+            </div>
+            <!-- Lugar de Facultad -->
+            <div class="form-group row">
+              <label class="col-sm-4 col-form-label">Lugar de Facultad</label>
+              <div class="col-sm-8">
+                <nb-form-field>
+                  <input nbInput type="text" class="form-control" [(ngModel)]="acta.lugarFacultad" name="lugarFacultad{{acta.id}}">
+                </nb-form-field>
+              </div>
+            </div>
+            <!-- Seguro Social -->
+            <div class="form-group row">
+              <label class="col-sm-4 col-form-label">Seguro Social</label>
+              <div class="col-sm-8">
+                <nb-form-field>
+                  <input nbInput type="text" class="form-control" [(ngModel)]="acta.seguroSocial" name="seguroSocial{{acta.id}}">
+                </nb-form-field>
+              </div>
+            </div>
+          </div>
+        </div>
+  
+        <!-- AFIL01 -->
+        <div *ngIf="afil01.length > 0" class="mb-4">
+          <h3>AFIL01</h3>
+          <div *ngFor="let afil of afil01" class="border rounded p-3 mb-3">
+            <!-- No. Patronal -->
+            <div class="form-group row">
+              <label class="col-sm-4 col-form-label">No. Patronal</label>
+              <div class="col-sm-8">
+                <nb-form-field>
+                  <input nbInput type="text" class="form-control" [(ngModel)]="afil.noPatronal" name="noPatronal{{afil.id}}">
+                </nb-form-field>
+              </div>
+            </div>
+            <!-- No. Reg. Patronal -->
+            <div class="form-group row">
+              <label class="col-sm-4 col-form-label">No. Reg. Patronal</label>
+              <div class="col-sm-8">
+                <nb-form-field>
+                  <input nbInput type="text" class="form-control" [(ngModel)]="afil.noRegPatronal" name="noRegPatronal{{afil.id}}">
+                </nb-form-field>
+              </div>
+            </div>
+            <!-- División -->
+            <div class="form-group row">
+              <label class="col-sm-4 col-form-label">División</label>
+              <div class="col-sm-8">
+                <nb-form-field>
+                  <input nbInput type="text" class="form-control" [(ngModel)]="afil.division" name="division{{afil.id}}">
+                </nb-form-field>
+              </div>
+            </div>
+            <!-- Grupo -->
+            <div class="form-group row">
+              <label class="col-sm-4 col-form-label">Grupo</label>
+              <div class="col-sm-8">
+                <nb-form-field>
+                  <input nbInput type="text" class="form-control" [(ngModel)]="afil.grupo" name="grupo{{afil.id}}">
+                </nb-form-field>
+              </div>
+            </div>
+            <!-- Fracción -->
+            <div class="form-group row">
+              <label class="col-sm-4 col-form-label">Fracción</label>
+              <div class="col-sm-8">
+                <nb-form-field>
+                  <input nbInput type="text" class="form-control" [(ngModel)]="afil.fraccion" name="fraccion{{afil.id}}">
+                </nb-form-field>
+              </div>
+            </div>
+            <!-- Clase -->
+            <div class="form-group row">
+              <label class="col-sm-4 col-form-label">Clase</label>
+              <div class="col-sm-8">
+                <nb-form-field>
+                  <input nbInput type="text" class="form-control" [(ngModel)]="afil.clase" name="clase{{afil.id}}">
+                </nb-form-field>
+              </div>
+            </div>
+            <!-- Actividad -->
+            <div class="form-group row">
+              <label class="col-sm-4 col-form-label">Actividad</label>
+              <div class="col-sm-8">
+                <nb-form-field>
+                  <input nbInput type="text" class="form-control" [(ngModel)]="afil.actividad" name="actividad{{afil.id}}">
+                </nb-form-field>
+              </div>
+            </div>
+            <!-- Descripción -->
+            <div class="form-group row">
+              <label class="col-sm-4 col-form-label">Descripción</label>
+              <div class="col-sm-8">
+                <nb-form-field>
+                  <input nbInput type="text" class="form-control" [(ngModel)]="afil.descripcion" name="descripcion{{afil.id}}">
+                </nb-form-field>
+              </div>
+            </div>
+          </div>
+        </div>
+  
+        <!-- RFC -->
+        <div *ngIf="rfc.length > 0" class="mb-4">
+          <h3>RFC</h3>
+          <div *ngFor="let r of rfc" class="border rounded p-3 mb-3">
+            <!-- RFC -->
+            <div class="form-group row">
+              <label class="col-sm-4 col-form-label">RFC</label>
+              <div class="col-sm-8">
+                <nb-form-field>
+                  <input nbInput type="text" class="form-control" [(ngModel)]="r.rfc" name="rfc{{r.id}}">
+                </nb-form-field>
+              </div>
+            </div>
+            <!-- CURP -->
+            <div class="form-group row">
+              <label class="col-sm-4 col-form-label">CURP</label>
+              <div class="col-sm-8">
+                <nb-form-field>
+                  <input nbInput type="text" class="form-control" [(ngModel)]="r.curp" name="curp{{r.id}}">
+                </nb-form-field>
+              </div>
+            </div>
+            <!-- Domicilio Fiscal -->
+            <div class="form-group row">
+              <label class="col-sm-4 col-form-label">Domicilio Fiscal</label>
+              <div class="col-sm-8">
+                <nb-form-field>
+                  <input nbInput type="text" class="form-control" [(ngModel)]="r.domicilioFiscal" name="domicilioFiscal{{r.id}}">
+                </nb-form-field>
+              </div>
+            </div>
+            <!-- Tipo de Régimen -->
+            <div class="form-group row">
+              <label class="col-sm-4 col-form-label">Tipo de Régimen</label>
+              <div class="col-sm-8">
+                <nb-select class="form-control" [(ngModel)]="r.tipoRegimen" name="tipoRegimen{{r.id}}">
+                  <nb-option value="fisica">Física</nb-option>
+                  <nb-option value="moral">Moral</nb-option>
+                </nb-select>
+              </div>
+            </div>
+            <!-- Régimen para Física -->
+            <div class="form-group row" *ngIf="r.tipoRegimen === 'fisica'">
+              <label class="col-sm-4 col-form-label">Régimen</label>
+              <div class="col-sm-8">
+                <nb-select class="form-control" [(ngModel)]="r.regimen" name="regimen{{r.id}}">
+                  <nb-option value="Régimen de Incorporación Fiscal">Régimen de Incorporación Fiscal</nb-option>
+                  <nb-option value="Actividades empresariales">Actividades empresariales</nb-option>
+                  <nb-option value="Arrendamiento de inmuebles">Arrendamiento de inmuebles</nb-option>
+                  <nb-option value="Servicios profesionales">Servicios profesionales</nb-option>
+                </nb-select>
+              </div>
+            </div>
+            <!-- Régimen para Moral -->
+            <div class="form-group row" *ngIf="r.tipoRegimen === 'moral'">
+              <label class="col-sm-4 col-form-label">Régimen</label>
+              <div class="col-sm-8">
+                <nb-select class="form-control" [(ngModel)]="r.regimen" name="regimen{{r.id}}">
+                  <nb-option value="Régimen General de Ley">Régimen General de Ley</nb-option>
+                  <nb-option value="Régimen de Actividad Agrícola, Ganadera, Silvícola y Pesquera">Régimen de Actividad Agrícola, Ganadera, Silvícola y Pesquera</nb-option>
+                  <nb-option value="Régimen de Incorporación Fiscal (RIF)">Régimen de Incorporación Fiscal (RIF)</nb-option>
+                  <nb-option value="Régimen de Sociedades Cooperativas de Producción">Régimen de Sociedades Cooperativas de Producción</nb-option>
+                  <nb-option value="Régimen de Entidades Controladoras">Régimen de Entidades Controladoras</nb-option>
+                </nb-select>
+              </div>
+            </div>
+          </div>
+        </div>
+  
+        <!-- Autorización STPS -->
+        <div *ngIf="autorizacion.length > 0" class="mb-4">
+          <h3>Autorización STPS</h3>
+          <div *ngFor="let auto of autorizacion" class="border rounded p-3 mb-3">
+            <!-- Fecha de Autorización -->
+            <div class="form-group row">
+              <label class="col-sm-4 col-form-label">Fecha de Autorización</label>
+              <div class="col-sm-8">
+                <nb-form-field>
+                  <input nbInput type="text" placeholder="YYYY-MM-DD" class="form-control" [(ngModel)]="auto.fechaAutorizacion" name="fechaAutorizacion{{auto.id}}" nbDatepicker>
+                  <nb-datepicker #datePickerAuto></nb-datepicker>
+                  <button nbButton status="primary" (click)="datePickerAuto.toggle()" type="button">Seleccionar Fecha</button>
+                </nb-form-field>
+              </div>
+            </div>
+            <!-- Registro de Autorización -->
+            <div class="form-group row">
+              <label class="col-sm-4 col-form-label">Registro de Autorización</label>
+              <div class="col-sm-8">
+                <nb-form-field>
+                  <input nbInput type="text" class="form-control" [(ngModel)]="auto.registroAutorizacion" name="registroAutorizacion{{auto.id}}">
+                </nb-form-field>
+              </div>
+            </div>
+            <!-- Actividades -->
+            <div *ngFor="let actividad of auto.actividades; let i = index" class="border rounded p-3 mb-2">
+              <!-- Actividad -->
+              <div class="form-group row">
+                <label class="col-sm-4 col-form-label">Actividad</label>
+                <div class="col-sm-8">
+                  <nb-form-field>
+                    <input nbInput type="text" class="form-control" [(ngModel)]="actividad.actividad" name="actividad{{auto.id}}{{i}}">
+                  </nb-form-field>
+                </div>
+              </div>
+              <!-- Folio -->
+              <div class="form-group row">
+                <label class="col-sm-4 col-form-label">Folio</label>
+                <div class="col-sm-8">
+                  <nb-form-field>
+                    <input nbInput type="text" class="form-control" [(ngModel)]="actividad.folio" name="folio{{auto.id}}{{i}}">
+                  </nb-form-field>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+  
+        <!-- Botón de Envío -->
+        <div class="text-center">
+          <button nbButton status="success" type="submit" [disabled]="isSubmitting">Guardar Cambios</button>
+        </div>
+      </form>
+    </nb-card-body>
+  </nb-card>
+  

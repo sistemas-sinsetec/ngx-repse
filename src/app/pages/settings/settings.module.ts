@@ -15,6 +15,7 @@ import {
   NbDatepickerModule,
   NbBadgeModule, // Importa NbBadgeModule aquí
   NbLayoutModule, // Importa NbLayoutModule si usas nb-layout
+  NbFormFieldModule,
 } from '@nebular/theme';
 
 import { ThemeModule } from '../../@theme/theme.module';
@@ -34,6 +35,8 @@ import { CompanyTaxDetailsComponent } from './my-company/company-tax-details/com
 import { CompanyTaxDetailsModalComponent } from './my-company/company-tax-details-modal/company-tax-details-modal.component';
 import { AnualReviewComponent } from './my-company/anual-review/anual-review.component';
 import { AnualUploadComponent } from './my-company/anual-upload/anual-upload.component';
+import { ReviewInfoModalComponent } from './my-company/review-info-modal/review-info-modal.component';
+import { RejectionDialogComponent } from './my-company/rejection-dialog/rejection-dialog.component';
 
 @NgModule({
   imports: [
@@ -56,6 +59,7 @@ import { AnualUploadComponent } from './my-company/anual-upload/anual-upload.com
     NbSelectModule,
     NbBadgeModule, // Añade NbBadgeModule aquí
     NbLayoutModule, // Añade NbLayoutModule si usas nb-layout
+    NbFormFieldModule,
   ],
   declarations: [
     SettingsComponent,
@@ -69,6 +73,8 @@ import { AnualUploadComponent } from './my-company/anual-upload/anual-upload.com
     CompanyTaxDetailsModalComponent,
     AnualReviewComponent,
     AnualUploadComponent,
+    ReviewInfoModalComponent,
+    RejectionDialogComponent,
   ],
 })
 export class SettingsModule { }

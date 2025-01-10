@@ -2,7 +2,9 @@ import { Component, OnInit } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { AuthService } from '../../../../services/auth.service';
 import { CompanyService } from '../../../../services/company.service';
-
+import { NbDialogService, NbToastrService } from '@nebular/theme';
+import { RejectionDialogComponent } from '../rejection-dialog/rejection-dialog.component';
+import { ReviewInfoModalComponent } from '../review-info-modal/review-info-modal.component';
 
 interface Tarea {
   id: number;
@@ -30,7 +32,7 @@ interface Archivo {
   templateUrl: './anual-review.component.html',
   styleUrls: ['./anual-review.component.scss']
 })
-export class AnualReviewComponent {
+export class AnualReviewComponent implements OnInit {
 
   archivos: Archivo[] = [];
   archivosCargados: Archivo[] = [];
@@ -57,9 +59,14 @@ export class AnualReviewComponent {
   noCargados: number = this.tareas.length;
   filter: string = 'cargados';
 
+  constructor(
+    private http: HttpClient,
+    public authService: AuthService,
+    public companyService: CompanyService,
+    private dialogService: NbDialogService,
+    private toastrService: NbToastrService
+  ) { }
 
-  constructor(private http: HttpClient, public authService: AuthService, public companyService: CompanyService) { }
-  
   ngOnInit() {
     this.selectedCompanyId = Number(this.companyService.selectedCompany?.id);
     if (this.selectedCompanyId) {
@@ -111,29 +118,28 @@ export class AnualReviewComponent {
     this.filter = filter;
   }
 
-  async aceptarArchivo(archivo: Archivo) {
+  aceptarArchivo(archivo: Archivo) {
     archivo.estado = 'aceptado';
     if (this.selectedCompanyId !== null) {
       this.http.post('https://siinad.mx/php/updateArchivoStatus.php', { id: archivo.id, estado: archivo.estado })
         .subscribe(response => {
           console.log('Archivo aceptado:', response);
           this.obtenerArchivos(this.selectedCompanyId!);
+          this.toastrService.success('Archivo aceptado correctamente', 'Éxito');
         }, error => {
           console.error('Error al aceptar el archivo:', error);
+          this.toastrService.danger('Error al aceptar el archivo', 'Error');
         });
     }
   }
 
-  async rechazarArchivo(archivo: Archivo) {
-    const modal = await this.modalController.create({
-      component: RechazoModalComponent,
-      componentProps: { archivo }
-    });
-
-    modal.onDidDismiss().then(result => {
-      if (result.data) {
+  rechazarArchivo(archivo: Archivo) {
+    this.dialogService.open(RejectionDialogComponent, {
+      context: { archivo }
+    }).onClose.subscribe(result => {
+      if (result) {
         archivo.estado = 'rechazado';
-        archivo.comentario = result.data.comentario;
+        archivo.comentario = result.comentario;
         if (this.selectedCompanyId !== null) {
           this.http.post('https://siinad.mx/php/updateArchivoStatus.php', {
             id: archivo.id,
@@ -142,30 +148,40 @@ export class AnualReviewComponent {
           }).subscribe(response => {
             console.log('Archivo rechazado:', response);
             this.obtenerArchivos(this.selectedCompanyId!);
+            this.toastrService.success('Archivo rechazado correctamente', 'Éxito');
           }, error => {
             console.error('Error al rechazar el archivo:', error);
+            this.toastrService.danger('Error al rechazar el archivo', 'Error');
           });
         }
       }
     });
-
-    return await modal.present();
   }
 
-  async revisarInformacionAdicional(archivo: Archivo) {
+  revisarInformacionAdicional(archivo: Archivo) {
     const tarea = this.tareas.find(t => t.id === archivo.tarea_id);
     if (!tarea) {
       console.error('No se encontró la tarea correspondiente');
+      this.toastrService.danger('No se encontró la tarea correspondiente', 'Error');
       return;
     }
 
     if (this.selectedCompanyId !== null) {
-      const modal = await this.modalController.create({
-        component: ReviewInfoModalComponent,
-        componentProps: { companyId: this.selectedCompanyId, tareaId: archivo.tarea_id, tareaNombre: tarea.nombre }
+      this.dialogService.open(ReviewInfoModalComponent, {
+        context: {
+          companyId: this.companyService.selectedCompany.id,
+          tareaId: archivo.tarea_id,
+          tareaNombre: tarea.nombre
+        },
+        closeOnBackdropClick: false,
+        closeOnEsc: true,
+      }).onClose.subscribe(result => {
+        if (result) {
+          // Manejar el resultado si es necesario
+          this.toastrService.success('Información adicional revisada correctamente', 'Éxito');
+          this.obtenerArchivos(this.selectedCompanyId!);
+        }
       });
-
-      return await modal.present();
     }
   }
 }
