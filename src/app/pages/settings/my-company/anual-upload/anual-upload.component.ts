@@ -75,6 +75,7 @@ export class AnualUploadComponent implements OnInit {
     this.noCargados = this.tareas.length;
   }
 
+
   async openModal(tarea: Tarea) {
     let component;
 
@@ -102,7 +103,6 @@ export class AnualUploadComponent implements OnInit {
         return;
     }
 
-    // Abre el modal sin manejar el resultado de su cierre
     this.nbDialogService.open(component, {
       context: {
         tarea: tarea,
