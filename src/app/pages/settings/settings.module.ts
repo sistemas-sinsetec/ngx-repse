@@ -32,6 +32,7 @@ import { PeriodManagementComponent } from './my-company/period-management/period
 import { CompanyTaxDetailsComponent } from './my-company/company-tax-details/company-tax-details.component';
 import { CompanyTaxDetailsModalComponent } from './my-company/company-tax-details-modal/company-tax-details-modal.component';
 import { AnualReviewComponent } from './my-company/anual-review/anual-review.component';
+import { AnualUploadComponent } from './my-company/anual-upload/anual-upload.component';
 @NgModule({
   imports: [
     ThemeModule,
@@ -63,6 +64,7 @@ import { AnualReviewComponent } from './my-company/anual-review/anual-review.com
     CompanyTaxDetailsComponent,
     CompanyTaxDetailsModalComponent,
     AnualReviewComponent,
+    AnualUploadComponent,
   ],
 })
 export class SettingsModule { }

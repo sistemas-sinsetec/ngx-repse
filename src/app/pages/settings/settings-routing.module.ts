@@ -42,6 +42,10 @@ const routes: Routes = [
       {
         path: 'my-company/company-tax-details',
         component: CompanyTaxDetailsComponent
+      },
+      {
+        path: 'my-company/anual-up',
+        component: CompanyTaxDetailsComponent
       }
     ],
   },
