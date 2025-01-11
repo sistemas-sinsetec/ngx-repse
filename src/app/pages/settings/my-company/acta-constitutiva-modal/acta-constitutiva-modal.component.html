@@ -1,1 +1,143 @@
-<p>acta-constitutiva-modal works!</p>
+<nb-card>
+    <nb-card-header>Acta Constitutiva</nb-card-header>
+    <nb-card-body>
+      <form #form="ngForm" (ngSubmit)="onSubmit(form)">
+        <!-- Domicilio Social -->
+        <div class="form-group">
+          <label for="domicilioSocial" class="label">Domicilio Social</label>
+          <input
+            nbInput
+            fullWidth
+            type="text"
+            name="domicilioSocial"
+            [(ngModel)]="actaConstitutiva.domicilioSocial"
+            required
+            id="domicilioSocial"
+          />
+        </div>
+  
+        <!-- Nombre del Representante -->
+        <div class="form-group">
+          <label for="nombreRepresentante" class="label">Nombre del Representante</label>
+          <input
+            nbInput
+            fullWidth
+            type="text"
+            name="nombreRepresentante"
+            [(ngModel)]="actaConstitutiva.nombreRepresentante"
+            required
+            id="nombreRepresentante"
+          />
+        </div>
+  
+        <!-- Número de Escritura -->
+        <div class="form-group">
+          <label for="numeroEscritura" class="label">Número de Escritura</label>
+          <input
+            nbInput
+            fullWidth
+            type="text"
+            name="numeroEscritura"
+            [(ngModel)]="actaConstitutiva.numeroEscritura"
+            required
+            id="numeroEscritura"
+          />
+        </div>
+  
+        <!-- Folio Mercantil -->
+        <div class="form-group">
+          <label for="folioMercantil" class="label">Folio Mercantil</label>
+          <input
+            nbInput
+            fullWidth
+            type="text"
+            name="folioMercantil"
+            [(ngModel)]="actaConstitutiva.folioMercantil"
+            required
+            id="folioMercantil"
+          />
+        </div>
+  
+        <!-- Fecha de Constitución -->
+        <div class="form-group">
+          <label for="fechaConstitucion" class="label">Fecha de Constitución</label>
+          <input
+            nbInput
+            fullWidth
+            type="date"
+            name="fechaConstitucion"
+            [(ngModel)]="actaConstitutiva.fechaConstitucion"
+            required
+            id="fechaConstitucion"
+          />
+        </div>
+  
+        <!-- Nombre del Notario -->
+        <div class="form-group">
+          <label for="nombreNotario" class="label">Nombre del Notario</label>
+          <input
+            nbInput
+            fullWidth
+            type="text"
+            name="nombreNotario"
+            [(ngModel)]="actaConstitutiva.nombreNotario"
+            required
+            id="nombreNotario"
+          />
+        </div>
+  
+        <!-- Nombre de la Notaría -->
+        <div class="form-group">
+          <label for="nombreNotaria" class="label">Nombre de la Notaría</label>
+          <input
+            nbInput
+            fullWidth
+            type="text"
+            name="nombreNotaria"
+            [(ngModel)]="actaConstitutiva.nombreNotaria"
+            required
+            id="nombreNotaria"
+          />
+        </div>
+  
+        <!-- Lugar de Facultad -->
+        <div class="form-group">
+          <label for="lugarFacultad" class="label">Lugar de Facultad</label>
+          <input
+            nbInput
+            fullWidth
+            type="text"
+            name="lugarFacultad"
+            [(ngModel)]="actaConstitutiva.lugarFacultad"
+            required
+            id="lugarFacultad"
+          />
+        </div>
+  
+        <!-- Seguro Social -->
+        <div class="form-group">
+          <label for="seguroSocial" class="label">Seguro Social</label>
+          <input
+            nbInput
+            fullWidth
+            type="text"
+            name="seguroSocial"
+            [(ngModel)]="actaConstitutiva.seguroSocial"
+            required
+            id="seguroSocial"
+          />
+        </div>
+  
+        <!-- Botones -->
+        <div class="actions">
+          <button nbButton status="danger" (click)="dismiss()" type="button">
+            Cancelar
+          </button>
+          <button nbButton status="primary" type="submit">
+            Guardar
+          </button>
+        </div>
+      </form>
+    </nb-card-body>
+  </nb-card>
+  

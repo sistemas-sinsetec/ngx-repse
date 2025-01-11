@@ -39,7 +39,9 @@ import { AnualUploadComponent } from './my-company/anual-upload/anual-upload.com
 import { ReviewInfoModalComponent } from './my-company/review-info-modal/review-info-modal.component';
 import { RejectionDialogComponent } from './my-company/rejection-dialog/rejection-dialog.component';
 import { PermissionsSectionsComponent } from './permissions-sections/permissions-sections.component';
-
+import { ActaConstitutivaModalComponent } from './my-company/acta-constitutiva-modal/acta-constitutiva-modal.component';
+import { Afil01ModalComponent } from './my-company/afil01-modal/afil01-modal.component';
+import { AutorizacionStpsModalComponent } from './my-company/autorizacion-stps-modal/autorizacion-stps-modal.component';
 @NgModule({
   imports: [
     ThemeModule,
@@ -78,6 +80,9 @@ import { PermissionsSectionsComponent } from './permissions-sections/permissions
     ReviewInfoModalComponent,
     RejectionDialogComponent,
     PermissionsSectionsComponent,
+    ActaConstitutivaModalComponent,
+    Afil01ModalComponent,
+    AutorizacionStpsModalComponent
   ],
 })
 export class SettingsModule { }
