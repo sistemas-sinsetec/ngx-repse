@@ -5,11 +5,11 @@ import { Router } from '@angular/router';
 import { CompanyService } from '../../../services/company.service';
 
 @Component({
-  selector: 'app-user-permissions-sections',
-  templateUrl: 'permissions-sections.component.html',
+  selector: 'ngx-permissions-sections',
+  templateUrl: './permissions-sections.component.html',
   styleUrls: ['./permissions-sections.component.scss'],
 })
-export class UserPermissionsSectionsPage implements OnInit {
+export class PermissionsSectionsComponent implements OnInit {
   selectedUserType: string = 'all';
   selectedUserId: string;
   selectedSection: string;
