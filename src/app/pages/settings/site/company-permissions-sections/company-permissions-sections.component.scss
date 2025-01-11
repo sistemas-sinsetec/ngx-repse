@@ -1,0 +1,37 @@
+:host {
+    display: block;
+    max-width: 700px; /* Ajusta según tus necesidades */
+    margin: 0 auto;   /* Centra el card en la página */
+  }
+  
+  .text-center {
+    text-align: center;
+  }
+  
+  .mt-3 {
+    margin-top: 1rem;
+  }
+  
+  .form-group {
+    margin-bottom: 1rem;
+    display: flex;
+    flex-direction: column;
+  }
+  
+  label {
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+  }
+  
+  .d-flex {
+    display: flex;
+  }
+  
+  .flex-grow-1 {
+    flex: 1;
+  }
+  
+  .align-items-center {
+    align-items: center;
+  }
+  

@@ -1,0 +1,79 @@
+<!-- company-sections.component.html -->
+<nb-card>
+    <nb-card-header class="text-center">
+      <h5><strong>Secciones visibles de empresas</strong></h5>
+    </nb-card-header>
+  
+    <nb-card-body>
+      <!-- Seleccionar Empresa -->
+      <div class="form-group">
+        <label for="companySelect">Seleccionar empresa</label>
+        <nb-select
+          id="companySelect"
+          placeholder="Selecciona una empresa"
+          [selected]="selectedCompanyId"
+          (selectedChange)="onCompanyChange($event)"
+          fullWidth
+        >
+          <nb-option
+            *ngFor="let company of companies"
+            [value]="company.idCompany"
+          >
+            {{ company.nameCompany }}
+          </nb-option>
+        </nb-select>
+      </div>
+  
+      <!-- Asignar Sección (múltiple) -->
+      <div class="form-group">
+        <label for="sectionSelect">Asignar sección</label>
+        <nb-select
+          id="sectionSelect"
+          placeholder="Selecciona secciones"
+          [selected]="selectedSections"
+          (selectedChange)="onSectionChange($event)"
+          multiple
+          fullWidth
+        >
+          <nb-option *ngFor="let section of sections" [value]="section">
+            {{ section }}
+          </nb-option>
+        </nb-select>
+      </div>
+  
+      <!-- Botón Añadir -->
+      <button
+        nbButton
+        status="primary"
+        fullWidth
+        (click)="addPermission()"
+        [disabled]="!selectedCompanyId || !selectedSections?.length"
+        class="mt-3"
+      >
+        Añadir
+      </button>
+    </nb-card-body>
+  
+    <nb-card-footer>
+      <!-- Listado de Permisos -->
+      <nb-list>
+        <nb-list-item
+          *ngFor="let permission of permissions"
+          class="d-flex align-items-center"
+        >
+          <div class="flex-grow-1">
+            {{ permission.NameSection }}
+          </div>
+          <button
+            nbButton
+            status="danger"
+            size="small"
+            (click)="removePermission(permission.NameSection)"
+          >
+            Quitar
+          </button>
+        </nb-list-item>
+      </nb-list>
+    </nb-card-footer>
+  </nb-card>
+  

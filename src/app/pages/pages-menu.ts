@@ -297,7 +297,7 @@ export const MENU_ITEMS: CustomMenuItem[] = [
         children: [
           {
             title: 'Secciones visibles de empresas',
-            link: '',
+            link: '/pages/settings/site/company-permissions-sections',
           },
           {
             title: 'Empresas registradas',

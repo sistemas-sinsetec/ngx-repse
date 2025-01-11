@@ -42,6 +42,10 @@ import { PermissionsSectionsComponent } from './permissions-sections/permissions
 import { ActaConstitutivaModalComponent } from './my-company/acta-constitutiva-modal/acta-constitutiva-modal.component';
 import { Afil01ModalComponent } from './my-company/afil01-modal/afil01-modal.component';
 import { AutorizacionStpsModalComponent } from './my-company/autorizacion-stps-modal/autorizacion-stps-modal.component';
+import { CompanyPermissionsSectionsComponent } from './site/company-permissions-sections/company-permissions-sections.component';
+import { PremiumAuthComponent } from './site/premium-auth/premium-auth.component';
+import { CpAuthModalComponent } from './site/cp-auth-modal/cp-auth-modal.component';
+import { CpAuthModalDeleteComponent } from './site/cp-auth-modal-delete/cp-auth-modal-delete.component';
 @NgModule({
   imports: [
     ThemeModule,
@@ -82,7 +86,11 @@ import { AutorizacionStpsModalComponent } from './my-company/autorizacion-stps-m
     PermissionsSectionsComponent,
     ActaConstitutivaModalComponent,
     Afil01ModalComponent,
-    AutorizacionStpsModalComponent
+    AutorizacionStpsModalComponent,
+    CompanyPermissionsSectionsComponent,
+    PremiumAuthComponent,
+    CpAuthModalComponent,
+    CpAuthModalDeleteComponent
   ],
 })
 export class SettingsModule { }

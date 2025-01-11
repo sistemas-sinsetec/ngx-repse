@@ -12,6 +12,7 @@ import { PeriodManagementComponent } from './my-company/period-management/period
 import { CompanyTaxDetailsComponent } from './my-company/company-tax-details/company-tax-details.component';
 import { AnualUploadComponent } from './my-company/anual-upload/anual-upload.component';
 import { AnualReviewComponent } from './my-company/anual-review/anual-review.component';
+import { CompanyPermissionsSectionsComponent } from './site/company-permissions-sections/company-permissions-sections.component';
 const routes: Routes = [
   {
     path: '',
@@ -53,7 +54,16 @@ const routes: Routes = [
       {
         path: 'my-company/anual-upload',
         component: AnualUploadComponent
+      },
+
+
+
+      //site routes
+      {
+        path: 'site/company-permissions-sections',
+        component: CompanyPermissionsSectionsComponent
       }
+      
     ],
   },
 ];

@@ -1,0 +1,145 @@
+<!-- repse-requests.component.html (ejemplo) -->
+<nb-card>
+  
+
+  
+    <!-- Cuerpo principal -->
+    <nb-card-body>
+      <!-- Seleccionar socio comercial -->
+      <div class="form-group">
+        <label for="selectEmployee">Seleccione un socio comercial:</label>
+        <nb-select
+          id="selectEmployee"
+          placeholder="Selecciona un socio comercial"
+          [(selected)]="selectedEmployee"
+          (selectedChange)="getEmployeeDetails()"
+          fullWidth
+        >
+          <nb-option
+            *ngFor="let empleado of empleados"
+            [value]="empleado"
+          >
+            {{ empleado.name }}
+          </nb-option>
+        </nb-select>
+      </div>
+  
+      <!-- Detalles del socio comercial (si hay uno seleccionado) -->
+      <nb-card
+        *ngIf="selectedEmployee"
+        class="mt-4 details-card"
+        [style.borderRadius.px]="10"
+      >
+        <!-- Encabezado del sub-card -->
+        <nb-card-header class="sub-card-header">
+          {{ labelDetallesSocioComercial }}
+        </nb-card-header>
+  
+        <!-- Contenido del sub-card -->
+        <nb-card-body>
+          <nb-list>
+            <!-- Folio de la solicitud -->
+            <nb-list-item>
+              <strong>Folio de la solicitud:</strong> {{ selectedEmployee.requestFolio }}
+            </nb-list-item>
+  
+            <!-- Alias de usuario -->
+            <nb-list-item>
+              <strong>{{ labelAliasUsuario }}:</strong> {{ selectedEmployee.username }}
+            </nb-list-item>
+  
+            <!-- Nombre completo de usuario -->
+            <nb-list-item>
+              <strong>{{ labelNombreCompletoUsuario }}:</strong> {{ selectedEmployee.name }}
+            </nb-list-item>
+  
+            <!-- Correo -->
+            <nb-list-item>
+              <strong>{{ labelCorreo }}:</strong> {{ selectedEmployee.email }}
+            </nb-list-item>
+  
+            <!-- Teléfono -->
+            <nb-list-item>
+              <strong>Num de teléfono:</strong> {{ selectedEmployee.phone }}
+            </nb-list-item>
+  
+            <!-- RFC -->
+            <nb-list-item>
+              <strong>{{ labelRFC }}:</strong> {{ selectedEmployee.rfc }}
+            </nb-list-item>
+  
+            <!-- Rol (Proveedor o Cliente) -->
+            <nb-list-item>
+              <strong>{{ labelRolComo }}:</strong>
+              {{ selectedEmployee.role === 'proveedor' ? 'Proveedor' : 'Cliente' }}
+            </nb-list-item>
+  
+            <!-- Nombre de la empresa -->
+            <nb-list-item>
+              <strong>{{ labelNombreEmpresa }}:</strong> {{ selectedEmployee.nameCompany }}
+            </nb-list-item>
+  
+            <!-- Fecha inicio de periodo -->
+            <nb-list-item>
+              <label>{{ labelFechaInicioPeriodo }}</label>
+              <input
+                nbInput
+                fullWidth
+                type="date"
+                [(ngModel)]="selectedEmployee.fecha_inicio"
+              />
+            </nb-list-item>
+  
+            <!-- Fecha fin de periodo -->
+            <nb-list-item>
+              <label>{{ labelFechaFinPeriodo }}</label>
+              <input
+                nbInput
+                fullWidth
+                type="date"
+                [(ngModel)]="selectedEmployee.fecha_fin"
+              />
+            </nb-list-item>
+  
+            <!-- Fecha de la solicitud de inicio -->
+            <nb-list-item>
+              <strong>Fecha de la solicitud de inicio:</strong>
+              {{ selectedEmployee.fecha_inicio_request }}
+            </nb-list-item>
+  
+            <!-- Fecha de solicitud final (editable) -->
+            <nb-list-item>
+              <label>Fecha de solicitud final</label>
+              <input
+                nbInput
+                fullWidth
+                type="date"
+                [(ngModel)]="selectedEmployee.fecha_fin_request"
+              />
+            </nb-list-item>
+          </nb-list>
+  
+          <!-- Botones Aceptar/Rechazar -->
+          <div class="mt-4 buttons-container">
+            <button
+              nbButton
+              status="primary"
+              fullWidth
+              (click)="aceptarSocio()"
+            >
+              {{ buttonAceptarSocio }}
+            </button>
+            <button
+              nbButton
+              status="danger"
+              fullWidth
+              (click)="rechazarSocio()"
+            >
+              {{ buttonRechazarSocio }}
+            </button>
+          </div>
+        </nb-card-body>
+      </nb-card>
+    </nb-card-body>
+  </nb-card>
+  
