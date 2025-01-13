@@ -1,6 +1,5 @@
 import { Component, OnInit } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { AuthService } from '../../../../services/auth.service';
 import { CompanyService } from '../../../../services/company.service';
 @Component({
   selector: 'ngx-department-management',
@@ -36,9 +35,7 @@ export class DepartmentManagementComponent {
     showSecondLunch: boolean = false;  // Variable para mostrar/ocultar segunda hora de comida
 
     constructor(
-      
       private http: HttpClient,
-      private authService: AuthService,
       private companyService: CompanyService
     ) { }
 

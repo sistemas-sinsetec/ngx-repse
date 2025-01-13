@@ -1,15 +1,14 @@
 import { Component, OnInit } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { NbToastrService } from '@nebular/theme';
+import { NbIconModule, NbToastrService } from '@nebular/theme';
 import { Router } from '@angular/router';
 import { CompanyService } from '../../../services/company.service';
-
 @Component({
   selector: 'ngx-permissions-sections',
   templateUrl: './permissions-sections.component.html',
   styleUrls: ['./permissions-sections.component.scss'],
 })
-export class PermissionsComponent implements OnInit {
+export class PermissionsSectionsComponent implements OnInit {
 selectedUserType: string = 'all';
   selectedUserId: string;
   selectedSection: string;
@@ -66,8 +65,7 @@ selectedUserType: string = 'all';
         if (response.success) {
           const allSections = ['Sistema REPSE', 'Control de proyectos', 'Empleados', 'Incidencias', 'Costos', 'Ventas', 'Configuracion de mi empresa', 'Configuracion de perfiles', 'Configuracion de socios comerciales', 'Configuracion de sitio', 'Configuracion de usuarios'];
           const assignedSections = response.sections.map((section: { NameSection: string }) => section.NameSection);
-          this.sections = allSections.filter(section => assignedSections.includes(section))
-         
+          this.sections = allSections.filter(section => assignedSections.includes(section))         
         } else {
           console.error(response.error);
           await this.showToast(response.error, 'danger');
@@ -113,7 +111,7 @@ selectedUserType: string = 'all';
       'Incidencias': ['Control de incidencias', 'Confirmar dia', 'Confirmar semana', 'Semanas procesadas', 'Lista de asistencia'],
       'Costos': [''],
       'Ventas': [''],
-     'Configuracion de mi empresa': [
+      'Configuracion de mi empresa': [
         'Asignar logo de la empresa',
         'Código de la empresa',
         'Departamentos',
@@ -152,7 +150,7 @@ selectedUserType: string = 'all';
       'Incidencias': ['Control de incidencias', 'Confirmar dia', 'Confirmar semana', 'Semanas procesadas', 'Lista de asistencia'],
       'Costos': [''],
       'Ventas': [''],
-     'Configuracion de mi empresa': [
+      'Configuracion de mi empresa': [
         'Asignar logo de la empresa',
         'Código de la empresa',
         'Departamentos',
@@ -187,7 +185,7 @@ selectedUserType: string = 'all';
         'Vizualizar proyectos', 
         'Seguimiento de proyectos'
       ],
-     'Empleados': ['Registrar solicitudes de empleados', 'editar solicitudes de empleados', 'Ver empleados registrados'],
+      'Empleados': ['Registrar solicitudes de empleados', 'editar solicitudes de empleados', 'Ver empleados registrados'],
       'Incidencias': ['Control de incidencias', 'Confirmar dia', 'Confirmar semana', 'Semanas procesadas', 'Lista de asistencia'],
       'Costos': [''],
       'Ventas': [''],
