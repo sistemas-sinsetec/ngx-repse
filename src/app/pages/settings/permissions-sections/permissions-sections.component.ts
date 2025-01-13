@@ -1,15 +1,16 @@
 import { Component, OnInit } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { NbIconModule, NbToastrService } from '@nebular/theme';
+import { NbToastrService } from '@nebular/theme';
 import { Router } from '@angular/router';
 import { CompanyService } from '../../../services/company.service';
+import { AuthService } from '../../../services/auth.service';
 @Component({
   selector: 'ngx-permissions-sections',
   templateUrl: './permissions-sections.component.html',
   styleUrls: ['./permissions-sections.component.scss'],
 })
 export class PermissionsSectionsComponent implements OnInit {
-selectedUserType: string = 'all';
+  selectedUserType: string = 'all';
   selectedUserId: string;
   selectedSection: string;
   selectedSubSections: string[] = [];
@@ -24,40 +25,65 @@ selectedUserType: string = 'all';
   subSectionsClient: string[] = []; // Nueva propiedad para cliente
   permissions: any[] = [];
 
-  groupedPermissions: { section: string, subSections: string[] }[] = []; // Nueva propieda
+  userTypeNames: Record<string, string> = {
+    admin: 'Administrador',
+    superV: 'Supervisor',
+    adminU: 'Administrativo'
+  };
+
+
+
+  groupedPermissions: { section: string, subSections: string[] }[] = []; // Nueva propiedad
 
   constructor(
     private http: HttpClient,
     private toastrService: NbToastrService,
-    private companyService: CompanyService,
+    public companyService: CompanyService,
     private router: Router,
-  ) {}
+    public authService: AuthService
+  ) { }
 
-  ngOnInit(): void {
+
+  ngOnInit() {
     this.loadUsers();
+    this.loadUserTypes();
+    this.loadSections();
   }
 
-  loadUsers() {
-    const companyId = this.companyService.selectedCompany.Id;
-    this.http
-      .post('https://siinad.mx/php/getUsersByCompanyId.php', { companyId })
-      .subscribe(
-        (response: any) => {
-          if (response.success) {
-            this.users = response.users;
-          } else {
-            this.showToast(response.error, 'danger');
-          }
-        },
-        (error) => {
-          console.error('Error en la solicitud GET:', error);
-          this.showToast('Error al cargar usuarios.', 'danger');
+  async loadUsers() {
+    const companyId = this.companyService.selectedCompany.id;
+    const data = { companyId: companyId };
+
+    this.http.post('https://siinad.mx/php/searchUsers.php', data).subscribe(
+      async (response: any) => {
+        if (response.success) {
+          this.users = response.employees;
+          this.filteredUsers = this.users;
+        } else {
+          this.showToast(response.error, 'danger');
         }
-      );
+      },
+      (error) => {
+        console.error('Error en la solicitud GET:', error);
+        this.showToast('Error al cargar usuarios.', 'danger');
+      }
+    );
+  }
+
+  async loadUserTypes() {
+    this.http.get('https://siinad.mx/php/get-level-users.php').subscribe(
+      async (response: any) => {
+        this.userTypes = response;
+      },
+      async (error) => {
+        console.error('Error en la solicitud GET:', error);
+        this.showToast('Error al cargar los tipos de usuario.', 'danger');
+      }
+    );
   }
 
   async loadSections() {
-    const companyId = this.companyService.selectedCompany.Id;
+    const companyId = this.companyService.selectedCompany.id;
     const data = { companyId: companyId };
 
     this.http.post('https://siinad.mx/php/loadCompanySections.php', data).subscribe(
@@ -65,7 +91,7 @@ selectedUserType: string = 'all';
         if (response.success) {
           const allSections = ['Sistema REPSE', 'Control de proyectos', 'Empleados', 'Incidencias', 'Costos', 'Ventas', 'Configuracion de mi empresa', 'Configuracion de perfiles', 'Configuracion de socios comerciales', 'Configuracion de sitio', 'Configuracion de usuarios'];
           const assignedSections = response.sections.map((section: { NameSection: string }) => section.NameSection);
-          this.sections = allSections.filter(section => assignedSections.includes(section))         
+          this.sections = allSections.filter(section => assignedSections.includes(section))
         } else {
           console.error(response.error);
           await this.showToast(response.error, 'danger');
@@ -87,7 +113,6 @@ selectedUserType: string = 'all';
       this.filteredUsers = this.users.filter(user => user.role === userType);
     }
   }
-
   async onUserChange(event: any) {
     this.selectedUserId = event.target.value;
     await this.loadPermissions();
@@ -98,13 +123,14 @@ selectedUserType: string = 'all';
     this.loadSubSections(this.selectedSection);
   }
 
+
   async loadSubSections(section: string) {
     const subSectionsMap: { [key: string]: string[] } = {
       'Sistema REPSE': [''],
       'Control de proyectos': [
         'Asignacion de proyectos',
         'Registro de proyectos',
-        'Vizualizar proyectos', 
+        'Vizualizar proyectos',
         'Seguimiento de proyectos'
       ],
       'Empleados': ['Registrar solicitudes de empleados', 'Editar solicitudes de empleados', 'Aceptar solicitudes de empleados', 'Procesar empleados', 'Ver empleados registrados'],
@@ -143,7 +169,7 @@ selectedUserType: string = 'all';
       'Control de proyectos': [
         'Asignacion de proyectos',
         'Registro de proyectos',
-        'Vizualizar proyectos', 
+        'Vizualizar proyectos',
         'Seguimiento de proyectos'
       ],
       'Empleados': ['Registrar solicitudes de empleados', 'editar solicitudes de empleados', 'Ver empleados registrados'],
@@ -182,7 +208,7 @@ selectedUserType: string = 'all';
       'Control de proyectos': [
         'Asignacion de proyectos',
         'Registro de proyectos',
-        'Vizualizar proyectos', 
+        'Vizualizar proyectos',
         'Seguimiento de proyectos'
       ],
       'Empleados': ['Registrar solicitudes de empleados', 'editar solicitudes de empleados', 'Ver empleados registrados'],
@@ -225,104 +251,105 @@ selectedUserType: string = 'all';
     }
   }
 
-  loadPermissions() {
-    if (!this.selectedUserId) return;
+  async loadPermissions() {
+    const companyId = this.companyService.selectedCompany.id;
+    const data = { userId: this.selectedUserId, companyId: companyId };
 
-    const companyId = this.companyService.selectedCompany.Id;
-    this.http
-      .post('https://siinad.mx/php/getPermissions.php', {
-        userId: this.selectedUserId,
-        companyId,
-      })
-      .subscribe(
-        (response: any) => {
-          if (response.success) {
-            this.permissions = response.permissions;
-            this.groupPermissions();
-          } else {
-            this.showToast(response.error, 'danger');
-          }
-        },
-        (error) => {
-          console.error('Error en la solicitud GET:', error);
-          this.showToast('Error al cargar permisos.', 'danger');
-        }
-      );
-  }
-
-  
-
-  groupPermissions() {
-    this.groupedPermissions = this.permissions.reduce(
-      (acc: { [key: string]: any[] }, permission: any) => {
-        const section = permission.section;
-        if (!acc[section]) {
-          acc[section] = [];
-        }
-        acc[section].push(permission);
-        return acc;
-      },
-      {}
-    );
-  }
-
-  addPermission(section: string, subSection: string) {
-    const companyId = this.companyService.selectedCompany.Id;
-    const data = {
-      userId: this.selectedUserId,
-      section,
-      subSection,
-      companyId,
-    };
-
-    this.http.post('https://siinad.mx/php/addPermission.php', data).subscribe(
-      (response: any) => {
+    this.http.post('https://siinad.mx/php/loadPermissions.php', data).subscribe(
+      async (response: any) => {
         if (response.success) {
-          this.permissions.push({ section, subSection });
-          this.groupPermissions();
-          this.showToast('Permiso agregado exitosamente.', 'success');
+          this.permissions = response.permissions;
+          this.groupPermissions(); // Agrupa los permisos después de cargarlos
         } else {
           console.error(response.error);
-          this.showToast(response.error, 'danger');
+          await this.showToast(response.error, 'danger');
         }
       },
-      (error) => {
+      async (error) => {
         console.error('Error en la solicitud POST:', error);
-        this.showToast('Error al agregar permiso.', 'danger');
+        await this.showToast('Error al cargar permisos.', 'danger');
       }
     );
   }
 
-  removePermission(permission: any) {
-    const companyId = this.companyService.selectedCompany.Id;
+
+
+  groupPermissions() {
+    // Define el tipo de grouped para que sea un objeto donde las claves son strings y los valores son arrays de strings
+    const grouped: { [key: string]: string[] } = {};
+
+    this.permissions.forEach(permission => {
+      if (!grouped[permission.section]) {
+        grouped[permission.section] = [];
+      }
+      grouped[permission.section].push(permission.subSection || 'Sin subapartado');
+    });
+
+    this.groupedPermissions = Object.keys(grouped).map(section => ({
+      section,
+      subSections: grouped[section]
+    }));
+  }
+
+  async addPermission() {
+    const companyId = this.companyService.selectedCompany.id;
+    let selectedSubSections: string[] = [];
+
+    if (this.companyService.selectedCompany.Role === 'proveedor') {
+      selectedSubSections = this.selectedSubSectionsProvider;
+    } else if (this.companyService.selectedCompany.Role === 'cliente') {
+      selectedSubSections = this.selectedSubSectionsClient;
+    } else {
+      selectedSubSections = this.selectedSubSections;
+    }
+
     const data = {
       userId: this.selectedUserId,
-      section: permission.section,
-      subSection: permission.subSection,
-      companyId,
+      section: this.selectedSection,
+      subSections: selectedSubSections,
+      companyId: companyId
+    };
+
+    this.http.post('https://siinad.mx/php/addPermission.php', data).subscribe(
+      async (response: any) => {
+        if (response.success) {
+          selectedSubSections.forEach((subSection: string) => {
+            this.permissions.push({ section: this.selectedSection, subSection: subSection });
+          });
+          this.groupPermissions(); // Actualiza la agrupación
+        } else {
+          console.error(response.error);
+          await this.showToast(response.error, 'danger');
+        }
+      },
+      async (error) => {
+        console.error('Error en la solicitud POST:', error);
+        await this.showToast('Error al añadir permiso.', 'danger');
+      }
+    );
+  }
+  async removePermission(section: string, subSection: string) {
+    const companyId = this.companyService.selectedCompany.id;
+    const data = {
+      userId: this.selectedUserId,
+      section: section,
+      subSection: subSection,
+      companyId: companyId
     };
 
     this.http.post('https://siinad.mx/php/removePermission.php', data).subscribe(
-      (response: any) => {
+      async (response: any) => {
         if (response.success) {
-          const index = this.permissions.findIndex(
-            (p) =>
-              p.section === permission.section &&
-              p.subSection === permission.subSection
-          );
-          if (index > -1) {
-            this.permissions.splice(index, 1);
-          }
-          this.groupPermissions();
-          this.showToast('Permiso eliminado exitosamente.', 'success');
+          this.permissions = this.permissions.filter(p => !(p.section === section && p.subSection === subSection));
+          this.groupPermissions(); // Actualiza la agrupación
         } else {
           console.error(response.error);
-          this.showToast(response.error, 'danger');
+          await this.showToast(response.error, 'danger');
         }
       },
-      (error) => {
+      async (error) => {
         console.error('Error en la solicitud POST:', error);
-        this.showToast('Error al eliminar permiso.', 'danger');
+        await this.showToast('Error al eliminar permiso.', 'danger');
       }
     );
   }
