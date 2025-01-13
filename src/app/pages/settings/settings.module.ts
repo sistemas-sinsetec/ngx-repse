@@ -46,6 +46,8 @@ import { CompanyPermissionsSectionsComponent } from './site/company-permissions-
 import { PremiumAuthComponent } from './site/premium-auth/premium-auth.component';
 import { CpAuthModalComponent } from './site/cp-auth-modal/cp-auth-modal.component';
 import { CpAuthModalDeleteComponent } from './site/cp-auth-modal-delete/cp-auth-modal-delete.component';
+import { CompaniesInfoComponent } from './my-company/companies-info/companies-info.component';
+import { EditCompanyModalComponent } from './my-company/edit-company-modal/edit-company-modal.component';
 @NgModule({
   imports: [
     ThemeModule,
@@ -90,7 +92,9 @@ import { CpAuthModalDeleteComponent } from './site/cp-auth-modal-delete/cp-auth-
     CompanyPermissionsSectionsComponent,
     PremiumAuthComponent,
     CpAuthModalComponent,
-    CpAuthModalDeleteComponent
+    CpAuthModalDeleteComponent,
+    CompaniesInfoComponent,
+    EditCompanyModalComponent
   ],
 })
 export class SettingsModule { }
