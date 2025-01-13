@@ -133,8 +133,20 @@ export class PermissionsSectionsComponent implements OnInit {
         'Vizualizar proyectos',
         'Seguimiento de proyectos'
       ],
-      'Empleados': ['Registrar solicitudes de empleados', 'Editar solicitudes de empleados', 'Aceptar solicitudes de empleados', 'Procesar empleados', 'Ver empleados registrados'],
-      'Incidencias': ['Control de incidencias', 'Confirmar dia', 'Confirmar semana', 'Semanas procesadas', 'Lista de asistencia'],
+      'Empleados': [
+        'Registrar solicitudes de empleados',
+        'Editar solicitudes de empleados',
+        'Aceptar solicitudes de empleados',
+        'Procesar empleados',
+        'Ver empleados registrados'
+      ],
+      'Incidencias': [
+        'Control de incidencias',
+        'Confirmar dia',
+        'Confirmar semana',
+        'Semanas procesadas',
+        'Lista de asistencia'
+      ],
       'Costos': [''],
       'Ventas': [''],
       'Configuracion de mi empresa': [
@@ -143,9 +155,11 @@ export class PermissionsSectionsComponent implements OnInit {
         'Departamentos',
         'Configuración inicial de períodos',
         'Tipos de período',
-        'Catálogo de períodos'
+        'Catálogo de períodos',
+        'Mi informacion fiscal',
+        'Confirmar expendientes digitales',
+        'Subir expendientes digitales'
       ],
-      'Configuracion de perfiles': [''],
       'Configuracion de socios comerciales': [
         'Autorizar socio comercial',
         'Editar roles de los socios comerciales',
@@ -244,12 +258,13 @@ export class PermissionsSectionsComponent implements OnInit {
 
     this.subSections = subSectionsMap[section] || [];
 
-    if (this.companyService.selectedCompany.Role === 'proveedor') {
+    if (this.companyService.selectedCompany.role === 'proveedor') {
       this.subSectionsProvider = subSectionsProviderMap[section] || [];
-    } else if (this.companyService.selectedCompany.Role === 'cliente') {
+    } else if (this.companyService.selectedCompany.role === 'cliente') {
       this.subSectionsClient = subSectionsClientMap[section] || [];
     }
   }
+
 
   async loadPermissions() {
     const companyId = this.companyService.selectedCompany.id;
@@ -356,9 +371,5 @@ export class PermissionsSectionsComponent implements OnInit {
 
   showToast(message: string, status: 'success' | 'danger') {
     this.toastrService.show(message, 'Notificación', { status });
-  }
-
-  goBack() {
-    this.router.navigate(['/previous-page']);  // Puedes definir la ruta que necesites
   }
 }
