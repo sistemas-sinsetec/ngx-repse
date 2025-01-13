@@ -1,1 +1,170 @@
-<p>permissions-sections works!</p>
+<!-- user-permissions.component.html -->
+<nb-card>
+    <!-- Encabezado de tarjeta (Título) -->
+    <nb-card-header class="text-center">
+      <h5 class="mb-0"><strong>Secciones visibles de los perfiles</strong></h5>
+    </nb-card-header>
+  
+    <!-- Cuerpo principal de la tarjeta -->
+    <nb-card-body>
+      <!-- Filtro por tipo de usuario -->
+      <div class="form-group mb-3">
+        <label for="userTypeSelect" class="label">Filtrar por tipo de usuario</label>
+        <nb-select
+          id="userTypeSelect"
+          [(selected)]="selectedUserType"
+          (selectedChange)="onUserTypeChange($event)"
+          placeholder="Todos"
+          fullWidth
+        >
+          <nb-option value="all">Todos</nb-option>
+          <nb-option
+            *ngFor="let userType of userTypes"
+            [value]="userType.levelUserName"
+          >
+            {{ userTypeNames[userType.levelUserName] || userType.levelUserName }}
+          </nb-option>
+        </nb-select>
+      </div>
+  
+      <!-- Seleccionar usuario -->
+      <div class="form-group mb-3">
+        <label for="userSelect" class="label">Seleccionar usuario</label>
+        <nb-select
+          id="userSelect"
+          [(selected)]="selectedUserId"
+          (selectedChange)="onUserChange($event)"
+          placeholder="Selecciona un usuario"
+          fullWidth
+        >
+          <nb-option
+            *ngFor="let user of filteredUsers"
+            [value]="user.id"
+          >
+            {{ user.name }}{{ user.id === authService.userId ? ' - (este usuario)' : '' }}
+          </nb-option>
+        </nb-select>
+      </div>
+  
+      <!-- Asignar sección -->
+      <div class="form-group mb-3">
+        <label for="sectionSelect" class="label">Asignar sección</label>
+        <nb-select
+          id="sectionSelect"
+          [(selected)]="selectedSection"
+          (selectedChange)="onSectionChange($event)"
+          placeholder="Selecciona una sección"
+          fullWidth
+        >
+          <nb-option
+            *ngFor="let section of sections"
+            [value]="section"
+          >
+            {{ section }}
+          </nb-option>
+        </nb-select>
+      </div>
+  
+      <!-- Subapartados (GENERALES) -->
+      <div
+        class="form-group mb-3"
+        *ngIf="subSections.length > 0 && companyService.selectedCompany.role !== 'proveedor' && companyService.selectedCompany.role !== 'cliente'"
+      >
+        <label for="subSectionSelect" class="label">Asignar subapartado(s)</label>
+        <nb-select
+          id="subSectionSelect"
+          [(selected)]="selectedSubSections"
+          multiple
+          fullWidth
+        >
+          <nb-option
+            *ngFor="let subSection of subSections"
+            [value]="subSection"
+          >
+            {{ subSection }}
+          </nb-option>
+        </nb-select>
+      </div>
+  
+      <!-- Subapartados (PROVEEDOR) -->
+      <div
+        class="form-group mb-3"
+        *ngIf="subSectionsProvider.length > 0 && companyService.selectedCompany.role === 'proveedor'"
+      >
+        <label for="subSectionSelectProvider" class="label">Asignar subapartado(s) para proveedor</label>
+        <nb-select
+          id="subSectionSelectProvider"
+          [(selected)]="selectedSubSectionsProvider"
+          multiple
+          fullWidth
+        >
+          <nb-option
+            *ngFor="let subSection of subSectionsProvider"
+            [value]="subSection"
+          >
+            {{ subSection }}
+          </nb-option>
+        </nb-select>
+      </div>
+  
+      <!-- Subapartados (CLIENTE) -->
+      <div
+        class="form-group mb-3"
+        *ngIf="subSectionsClient.length > 0 && companyService.selectedCompany.role === 'cliente'"
+      >
+        <label for="subSectionSelectClient" class="label">Asignar subapartado(s) para cliente</label>
+        <nb-select
+          id="subSectionSelectClient"
+          [(selected)]="selectedSubSectionsClient"
+          multiple
+          fullWidth
+        >
+          <nb-option
+            *ngFor="let subSection of subSectionsClient"
+            [value]="subSection"
+          >
+            {{ subSection }}
+          </nb-option>
+        </nb-select>
+      </div>
+  
+      <!-- Botón Añadir Permiso -->
+      <div class="mt-3 text-center">
+        <button nbButton status="primary" (click)="addPermission()">
+          Añadir
+        </button>
+      </div>
+    </nb-card-body>
+  
+    <!-- Sección de Listado/Acordeón (Pie de la tarjeta) -->
+    <nb-card-footer>
+      <nb-accordion>
+        <!-- Itera sobre las secciones de permisos agrupadas -->
+        <nb-accordion-item *ngFor="let section of groupedPermissions">
+          <nb-accordion-item-header>
+            {{ section.section }}
+          </nb-accordion-item-header>
+  
+          <nb-accordion-item-body>
+            <nb-list>
+              <!-- Muestra los subapartados asociados a la sección -->
+              <nb-list-item *ngFor="let subSection of section.subSections" class="d-flex align-items-center">
+                <div class="flex-grow-1">
+                  {{ subSection || 'Sin subapartado' }}
+                </div>
+                <button
+                  nbButton
+                  status="danger"
+                  size="small"
+                  (click)="removePermission(section.section, subSection)"
+                >
+                  Quitar
+                </button>
+              </nb-list-item>
+            </nb-list>
+          </nb-accordion-item-body>
+        </nb-accordion-item>
+      </nb-accordion>
+    </nb-card-footer>
+  </nb-card>
+  

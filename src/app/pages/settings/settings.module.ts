@@ -17,6 +17,7 @@ import {
   NbBadgeModule, // Importa NbBadgeModule aquí
   NbLayoutModule, // Importa NbLayoutModule si usas nb-layout
   NbFormFieldModule,
+  NbAccordionModule
 } from '@nebular/theme';
 
 import { ThemeModule } from '../../@theme/theme.module';
@@ -74,6 +75,7 @@ import { EditCompanyModalComponent } from './site/edit-company-modal/edit-compan
     NbBadgeModule, // Añade NbBadgeModule aquí
     NbLayoutModule, // Añade NbLayoutModule si usas nb-layout
     NbFormFieldModule,
+    NbAccordionModule
   ],
   declarations: [
     SettingsComponent,

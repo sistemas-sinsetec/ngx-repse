@@ -13,6 +13,7 @@ import { CompanyTaxDetailsComponent } from './my-company/company-tax-details/com
 import { AnualUploadComponent } from './my-company/anual-upload/anual-upload.component';
 import { AnualReviewComponent } from './my-company/anual-review/anual-review.component';
 import { CompanyPermissionsSectionsComponent } from './site/company-permissions-sections/company-permissions-sections.component';
+import { PermissionsSectionsComponent } from './permissions-sections/permissions-sections.component';
 const routes: Routes = [
   {
     path: '',
@@ -56,6 +57,11 @@ const routes: Routes = [
         component: AnualUploadComponent
       },
 
+      //user permissions 
+      {
+        path: 'permissions-sections',
+        component: PermissionsSectionsComponent
+      },
 
 
       //site routes

@@ -234,7 +234,7 @@ export const MENU_ITEMS: CustomMenuItem[] = [
       {
         title: 'Secciones de perfiles',
         icon: 'eye-off-outline',
-        link: '',
+        link: '/pages/settings/permissions-sections',
       },
       {
         title: 'Socios comerciales',
