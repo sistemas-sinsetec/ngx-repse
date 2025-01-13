@@ -48,6 +48,8 @@ import { CpAuthModalComponent } from './site/cp-auth-modal/cp-auth-modal.compone
 import { CpAuthModalDeleteComponent } from './site/cp-auth-modal-delete/cp-auth-modal-delete.component';
 import { CompaniesInfoComponent } from './my-company/companies-info/companies-info.component';
 import { EditCompanyModalComponent } from './my-company/edit-company-modal/edit-company-modal.component';
+import { RegisterAdminSComponent } from './my-company/register-admin-s/register-admin-s.component';
+import { RegistroModalComponent } from './my-company/registro-modal/registro-modal.component';
 @NgModule({
   imports: [
     ThemeModule,
@@ -94,7 +96,9 @@ import { EditCompanyModalComponent } from './my-company/edit-company-modal/edit-
     CpAuthModalComponent,
     CpAuthModalDeleteComponent,
     CompaniesInfoComponent,
-    EditCompanyModalComponent
+    EditCompanyModalComponent,
+    RegisterAdminSComponent,
+    RegistroModalComponent
   ],
 })
 export class SettingsModule { }
