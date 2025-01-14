@@ -10,6 +10,7 @@ import { PagesRoutingModule } from './pages-routing.module';
 import { MiscellaneousModule } from './miscellaneous/miscellaneous.module';
 import { ConfirmDayComponent } from './incident-control/confirm-day/confirm-day.component';
 import { ConfirmWeekComponent } from './incident-control/confirm-week/confirm-week.component';
+import { IncidentModalComponent } from './incident-control/incident-modal/incident-modal.component';
 @NgModule({
   imports: [
     PagesRoutingModule,
@@ -25,6 +26,7 @@ import { ConfirmWeekComponent } from './incident-control/confirm-week/confirm-we
     PagesComponent,
     ConfirmDayComponent,
     ConfirmWeekComponent,
+    IncidentModalComponent,
    
  
   ],

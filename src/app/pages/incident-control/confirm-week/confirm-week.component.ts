@@ -193,7 +193,7 @@ export class ConfirmWeekComponent {
       period_type_id: periodTypeId,
       week_number: weekNumber,
     };
-
+   
     const url = `https://siinad.mx/php/confirm-week.php`;
 
     this.http.post(url, body).subscribe(
