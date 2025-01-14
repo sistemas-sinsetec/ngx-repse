@@ -8,7 +8,11 @@ import { DashboardModule } from './dashboard/dashboard.module';
 import { ECommerceModule } from './e-commerce/e-commerce.module';
 import { PagesRoutingModule } from './pages-routing.module';
 import { MiscellaneousModule } from './miscellaneous/miscellaneous.module';
-
+import { ConfirmDayComponent } from './incident-control/confirm-day/confirm-day.component';
+import { ConfirmWeekComponent } from './incident-control/confirm-week/confirm-week.component';
+import { IncidentModalComponent } from './incident-control/incident-modal/incident-modal.component';
+import { IncidentViewerComponent } from './incident-control/incident-viewer/incident-viewer.component';
+import { ChangeHoursModalComponent } from './incident-control/change-hours-modal/change-hours-modal.component';
 @NgModule({
   imports: [
     PagesRoutingModule,
@@ -22,6 +26,11 @@ import { MiscellaneousModule } from './miscellaneous/miscellaneous.module';
   ],
   declarations: [
     PagesComponent,
+    ConfirmDayComponent,
+    ConfirmWeekComponent,
+    IncidentModalComponent,
+    IncidentViewerComponent,
+    ChangeHoursModalComponent,
    
  
   ],

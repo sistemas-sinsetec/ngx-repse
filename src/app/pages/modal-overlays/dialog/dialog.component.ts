@@ -11,6 +11,9 @@ import { DialogNamePromptComponent } from './dialog-name-prompt/dialog-name-prom
 export class DialogComponent {
 
   names: string[] = [];
+  title: string;
+  message: string;
+  buttons: { text: string, action: string }[];
 
   constructor(private dialogService: NbDialogService) {}
 

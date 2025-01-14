@@ -51,17 +51,20 @@ export class MyUsersComponent {
   }
 
   buscarUsuarios() {
+    console.log('Búsqueda iniciada con:', this.filtroUsuarios, this.filtroRol);
     if (this.filtroUsuarios.trim() !== '') {
       this.filteredEmployees = this.employees.filter(employee =>
         (employee.username.toLowerCase().includes(this.filtroUsuarios.toLowerCase()) ||
           employee.name.toLowerCase().includes(this.filtroUsuarios.toLowerCase())) &&
         (this.filtroRol === '' || employee.role === this.filtroRol)
       );
+      console.log('Resultados filtrados:', this.filteredEmployees);
       this.busquedaActiva = true;
     } else if (this.filtroRol !== '') {
       this.filteredEmployees = this.employees.filter(employee =>
         employee.role === this.filtroRol
       );
+      console.log('Resultados filtrados por rol:', this.filteredEmployees);
       this.busquedaActiva = true;
     } else {
       this.filteredEmployees = this.employees;
@@ -110,6 +113,8 @@ export class MyUsersComponent {
         return 'Rol desconocido';
     }
   }
+
+  
 
 
 
