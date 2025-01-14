@@ -7,7 +7,7 @@ import { PeriodService } from '../../../services/period.service';
 import { NbToastrService } from '@nebular/theme';
 import * as moment from 'moment';
 import { ToastrComponent } from '../../modal-overlays/toastr/toastr.component';
-import { ConfirmDialogModalComponent } from '../confirm-dialog-modal/confirm-dialog-modal.component';
+import { DialogComponent } from '../../modal-overlays/dialog/dialog.component';
 
 @Component({
   selector: 'ngx-confirm-day',
@@ -249,7 +249,7 @@ export class ConfirmDayComponent {
   event.stopPropagation(); // Detener la propagación del evento
 
   // Abrir el diálogo de confirmación
-  const dialogRef = this.dialogService.open(ConfirmDialogModalComponent, {
+  const dialogRef = this.dialogService.open(DialogComponent, {
     context: {
       title: 'Confirmar eliminación',
       message: `¿Estás seguro de que quieres eliminar el registro del empleado ${dia.first_name} ${dia.last_name}?`,
@@ -277,7 +277,7 @@ export class ConfirmDayComponent {
 // Mostrar información del día al hacer clic
 async mostrarInfoDia(dia: any) {
   // Abrir el diálogo de información del día
-  const dialogRef = this.dialogService.open(ConfirmDialogModalComponent, {
+  const dialogRef = this.dialogService.open(DialogComponent, {
     context: {
       title: 'Confirmar eliminación',
       message: `¿Estás seguro de que quieres eliminar el registro del empleado ${dia.first_name} ${dia.last_name}?`,

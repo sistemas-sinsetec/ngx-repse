@@ -9,8 +9,6 @@ import { ECommerceModule } from './e-commerce/e-commerce.module';
 import { PagesRoutingModule } from './pages-routing.module';
 import { MiscellaneousModule } from './miscellaneous/miscellaneous.module';
 import { ConfirmDayComponent } from './incident-control/confirm-day/confirm-day.component';
-import { ConfirmDialogModalComponent } from './incident-control/confirm-dialog-modal/confirm-dialog-modal.component';
-
 @NgModule({
   imports: [
     PagesRoutingModule,
@@ -25,7 +23,6 @@ import { ConfirmDialogModalComponent } from './incident-control/confirm-dialog-m
   declarations: [
     PagesComponent,
     ConfirmDayComponent,
-    ConfirmDialogModalComponent,
    
  
   ],
