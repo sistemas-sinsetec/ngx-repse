@@ -54,7 +54,7 @@ export class ConfirmDayComponent {
       this.spinnerService.load();
     
       const companyId = this.companyService.selectedCompany.id;  // Obtener company_id desde AuthService
-      const periodId = this.periodService.selectedPeriod.period;  // Obtener period_id desde AuthService
+      const periodId = this.periodService.selectedPeriod.id;  // Obtener period_id desde AuthService
     
       if (!companyId || !periodId) {
         console.error('No se proporcionaron company_id o period_id');

@@ -45,7 +45,7 @@ export class ConfirmWeekComponent {
     this.isLoading = true; // Activar el spinner
 
     const companyId = this.companyService.selectedCompany.id;
-    const periodId = this.periodService.selectedPeriod.period; // Revisar este .period
+    const periodId = this.periodService.selectedPeriod.id; 
 
     if (!companyId || !periodId) {
       console.error('No se proporcionaron company_id o period_id');
@@ -110,7 +110,7 @@ export class ConfirmWeekComponent {
         date: date,
         status: dayData ? dayData.status : 'pending',
         company_id: dayData ? dayData.company_id : this.companyService.selectedCompany.id,
-        period_id: dayData ? dayData.period_id : this.periodService.selectedPeriod.period, //Revisar este
+        period_id: dayData ? dayData.period_id : this.periodService.selectedPeriod.id,
       });
 
       start.add(1, 'days');
@@ -178,7 +178,7 @@ export class ConfirmWeekComponent {
 
     const companyId = this.companyService.selectedCompany.id;
     const periodId = this.currentPeriodId;
-    const periodTypeId = this.periodService.selectedPeriod.period; //Revisar este x3
+    const periodTypeId = this.periodService.selectedPeriod.id;
     const weekNumber = this.currentSemana;
 
     if (!companyId || !periodId || !periodTypeId || !weekNumber) {
