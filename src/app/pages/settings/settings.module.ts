@@ -19,6 +19,8 @@ import {
   NbFormFieldModule,
   NbAccordionModule,
   NbInputModule,
+  NbTagModule,
+  NbUserModule
 } from '@nebular/theme';
 
 import { ThemeModule } from '../../@theme/theme.module';
@@ -81,7 +83,10 @@ import { MyProfileComponent } from './users/my-profile/my-profile.component';
     NbLayoutModule, // Añade NbLayoutModule si usas nb-layout
     NbFormFieldModule,
     NbAccordionModule,
-    NbInputModule
+    NbInputModule,
+    NbTagModule,
+    NbUserModule
+
   ],
   declarations: [
     SettingsComponent,
@@ -111,7 +116,8 @@ import { MyProfileComponent } from './users/my-profile/my-profile.component';
     RegistroModalComponent,
     RegisterComponent,
     AgainDialogComponent,
-    MyUsersComponent
+    MyUsersComponent,
+    MyProfileComponent
   ],
 })
 export class SettingsModule { }

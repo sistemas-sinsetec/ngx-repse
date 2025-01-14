@@ -289,7 +289,7 @@ export const MENU_ITEMS: CustomMenuItem[] = [
           },
           {
             title: 'Editar mi usuario',
-            link: '',
+            link: '/pages/settings/users/my-profile',
             hidden: false,
             permission: { section: 'Configuracion de usuarios', subSection: 'Editar mi usuario' },
           },
@@ -306,7 +306,7 @@ export const MENU_ITEMS: CustomMenuItem[] = [
           },
           {
             title: 'Empresas registradas',
-            link: '',
+            link: '/pages/settings/site/companies-info',
           },
           {
             title: 'Registrar empresas',

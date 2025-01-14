@@ -1,1 +1,74 @@
-<p>companies-info works!</p>
+<div class="container mt-5">
+    <!-- Encabezado Corporativo -->
+    <div class="d-flex align-items-center mb-4">
+      <img src="assets/logo.png" alt="Logo de la Empresa" class="logo mr-3" width="60">
+      <h2 class="font-weight-bold">Gestión de Empresas Registradas</h2>
+    </div>
+  
+    <nb-card>
+      <!-- Sección de Búsqueda -->
+      <nb-card-header>
+        <div class="search-section row">
+          <div class="col-md-3 mb-2">
+            <nb-select fullWidth placeholder="Buscar por" [(ngModel)]="searchField" (selectedChange)="updatePlaceholder()">
+              <nb-option value="nameCompany">Nombre de la Empresa</nb-option>
+              <nb-option value="companyRFC">RFC</nb-option>
+              <nb-option value="name">Nombre Legal</nb-option>
+              <nb-option value="username">Usuario Propietario</nb-option>
+              <nb-option value="email">Correo Electrónico</nb-option>
+              <nb-option value="phone">Número de Teléfono</nb-option>
+              <nb-option value="levelUserName">Tipo de Usuario</nb-option>
+              <nb-option value="fecha_inicio">Fecha de Inicio</nb-option>
+              <nb-option value="fecha_fin">Fecha de Fin</nb-option>
+            </nb-select>
+          </div>
+          <div class="col-md-6 mb-2">
+            <input nbInput fullWidth type="text" [(ngModel)]="searchTerm" [placeholder]="searchPlaceholder" (input)="formatDateInput($event)" class="form-control">
+          </div>
+          <div class="col-md-3 mb-2">
+            <button nbButton status="primary" fullWidth (click)="buscarEmpresas()">Buscar</button>
+          </div>
+        </div>
+      </nb-card-header>
+  
+      <!-- Cuerpo del Card: Lista de Empresas -->
+      <nb-card-body>
+        <div class="row">
+          <div class="col-lg-4 col-md-6 mb-4" *ngFor="let company of filteredCompanies">
+            <nb-card class="company-card h-100 shadow-sm">
+              <nb-card-header class="bg-primary text-white">
+                <strong>{{ company.nameCompany }}</strong>
+              </nb-card-header>
+              <nb-card-body>
+                <div class="company-details">
+                  <p><nb-icon icon="hash" pack="eva" class="mr-2"></nb-icon><strong>RFC:</strong> {{ company.companyRFC }}</p>
+                  <p><nb-icon icon="file-text" pack="eva" class="mr-2"></nb-icon><strong>Nombre Legal:</strong> {{ company.name }}</p>
+                  <p><nb-icon icon="user" pack="eva" class="mr-2"></nb-icon><strong>Usuario Propietario:</strong> {{ company.username }}</p>
+                  <p><nb-icon icon="email" pack="eva" class="mr-2"></nb-icon><strong>Correo Electrónico:</strong> {{ company.email }}</p>
+                  <p><nb-icon icon="phone" pack="eva" class="mr-2"></nb-icon><strong>Número de Teléfono:</strong> {{ company.phone }}</p>
+                  <p><nb-icon icon="settings" pack="eva" class="mr-2"></nb-icon><strong>Tipo de Usuario:</strong> {{ company.levelUserName }}</p>
+                  <p><nb-icon icon="calendar" pack="eva" class="mr-2"></nb-icon><strong>Inicio:</strong> {{ company.fecha_inicio | date:'shortDate' }}</p>
+                  <p><nb-icon icon="calendar-off" pack="eva" class="mr-2"></nb-icon><strong>Fin:</strong> {{ company.fecha_fin | date:'shortDate' }}</p>
+                  <p><nb-icon [icon]="company.isPremium ? 'star' : 'star-outline'" pack="eva" class="mr-2"></nb-icon><strong>Premium:</strong> {{ company.isPremium ? 'Sí' : 'No' }}</p>
+                </div>
+              </nb-card-body>
+              <nb-card-footer class="text-right">
+                <button nbButton size="small" status="success" (click)="editarEmpresa(company)">
+                  <nb-icon icon="edit-2" pack="eva" class="mr-1"></nb-icon> Editar
+                </button>
+              </nb-card-footer>
+            </nb-card>
+          </div>
+        </div>
+  
+        <!-- Mensaje cuando no hay empresas -->
+        <div *ngIf="filteredCompanies.length === 0" class="text-center mt-4">
+          <nb-icon icon="inbox" pack="eva" size="giant" class="mb-2"></nb-icon>
+          <p>No se encontraron empresas con los criterios de búsqueda proporcionados.</p>
+        </div>
+      </nb-card-body>
+  
+      <!-- Paginación (opcional) -->
+      
+    </nb-card>
+  </div>

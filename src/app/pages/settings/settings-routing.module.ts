@@ -16,6 +16,8 @@ import { CompanyPermissionsSectionsComponent } from './site/company-permissions-
 import { PermissionsSectionsComponent } from './permissions-sections/permissions-sections.component';
 import { RegisterComponent } from './users/register/register.component';
 import { MyUsersComponent } from './users/my-users/my-users.component';
+import { MyProfileComponent } from './users/my-profile/my-profile.component';
+import { CompaniesInfoComponent } from './site/companies-info/companies-info.component';
 const routes: Routes = [
   {
     path: '',
@@ -71,6 +73,10 @@ const routes: Routes = [
         path: 'site/company-permissions-sections',
         component: CompanyPermissionsSectionsComponent
       },
+      {
+        path: 'site/companies-info',
+        component: CompaniesInfoComponent
+      },
 
 
       //user routes
@@ -81,6 +87,10 @@ const routes: Routes = [
       {
         path: 'users/my-users',
         component: MyUsersComponent
+      },
+      {
+        path: 'users/my-profile',
+        component: MyProfileComponent
       }
       
     ],

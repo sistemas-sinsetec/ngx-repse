@@ -1,39 +1,50 @@
+.container {
+  margin-top: 20px;
+}
+
 .header-title {
-    font-size: 24px;
-    font-weight: bold;
-    text-align: center;
-    margin-bottom: 20px;
-  }
+  font-size: 24px;
+  font-weight: bold;
+  text-align: center;
+  margin-bottom: 20px;
+}
 
-  .table-container {
-    margin-top: 20px;
-  }
+.table thead th {
+  background-color: #f8f9fa;
+  font-weight: bold;
+}
 
-  .btn-group {
-    display: flex;
-    justify-content: center;
-  }
+.table td,
+.table th {
+  vertical-align: middle;
+  text-align: center;
+}
 
-  .btn-group-button {
-    margin: 0 5px;
-  }
+.form-control {
+  max-width: 300px;
+  margin: 0 auto;
+}
 
-  .active {
-    box-shadow: 0 0 0 2px #3366ff;
-  }
+.text-center {
+  text-align: center;
+}
 
-  .text-center {
-    text-align: center;
-  }
+.m-2 {
+  margin: 5px;
+}
 
-  .mb-3 {
-    margin-bottom: 1rem;
-  }
+.btn-group .btn.active {
+  background-color: #007bff;
+  color: white;
+}
 
-  .mb-4 {
-    margin-bottom: 1.5rem;
-  }
+.badge-container {
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+  margin-bottom: 1rem; /* Equivalente a mb-4 */
+}
 
-  .m-2 {
-    margin: 0.5rem;
-  }
+.badge-item {
+  margin: 0.5rem; /* Equivalente a m-2 */
+}

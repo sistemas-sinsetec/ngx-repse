@@ -1,8 +1,7 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, OnDestroy } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { NbAlertModule, NbToastrService } from '@nebular/theme';  // Cambié AlertController por NbToastrService
-import { Share } from '@capacitor/share';
-import { CompanyService } from '../../../../services/company.service';  // No se usó en este ejemplo, pero se mantiene
+import { NbToastrService } from '@nebular/theme';  // Asegúrate de que NbToastrModule está importado en tu módulo
+import { CompanyService } from '../../../../services/company.service';
 import { AuthService } from '../../../../services/auth.service';
 import { Router } from '@angular/router';
 
@@ -11,7 +10,7 @@ import { Router } from '@angular/router';
   templateUrl: './my-profile.component.html',
   styleUrls: ['./my-profile.component.scss']
 })
-export class MyProfileComponent implements OnInit {
+export class MyProfileComponent implements OnInit, OnDestroy {
   idUser: string;
   fullName: string;
   userName: string;
@@ -26,13 +25,13 @@ export class MyProfileComponent implements OnInit {
 
   constructor(
     private http: HttpClient,
-    private toastrService: NbToastrService, // 
-    private companyService: CompanyService, // 
+    private toastrService: NbToastrService,
+    private companyService: CompanyService,
     private authService: AuthService,
     private router: Router,
   ) {
     // Inicialización
-    this.idUser = this.companyService.selectedCompany.id();  // Si tienes un servicio para obtener el userId
+    this.idUser = this.authService.userId; // Si tienes un servicio para obtener el userId
     this.employeeName = this.authService.username;
     this.employeeId = this.authService.userId;
   }
@@ -80,7 +79,7 @@ export class MyProfileComponent implements OnInit {
       this.http.post(url, formData).subscribe((response: any) => {
         if (response.success) {
           this.avatar = response.filePath;
-          this.showAlert('Success', 'Avatar updated successfully.');
+          this.showAlert('Éxito', 'Avatar actualizado exitosamente.');
         } else {
           this.showAlert('Error', response.error);
         }
@@ -97,18 +96,9 @@ export class MyProfileComponent implements OnInit {
     return result;
   }
 
-  async generateAndShareCode() {
+  generateAndShareCode() {
     this.generatedCode = this.createUniqueCode(); // Genera un nuevo código
     this.saveGeneratedCode(); // Guarda el nuevo código generado en la tabla `user_codes`
-    await this.shareCode();
-  }
-
-  async shareCode() {
-    await Share.share({
-      title: 'Código del Empleado',
-      text: `Código del Empleado: ${this.generatedCode}`,
-      dialogTitle: 'Compartir Código'
-    });
   }
 
   saveGeneratedCode() {
@@ -132,9 +122,9 @@ export class MyProfileComponent implements OnInit {
     );
   }
 
-  async saveSettings() {
+  saveSettings() {
     if (this.userPassword !== this.confirmPassword) {
-      await this.showAlert('Error', 'Passwords do not match.');
+      this.showAlert('Error', 'Las contraseñas no coinciden.');
       return;
     }
 
@@ -147,42 +137,100 @@ export class MyProfileComponent implements OnInit {
     };
 
     const url = `https://www.siinad.mx/php/update_user.php`;
-    this.http.post(url, data).subscribe(async (response: any) => {
-      await this.showAlert(response.success ? 'Success' : 'Error', response.message);
+    this.http.post(url, data).subscribe((response: any) => {
+      this.showAlert(response.success ? 'Éxito' : 'Error', response.message);
     });
   }
 
-  async showAlert(header: string, message: string) {
+  shareCode() {
+    if (this.generatedCode) {
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(this.generatedCode).then(() => {
+          this.showAlert('Éxito', 'Código copiado al portapapeles.');
+        }).catch((err) => {
+          console.error('Error al copiar el código: ', err);
+          this.showAlert('Error', 'No se pudo copiar el código.');
+        });
+      } else {
+        // Fallback para navegadores que no soportan navigator.clipboard
+        this.fallbackCopyTextToClipboard(this.generatedCode);
+      }
+    } else {
+      this.showAlert('Advertencia', 'No hay código para copiar.');
+    }
+  }
+
+  // Método de fallback usando un textarea temporal
+  fallbackCopyTextToClipboard(text: string) {
+    const textArea = document.createElement("textarea");
+    textArea.value = text;
+    
+    // Evitar que el textarea sea visible
+    textArea.style.position = "fixed";
+    textArea.style.top = "0";
+    textArea.style.left = "0";
+    textArea.style.width = "2em";
+    textArea.style.height = "2em";
+    textArea.style.padding = "0";
+    textArea.style.border = "none";
+    textArea.style.outline = "none";
+    textArea.style.boxShadow = "none";
+    textArea.style.background = "transparent";
+    
+    document.body.appendChild(textArea);
+    textArea.focus();
+    textArea.select();
+
+    try {
+      const successful = document.execCommand('copy');
+      if (successful) {
+        this.showAlert('Éxito', 'Código copiado al portapapeles.');
+      } else {
+        this.showAlert('Error', 'No se pudo copiar el código.');
+      }
+    } catch (err) {
+      console.error('Error al copiar el código: ', err);
+      this.showAlert('Error', 'No se pudo copiar el código.');
+    }
+
+    document.body.removeChild(textArea);
+  }
+
+  showAlert(header: string, message: string) {
+    let status: 'success' | 'danger' | 'warning' = 'success';
+
+    if (header === 'Error') {
+      status = 'danger';
+    } else if (header === 'Advertencia') {
+      status = 'warning';
+    }
+
     this.toastrService.show(message, header, {
-      status: header === 'Error' ? 'danger' : 'success',
+      status: status,
       destroyByClick: true,
       duration: 5000
     });
-  }
-
-  goBack() {
-    this.router.navigate(['/previous-route']);
   }
 
   ionViewWillLeave() {
     this.deleteEmployeeCode();
   }
 
-  async deleteEmployeeCode() {
+  deleteEmployeeCode() {
     const data = { employeeId: this.employeeId };
 
     this.http.post('https://siinad.mx/php/delete-employee-code.php', data).subscribe(
-      async (response: any) => {
+      (response: any) => {
         if (response.success) {
           console.log('Código eliminado con éxito.');
         } else {
           console.error(response.error);
-          await this.showAlert('Error', 'Error al eliminar el código.');
+          this.showAlert('Error', 'Error al eliminar el código.');
         }
       },
-      async (error) => {
+      (error) => {
         console.error('Error en la solicitud POST:', error);
-        await this.showAlert('Error', 'Error al eliminar el código.');
+        this.showAlert('Error', 'Error al eliminar el código.');
       }
     );
   }

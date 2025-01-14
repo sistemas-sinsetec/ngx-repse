@@ -10,73 +10,112 @@
   
           <div class="text-center mb-3">
             <div class="btn-group">
-              <button
-                nbButton
-                status="secondary"
-                size="small"
-                [class.active]="filter === 'cargados'"
-                (click)="setFilter('cargados')"
-                class="btn-group-button"
-              >
-                Cargados
-              </button>
-              <button
-                nbButton
-                status="success"
-                size="small"
-                [class.active]="filter === 'aceptados'"
-                (click)="setFilter('aceptados')"
-                class="btn-group-button"
-              >
-                Aceptados
-              </button>
-              <button
-                nbButton
-                status="danger"
-                size="small"
-                [class.active]="filter === 'rechazados'"
-                (click)="setFilter('rechazados')"
-                class="btn-group-button"
-              >
-                Rechazados
-              </button>
+              <button (click)="setFilter('cargados')" [class.active]="filter === 'cargados'" class="btn btn-secondary ms-2">Cargados</button>
+              <button (click)="setFilter('aceptados')" [class.active]="filter === 'aceptados'" class="btn btn-success ms-2">Aceptados</button>
+              <button (click)="setFilter('rechazados')" [class.active]="filter === 'rechazados'" class="btn btn-danger ms-2">Rechazados</button>
             </div>
           </div>
   
           <!-- Tabla Cargados -->
-          <div *ngIf="filter === 'cargados'" class="table-container">
+          <div *ngIf="filter === 'cargados'" class="table-responsive">
             <h3>Cargados</h3>
-            <ng2-smart-table
-              [settings]="settingsCargados"
-              [source]="archivosCargados"
-            ></ng2-smart-table>
+            <table class="table">
+              <thead>
+                <tr>
+                  <th>Tarea</th>
+                  <th>Archivo</th>
+                  <th>Fecha de Subida</th>
+                  <th>Subido Por</th>
+                  <th>Estado</th>
+                  <th>Acciones</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr *ngFor="let archivo of archivosCargados">
+                  <td>{{ archivo.tarea_nombre }}</td>
+                  <td>{{ archivo.file_path }}</td>
+                  <td>{{ archivo.upload_date }}</td>
+                  <td>{{ archivo.uploaded_by }}</td>
+                  <td>{{ archivo.estado }}</td>
+                  <td>
+                    <a [href]="'https://siinad.mx/php/' + archivo.file_path" target="_blank" class="btn btn-primary">Revisar</a>
+                    <button class="btn btn-success" (click)="aceptarArchivo(archivo)">Aceptar</button>
+                    <button class="btn btn-danger" (click)="rechazarArchivo(archivo)">Rechazar</button>
+                    <button class="btn btn-info" (click)="revisarInformacionAdicional(archivo)">Revisar Información Adicional</button>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
           </div>
-  
-          <!-- Tabla Aceptados -->
-          <div *ngIf="filter === 'aceptados'" class="table-container">
+      
+          <div *ngIf="filter === 'aceptados'" class="table-responsive">
             <h3>Aceptados</h3>
-            <ng2-smart-table
-              [settings]="settingsAceptados"
-              [source]="archivosAceptados"
-            ></ng2-smart-table>
+            <table class="table">
+              <thead>
+                <tr>
+                  <th>Tarea</th>
+                  <th>Archivo</th>
+                  <th>Fecha de Subida</th>
+                  <th>Subido Por</th>
+                  <th>Estado</th>
+                  <th>Acciones</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr *ngFor="let archivo of archivosAceptados">
+                  <td>{{ archivo.tarea_nombre }}</td>
+                  <td>{{ archivo.file_path }}</td>
+                  <td>{{ archivo.upload_date }}</td>
+                  <td>{{ archivo.uploaded_by }}</td>
+                  <td>{{ archivo.estado }}</td>
+                  <td>
+                    <a [href]="'https://siinad.mx/php/' + archivo.file_path" target="_blank" class="btn btn-primary">Revisar</a>
+                    <button class="btn btn-info" (click)="revisarInformacionAdicional(archivo)">Revisar Información Adicional</button>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
           </div>
-  
-          <!-- Tabla Rechazados -->
-          <div *ngIf="filter === 'rechazados'" class="table-container">
+      
+          <div *ngIf="filter === 'rechazados'" class="table-responsive">
             <h3>Rechazados</h3>
-            <ng2-smart-table
-              [settings]="settingsRechazados"
-              [source]="archivosRechazados"
-            ></ng2-smart-table>
+            <table class="table">
+              <thead>
+                <tr>
+                  <th>Tarea</th>
+                  <th>Archivo</th>
+                  <th>Fecha de Subida</th>
+                  <th>Subido Por</th>
+                  <th>Estado</th>
+                  <th>Acciones</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr *ngFor="let archivo of archivosRechazados">
+                  <td>{{ archivo.tarea_nombre }}</td>
+                  <td>{{ archivo.file_path }}</td>
+                  <td>{{ archivo.upload_date }}</td>
+                  <td>{{ archivo.uploaded_by }}</td>
+                  <td>{{ archivo.estado }}</td>
+                  <td>
+                    <a [href]="'https://siinad.mx/php/' + archivo.file_path" target="_blank" class="btn btn-primary">Revisar</a>
+                    <button class="btn btn-info" (click)="revisarInformacionAdicional(archivo)">Revisar Información Adicional</button>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
           </div>
   
           <!-- Badges -->
-          <div class="text-center mb-4">
-            <nb-badge status="success" text="Cargados: {{ cargados }}" class="m-2"></nb-badge>
-            <nb-badge status="primary" text="Completos: {{ completos }}" class="m-2"></nb-badge>
-            <nb-badge status="danger" text="Incompletos: {{ incompletos }}" class="m-2"></nb-badge>
-            <nb-badge status="warning" text="No cargados: {{ noCargados }}" class="m-2"></nb-badge>
+          <div class="d-flex justify-content-center flex-wrap mb-4">
+            <nb-tag class="m-2" status="success" text="Cargados: {{ cargados }}"></nb-tag>
+            <nb-tag class="m-2" status="primary" text="Completos: {{ completos }}"></nb-tag>
+            <nb-tag class="m-2" status="danger" text="Incompletos: {{ incompletos }}"></nb-tag>
+            <nb-tag class="m-2" status="warning" text="No cargados: {{ noCargados }}"></nb-tag>
           </div>
+          
+          
+          
         </nb-card-body>
       </nb-card>
     </nb-layout-column>
