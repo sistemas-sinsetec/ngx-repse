@@ -14,6 +14,8 @@ import { AnualUploadComponent } from './my-company/anual-upload/anual-upload.com
 import { AnualReviewComponent } from './my-company/anual-review/anual-review.component';
 import { CompanyPermissionsSectionsComponent } from './site/company-permissions-sections/company-permissions-sections.component';
 import { PermissionsSectionsComponent } from './permissions-sections/permissions-sections.component';
+import { RegisterComponent } from './users/register/register.component';
+import { MyUsersComponent } from './users/my-users/my-users.component';
 const routes: Routes = [
   {
     path: '',
@@ -68,6 +70,17 @@ const routes: Routes = [
       {
         path: 'site/company-permissions-sections',
         component: CompanyPermissionsSectionsComponent
+      },
+
+
+      //user routes
+      {
+        path: 'users/register',
+        component: RegisterComponent
+      },
+      {
+        path: 'users/my-users',
+        component: MyUsersComponent
       }
       
     ],

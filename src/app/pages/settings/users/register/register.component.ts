@@ -36,6 +36,8 @@ export class RegisterComponent {
   secondaryCompanies: any[] = []; // Empresas secundarias
   isModalOpen = false;
 
+
+
   
 
 
@@ -45,7 +47,7 @@ export class RegisterComponent {
     private toastrService: NbToastrService,
     public authService: AuthService,
     private dialogService: NbDialogService,
-    private companyService: CompanyService
+    public companyService: CompanyService
   ) { }
 
   ngOnInit() {
@@ -312,8 +314,6 @@ export class RegisterComponent {
   }
   
   
-
-
 }
 
 

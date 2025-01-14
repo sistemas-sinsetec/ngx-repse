@@ -278,9 +278,14 @@ export const MENU_ITEMS: CustomMenuItem[] = [
         children: [
           {
             title: 'Registrar usuarios',
-            link: '',
+            link: '/pages/settings/users/register', 
             hidden: false,
             permission: { section: 'Configuracion de usuarios', subSection: 'Registrar, eliminar, ver y editar usuarios' },
+          },
+          {
+            title: 'Mis usuarios',
+            link: '/pages/settings/users/my-users', 
+        
           },
           {
             title: 'Editar mi usuario',

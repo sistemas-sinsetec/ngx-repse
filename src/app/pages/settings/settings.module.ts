@@ -17,7 +17,8 @@ import {
   NbBadgeModule, // Importa NbBadgeModule aquí
   NbLayoutModule, // Importa NbLayoutModule si usas nb-layout
   NbFormFieldModule,
-  NbAccordionModule
+  NbAccordionModule,
+  NbInputModule,
 } from '@nebular/theme';
 
 import { ThemeModule } from '../../@theme/theme.module';
@@ -54,6 +55,7 @@ import { CompaniesInfoComponent } from './site/companies-info/companies-info.com
 import { EditCompanyModalComponent } from './site/edit-company-modal/edit-company-modal.component';
 import { RegisterComponent } from './users/register/register.component';
 import { AgainDialogComponent } from './users/again-dialog/again-dialog.component';
+import { MyUsersComponent } from './users/my-users/my-users.component';
 
 @NgModule({
   imports: [
@@ -77,7 +79,8 @@ import { AgainDialogComponent } from './users/again-dialog/again-dialog.componen
     NbBadgeModule, // Añade NbBadgeModule aquí
     NbLayoutModule, // Añade NbLayoutModule si usas nb-layout
     NbFormFieldModule,
-    NbAccordionModule
+    NbAccordionModule,
+    NbInputModule
   ],
   declarations: [
     SettingsComponent,
@@ -106,7 +109,8 @@ import { AgainDialogComponent } from './users/again-dialog/again-dialog.componen
     RegisterAdminSComponent,
     RegistroModalComponent,
     RegisterComponent,
-    AgainDialogComponent
+    AgainDialogComponent,
+    MyUsersComponent
   ],
 })
 export class SettingsModule { }
