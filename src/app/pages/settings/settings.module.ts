@@ -59,6 +59,7 @@ import { RegisterComponent } from './users/register/register.component';
 import { AgainDialogComponent } from './users/again-dialog/again-dialog.component';
 import { MyUsersComponent } from './users/my-users/my-users.component';
 import { MyProfileComponent } from './users/my-profile/my-profile.component';
+import { RegCompanyComponent } from './site/reg-company/reg-company.component';
 
 @NgModule({
   imports: [
@@ -117,7 +118,8 @@ import { MyProfileComponent } from './users/my-profile/my-profile.component';
     RegisterComponent,
     AgainDialogComponent,
     MyUsersComponent,
-    MyProfileComponent
+    MyProfileComponent,
+    RegCompanyComponent
   ],
 })
 export class SettingsModule { }
