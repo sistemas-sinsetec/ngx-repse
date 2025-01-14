@@ -54,6 +54,7 @@ import { CompaniesInfoComponent } from './site/companies-info/companies-info.com
 import { EditCompanyModalComponent } from './site/edit-company-modal/edit-company-modal.component';
 import { RegisterComponent } from './users/register/register.component';
 import { AgainDialogComponent } from './users/again-dialog/again-dialog.component';
+import { MyProfileComponent } from './users/my-profile/my-profile.component';
 
 @NgModule({
   imports: [
@@ -106,7 +107,8 @@ import { AgainDialogComponent } from './users/again-dialog/again-dialog.componen
     RegisterAdminSComponent,
     RegistroModalComponent,
     RegisterComponent,
-    AgainDialogComponent
+    AgainDialogComponent,
+    MyProfileComponent
   ],
 })
 export class SettingsModule { }
