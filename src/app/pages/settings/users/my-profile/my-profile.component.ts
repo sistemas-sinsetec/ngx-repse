@@ -4,6 +4,7 @@ import { NbAlertModule, NbToastrService } from '@nebular/theme';  // Cambié Ale
 import { Share } from '@capacitor/share';
 import { CompanyService } from '../../../../services/company.service';  // No se usó en este ejemplo, pero se mantiene
 import { AuthService } from '../../../../services/auth.service';
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'ngx-my-profile',
@@ -28,6 +29,7 @@ export class MyProfileComponent implements OnInit {
     private toastrService: NbToastrService, // 
     private companyService: CompanyService, // 
     private authService: AuthService,
+    private router: Router,
   ) {
     // Inicialización
     this.idUser = this.companyService.selectedCompany.id();  // Si tienes un servicio para obtener el userId
@@ -159,7 +161,7 @@ export class MyProfileComponent implements OnInit {
   }
 
   goBack() {
-    // Lógica para regresar
+    this.router.navigate(['/previous-route']);
   }
 
   ionViewWillLeave() {
