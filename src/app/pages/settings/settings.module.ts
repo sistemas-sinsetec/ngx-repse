@@ -52,6 +52,8 @@ import { RegisterAdminSComponent } from './my-company/register-admin-s/register-
 import { RegistroModalComponent } from './my-company/registro-modal/registro-modal.component';
 import { CompaniesInfoComponent } from './site/companies-info/companies-info.component';
 import { EditCompanyModalComponent } from './site/edit-company-modal/edit-company-modal.component';
+import { RegisterComponent } from './users/register/register.component';
+import { AgainDialogComponent } from './users/again-dialog/again-dialog.component';
 
 @NgModule({
   imports: [
@@ -102,7 +104,9 @@ import { EditCompanyModalComponent } from './site/edit-company-modal/edit-compan
     CompaniesInfoComponent,
     EditCompanyModalComponent,
     RegisterAdminSComponent,
-    RegistroModalComponent
+    RegistroModalComponent,
+    RegisterComponent,
+    AgainDialogComponent
   ],
 })
 export class SettingsModule { }

@@ -113,13 +113,13 @@ export class PermissionsSectionsComponent implements OnInit {
       this.filteredUsers = this.users.filter(user => user.role === userType);
     }
   }
-  async onUserChange(event: any) {
-    this.selectedUserId = event.target.value;
+  async onUserChange(selectedValue: any) {
+    this.selectedUserId = selectedValue;
     await this.loadPermissions();
   }
-
-  async onSectionChange(event: any) {
-    this.selectedSection = event.target.value;
+  
+  async onSectionChange(selectedValue: any) {
+    this.selectedSection = selectedValue;
     this.loadSubSections(this.selectedSection);
   }
 
