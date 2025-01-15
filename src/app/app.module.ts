@@ -10,6 +10,7 @@ import { AppRoutingModule } from './app-routing.module';
 
 import {
   NbChatModule,
+  NbActionsModule,
   NbDatepickerModule,
   NbDialogModule,
   NbMenuModule,
@@ -23,6 +24,7 @@ import {
   NbCardModule,       // <-- Importa NbCardModule para usar <nb-card>
   NbSelectModule,     // <-- Importa NbSelectModule para usar <nb-select>
   NbIconModule,  
+
        // <-- Importa NbIconModule si usas <nb-icon>
 } from '@nebular/theme';
 
@@ -30,9 +32,10 @@ import { NbAuthModule } from '@nebular/auth';
 import { CustomLoginComponent } from './custom-login/custom-login.component';
 import { AuthService } from './services/auth.service';
 import { SelectCompanyPeriodDialogComponent } from './select-company-period-dialog/select-company-period-dialog.component';
-
+import { IncidentControlComponent } from './pages/incident-control/incident-control.component'; // Asegúrate de que esta ruta sea correcta
 @NgModule({
   declarations: [
+    IncidentControlComponent,
     AppComponent,
     CustomLoginComponent,
     SelectCompanyPeriodDialogComponent,
@@ -60,8 +63,8 @@ import { SelectCompanyPeriodDialogComponent } from './select-company-period-dial
     NbCheckboxModule,
     NbCardModule,        // <-- Asegúrate de estar importando NbCardModule
     NbSelectModule,      // <-- Asegúrate de estar importando NbSelectModule
-    NbIconModule,        // <-- Asegúrate de estar importando NbIconModule si usas <nb-icon>
-
+    NbIconModule,   // <-- Asegúrate de estar importando NbIconModule si usas <nb-icon>
+    NbActionsModule,     
     NbAuthModule.forRoot({
       strategies: [],
       forms: {

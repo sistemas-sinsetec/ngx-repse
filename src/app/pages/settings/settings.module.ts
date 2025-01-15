@@ -1,6 +1,5 @@
 import { NgModule } from '@angular/core';
 import {
-  
   NbButtonModule,
   NbCardModule,
   NbIconModule,
@@ -59,7 +58,7 @@ import { MyProfileComponent } from './users/my-profile/my-profile.component';
 import { RegCompanyComponent } from './site/reg-company/reg-company.component';
 import { CpAuthDialogComponent } from './site/cp-auth-dialog/cp-auth-dialog.component';
 import { CpAuthDeleteDialogComponent } from './site/cp-auth-delete-dialog/cp-auth-delete-dialog.component';
-
+import { ProcessWeeklyListsComponent } from '../incident-control/process-weekly-lists/process-weekly-lists.component';
 @NgModule({
   imports: [
     ThemeModule,
@@ -119,7 +118,8 @@ import { CpAuthDeleteDialogComponent } from './site/cp-auth-delete-dialog/cp-aut
     MyProfileComponent,
     RegCompanyComponent,
     CpAuthDialogComponent,
-    CpAuthDeleteDialogComponent
+    CpAuthDeleteDialogComponent,
+    ProcessWeeklyListsComponent,
   ],
 })
 export class SettingsModule { }

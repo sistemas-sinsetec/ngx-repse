@@ -1,5 +1,5 @@
 import { NgModule } from '@angular/core';
-import { NbMenuModule } from '@nebular/theme';
+import { NbMenuModule, NbCardModule } from '@nebular/theme';
 import { FormsModule } from '@angular/forms'; // Importa FormsModule
 import { SettingsModule } from './settings/settings.module';
 import { ThemeModule } from '../@theme/theme.module';
@@ -13,7 +13,10 @@ import { ConfirmWeekComponent } from './incident-control/confirm-week/confirm-we
 import { IncidentModalComponent } from './incident-control/incident-modal/incident-modal.component';
 import { IncidentViewerComponent } from './incident-control/incident-viewer/incident-viewer.component';
 import { ChangeHoursModalComponent } from './incident-control/change-hours-modal/change-hours-modal.component';
+<<<<<<< HEAD
 import { ProcessWeeklyListsComponent } from './incident-control/process-weekly-lists/process-weekly-lists.component';
+=======
+>>>>>>> 5524a08684ccdfa61eb5edae567262804b01fe37
 import { ProcessedAttendanceComponent } from './incident-control/processed-attendance/processed-attendance.component';
 @NgModule({
   imports: [
@@ -24,7 +27,8 @@ import { ProcessedAttendanceComponent } from './incident-control/processed-atten
     DashboardModule,
     ECommerceModule,
     MiscellaneousModule,
-    SettingsModule
+    SettingsModule,
+    NbCardModule
   ],
   declarations: [
     PagesComponent,
@@ -33,7 +37,10 @@ import { ProcessedAttendanceComponent } from './incident-control/processed-atten
     IncidentModalComponent,
     IncidentViewerComponent,
     ChangeHoursModalComponent,
+<<<<<<< HEAD
     ProcessWeeklyListsComponent,
+=======
+>>>>>>> 5524a08684ccdfa61eb5edae567262804b01fe37
     ProcessedAttendanceComponent,
 
   ],
