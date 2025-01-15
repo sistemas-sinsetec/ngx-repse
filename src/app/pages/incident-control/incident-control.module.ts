@@ -28,11 +28,14 @@ import { IncidentControlComponent } from './incident-control.component';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { Ng2SmartTableModule } from 'ng2-smart-table';
 import { IncidentViewerComponent } from './incident-viewer/incident-viewer.component';
+import { ConfirmDayComponent } from './confirm-day/confirm-day.component';
 
 @NgModule({
   declarations: [
     IncidentControlComponent,
-    IncidentViewerComponent
+    IncidentViewerComponent,
+    ConfirmDayComponent,
+
   ],
   imports: [
     CommonModule,

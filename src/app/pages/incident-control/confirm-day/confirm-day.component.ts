@@ -15,27 +15,26 @@ import { DialogComponent } from '../../modal-overlays/dialog/dialog.component';
   styleUrls: ['./confirm-day.component.scss']
 })
 export class ConfirmDayComponent {
-  selectAll: boolean = false; // Bandera para seleccionar todos
-
-  diasPendientes: any[] = [];
-  filteredDias: any[] = [];
-  currentFechaDias: any[] = [];  // Días de la fecha actual
-  currentFecha: string = '';  // Fecha actual a mostrar
-  searchTerm: string = '';
+  diasSemana: any[] = [];
+  filteredEmployees: any[] = [];
   currentSemana: string = '';
-  currentPeriodId: string = ''; // Variable para almacenar el period_id
+  periodStartDate: string = '';
+  periodEndDate: string = '';
+  selectedDia: any;
+  empleadosDia: any[] = [];
+  empleadosIncidencias: any[] = [];
+  currentPeriodId: string = '';
+  isWeekConfirmed: boolean = false;
+  currentFecha: string = '';
 
-  periodStartDate: string = ''; // Fecha de inicio del periodo
-  periodEndDate: string = '';   // Fecha de fin del periodo
-  diasDelPeriodo: any[] = [];   // Días generados dentro del periodo
+  filteredEmpleadosDia: any[] = []; // Lista filtrada de empleados asignados
+  filteredEmpleadosIncidencias: any[] = []; // Lista filtrada de empleados con incidencias
+  searchTerm: string = ''; // Término de búsqueda
 
-  isLastConfirmedDay: boolean = false; // Para verificar si se muestra el último día confirmado
-  noDaysAvailable: boolean = false; // Nueva propiedad para manejar el caso de que no haya días
-  isButtonDisabled: boolean = false; // Controla si el botón está deshabilitado
 
   constructor(
     private authService: AuthService,
-    private httpClient: HttpClient,
+    private http: HttpClient,
     private spinnerService: NbSpinnerService,
     private alertModule: NbAlertModule,
     private companyService: CompanyService,
@@ -46,268 +45,264 @@ export class ConfirmDayComponent {
   ) { }
 
   ngOnInit() {
-    this.loadDiasPendientes();
+    this.loadWeekData();
   }
 
-    async loadDiasPendientes() {
-      // Mostrar el spinner
-      this.spinnerService.load();
-    
-      const companyId = this.companyService.selectedCompany.id;  // Obtener company_id desde AuthService
-      const periodId = this.periodService.selectedPeriod.id;  // Obtener period_id desde AuthService
-    
-      if (!companyId || !periodId) {
-        console.error('No se proporcionaron company_id o period_id');
-        this.spinnerService.clear(); // Ocultar el spinner
-        return;
-      }
-    
-      try {
-        // Lógica para cargar días pendientes
-        const response = await this.httpClient
-          .get(`https://api.example.com/dias-pendientes?companyId=${companyId}&periodId=${periodId}`)
-          .toPromise();
-    
-        // Procesar la respuesta
-        console.log('Días pendientes cargados:', response);
-      } catch (error) {
-        console.error('Error al cargar días pendientes:', error);
-      } finally {
-        // Ocultar el spinner
-        this.spinnerService.clear();
-      }
+  async loadWeekData() {
+    const spinner = this.spinnerService; // Mostrar spinner
+    spinner.load();
+
+    const companyId = this.companyService.selectedCompany.id;
+    const periodTypeId = this.periodService.selectedPeriod.id;
+
+    if (!companyId || !periodTypeId) {
+      console.error('No se proporcionaron company_id o period_type_id');
+      spinner.clear();
+      return;
     }
 
-    filtrarPorFechaMasAntigua() {
-      if (this.diasPendientes.length > 0) {
-        console.log('Días pendientes inicial:', this.diasPendientes); // Mostrar todos los días pendientes
-    
-        this.noDaysAvailable = false; // Reiniciar si se encuentran días
-    
-        // Filtrar los días que están pendientes (asegúrate de que project_status sea exactamente "pending")
-        const diasPendientes = this.diasPendientes.filter(dia => dia.project_status && dia.project_status.trim().toLowerCase() === 'pending');
-        console.log('Días filtrados como pendientes:', diasPendientes); // Mostrar días pendientes después de filtrar por project_status
-    
-        if (diasPendientes.length > 0) {
-          // Ordenar los días pendientes por fecha para encontrar el más antiguo
-          diasPendientes.sort((a, b) => moment(a.day_of_week).diff(moment(b.day_of_week)));
-          console.log('Días pendientes ordenados por fecha:', diasPendientes); // Mostrar días pendientes ordenados
-    
-          // Si hay días pendientes, mostrar el más antiguo
-          this.isLastConfirmedDay = false;
-          const fechaMasAntigua = diasPendientes[0].day_of_week;
-          console.log('Fecha más antigua encontrada:', fechaMasAntigua); // Mostrar la fecha más antigua encontrada
-    
-          // Filtrar todos los días de esa fecha (incluir todos los empleados de la misma fecha)
-          this.currentFechaDias = this.diasPendientes.filter(dia => dia.day_of_week === fechaMasAntigua);
-          console.log('Días correspondientes a la fecha más antigua (todos los empleados):', this.currentFechaDias); // Mostrar días de la fecha más antigua con todos los empleados
-          this.currentFecha = fechaMasAntigua;
-    
-          const periodoMasAntiguo = this.currentFechaDias[0];
-          if (periodoMasAntiguo) {
-            console.log('Periodo más antiguo encontrado:', periodoMasAntiguo); // Mostrar el periodo más antiguo encontrado
-            this.periodStartDate = periodoMasAntiguo.period_start_date;
-            this.periodEndDate = periodoMasAntiguo.period_end_date;
-            this.currentSemana = periodoMasAntiguo.work_week;
-            this.currentPeriodId = periodoMasAntiguo.period_id;
-    
-            // Generar los días del periodo
-            this.generarDiasDelPeriodo(this.periodStartDate, this.periodEndDate);
-          }
+    const url = `https://siinad.mx/php/get-week-data.php?company_id=${companyId}&period_type_id=${periodTypeId}`;
+
+    this.http.get(url).subscribe(
+      (data: any) => {
+        if (data && data.length > 0 && !data.error) {
+          this.diasSemana = data;
+          this.filteredEmployees = [...this.diasSemana];
+
+          const semanaActual = this.diasSemana[0];
+          this.currentSemana = semanaActual.week_number;
+          this.periodStartDate = semanaActual.period_start_date;
+          this.periodEndDate = semanaActual.period_end_date;
+          this.currentPeriodId = semanaActual.period_id;
+
+          this.generarDiasDeSemana(this.periodStartDate, this.periodEndDate, this.currentPeriodId);
+
+          this.verificarConfirmacionSemana(companyId, this.currentPeriodId);
         } else {
-          // Si no hay días pendientes, buscar el último día confirmado
-          this.isLastConfirmedDay = true;
-          const ultimoDiaConfirmado = this.diasPendientes
-            .filter(dia => dia.project_status && dia.project_status.trim().toLowerCase() === 'confirmed')
-            .sort((a, b) => moment(b.confirmation_date).diff(moment(a.confirmation_date)))[0];
-    
-          console.log('Último día confirmado encontrado:', ultimoDiaConfirmado); // Mostrar el último día confirmado encontrado
-    
-          if (ultimoDiaConfirmado) {
-            // Filtrar todos los días confirmados para esa fecha
-            this.currentFechaDias = this.diasPendientes.filter(dia => dia.day_of_week === ultimoDiaConfirmado.day_of_week);
-            this.currentFecha = ultimoDiaConfirmado.day_of_week;
-            this.periodStartDate = ultimoDiaConfirmado.period_start_date;
-            this.periodEndDate = ultimoDiaConfirmado.period_end_date;
-            this.currentSemana = ultimoDiaConfirmado.work_week;
-            this.currentPeriodId = ultimoDiaConfirmado.period_id;
-    
-            // Generar los días del periodo
-            this.generarDiasDelPeriodo(this.periodStartDate, this.periodEndDate);
-          } else {
-            // Si no hay días confirmados, mostrar que no hay días disponibles
-            console.log('No hay días pendientes ni confirmados.'); // Mostrar si no hay días disponibles
-            this.noDaysAvailable = true;
-            this.limpiarVista();
-          }
+          console.error('No se encontraron días confirmados para la semana.');
+          this.showToast('No se encontraron días confirmados para la semana.', 'danger');
         }
-      } else {
-        // Si no hay días en absoluto, mostrar que no hay días disponibles
-        console.log('No hay días disponibles en absoluto.'); // Mostrar si no hay días en absoluto
-        this.noDaysAvailable = true;
-        this.limpiarVista();
+        spinner.clear();
+      },
+      (error) => {
+        console.error('Error al cargar los datos de la semana', error);
+        spinner.clear();
       }
-    }
+    );
+  }
 
-    limpiarVista() {
-      this.currentFechaDias = [];
-      this.currentFecha = '';
-      this.periodStartDate = '';
-      this.periodEndDate = '';
-      this.diasDelPeriodo = [];
-      this.currentSemana = '';
-      this.currentPeriodId = '';
-    }
-  
+  verificarConfirmacionSemana(companyId: string, periodId: string) {
+    const confirmUrl = `https://siinad.mx/php/get-week-confirmations.php?company_id=${companyId}&period_id=${periodId}`;
 
-      // Función para generar los días entre el rango del periodo
-  generarDiasDelPeriodo(startDate: string, endDate: string) {
+    this.http.get(confirmUrl).subscribe(
+      (response: any) => {
+        this.isWeekConfirmed = response && response.length > 0;
+      },
+      (error) => {
+        console.error('Error al verificar la confirmación de la semana', error);
+      }
+    );
+  }
+
+  generarDiasDeSemana(startDate: string, endDate: string, periodId: string) {
     const start = moment(startDate);
     const end = moment(endDate);
     const dias = [];
 
     while (start.isSameOrBefore(end)) {
-      // Inicializa cada día como pendiente
       const date = start.format('YYYY-MM-DD');
+      const dayData = this.diasSemana.find(dia => dia.day_of_week === date);
+
       dias.push({
         date: date,
-        status: this.obtenerStatusDelDia(date), // Asignar el estado (Confirmado o Pendiente)
+        status: dayData && dayData.status ? dayData.status : null, // Usar null si no hay estado
+        company_id: dayData ? dayData.company_id : this.companyService.selectedCompany.id,
+        period_id: dayData ? dayData.period_id : periodId,
       });
+
       start.add(1, 'days');
     }
 
-    this.diasDelPeriodo = dias;
-    console.log('Días del periodo:', this.diasDelPeriodo);
+    this.diasSemana = dias;
   }
 
+  async cargarEmpleadosDia(dia: any) {
+    const spinner = this.spinnerService; // Mostrar spinner
+    spinner.load();
 
-  
-  obtenerStatusDelDia(date: string): string {
-    // Busca el día que coincida con la fecha del periodo y esté confirmado
-    const diaEncontrado = this.diasPendientes.find(dia => {
-      console.log('Comparando:', dia.day_of_week, 'con', date);
-      return dia.day_of_week === date && dia.project_status.toLowerCase() === 'confirmed';
-    });
-    return diaEncontrado ? 'confirmed' : 'pending';
-  }
+    // Limpiar listas de empleados asignados e incidencias antes de cargar los nuevos datos
+    this.empleadosDia = []; // Lista de empleados asignados
+    this.empleadosIncidencias = []; // Lista de empleados con incidencias
 
-  // Filtrar los días según el término de búsqueda
-  filterRecords() {
-    const searchTerm = this.searchTerm.toLowerCase();
+    const companyId = dia.company_id;
+    const periodId = dia.period_id;
+    const date = dia.date;
 
-    this.filteredDias = this.currentFechaDias.filter(dia => {
-      const employeeCode = dia.employee_code ? dia.employee_code.toLowerCase() : '';
-      const firstName = dia.first_name ? dia.first_name.toLowerCase() : '';
-      const lastName = dia.last_name ? dia.last_name.toLowerCase() : '';
-      const projectName = dia.project_name ? dia.project_name.toLowerCase() : '';
-      const status = dia.project_status ? dia.project_status.toLowerCase() : '';
+    const url = `https://siinad.mx/php/get-employee-assignments-days.php?company_id=${companyId}&period_id=${periodId}&date=${date}`;
 
-      return (
-        employeeCode.includes(searchTerm) ||
-        firstName.includes(searchTerm) ||
-        lastName.includes(searchTerm) ||
-        projectName.includes(searchTerm) ||
-        status.includes(searchTerm)
-      );
-    });
-  }
+    try {
+      const data: any = await this.http.get(url).toPromise();
 
-  // Confirmar los días seleccionados
-  confirmDay(payload: any) {
-    // Mostrar el spinner
-    this.spinnerService.load();
-  
-    // Enviar el payload al backend para confirmar el día
-    this.httpClient.post('https://siinad.mx/php/confirm-day.php', payload).subscribe(
-      (response: any) => {
-        console.log('Día confirmado exitosamente', response);
-  
-        // Actualizar el estado de los días confirmados en el frontend
-        if (response.success) {
-          this.diasDelPeriodo.forEach(dia => {
-            if (dia.date === payload.day_of_week) {
-              dia.status = 'confirmed';
-            }
-          });
+      if (data) {
+        // Asignar los empleados asignados y con incidencias
+        this.empleadosDia = data.empleados_asignados || [];
+        this.empleadosIncidencias = data.empleados_incidencias || [];
+
+        // Crear una lista de empleados combinados
+        this.empleadosDia = this.empleadosDia.map(empAsignado => {
+          // Verificar si el empleado también tiene una incidencia
+          const incidencia = this.empleadosIncidencias.find(inc => inc.employee_id === empAsignado.employee_id);
+
+          // Si el empleado tiene una incidencia, combinar los datos
+          if (incidencia) {
+            return {
+              ...empAsignado,
+              incident_type: incidencia.incident_type,
+              description: incidencia.description,
+              hasIncidencia: true // Bandera para indicar que tiene una incidencia
+            };
+          }
+
+          // Si no tiene incidencia, devolver el empleado tal cual
+          return empAsignado;
+        });
+
+        // Filtrar empleados con incidencias que no están en `empleadosDia`
+        this.empleadosIncidencias = this.empleadosIncidencias.filter(
+          inc => !this.empleadosDia.some(emp => emp.employee_id === inc.employee_id)
+        );
+
+        // Inicializar las listas filtradas con los datos recién cargados
+        this.filteredEmpleadosDia = [...this.empleadosDia];
+        this.filteredEmpleadosIncidencias = [...this.empleadosIncidencias];
+
+        if (this.empleadosDia.length === 0 && this.empleadosIncidencias.length === 0) {
+          console.error('No se encontraron empleados para el día seleccionado.');
         }
-  
-        this.isButtonDisabled = true;
-        this.loadDiasPendientes(); // Llamar a la función para cargar días pendientes
+      } else {
+        console.error('No se encontraron empleados para el día seleccionado.');
+      }
+    } catch (error) {
+      console.error('Error al cargar los empleados para el día seleccionado', error);
+    } finally {
+      spinner.clear();
+    }
+  }
+
+  filterEmployees() {
+    const searchTermLower = this.searchTerm.toLowerCase();
+
+    // Filtrar empleados asignados
+    this.filteredEmpleadosDia = this.empleadosDia.filter(emp =>
+      emp.employee_code.toLowerCase().includes(searchTermLower) ||
+      emp.first_name.toLowerCase().includes(searchTermLower) ||
+      emp.last_name.toLowerCase().includes(searchTermLower) ||
+      (emp.middle_name && emp.middle_name.toLowerCase().includes(searchTermLower))
+    );
+
+    // Filtrar empleados con incidencias
+    this.filteredEmpleadosIncidencias = this.empleadosIncidencias.filter(emp =>
+      emp.employee_code.toLowerCase().includes(searchTermLower) ||
+      emp.first_name.toLowerCase().includes(searchTermLower) ||
+      emp.last_name.toLowerCase().includes(searchTermLower) ||
+      (emp.middle_name && emp.middle_name.toLowerCase().includes(searchTermLower))
+    );
+  }
+
+  async mostrarInfoDia(dia: any) {
+    this.selectedDia = dia;
+    await this.cargarEmpleadosDia(dia);
+
+    // Verificar si hay empleados asignados o con incidencias
+    if (this.empleadosDia.length === 0 && this.empleadosIncidencias.length === 0) {
+      this.toastrService.show(
+        'No hay empleados asignados ni con incidencias para este día.',
+        `Información del Día: ${dia.date}`,
+        { status: 'info', duration: 5000 }
+      );
+    }
+  }
+
+  async confirmarDia(dia: any) {
+    const spinner = this.spinnerService; // Mostrar spinner
+    spinner.load();
+
+    const body = {
+      company_id: dia.company_id,
+      period_id: dia.period_id,
+      period_type_id: this.periodService.selectedPeriod.id, // Asegúrate de que esto esté disponible
+      day_of_week: dia.date, // Suponiendo que `dia.date` es el día de la semana
+      week_number: this.currentSemana, // Asegúrate de que esto esté disponible
+      confirmation_date: new Date().toISOString().split('T')[0], // La fecha de confirmación
+      status: 'confirmed' // O cualquier estado que necesites
+    };
+
+    const url = `https://siinad.mx/php/confirm-day.php`;
+
+    this.http.post(url, body).subscribe(
+      async (response: any) => {
+        if (response && response.success) {
+          console.log('Día confirmado correctamente');
+         
+          dia.status = 'confirmed';
+        } else {
+          console.error('Error al confirmar el día:', response.error);
+          
+        }
+        spinner.clear();
       },
-      (error) => {
-        console.error('Error al confirmar el día', error);
-      },
-      () => {
-        // Ocultar el spinner después de completar la operación
-        this.spinnerService.clear();
+      async (error) => {
+        console.error('Error en la solicitud de confirmación del día:', error);
+        
+        spinner.clear();
       }
     );
   }
 
- // Eliminar un día de la lista
- async eliminarDia(dia: any, event: Event) {
-  event.stopPropagation(); // Detener la propagación del evento
 
-  // Abrir el diálogo de confirmación
-  const dialogRef = this.dialogService.open(DialogComponent, {
-    context: {
-      title: 'Confirmar eliminación',
-      message: `¿Estás seguro de que quieres eliminar el registro del empleado ${dia.first_name} ${dia.last_name}?`,
-      buttons: [
-        {
-          text: 'Cancelar',
-          action: 'cancel',  // Acción para cancelar
-        },
-        {
-          text: 'Eliminar',
-          action: 'confirm',  // Acción para confirmar
-        },
-      ],
-    },
-  });
-  
-  dialogRef.onClose.subscribe((action: string) => {
-    if (action === 'confirm') {
-      // Lógica para eliminar
-    } else {
-      console.log('Eliminación cancelada');
-    }
-  });
-}
-// Mostrar información del día al hacer clic
-async mostrarInfoDia(dia: any) {
-  // Abrir el diálogo de información del día
-  const dialogRef = this.dialogService.open(DialogComponent, {
-    context: {
-      title: 'Confirmar eliminación',
-      message: `¿Estás seguro de que quieres eliminar el registro del empleado ${dia.first_name} ${dia.last_name}?`,
-      buttons: [
-        {
-          text: 'Cancelar',
-          action: 'cancel',
-        },
-        {
-          text: 'Eliminar',
-          action: 'confirm',
-        },
-      ],
-    },
-  });
+  async eliminarEmpleadoDelDia(employeeId: string) {
+    // Abrir un diálogo de confirmación
+    this.dialogService.open(DialogComponent, {
+      context: {
+        title: 'Confirmar eliminación',
+        message: '¿Estás seguro de que deseas eliminar este empleado asignado del día y su incidencia (si existe)?',
+        buttons: [
+          { text: 'Cancelar', action: 'cancel' },
+          { text: 'Eliminar', action: 'confirm' },
+        ],
+      },
+    }).onClose.subscribe(async (result: boolean) => {
+      if (result) {
+        const loading = this.toastrService.info('Eliminando empleado asignado...', 'Por favor espera', { duration: 0 });
 
-  dialogRef.onClose.subscribe(() => {
-    console.log('Dialog cerrado');
-  });
-}
-  // Alternar confirmación de un día
-  toggleConfirm(dia: any) {
-    dia.confirmed = !dia.confirmed;
-  }
+        const url = `https://siinad.mx/php/delete-employee-assignment-incident.php`;
+        const body = { employee_id: employeeId, date: this.selectedDia.date };
 
-  // Alternar selección de todos los días
-  toggleSelectAll() {
-    this.selectAll = !this.selectAll;
-    this.filteredDias.forEach(dia => {
-      dia.confirmed = this.selectAll;
+        this.http.post(url, body).subscribe(
+          async (response: any) => {
+            if (response && response.success) {
+              // Eliminar el empleado de ambas listas
+              this.empleadosDia = this.empleadosDia.filter(emp => emp.employee_id !== employeeId);
+              this.empleadosIncidencias = this.empleadosIncidencias.filter(emp => emp.employee_id !== employeeId);
+              this.toastrService.success('El empleado y su incidencia han sido eliminados correctamente.', 'Eliminado');
+            } else {
+              console.error('Error al eliminar el empleado:', response.error);
+              this.toastrService.danger(response.error || 'Hubo un problema al eliminar el empleado.', 'Error');
+            }
+          },
+          (error) => {
+            console.error('Error en la solicitud de eliminación del empleado:', error);
+            this.toastrService.danger('Hubo un problema al conectar con el servidor. Inténtalo de nuevo.', 'Error');
+          }
+        );
+      }
     });
   }
+
+
+
+  showToast(message: string, status: 'success' | 'danger') {
+    this.toastrService.show(message, 'Notificación', { status });
   }
+
+}
