@@ -1,17 +1,25 @@
 import { NgModule } from '@angular/core';
-import { CommonModule } from '@angular/common';
 import { RouterModule, Routes } from '@angular/router';
 import { IncidentControlComponent } from './incident-control.component';
+import { IncidentViewerComponent } from './incident-viewer/incident-viewer.component';
 
 const routes: Routes = [
-  { path: '', component: IncidentControlComponent },
-  
+  {
+    path: '',
+    component: IncidentControlComponent,
+    children: [
+        {
+              path: 'incident-viewer',
+              component: IncidentViewerComponent
+            },
+
+    ],
+  },
 ];
 
 @NgModule({
-  declarations: [],
-  imports: [
-    CommonModule
-  ]
+  imports: [RouterModule.forChild(routes)],
+  exports: [RouterModule],
 })
-export class IncidentControlRoutingModule { }
+export class IncidentControlRoutingModule {
+}

@@ -60,33 +60,7 @@ import { CpAuthDialogComponent } from './site/cp-auth-dialog/cp-auth-dialog.comp
 import { CpAuthDeleteDialogComponent } from './site/cp-auth-delete-dialog/cp-auth-delete-dialog.component';
 import { ProcessWeeklyListsComponent } from '../incident-control/process-weekly-lists/process-weekly-lists.component';
 @NgModule({
-  imports: [
-    ThemeModule,
-    NbCardModule,
-    NbButtonModule,
-    NbIconModule, // Añadimos el módulo de iconos aquí
-    SettingsRoutingModule,
-    NbAlertModule, // Importamos NbAlertModule
-    NbToastrModule, // Para notificaciones
-    NbListModule,
-    NbCheckboxModule,
-    FormsModule,
-    NbCalendarModule,
-    NbCalendarKitModule,
-    NbCalendarRangeModule,
-    NbDatepickerModule.forRoot(),
-    NbOptionModule, // Aquí añadimos el Datepicker
-    Ng2SmartTableModule,
-    NbSelectModule,
-    NbBadgeModule, // Añade NbBadgeModule aquí
-    NbLayoutModule, // Añade NbLayoutModule si usas nb-layout
-    NbFormFieldModule,
-    NbAccordionModule,
-    NbInputModule,
-    NbTagModule,
-    NbUserModule
-
-  ],
+ 
   declarations: [
     SettingsComponent,
     UploadLogoComponent,
@@ -120,6 +94,33 @@ import { ProcessWeeklyListsComponent } from '../incident-control/process-weekly-
     CpAuthDialogComponent,
     CpAuthDeleteDialogComponent,
     ProcessWeeklyListsComponent,
+  ],
+  imports: [
+    ThemeModule,
+    NbCardModule,
+    NbButtonModule,
+    NbIconModule, // Añadimos el módulo de iconos aquí
+    SettingsRoutingModule,
+    NbAlertModule, // Importamos NbAlertModule
+    NbToastrModule, // Para notificaciones
+    NbListModule,
+    NbCheckboxModule,
+    FormsModule,
+    NbCalendarModule,
+    NbCalendarKitModule,
+    NbCalendarRangeModule,
+    NbDatepickerModule.forRoot(),
+    NbOptionModule, // Aquí añadimos el Datepicker
+    Ng2SmartTableModule,
+    NbSelectModule,
+    NbBadgeModule, // Añade NbBadgeModule aquí
+    NbLayoutModule, // Añade NbLayoutModule si usas nb-layout
+    NbFormFieldModule,
+    NbAccordionModule,
+    NbInputModule,
+    NbTagModule,
+    NbUserModule
+
   ],
 })
 export class SettingsModule { }

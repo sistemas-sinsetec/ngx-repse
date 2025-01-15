@@ -109,7 +109,7 @@ export const MENU_ITEMS: CustomMenuItem[] = [
     children: [
       {
         title: 'Registro de incidencias',
-        link: '',
+        link: '/pages/incident-control/incident-viewer',
         hidden: false,
         permission: { section: 'Incidencias', subSection: 'Control de incidencias' },
       },
