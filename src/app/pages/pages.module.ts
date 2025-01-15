@@ -13,6 +13,8 @@ import { ConfirmWeekComponent } from './incident-control/confirm-week/confirm-we
 import { IncidentModalComponent } from './incident-control/incident-modal/incident-modal.component';
 import { IncidentViewerComponent } from './incident-control/incident-viewer/incident-viewer.component';
 import { ChangeHoursModalComponent } from './incident-control/change-hours-modal/change-hours-modal.component';
+import { ProcessWeeklyListsComponent } from './incident-control/process-weekly-lists/process-weekly-lists.component';
+import { ProcessedAttendanceComponent } from './incident-control/processed-attendance/processed-attendance.component';
 @NgModule({
   imports: [
     PagesRoutingModule,
@@ -31,6 +33,8 @@ import { ChangeHoursModalComponent } from './incident-control/change-hours-modal
     IncidentModalComponent,
     IncidentViewerComponent,
     ChangeHoursModalComponent,
+    ProcessWeeklyListsComponent,
+    ProcessedAttendanceComponent,
 
   ],
 })
