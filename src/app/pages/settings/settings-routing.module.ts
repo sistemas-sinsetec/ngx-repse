@@ -1,7 +1,7 @@
 import { NgModule } from '@angular/core';
 import { RouterModule, Routes } from '@angular/router';
 
-import {SettingsComponent } from './settings.component';
+import { SettingsComponent } from './settings.component';
 
 import { UploadLogoComponent } from './my-company/upload-logo/upload-logo.component';
 import { CodeCompanyComponent } from './my-company/code-company/code-company.component';
@@ -18,6 +18,8 @@ import { RegisterComponent } from './users/register/register.component';
 import { MyUsersComponent } from './users/my-users/my-users.component';
 import { MyProfileComponent } from './users/my-profile/my-profile.component';
 import { CompaniesInfoComponent } from './site/companies-info/companies-info.component';
+import { RegCompanyComponent } from './site/reg-company/reg-company.component';
+import { PremiumAuthComponent } from './site/premium-auth/premium-auth.component';
 const routes: Routes = [
   {
     path: '',
@@ -55,7 +57,7 @@ const routes: Routes = [
         path: 'my-company/anual-review',
         component: AnualReviewComponent
       },
-      
+
       {
         path: 'my-company/anual-upload',
         component: AnualUploadComponent
@@ -77,6 +79,14 @@ const routes: Routes = [
         path: 'site/companies-info',
         component: CompaniesInfoComponent
       },
+      {
+        path: 'site/reg-company',
+        component: RegCompanyComponent
+      },
+      {
+        path: 'site/premium-auth',
+        component: PremiumAuthComponent
+      },
 
 
       //user routes
@@ -92,7 +102,7 @@ const routes: Routes = [
         path: 'users/my-profile',
         component: MyProfileComponent
       }
-      
+
     ],
   },
 ];

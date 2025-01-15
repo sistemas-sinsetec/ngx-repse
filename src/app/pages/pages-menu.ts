@@ -310,11 +310,11 @@ export const MENU_ITEMS: CustomMenuItem[] = [
           },
           {
             title: 'Registrar empresas',
-            link: '',
+            link: '/pages/settings/site/reg-company',
           },
           {
             title: 'Confirmar solicitudes premium',
-            link: '',
+            link: '/pages/settings/site/premium-auth',
           },
         ],
       },

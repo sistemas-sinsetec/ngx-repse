@@ -51,7 +51,6 @@ import { PremiumAuthComponent } from './site/premium-auth/premium-auth.component
 import { CpAuthModalComponent } from './site/cp-auth-modal/cp-auth-modal.component';
 import { CpAuthModalDeleteComponent } from './site/cp-auth-modal-delete/cp-auth-modal-delete.component';
 
-import { RegisterAdminSComponent } from './my-company/register-admin-s/register-admin-s.component';
 import { RegistroModalComponent } from './my-company/registro-modal/registro-modal.component';
 import { CompaniesInfoComponent } from './site/companies-info/companies-info.component';
 import { EditCompanyModalComponent } from './site/edit-company-modal/edit-company-modal.component';
@@ -113,7 +112,7 @@ import { RegCompanyComponent } from './site/reg-company/reg-company.component';
     CpAuthModalDeleteComponent,
     CompaniesInfoComponent,
     EditCompanyModalComponent,
-    RegisterAdminSComponent,
+   
     RegistroModalComponent,
     RegisterComponent,
     AgainDialogComponent,
