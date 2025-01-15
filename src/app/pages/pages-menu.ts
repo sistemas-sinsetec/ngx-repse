@@ -115,31 +115,30 @@ export const MENU_ITEMS: CustomMenuItem[] = [
       },
       {
         title: 'Confirmar día',
-        link: '',
+        link: '/pages/incident-control/confirm-day',
         hidden: false,
         permission: { section: 'Incidencias', subSection: 'Confirmar dia' },
       },
       {
         title: 'Confirmar semana',
-        link: '',
+        link: '/pages/incident-control/confirm-week',
         hidden: false,
         permission: { section: 'Incidencias', subSection: 'Confirmar semana' },
       },
       {
         title: 'Semanas Procesadas',
-        link: 'process-weekly-lists',
+        link: '/pages/incident-control/process-weekly-lists',
         hidden: false,
         permission: { section: 'Incidencias', subSection: 'Semanas procesadas' },
       },
       {
         title: 'Listas de asistencias',
-        link: '',
+        link: '/pages/incident-control/processed-attendance',
         hidden: false,
         permission: { section: 'Incidencias', subSection: 'Lista de asistencia' },
       },
     ],
   },
-
   // Grupo: Finanzas
   {
     title: 'Finanzas',
