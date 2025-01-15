@@ -1,3 +1,6 @@
+<<<<<<< HEAD
+import { Component } from '@angular/core';
+=======
 import { Component, OnInit } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { NbSpinnerService, NbAlertModule, NbToastrService } from '@nebular/theme';
@@ -8,6 +11,7 @@ import { NbActionsModule } from '@nebular/theme';
 import * as moment from 'moment';
 
 
+>>>>>>> 5524a08684ccdfa61eb5edae567262804b01fe37
 
 @Component({
   selector: 'ngx-process-weekly-lists',
@@ -15,6 +19,8 @@ import * as moment from 'moment';
   styleUrls: ['./process-weekly-lists.component.scss']
 })
 export class ProcessWeeklyListsComponent {
+<<<<<<< HEAD
+=======
   confirmedWeeks: any[] = []; // Lista de semanas confirmadas
   selectedWeek: any; // Semana confirmada seleccionada
   diasSemana: any[] = []; // Días de la semana seleccionada
@@ -193,5 +199,6 @@ loadEmployeesForWeek() {
       }
     );
   }
+>>>>>>> 5524a08684ccdfa61eb5edae567262804b01fe37
 
 }

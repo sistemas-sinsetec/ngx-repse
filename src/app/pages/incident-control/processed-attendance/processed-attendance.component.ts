@@ -1,3 +1,6 @@
+<<<<<<< HEAD
+import { Component } from '@angular/core';
+=======
 import { Component, OnInit } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { NbSpinnerService, NbToastrService, NbAlertModule } from '@nebular/theme';
@@ -7,6 +10,7 @@ import { PeriodService } from '../../../services/period.service';
 import * as moment from 'moment';
 import jsPDF from 'jspdf';
 import html2canvas from 'html2canvas';
+>>>>>>> 5524a08684ccdfa61eb5edae567262804b01fe37
 
 @Component({
   selector: 'ngx-processed-attendance',
@@ -14,6 +18,9 @@ import html2canvas from 'html2canvas';
   styleUrls: ['./processed-attendance.component.scss']
 })
 export class ProcessedAttendanceComponent {
+<<<<<<< HEAD
+
+=======
   processedWeeks: any[] = []; // Lista de semanas procesadas
   selectedWeek: any; // Semana procesada seleccionada
   diasSemana: any[] = []; // Días de la semana seleccionada
@@ -215,4 +222,5 @@ export class ProcessedAttendanceComponent {
       this.spinnerService.clear(); // Ocultar el spinner
     }
   }
+>>>>>>> 5524a08684ccdfa61eb5edae567262804b01fe37
 }
