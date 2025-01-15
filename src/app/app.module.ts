@@ -32,9 +32,10 @@ import { NbAuthModule } from '@nebular/auth';
 import { CustomLoginComponent } from './custom-login/custom-login.component';
 import { AuthService } from './services/auth.service';
 import { SelectCompanyPeriodDialogComponent } from './select-company-period-dialog/select-company-period-dialog.component';
-
+import { IncidentControlComponent } from './pages/incident-control/incident-control.component'; // Asegúrate de que esta ruta sea correcta
 @NgModule({
   declarations: [
+    IncidentControlComponent,
     AppComponent,
     CustomLoginComponent,
     SelectCompanyPeriodDialogComponent,
