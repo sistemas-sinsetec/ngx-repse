@@ -1,1 +1,49 @@
-<p>edit-company-modal works!</p>
+<nb-card>
+    <nb-card-body>
+      <nb-list>
+        <nb-list-item>
+          <label>Nombre de la Empresa</label>
+          <nb-input [(ngModel)]="company.nameCompany" fullWidth></nb-input>
+        </nb-list-item>
+        <nb-list-item>
+          <label>RFC</label>
+          <nb-input [(ngModel)]="company.companyRFC" fullWidth></nb-input>
+        </nb-list-item>
+        <nb-list-item>
+          <label>Nombre Legal</label>
+          <nb-input [(ngModel)]="company.name" fullWidth></nb-input>
+        </nb-list-item>
+        <nb-list-item>
+          <label>Usuario Propietario</label>
+          <nb-input [(ngModel)]="company.username" fullWidth></nb-input>
+        </nb-list-item>
+        <nb-list-item>
+          <label>Correo Electrónico</label>
+          <nb-input [(ngModel)]="company.email" fullWidth></nb-input>
+        </nb-list-item>
+        <nb-list-item>
+          <label>Número de Teléfono</label>
+          <nb-input [(ngModel)]="company.phone" fullWidth></nb-input>
+        </nb-list-item>
+        <nb-list-item>
+          <label>Tipo de Usuario</label>
+          <nb-input [(ngModel)]="company.levelUserName" fullWidth></nb-input>
+        </nb-list-item>
+        <nb-list-item>
+          <label>Fecha de Inicio del Periodo</label>
+          <nb-input [(ngModel)]="company.fecha_inicio" fullWidth></nb-input>
+        </nb-list-item>
+        <nb-list-item>
+          <label>Fecha de Fin del Periodo</label>
+          <nb-input [(ngModel)]="company.fecha_fin" fullWidth></nb-input>
+        </nb-list-item>
+        <nb-list-item>
+          <label>Premium</label>
+          <nb-input [(ngModel)]="company.premium" fullWidth></nb-input>
+        </nb-list-item>
+      </nb-list>
+  
+      <button nbButton status="success" (click)="guardarCambios()" fullWidth>Guardar Cambios</button>
+    </nb-card-body>
+  </nb-card>
+  

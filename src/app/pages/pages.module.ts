@@ -31,8 +31,7 @@ import { ChangeHoursModalComponent } from './incident-control/change-hours-modal
     IncidentModalComponent,
     IncidentViewerComponent,
     ChangeHoursModalComponent,
-   
- 
+
   ],
 })
 export class PagesModule {
