@@ -1,5 +1,5 @@
 import { NgModule } from '@angular/core';
-import { NbMenuModule } from '@nebular/theme';
+import { NbMenuModule, NbCardModule } from '@nebular/theme';
 import { FormsModule } from '@angular/forms'; // Importa FormsModule
 import { SettingsModule } from './settings/settings.module';
 import { ThemeModule } from '../@theme/theme.module';
@@ -13,6 +13,7 @@ import { ConfirmWeekComponent } from './incident-control/confirm-week/confirm-we
 import { IncidentModalComponent } from './incident-control/incident-modal/incident-modal.component';
 import { IncidentViewerComponent } from './incident-control/incident-viewer/incident-viewer.component';
 import { ChangeHoursModalComponent } from './incident-control/change-hours-modal/change-hours-modal.component';
+import { ProcessedAttendanceComponent } from './incident-control/processed-attendance/processed-attendance.component';
 @NgModule({
   imports: [
     PagesRoutingModule,
@@ -22,7 +23,8 @@ import { ChangeHoursModalComponent } from './incident-control/change-hours-modal
     DashboardModule,
     ECommerceModule,
     MiscellaneousModule,
-    SettingsModule
+    SettingsModule,
+    NbCardModule
   ],
   declarations: [
     PagesComponent,
@@ -31,6 +33,7 @@ import { ChangeHoursModalComponent } from './incident-control/change-hours-modal
     IncidentModalComponent,
     IncidentViewerComponent,
     ChangeHoursModalComponent,
+    ProcessedAttendanceComponent,
 
   ],
 })

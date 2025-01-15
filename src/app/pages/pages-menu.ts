@@ -127,7 +127,7 @@ export const MENU_ITEMS: CustomMenuItem[] = [
       },
       {
         title: 'Semanas Procesadas',
-        link: '',
+        link: 'process-weekly-lists',
         hidden: false,
         permission: { section: 'Incidencias', subSection: 'Semanas procesadas' },
       },
