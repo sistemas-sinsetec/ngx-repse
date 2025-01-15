@@ -48,8 +48,6 @@ import { Afil01ModalComponent } from './my-company/afil01-modal/afil01-modal.com
 import { AutorizacionStpsModalComponent } from './my-company/autorizacion-stps-modal/autorizacion-stps-modal.component';
 import { CompanyPermissionsSectionsComponent } from './site/company-permissions-sections/company-permissions-sections.component';
 import { PremiumAuthComponent } from './site/premium-auth/premium-auth.component';
-import { CpAuthModalComponent } from './site/cp-auth-modal/cp-auth-modal.component';
-import { CpAuthModalDeleteComponent } from './site/cp-auth-modal-delete/cp-auth-modal-delete.component';
 
 import { RegistroModalComponent } from './my-company/registro-modal/registro-modal.component';
 import { CompaniesInfoComponent } from './site/companies-info/companies-info.component';
@@ -59,6 +57,8 @@ import { AgainDialogComponent } from './users/again-dialog/again-dialog.componen
 import { MyUsersComponent } from './users/my-users/my-users.component';
 import { MyProfileComponent } from './users/my-profile/my-profile.component';
 import { RegCompanyComponent } from './site/reg-company/reg-company.component';
+import { CpAuthDialogComponent } from './site/cp-auth-dialog/cp-auth-dialog.component';
+import { CpAuthDeleteDialogComponent } from './site/cp-auth-delete-dialog/cp-auth-delete-dialog.component';
 
 @NgModule({
   imports: [
@@ -108,8 +108,7 @@ import { RegCompanyComponent } from './site/reg-company/reg-company.component';
     AutorizacionStpsModalComponent,
     CompanyPermissionsSectionsComponent,
     PremiumAuthComponent,
-    CpAuthModalComponent,
-    CpAuthModalDeleteComponent,
+
     CompaniesInfoComponent,
     EditCompanyModalComponent,
    
@@ -118,7 +117,9 @@ import { RegCompanyComponent } from './site/reg-company/reg-company.component';
     AgainDialogComponent,
     MyUsersComponent,
     MyProfileComponent,
-    RegCompanyComponent
+    RegCompanyComponent,
+    CpAuthDialogComponent,
+    CpAuthDeleteDialogComponent
   ],
 })
 export class SettingsModule { }

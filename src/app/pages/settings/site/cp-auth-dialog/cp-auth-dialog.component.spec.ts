@@ -1,18 +1,18 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { CpAuthModalComponent } from './cp-auth-modal.component';
+import { CpAuthDialogComponent } from './cp-auth-dialog.component';
 
-describe('CpAuthModalComponent', () => {
-  let component: CpAuthModalComponent;
-  let fixture: ComponentFixture<CpAuthModalComponent>;
+describe('CpAuthDialogComponent', () => {
+  let component: CpAuthDialogComponent;
+  let fixture: ComponentFixture<CpAuthDialogComponent>;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      declarations: [ CpAuthModalComponent ]
+      declarations: [ CpAuthDialogComponent ]
     })
     .compileComponents();
 
-    fixture = TestBed.createComponent(CpAuthModalComponent);
+    fixture = TestBed.createComponent(CpAuthDialogComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();
   });
