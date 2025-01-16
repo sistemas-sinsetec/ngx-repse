@@ -54,9 +54,6 @@ export class IncidentViewerComponent implements OnInit {
       return;
     }
 
-    const spinner = this.spinnerService; // Mostrar spinner
-    spinner.load();
-
     this.http
       .get(
         `https://siinad.mx/php/get_weekly_periods.php?company_id=${this.companyId}&period_type_id=${selectedPeriod}`
@@ -65,12 +62,12 @@ export class IncidentViewerComponent implements OnInit {
         (data: any) => {
           this.weeks = data;
           this.selectedWeek = this.weeks.length ? this.weeks[0] : null;
-          this.onWeekChange(this.selectedWeek);
-          spinner.clear();
+          if (this.selectedWeek) {
+            this.onWeekChange(this.selectedWeek);
+          }
         },
         (error) => {
           console.error('Error al cargar las semanas', error);
-          spinner.clear();
         }
       );
   }
@@ -78,6 +75,8 @@ export class IncidentViewerComponent implements OnInit {
   onWeekChange(week: any) {
     this.selectedWeek = week;
     this.generateDiasSemana(week.start_date, week.end_date);
+    // Resetear el día seleccionado cuando cambia la semana
+    this.selectedDia = null;
     this.loadEmployees();
   }
 
@@ -86,11 +85,11 @@ export class IncidentViewerComponent implements OnInit {
     const end = moment(endDate);
     this.diasSemana = [];
 
-    let day = start;
-    while (day <= end) {
+    let day = start.clone(); // Clonar para evitar mutaciones
+    while (day.isSameOrBefore(end, 'day')) {
       this.diasSemana.push({
         date: day.format('YYYY-MM-DD'),
-        display: day.format('dddd'), // Nombre del día de la semana
+        display: day.format('dddd').charAt(0).toUpperCase() + day.format('dddd').slice(1), // Capitalizar el día
       });
       day = day.add(1, 'day');
     }
@@ -204,8 +203,6 @@ export class IncidentViewerComponent implements OnInit {
           console.log('Horas guardadas correctamente:', response);
           // Mostrar el Toast de éxito
           await this.showToast('Horas asignadas correctamente.', 'success');
-          // Mostrar la alerta de éxito
-          await this.showToast('Las horas se asignaron correctamente.' , 'success');
         },
         (error) => {
           console.error('Error al guardar las horas:', error);
@@ -287,5 +284,9 @@ export class IncidentViewerComponent implements OnInit {
 
   showToast(message: string, status: 'success' | 'danger') {
     this.toastrService.show(message, 'Notificación', { status });
+  }
+
+  getFormattedDate(date: string): string {
+    return moment(date).format('YYYY-MM-DD');
   }
 }

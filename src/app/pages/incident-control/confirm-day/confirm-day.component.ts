@@ -8,6 +8,7 @@ import { NbToastrService } from '@nebular/theme';
 import * as moment from 'moment';
 import { ToastrComponent } from '../../modal-overlays/toastr/toastr.component';
 import { DialogComponent } from '../../modal-overlays/dialog/dialog.component';
+import { LoadingController, AlertController, NavController } from '@ionic/angular';
 
 @Component({
   selector: 'ngx-confirm-day',
@@ -41,6 +42,7 @@ export class ConfirmDayComponent {
     private periodService: PeriodService,
     private dialogService: NbDialogService,
     private toastrService: NbToastrService,
+    private loadingController: LoadingController,
 
   ) { }
 
@@ -49,15 +51,17 @@ export class ConfirmDayComponent {
   }
 
   async loadWeekData() {
-    const spinner = this.spinnerService; // Mostrar spinner
-    spinner.load();
+    const loading = await this.loadingController.create({
+      message: 'Cargando datos de la semana...',
+    });
+    await loading.present();
 
     const companyId = this.companyService.selectedCompany.id;
-    const periodTypeId = this.periodService.selectedPeriod.id;
+    const periodTypeId = this.periodService.selectedPeriod.period_type_id;
 
     if (!companyId || !periodTypeId) {
       console.error('No se proporcionaron company_id o period_type_id');
-      spinner.clear();
+      loading.dismiss();
       return;
     }
 
@@ -80,13 +84,13 @@ export class ConfirmDayComponent {
           this.verificarConfirmacionSemana(companyId, this.currentPeriodId);
         } else {
           console.error('No se encontraron días confirmados para la semana.');
-          this.showToast('No se encontraron días confirmados para la semana.', 'danger');
+          this.toastrService.danger('No se encontraron días confirmados para la semana.', 'danger');
         }
-        spinner.clear();
+        loading.dismiss();
       },
       (error) => {
         console.error('Error al cargar los datos de la semana', error);
-        spinner.clear();
+        loading.dismiss();
       }
     );
   }
@@ -127,8 +131,7 @@ export class ConfirmDayComponent {
   }
 
   async cargarEmpleadosDia(dia: any) {
-    const spinner = this.spinnerService; // Mostrar spinner
-    spinner.load();
+    
 
     // Limpiar listas de empleados asignados e incidencias antes de cargar los nuevos datos
     this.empleadosDia = []; // Lista de empleados asignados
@@ -185,7 +188,7 @@ export class ConfirmDayComponent {
     } catch (error) {
       console.error('Error al cargar los empleados para el día seleccionado', error);
     } finally {
-      spinner.clear();
+   
     }
   }
 
@@ -224,8 +227,7 @@ export class ConfirmDayComponent {
   }
 
   async confirmarDia(dia: any) {
-    const spinner = this.spinnerService; // Mostrar spinner
-    spinner.load();
+   
 
     const body = {
       company_id: dia.company_id,
@@ -249,12 +251,12 @@ export class ConfirmDayComponent {
           console.error('Error al confirmar el día:', response.error);
           
         }
-        spinner.clear();
+       
       },
       async (error) => {
         console.error('Error en la solicitud de confirmación del día:', error);
         
-        spinner.clear();
+        
       }
     );
   }
@@ -301,8 +303,5 @@ export class ConfirmDayComponent {
 
 
 
-  showToast(message: string, status: 'success' | 'danger') {
-    this.toastrService.show(message, 'Notificación', { status });
-  }
 
 }

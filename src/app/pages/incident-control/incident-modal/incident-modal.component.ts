@@ -8,7 +8,7 @@ import { NbDialogRef } from '@nebular/theme';
 })
 export class IncidentModalComponent {
   @Input() incidentOptions: string[] = [];
-  @Input() employees: any[] = []; // Manejar múltiples empleados
+  @Input() employees: any[] = []; // Cambiado a array para manejar múltiples empleados
   selectedIncident: string = '';
   description: string = '';
 
