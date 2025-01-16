@@ -43,6 +43,7 @@ export class ConfirmDayComponent {
     private dialogService: NbDialogService,
     private toastrService: NbToastrService,
     private loadingController: LoadingController,
+    private alertController: AlertController,
 
   ) { }
 
@@ -131,6 +132,11 @@ export class ConfirmDayComponent {
   }
 
   async cargarEmpleadosDia(dia: any) {
+
+    const loading = await this.loadingController.create({
+      message: 'Cargando empleados para el día seleccionado...',
+    });
+    await loading.present();
     
 
     // Limpiar listas de empleados asignados e incidencias antes de cargar los nuevos datos
@@ -188,7 +194,7 @@ export class ConfirmDayComponent {
     } catch (error) {
       console.error('Error al cargar los empleados para el día seleccionado', error);
     } finally {
-   
+      loading.dismiss();
     }
   }
 
@@ -227,7 +233,10 @@ export class ConfirmDayComponent {
   }
 
   async confirmarDia(dia: any) {
-   
+    const loading = await this.loadingController.create({
+      message: 'Confirmando día...',
+    });
+    await loading.present();
 
     const body = {
       company_id: dia.company_id,
@@ -245,59 +254,74 @@ export class ConfirmDayComponent {
       async (response: any) => {
         if (response && response.success) {
           console.log('Día confirmado correctamente');
-         
+          await this.mostrarAlerta('Día confirmado', `El día ${dia.date} se ha confirmado exitosamente.`);
           dia.status = 'confirmed';
         } else {
           console.error('Error al confirmar el día:', response.error);
-          
+          await this.mostrarAlerta('Error', response.error || 'Hubo un problema al confirmar el día. Inténtalo de nuevo.');
         }
-       
+        loading.dismiss();
       },
       async (error) => {
         console.error('Error en la solicitud de confirmación del día:', error);
-        
-        
+        await this.mostrarAlerta('Error', 'Hubo un problema al conectar con el servidor. Inténtalo de nuevo.');
+        loading.dismiss();
       }
     );
   }
 
+  async mostrarAlerta(header: string, message: string) {
+    const alert = await this.alertController.create({
+      header,
+      message,
+      buttons: ['OK']
+    });
+    await alert.present();
+  }
+
 
   async eliminarEmpleadoDelDia(employeeId: string) {
-    // Abrir un diálogo de confirmación
-    this.dialogService.open(DialogComponent, {
-      context: {
-        title: 'Confirmar eliminación',
-        message: '¿Estás seguro de que deseas eliminar este empleado asignado del día y su incidencia (si existe)?',
-        buttons: [
-          { text: 'Cancelar', action: 'cancel' },
-          { text: 'Eliminar', action: 'confirm' },
-        ],
-      },
-    }).onClose.subscribe(async (result: boolean) => {
-      if (result) {
-        const loading = this.toastrService.info('Eliminando empleado asignado...', 'Por favor espera', { duration: 0 });
+    const alert = await this.alertController.create({
+      header: 'Confirmar eliminación',
+      message: '¿Estás seguro de que deseas eliminar este empleado asignado del día y su incidencia (si existe)?',
+      buttons: [
+        {
+          text: 'Cancelar',
+          role: 'cancel',
+        },
+        {
+          text: 'Eliminar',
+          handler: async () => {
+            const loading = await this.loadingController.create({
+              message: 'Eliminando empleado asignado...',
+            });
+            await loading.present();
 
-        const url = `https://siinad.mx/php/delete-employee-assignment-incident.php`;
-        const body = { employee_id: employeeId, date: this.selectedDia.date };
+            const url = `https://siinad.mx/php/delete-employee-assignment-incident.php`;
+            const body = { employee_id: employeeId, date: this.selectedDia.date };
 
-        this.http.post(url, body).subscribe(
-          async (response: any) => {
-            if (response && response.success) {
-              // Eliminar el empleado de ambas listas
-              this.empleadosDia = this.empleadosDia.filter(emp => emp.employee_id !== employeeId);
-              this.empleadosIncidencias = this.empleadosIncidencias.filter(emp => emp.employee_id !== employeeId);
-              this.toastrService.success('El empleado y su incidencia han sido eliminados correctamente.', 'Eliminado');
-            } else {
-              console.error('Error al eliminar el empleado:', response.error);
-              this.toastrService.danger(response.error || 'Hubo un problema al eliminar el empleado.', 'Error');
-            }
+            this.http.post(url, body).subscribe(
+              async (response: any) => {
+                if (response && response.success) {
+                  // Eliminar el empleado de ambas listas
+                  this.empleadosDia = this.empleadosDia.filter(emp => emp.employee_id !== employeeId);
+                  this.empleadosIncidencias = this.empleadosIncidencias.filter(emp => emp.employee_id !== employeeId);
+                  await this.mostrarAlerta('Eliminado', 'El empleado y su incidencia han sido eliminados correctamente.');
+                } else {
+                  console.error('Error al eliminar el empleado:', response.error);
+                  await this.mostrarAlerta('Error', response.error || 'Hubo un problema al eliminar el empleado.');
+                }
+                loading.dismiss();
+              },
+              async (error) => {
+                console.error('Error en la solicitud de eliminación del empleado:', error);
+                await this.mostrarAlerta('Error', 'Hubo un problema al conectar con el servidor. Inténtalo de nuevo.');
+                loading.dismiss();
+              }
+            );
           },
-          (error) => {
-            console.error('Error en la solicitud de eliminación del empleado:', error);
-            this.toastrService.danger('Hubo un problema al conectar con el servidor. Inténtalo de nuevo.', 'Error');
-          }
-        );
-      }
+        },
+      ],
     });
   }
 
