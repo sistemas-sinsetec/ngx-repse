@@ -36,6 +36,7 @@ import { SelectCompanyPeriodDialogComponent } from './select-company-period-dial
 
 @NgModule({
   declarations: [
+
     AppComponent,
     CustomLoginComponent,
     SelectCompanyPeriodDialogComponent,

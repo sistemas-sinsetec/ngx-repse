@@ -30,18 +30,12 @@ import { Ng2SmartTableModule } from 'ng2-smart-table';
 import { IncidentViewerComponent } from './incident-viewer/incident-viewer.component';
 import { ConfirmDayComponent } from './confirm-day/confirm-day.component';
 import { ProcessedAttendanceComponent } from './processed-attendance/processed-attendance.component';
-import { ConfirmWeekComponent } from './confirm-week/confirm-week.component';
-import { ChangeHoursModalComponent } from './change-hours-modal/change-hours-modal.component';
-import { IncidentModalComponent } from './incident-modal/incident-modal.component';
 @NgModule({
   declarations: [
     IncidentControlComponent,
     IncidentViewerComponent,
     ConfirmDayComponent,
-    ProcessedAttendanceComponent,
-    ConfirmWeekComponent,
-    ChangeHoursModalComponent,
-    IncidentModalComponent
+    ProcessedAttendanceComponent
 
   ],
   imports: [
@@ -69,7 +63,7 @@ import { IncidentModalComponent } from './incident-modal/incident-modal.componen
     NbAccordionModule,
     NbInputModule,
     NbTagModule,
-    NbUserModule,
+    NbUserModule
 
   ]
 })
