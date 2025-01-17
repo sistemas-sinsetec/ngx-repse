@@ -1,1 +1,12 @@
-<p>cp-auth-modal-delete works!</p>
+<nb-layout>
+    <nb-layout-column>
+      <div *ngIf="mostrarMotivoRechazo" class="form-group">
+        <label for="motivo">Motivo de Rechazo</label>
+        <textarea nbInput id="motivo" [(ngModel)]="motivo" rows="4" placeholder="Escribe el motivo aquí"></textarea>
+      </div>
+      <button nbButton status="primary" fullWidth (click)="confirmarRechazo()">
+        Confirmar
+      </button>
+    </nb-layout-column>
+  </nb-layout>
+  

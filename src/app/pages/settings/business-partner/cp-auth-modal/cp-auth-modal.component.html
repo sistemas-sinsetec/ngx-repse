@@ -1,1 +1,11 @@
-<p>cp-auth-modal works!</p>
+<nb-layout>
+    <nb-layout-column class="modal-content">
+      <button nbButton status="success" fullWidth (click)="cerrarModal(true)">
+        Sí
+      </button>
+      <button nbButton status="danger" fullWidth (click)="cerrarModal(false)">
+        No, regresar a inicio
+      </button>
+    </nb-layout-column>
+  </nb-layout>
+  
