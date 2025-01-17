@@ -65,6 +65,7 @@ import { CpAuthModalDeleteComponent } from './business-partner/cp-auth-modal-del
 import { EditRolesComponent } from './business-partner/edit-roles/edit-roles.component';
 import { BusinessPartnerRegisterComponent } from './business-partner/business-partner-register/business-partner-register.component';
 import { CompanyInfoModalComponent } from './business-partner/company-info-modal/company-info-modal.component';
+import { PermissionsBusineesPartnerComponent } from './business-partner/permissions-businees-partner/permissions-businees-partner.component';
 @NgModule({
  
   declarations: [
@@ -106,6 +107,7 @@ import { CompanyInfoModalComponent } from './business-partner/company-info-modal
     EditRolesComponent,
     BusinessPartnerRegisterComponent,
     CompanyInfoModalComponent,
+    PermissionsBusineesPartnerComponent,
   ],
   imports: [
     ThemeModule,
