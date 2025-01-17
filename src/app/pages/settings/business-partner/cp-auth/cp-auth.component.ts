@@ -71,17 +71,17 @@ export class CpAuthComponent implements OnInit {
       companyId: this.companyService.selectedCompany.id,
       associationId: this.selectedSocio.id
     };
-
+  
     this.http.post<any>('https://siinad.mx/php/update_verified.php', data)
       .subscribe(async (response: any) => {
         if (response.success) {
           console.log('Socio aceptado con éxito');
           this.socios = this.socios.filter(socio => socio.id !== this.selectedSocio.id);
           this.selectedSocio = null;
-
+  
           // Usar el diálogo de Nebular para mostrar el modal
           this.dialogService.open(CpAuthModalComponent, {
-            context: { continuarRegistro: false },
+            context: { continuarRegistro: false }, // Ahora válido
           }).onClose.subscribe((data) => {
             if (data?.continuarRegistro) {
               // Acción adicional si se selecciona continuar el registro
@@ -96,6 +96,7 @@ export class CpAuthComponent implements OnInit {
         console.error('Error al aceptar al socio:', error);
       });
   }
+  
 
   rechazarSocio() {
     this.presentModal();
