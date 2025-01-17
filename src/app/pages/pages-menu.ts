@@ -243,26 +243,26 @@ export const MENU_ITEMS: CustomMenuItem[] = [
         children: [
           {
             title: 'Autorizar socio comercial',
-            link: 'pages/settings/business-partner/cp-auth',
+            link: 'settings/business-partner/cp-auth',
             hidden: false,
             permission: { section: 'Configuracion de socios comerciales', subSection: 'Autorizar socio comercial' },
           },
           {
             title: 'Editar roles de socios comercial',
-            link: 'pages/settings/business-partner/edit-roles',
+            link: 'settings/business-partner/edit-roles',
             hidden: false,
             permission: { section: 'Configuracion de socios comerciales', subSection: 'Editar roles de los socios comerciales' },
           },
           {
             title: 'Registrar socio comercial',
-            link: 'pages/settings/business-partner/business-partner-register',
+            link: 'settings/business-partner/business-partner-register',
             hidden: false,
             permission: { section: 'Configuracion de socios comerciales', subSection: 'Registrar socio comercial' },
         
           },
           {
             title: 'Secciones visibles de mis socios comerciales',
-            link: 'pages/settings/business-partner/permissions-businees-partner',
+            link: 'settings/business-partner/permissions-businees-partner',
             hidden: false,
             permission: { section: 'Configuracion de socios comerciales', subSection: 'Secciones visibles de los socios comerciales' },
         
