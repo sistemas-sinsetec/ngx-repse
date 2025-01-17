@@ -62,6 +62,9 @@ import { ProcessWeeklyListsComponent } from '../incident-control/process-weekly-
 import { CpAuthComponent } from './business-partner/cp-auth/cp-auth.component';
 import { CpAuthModalComponent } from './business-partner/cp-auth-modal/cp-auth-modal.component';
 import { CpAuthModalDeleteComponent } from './business-partner/cp-auth-modal-delete/cp-auth-modal-delete.component';
+import { EditRolesComponent } from './business-partner/edit-roles/edit-roles.component';
+import { BusinessPartnerRegisterComponent } from './business-partner/business-partner-register/business-partner-register.component';
+import { CompanyInfoModalComponent } from './business-partner/company-info-modal/company-info-modal.component';
 @NgModule({
  
   declarations: [
@@ -100,6 +103,9 @@ import { CpAuthModalDeleteComponent } from './business-partner/cp-auth-modal-del
     CpAuthComponent,
     CpAuthModalComponent,
     CpAuthModalDeleteComponent,
+    EditRolesComponent,
+    BusinessPartnerRegisterComponent,
+    CompanyInfoModalComponent,
   ],
   imports: [
     ThemeModule,

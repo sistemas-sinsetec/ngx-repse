@@ -8,7 +8,7 @@ import { NbDialogService, NbDialogRef } from '@nebular/theme';
 })
 export class CpAuthModalComponent {
   continuarRegistro: boolean;
-
+  
   constructor(
     private dialogService: NbDialogService,
     private dialogRef: NbDialogRef<CpAuthModalComponent>,
