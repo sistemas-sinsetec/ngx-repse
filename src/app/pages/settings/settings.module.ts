@@ -49,6 +49,7 @@ import { CompanyPermissionsSectionsComponent } from './site/company-permissions-
 import { PremiumAuthComponent } from './site/premium-auth/premium-auth.component';
 
 import { RegistroModalComponent } from './my-company/registro-modal/registro-modal.component';
+import { RegistroModalComponentP } from './business-partner/registro-modal/registro-modal.component';
 import { CompaniesInfoComponent } from './site/companies-info/companies-info.component';
 import { EditCompanyModalComponent } from './site/edit-company-modal/edit-company-modal.component';
 import { RegisterComponent } from './users/register/register.component';
@@ -93,6 +94,7 @@ import { PermissionsBusineesPartnerComponent } from './business-partner/permissi
     EditCompanyModalComponent,
    
     RegistroModalComponent,
+    RegistroModalComponentP,
     RegisterComponent,
     AgainDialogComponent,
     MyUsersComponent,

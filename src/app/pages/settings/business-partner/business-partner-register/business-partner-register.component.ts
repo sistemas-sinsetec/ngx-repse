@@ -2,7 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Router } from '@angular/router';
 import { NbToastrService, NbDialogService } from '@nebular/theme';
-import { RegistroModalComponent } from '../registro-modal/registro-modal.component';
+import { RegistroModalComponentP } from '../registro-modal/registro-modal.component';
 import { AuthService } from '../../../../services/auth.service';
 import { PhoneNumberUtil } from 'google-libphonenumber';
 import { CompanyInfoModalComponent } from '../company-info-modal/company-info-modal.component';
@@ -140,7 +140,7 @@ export class BusinessPartnerRegisterComponent implements OnInit {
           if (response.success) {
             this.mostrarToast(response.message, 'success');
 
-            const dialogRef = this.dialogService.open(RegistroModalComponent, {
+            const dialogRef = this.dialogService.open(RegistroModalComponentP, {
               context: { continuarRegistro: false },
             });
 

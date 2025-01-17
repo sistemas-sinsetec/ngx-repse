@@ -6,12 +6,12 @@ import { NbDialogService, NbDialogRef } from '@nebular/theme';
   templateUrl: './registro-modal.component.html',
   styleUrls: ['./registro-modal.component.scss']
 })
-export class RegistroModalComponent {
+export class RegistroModalComponentP {
   @Input() continuarRegistro: boolean;
 
   constructor(
     private dialogService: NbDialogService,
-    private dialogRef: NbDialogRef<RegistroModalComponent>,
+    private dialogRef: NbDialogRef<RegistroModalComponentP>,
   ) { }
 
   cerrarModal(continuar: boolean) {
