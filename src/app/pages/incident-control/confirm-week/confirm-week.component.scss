@@ -1,0 +1,39 @@
+.days-container {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: flex-start;
+  }
+
+  .day-box {
+    width: 40px;
+    height: 40px;
+    margin: 5px;
+    text-align: center;
+    line-height: 40px;
+    border-radius: 5px;
+    cursor: pointer;
+    font-weight: bold;
+    background-color: #e0e0e0;
+    border: 1px solid #ccc;
+  }
+
+  .day-box.confirmed {
+    background-color: #4caf50;
+    color: white;
+  }
+  
+  .day-box.pending {
+    background-color: #ffcc00;
+    /* Color para días pendientes */
+    color: black;
+  }
+
+
+  .day-box:hover {
+    background-color: #81c784;
+  }
+
+  .day-box {
+    background-color: #e0e0e0; /* Fondo gris para días sin estado */
+  }
+  

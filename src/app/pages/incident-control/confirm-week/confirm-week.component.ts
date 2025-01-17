@@ -6,6 +6,8 @@ import { CompanyService } from '../../../services/company.service';
 import { PeriodService } from '../../../services/period.service';
 import { DialogComponent } from '../../modal-overlays/dialog/dialog.component';
 import * as moment from 'moment';
+import { LoadingController } from '@ionic/angular';
+
 
 @Component({
   selector: 'ngx-confirm-week',
@@ -28,8 +30,6 @@ export class ConfirmWeekComponent {
   filteredEmpleadosIncidencias: any[] = []; // Lista filtrada de empleados con incidencias
   searchTerm: string = ''; // Término de búsqueda
 
-  isLoading: boolean = false;  // Propiedad para manejar el estado del spinner
-
   constructor(
     private authService: AuthService,
     private companyService: CompanyService,
@@ -38,6 +38,7 @@ export class ConfirmWeekComponent {
     private spinnerService: NbSpinnerService,
     private toastrService: NbToastrService,
     private dialogService: NbDialogService,
+    private loadingController: LoadingController
   ) { }
 
   ngOnInit() {
@@ -46,14 +47,18 @@ export class ConfirmWeekComponent {
 
   // Cargar los datos de la semana
   async loadWeekData() {
-    this.isLoading = true; // Activar el spinner
+
+    const loading = await this.loadingController.create({
+      message: 'Cargando datos de la semana...',
+    });
+    await loading.present();
 
     const companyId = this.companyService.selectedCompany.id;
     const periodTypeId = this.periodService.selectedPeriod.id;
 
     if (!companyId || !periodTypeId) {
       console.error('No se proporcionaron company_id o period_id');
-      this.isLoading = false; // Desactivar el spinner
+      loading.dismiss();
       return;
     }
 
@@ -77,11 +82,11 @@ export class ConfirmWeekComponent {
           console.error('No se encontraron días confirmados para la semana.');
           this.mostrarAlerta('Sin datos', 'No hay días confirmados para la semana actual.');
         }
-        this.isLoading = false; // Desactivar el spinner
+        loading.dismiss();
       },
       (error) => {
         console.error('Error al cargar los datos de la semana', error);
-        this.isLoading = false; // Desactivar el spinner
+        loading.dismiss();
       }
     );
   }
@@ -124,8 +129,10 @@ export class ConfirmWeekComponent {
 
   // Cargar los empleados para un día específico
   async cargarEmpleadosDia(dia: any) {
-    
-
+    const loading = await this.loadingController.create({
+      message: 'Cargando empleados para el día seleccionado...',
+    });
+    await loading.present();
     // Limpiar listas de empleados asignados e incidencias antes de cargar los nuevos datos
     this.empleadosDia = []; // Lista de empleados asignados
     this.empleadosIncidencias = []; // Lista de empleados con incidencias
@@ -181,6 +188,7 @@ export class ConfirmWeekComponent {
     } catch (error) {
       console.error('Error al cargar los empleados para el día seleccionado', error);
     } finally {
+      loading.dismiss();
     
     }
   }
@@ -219,7 +227,10 @@ export class ConfirmWeekComponent {
 
   // Confirmar la semana completa
   async confirmarSemanaCompleta() {
-    this.isLoading = true; // Activar el spinner
+    const loading = await this.loadingController.create({
+      message: 'Confirmando semana...',
+    });
+    await loading.present();
 
     const companyId = this.companyService.selectedCompany.id;
     const periodId = this.currentPeriodId;
@@ -228,7 +239,7 @@ export class ConfirmWeekComponent {
 
     if (!companyId || !periodId || !periodTypeId || !weekNumber) {
       console.error('Faltan datos para confirmar la semana');
-      this.isLoading = false; // Desactivar el spinner
+      loading.dismiss();
       return;
     }
 
@@ -250,12 +261,12 @@ export class ConfirmWeekComponent {
           console.error('Error al confirmar la semana:', response.message);
           await this.toastrService.danger('Hubo un problema al confirmar la semana. Inténtalo de nuevo.');
         }
-        this.isLoading = false; // Desactivar el spinner
+        loading.dismiss();
       },
       async (error) => {
         console.error('Error en la solicitud de confirmación de la semana:', error);
         await this.toastrService.danger('Hubo un problema al conectar con el servidor. Inténtalo de nuevo.');
-        this.isLoading = false; // Desactivar el spinner
+        loading.dismiss();
       }
     );
   }

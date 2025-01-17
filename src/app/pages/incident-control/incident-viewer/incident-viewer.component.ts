@@ -7,6 +7,7 @@ import { IncidentModalComponent } from '../incident-modal/incident-modal.compone
 import { ChangeHoursModalComponent } from '../change-hours-modal/change-hours-modal.component';
 import { CompanyService } from '../../../services/company.service';
 import { PeriodService } from '../../../services/period.service';
+import { LoadingController, AlertController } from '@ionic/angular';
 
 @Component({
   selector: 'ngx-incident-viewer',
@@ -37,7 +38,9 @@ export class IncidentViewerComponent implements OnInit {
     private authService: AuthService, // AuthService
     private companyService: CompanyService,
     private periodService: PeriodService,
-    private toastrService: NbToastrService
+    private toastrService: NbToastrService,
+    private loadingController: LoadingController,
+    private alertController: AlertController
   ) { }
 
   ngOnInit() {
@@ -54,6 +57,12 @@ export class IncidentViewerComponent implements OnInit {
       return;
     }
 
+    const loading = await this.loadingController.create({
+      message: 'Cargando semanas...',
+      spinner: 'circles',
+    });
+    await loading.present();
+
     this.http
       .get(
         `https://siinad.mx/php/get_weekly_periods.php?company_id=${this.companyId}&period_type_id=${selectedPeriod}`
@@ -64,10 +73,12 @@ export class IncidentViewerComponent implements OnInit {
           this.selectedWeek = this.weeks.length ? this.weeks[0] : null;
           if (this.selectedWeek) {
             this.onWeekChange(this.selectedWeek);
+            loading.dismiss();
           }
         },
         (error) => {
           console.error('Error al cargar las semanas', error);
+          loading.dismiss();
         }
       );
   }
@@ -109,18 +120,21 @@ export class IncidentViewerComponent implements OnInit {
     const { start_date, end_date, week_number } = this.selectedWeek;
     const day_of_week = this.selectedDia; // Usar el día seleccionado
 
-    const spinner = this.spinnerService;
-    spinner.load();
+    const loading = await this.loadingController.create({
+      message: 'Cargando empleados...',
+      spinner: 'circles',
+    });
+    await loading.present();
 
     // Cargar empleados asignados
     this.http.get(`https://siinad.mx/php/get_assigned_employees1.php?start_date=${start_date}&end_date=${end_date}&company_id=${this.companyId}&project_id=0&week_number=${week_number}&day_of_week=${day_of_week}`)
       .subscribe((data: any) => {
         this.assignedEmployees = data;
         this.filteredAssignedEmployees = [...this.assignedEmployees];
-        spinner.clear();
+        loading.dismiss();
       }, error => {
         console.error('Error al cargar empleados asignados', error);
-        spinner.clear();
+        loading.dismiss();
       });
 
     // Cargar empleados no asignados
@@ -128,10 +142,10 @@ export class IncidentViewerComponent implements OnInit {
       .subscribe((data: any) => {
         this.unassignedEmployees = data;
         this.filteredUnassignedEmployees = [...this.unassignedEmployees];
-        spinner.clear();
+        loading.dismiss();
       }, error => {
         console.error('Error al cargar empleados no asignados', error);
-        spinner.clear();
+        loading.dismiss();
       });
   }
 
@@ -163,22 +177,29 @@ export class IncidentViewerComponent implements OnInit {
       console.log('No hay empleados seleccionados.');
       return;
     }
-
-    // Abrir el modal personalizado con Nebular
-    const dialogRef = this.dialogService.open(ChangeHoursModalComponent, {
-      context: {
-        employees: selectedEmployees // Pasar todos los empleados seleccionados al modal
-      }
-    });
-
-    // Recibir los datos del modal al cerrarse
-    dialogRef.onClose.subscribe((result) => {
-      if (result) {
-        selectedEmployees.forEach(employee => {
-          this.saveHours(employee, result);
-        });
-      }
-    });
+  
+    // Verificar si el día ya está confirmado
+    const dayConfirmed = await this.checkIfDayConfirmed();
+    if (dayConfirmed) {
+      return; // Si el día está confirmado, no continuar con el cambio de horas
+    }
+  
+    // Abrir un diálogo con Nebular
+    this.dialogService
+      .open(ChangeHoursModalComponent, {
+        context: {
+          employees: selectedEmployees, // Pasar todos los empleados seleccionados al modal
+        },
+       
+      })
+      .onClose.subscribe((result) => {
+        if (result) {
+          // Guardar las horas para todos los empleados seleccionados
+          for (const employee of selectedEmployees) {
+            this.saveHours(employee, result);
+          }
+        }
+      });
   }
 
   async saveHours(employee: any, data: any) {
@@ -219,41 +240,63 @@ export class IncidentViewerComponent implements OnInit {
       console.log('No hay empleados seleccionados.');
       return;
     }
-
+  
     const incidentOptions = isAssigned ? this.assignedIncidents : this.unassignedIncidents;
-
-    // Abrir solo un modal para todos los empleados seleccionados
-    const dialogRef = this.dialogService.open(IncidentModalComponent, {
-      context: {
-        incidentOptions,
-        employees: selectedEmployees // Pasar todos los empleados seleccionados al modal
-      }
-    });
-
-    // Guardar la misma incidencia para todos los empleados seleccionados
-    dialogRef.onClose.subscribe((result) => {
-      if (result) {
-        selectedEmployees.forEach(employee => {
-          this.saveIncident(employee, result);
-        });
-      }
-    });
+  
+    // Verificar si el día ya está confirmado
+    const dayConfirmed = await this.checkIfDayConfirmed();
+    if (dayConfirmed) {
+      return; // Si el día está confirmado, no continuar con la asignación
+    }
+  
+    // Abrir un diálogo con Nebular
+    this.dialogService
+      .open(IncidentModalComponent, {
+        context: {
+          incidentOptions,
+          employees: selectedEmployees, // Pasar todos los empleados seleccionados al modal
+        },
+        closeOnBackdropClick: false, // Opcional: evita cerrar el diálogo al hacer clic fuera
+      })
+      .onClose.subscribe((result) => {
+        if (result) {
+          // Guardar la misma incidencia para todos los empleados seleccionados
+          for (const employee of selectedEmployees) {
+            this.saveIncident(employee, result);
+          }
+        }
+      });
   }
 
-  saveIncident(employee: any, data: any) {
+
+  async saveIncident(employee: any, data: any) {
+    // Preparar los datos de la incidencia
     const incidentData = {
       employee_id: employee.employee_id,
       period_id: this.selectedWeek.period_id,
+      period_type_id: this.periodService.selectedPeriod.id,
+      company_id: this.companyId,
       day_of_week: moment(this.selectedDia).format('YYYY-MM-DD'),
       work_week: this.selectedWeek.week_number,
       incident_type: data.incident,
-      description: data.description
+      description: data.description || null
     };
-
+  
+    // Realizar la solicitud HTTP para guardar la incidencia
     this.http.post('https://siinad.mx/php/save_incident.php', incidentData)
       .subscribe(
-        response => console.log('Incident saved successfully:', response),
-        error => console.error('Error saving incident:', error)
+        async (response) => {
+          console.log('Incidencia guardada correctamente:', response);
+          // Mostrar el Toast de éxito
+          await this.showToast('Incidencia guardada correctamente.', 'success');
+          // Mostrar la alerta de éxito
+          await this.showAlert('La incidencia ha sido asignada correctamente.');
+        },
+        async (error) => {
+          console.error('Error al guardar la incidencia:', error);
+          // Mostrar alerta si ocurre un error
+          await this.showAlert('Hubo un error al guardar la incidencia. Intenta nuevamente.');
+        }
       );
   }
 
@@ -288,5 +331,15 @@ export class IncidentViewerComponent implements OnInit {
 
   getFormattedDate(date: string): string {
     return moment(date).format('YYYY-MM-DD');
+  }
+
+  async showAlert(message: string) {
+    const alert = await this.alertController.create({
+      header: 'Advertencia',
+      message: message,
+      buttons: ['Aceptar'],
+    });
+
+    await alert.present();
   }
 }

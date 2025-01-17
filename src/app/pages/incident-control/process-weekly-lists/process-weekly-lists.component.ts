@@ -1,15 +1,13 @@
 
 import { Component, OnInit } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { NbSpinnerService, NbAlertModule, NbToastrService } from '@nebular/theme';
+import { NbSpinnerService, NbAlertModule, NbToastrService, NbDialogService } from '@nebular/theme';
 import { AuthService } from '../../../services/auth.service';
 import { CompanyService } from '../../../services/company.service';
 import { PeriodService } from '../../../services/period.service';
 import { NbActionsModule } from '@nebular/theme';
 import * as moment from 'moment';
-
-
-
+import { ProcessedListDialogComponent } from '../processed-list-dialog/processed-list-dialog.component';
 
 @Component({
   selector: 'ngx-process-weekly-lists',
@@ -31,6 +29,7 @@ export class ProcessWeeklyListsComponent {
     private companyService: CompanyService,
     private periodService: PeriodService,
     private toastrService: NbToastrService,
+    private dialogService: NbDialogService
   ) {}
 
   ngOnInit() {
@@ -195,6 +194,14 @@ loadEmployeesForWeek() {
         console.error('Error al procesar la semana', error);
       }
     );
+  }
+
+  openProcessedListsModal() {
+    this.dialogService.open(ProcessedListDialogComponent, {
+      context: {}, // Puedes pasar datos al modal aquí si es necesario
+      closeOnBackdropClick: false, // Opcional: evita que se cierre al hacer clic fuera del modal
+      hasScroll: true, // Opcional: habilita el desplazamiento si el contenido es largo
+    });
   }
 
 

@@ -58,7 +58,7 @@ import { MyProfileComponent } from './users/my-profile/my-profile.component';
 import { RegCompanyComponent } from './site/reg-company/reg-company.component';
 import { CpAuthDialogComponent } from './site/cp-auth-dialog/cp-auth-dialog.component';
 import { CpAuthDeleteDialogComponent } from './site/cp-auth-delete-dialog/cp-auth-delete-dialog.component';
-import { ProcessWeeklyListsComponent } from '../incident-control/process-weekly-lists/process-weekly-lists.component';
+
 @NgModule({
  
   declarations: [
@@ -93,7 +93,7 @@ import { ProcessWeeklyListsComponent } from '../incident-control/process-weekly-
     RegCompanyComponent,
     CpAuthDialogComponent,
     CpAuthDeleteDialogComponent,
-    ProcessWeeklyListsComponent,
+
   ],
   imports: [
     ThemeModule,

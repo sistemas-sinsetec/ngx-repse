@@ -1,6 +1,3 @@
-//Prueba
-//prueba 2
-//Prueba 3
 import { NgModule } from '@angular/core';
 import {
   NbButtonModule,
@@ -36,6 +33,10 @@ import { ProcessedAttendanceComponent } from './processed-attendance/processed-a
 import { ChangeHoursModalComponent } from './change-hours-modal/change-hours-modal.component';
 import { IncidentModalComponent } from './incident-modal/incident-modal.component';
 import { ConfirmWeekComponent } from './confirm-week/confirm-week.component';
+import { ProcessWeeklyListsComponent } from './process-weekly-lists/process-weekly-lists.component';
+import { IonicModule } from '@ionic/angular';
+import { ProcessedListDialogComponent } from './processed-list-dialog/processed-list-dialog.component';
+
 @NgModule({
   declarations: [
     IncidentControlComponent,
@@ -44,7 +45,9 @@ import { ConfirmWeekComponent } from './confirm-week/confirm-week.component';
     ProcessedAttendanceComponent,
     ChangeHoursModalComponent,
     IncidentModalComponent,
-    ConfirmWeekComponent
+    ConfirmWeekComponent,
+    ProcessWeeklyListsComponent,
+    ProcessedListDialogComponent
 
   ],
   imports: [
@@ -72,7 +75,8 @@ import { ConfirmWeekComponent } from './confirm-week/confirm-week.component';
     NbAccordionModule,
     NbInputModule,
     NbTagModule,
-    NbUserModule
+    NbUserModule,
+    IonicModule
 
   ]
 })
