@@ -1,0 +1,53 @@
+<nb-layout>
+    <nb-layout-column class="container mt-5 rounded-5">
+      <div class="row justify-content-center">
+        <div class="col-md-6">
+          <div class="text-center pt-4">
+            <h5><strong>Editar roles de socios comerciales</strong></h5>
+          </div>
+          <nb-card class="shadow-lg p-4 rounded-5">
+            <!-- Selector de socio comercial -->
+            <div class="mb-3">
+              <label for="usuario_a_editar" class="form-label">Selecciona el socio comercial a editar:</label>
+              <nb-select
+                class="form-select rounded-pill"
+                placeholder="Selecciona un socio comercial"
+                [(selected)]="usuarioSeleccionado"
+                (selectedChange)="mostrarDatosSocioComercial()"
+              >
+                <nb-option *ngFor="let socioComercial of sociosComerciales" [value]="socioComercial.businessPartnerId">
+                  {{ socioComercial.nameCompany }} - {{ socioComercial.roleName }}
+                </nb-option>
+              </nb-select>
+            </div>
+  
+            <!-- Detalles del socio comercial seleccionado -->
+            <div *ngIf="socioComercialSeleccionado">
+              <h5>Nombre del socio: {{ socioComercialSeleccionado.nameCompany }}</h5>
+              <h6>Rol actual: {{ socioComercialSeleccionado.roleName }}</h6>
+  
+              <!-- Selector para cambiar el rol -->
+              <div class="mb-3">
+                <label for="nuevo_rol" class="form-label">Cambiar rol:</label>
+                <nb-select
+                  class="form-select rounded-pill"
+                  placeholder="Selecciona un nuevo rol"
+                  [(selected)]="nuevoRol"
+                >
+                  <nb-option *ngFor="let rol of rolesDisponibles" [value]="rol.id">
+                    {{ rol.roleName }}
+                  </nb-option>
+                </nb-select>
+              </div>
+  
+              <!-- Botón para actualizar rol -->
+              <div class="text-center mt-4">
+                <button nbButton status="primary" fullWidth (click)="actualizarRol()">Actualizar Rol</button>
+              </div>
+            </div>
+          </nb-card>
+        </div>
+      </div>
+    </nb-layout-column>
+  </nb-layout>
+  

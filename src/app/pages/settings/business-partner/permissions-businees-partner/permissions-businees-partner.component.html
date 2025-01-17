@@ -1,0 +1,95 @@
+<nb-layout>
+    <nb-layout-column class="container mt-4">
+      <div class="row justify-content-center">
+        <div class="col-md-8 col-lg-6">
+          <div class="text-center pt-4">
+            <h5><strong>Secciones visibles de mis socios comerciales</strong></h5>
+          </div>
+          <nb-card class="shadow-lg p-4 mt-4">
+            <!-- Selector de empresa -->
+            <div class="mb-3">
+              <label for="businessPartnerId" class="form-label">Seleccionar empresa</label>
+              <nb-select
+                placeholder="Selecciona una empresa"
+                [(selected)]="businessPartnerId"
+                (selectedChange)="onCompanyChange($event)"
+              >
+                <nb-option *ngFor="let company of companies" [value]="company.businessPartnerId">
+                  {{ company.nameCompany }}
+                </nb-option>
+              </nb-select>
+            </div>
+  
+            <!-- Secciones para Clientes -->
+            <div *ngIf="selectedRoleName === 'cliente'" class="mb-3">
+              <label for="sectionsCliente" class="form-label">Secciones para Clientes</label>
+              <nb-select
+                multiple
+                placeholder="Selecciona secciones"
+                [(selected)]="selectedSections"
+                (selectedChange)="onSectionChange($event)"
+              >
+                <nb-option *ngFor="let section of sectionsCliente" [value]="section">
+                  {{ section }}
+                </nb-option>
+              </nb-select>
+            </div>
+  
+            <!-- Secciones para Proveedores -->
+            <div *ngIf="selectedRoleName === 'proveedor'" class="mb-3">
+              <label for="sectionsProveedor" class="form-label">Secciones para Proveedores</label>
+              <nb-select
+                multiple
+                placeholder="Selecciona secciones"
+                [(selected)]="selectedSections"
+                (selectedChange)="onSectionChange($event)"
+              >
+                <nb-option *ngFor="let section of sectionsProveedor" [value]="section">
+                  {{ section }}
+                </nb-option>
+              </nb-select>
+            </div>
+  
+            <!-- Secciones para Cliente-Proveedor -->
+            <div *ngIf="selectedRoleName === 'clienteProveedor'" class="mb-3">
+              <label for="sectionsClienteProveedor" class="form-label">Secciones para Cliente-Proveedor</label>
+              <nb-select
+                multiple
+                placeholder="Selecciona secciones"
+                [(selected)]="selectedSections"
+                (selectedChange)="onSectionChange($event)"
+              >
+                <nb-option *ngFor="let section of sectionsClienteProveedor" [value]="section">
+                  {{ section }}
+                </nb-option>
+              </nb-select>
+            </div>
+  
+            <!-- Botón Añadir -->
+            <div class="text-center">
+              <button
+                nbButton
+                status="primary"
+                fullWidth
+                (click)="addPermission()"
+                [disabled]="!businessPartnerId || !selectedSections || selectedSections.length === 0"
+              >
+                Añadir
+              </button>
+            </div>
+          </nb-card>
+  
+          <!-- Lista de permisos -->
+          <nb-list class="list-group mt-4">
+            <nb-list-item *ngFor="let permission of permissions">
+              {{ permission.name_section }}
+              <button nbButton status="danger" (click)="removePermission(permission.name_section)" size="small" outline>
+                Quitar
+              </button>
+            </nb-list-item>
+          </nb-list>
+        </div>
+      </div>
+    </nb-layout-column>
+  </nb-layout>
+  
