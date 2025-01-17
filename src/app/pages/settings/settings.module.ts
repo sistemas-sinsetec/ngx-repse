@@ -59,6 +59,9 @@ import { RegCompanyComponent } from './site/reg-company/reg-company.component';
 import { CpAuthDialogComponent } from './site/cp-auth-dialog/cp-auth-dialog.component';
 import { CpAuthDeleteDialogComponent } from './site/cp-auth-delete-dialog/cp-auth-delete-dialog.component';
 import { ProcessWeeklyListsComponent } from '../incident-control/process-weekly-lists/process-weekly-lists.component';
+import { CpAuthComponent } from './business-partner/cp-auth/cp-auth.component';
+import { CpAuthModalComponent } from './business-partner/cp-auth-modal/cp-auth-modal.component';
+import { CpAuthModalDeleteComponent } from './business-partner/cp-auth-modal-delete/cp-auth-modal-delete.component';
 @NgModule({
  
   declarations: [
@@ -94,6 +97,9 @@ import { ProcessWeeklyListsComponent } from '../incident-control/process-weekly-
     CpAuthDialogComponent,
     CpAuthDeleteDialogComponent,
     ProcessWeeklyListsComponent,
+    CpAuthComponent,
+    CpAuthModalComponent,
+    CpAuthModalDeleteComponent,
   ],
   imports: [
     ThemeModule,
