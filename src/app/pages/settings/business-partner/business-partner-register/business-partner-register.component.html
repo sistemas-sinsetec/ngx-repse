@@ -50,7 +50,7 @@
             <nb-input-field>
               <input nbInput type="email" placeholder="Correo electrónico" [(ngModel)]="usuario.correo" />
             </nb-input-field>
-            <small *ngIf="usuario.correo && (!usuario.correo.includes('@') || !isValidEmail(usuario.correo))" class="text-danger">Correo no válido</small>
+            <small *ngIf="usuario.correo && (!usuario.correo.includes('@'))" class="text-danger">Correo no válido</small>
           </div>
           <div class="form-group mb-3">
             <nb-input-field>

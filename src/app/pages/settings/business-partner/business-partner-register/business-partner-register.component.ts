@@ -132,7 +132,7 @@ export class BusinessPartnerRegisterComponent implements OnInit {
             : null,
         fechaInicio: this.usuario.fechaInicio,
         fechaFin: this.usuario.fechaFin,
-        empresaLigada: this.companyService.selectedCompany.id,
+        empresaLigada: this.companyService.selectedCompany.name,
       };
 
       this.http.post('https://siinad.mx/php/registrar.php', data).subscribe(
