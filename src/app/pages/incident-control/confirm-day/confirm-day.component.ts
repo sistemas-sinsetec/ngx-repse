@@ -32,7 +32,6 @@ export class ConfirmDayComponent {
   filteredEmpleadosIncidencias: any[] = []; // Lista filtrada de empleados con incidencias
   searchTerm: string = ''; // Término de búsqueda
 
-
   constructor(
     private authService: AuthService,
     private http: HttpClient,
@@ -58,7 +57,7 @@ export class ConfirmDayComponent {
     await loading.present();
 
     const companyId = this.companyService.selectedCompany.id;
-    const periodTypeId = this.periodService.selectedPeriod.period_type_id;
+    const periodTypeId = this.periodService.selectedPeriod.id;
 
     if (!companyId || !periodTypeId) {
       console.error('No se proporcionaron company_id o period_type_id');
@@ -296,16 +295,20 @@ export class ConfirmDayComponent {
               message: 'Eliminando empleado asignado...',
             });
             await loading.present();
-
+  
             const url = `https://siinad.mx/php/delete-employee-assignment-incident.php`;
             const body = { employee_id: employeeId, date: this.selectedDia.date };
-
+  
             this.http.post(url, body).subscribe(
               async (response: any) => {
                 if (response && response.success) {
-                  // Eliminar el empleado de ambas listas
+                  // Actualizar las listas eliminando el empleado correspondiente
                   this.empleadosDia = this.empleadosDia.filter(emp => emp.employee_id !== employeeId);
+                  this.filteredEmpleadosDia = this.filteredEmpleadosDia.filter(emp => emp.employee_id !== employeeId);
+  
                   this.empleadosIncidencias = this.empleadosIncidencias.filter(emp => emp.employee_id !== employeeId);
+                  this.filteredEmpleadosIncidencias = this.filteredEmpleadosIncidencias.filter(emp => emp.employee_id !== employeeId);
+  
                   await this.mostrarAlerta('Eliminado', 'El empleado y su incidencia han sido eliminados correctamente.');
                 } else {
                   console.error('Error al eliminar el empleado:', response.error);
@@ -323,7 +326,10 @@ export class ConfirmDayComponent {
         },
       ],
     });
+  
+    await alert.present();
   }
+  
 
 
 

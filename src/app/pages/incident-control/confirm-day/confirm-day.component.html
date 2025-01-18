@@ -1,97 +1,116 @@
 <nb-layout>
-    <nb-layout-column>
-      <div class="row">
-        
-        <!-- Columna izquierda para mostrar información de la semana -->
-        <div class="col-lg-4 col-md-5">
-          <nb-card class="sticky-top p-3 mb-4 bg-light shadow-sm">
-            <nb-card-header>
-              <h6 class="fw-bold">Resumen de la Semana</h6>
-            </nb-card-header>
-            <nb-card-body>
-              <p><strong>Fecha seleccionada:</strong> {{ currentFecha || 'No seleccionada' }}</p>
-              <p><strong>Semana:</strong> {{ currentSemana || 'No disponible' }}</p>
-              <p><strong>Inicio del Periodo:</strong> {{ periodStartDate || 'No disponible' }}</p>
-              <p><strong>Fin del Periodo:</strong> {{ periodEndDate || 'No disponible' }}</p>
-              
-              <!-- Lista de Días de la Semana -->
-              <h6><strong>Días de la semana:</strong></h6>
-              <div class="days-container mt-3">
-                <div 
-                  *ngFor="let dia of diasSemana" 
-                  class="day-box"
-                  [ngClass]="{
-                    'confirmed': dia.status === 'confirmed', 
-                    'pending': dia.status === 'pending'
-                  }" 
-                  (click)="mostrarInfoDia(dia)">
-                  {{ dia.date | date:'dd' }}
-                </div>
+  <nb-layout-column>
+    <div class="row">
+      <!-- Columna izquierda para mostrar información de la semana -->
+      <div class="col-lg-4 col-md-5">
+        <nb-card class="sticky-top p-3 mb-4 bg-light shadow-sm">
+          <nb-card-header>
+            <h6 class="fw-bold">Resumen de la Semana</h6>
+          </nb-card-header>
+          <nb-card-body>
+            <p><strong>Fecha seleccionada:</strong> {{ currentFecha || 'No seleccionada' }}</p>
+            <p><strong>Semana:</strong> {{ currentSemana || 'No disponible' }}</p>
+            <p><strong>Inicio del Periodo:</strong> {{ periodStartDate || 'No disponible' }}</p>
+            <p><strong>Fin del Periodo:</strong> {{ periodEndDate || 'No disponible' }}</p>
+
+            <!-- Lista de Días de la Semana -->
+            <h6><strong>Días de la semana:</strong></h6>
+            <div class="days-container mt-3">
+              <div
+                *ngFor="let dia of diasSemana"
+                class="day-box"
+                [ngClass]="{
+                  'confirmed': dia.status === 'confirmed', 
+                  'pending': dia.status === 'pending'
+                }"
+                (click)="mostrarInfoDia(dia)"
+              >
+                {{ dia.date | date:'dd' }}
               </div>
-            </nb-card-body>
-          </nb-card>
-        </div>
-  
-        <!-- Columna derecha con detalles de empleados por día -->
-        <div class="col-lg-8 col-md-7">
-          <input nbInput placeholder="Buscar empleados..." [(ngModel)]="searchTerm" (input)="filterEmployees()" class="form-control mb-3" />
-  
-          <!-- Lista de Empleados Asignados -->
-          <nb-card class="shadow-lg p-4 mb-4">
-            <nb-card-header>
-              <h6>Empleados Asignados para el Día Seleccionado</h6>
-            </nb-card-header>
-            <nb-card-body>
-              <nb-list>
-                <nb-list-item *ngFor="let emp of filteredEmpleadosDia">
+            </div>
+          </nb-card-body>
+        </nb-card>
+      </div>
+
+      <!-- Columna derecha con detalles de empleados por día -->
+      <div class="col-lg-8 col-md-7">
+        <input nbInput placeholder="Buscar empleados..." [(ngModel)]="searchTerm" (input)="filterEmployees()" class="form-control mb-3" />
+
+        <!-- Lista de Empleados Asignados -->
+        <nb-card class="shadow-lg p-4 mb-4">
+          <nb-card-header>
+            <h6>Empleados Asignados para el Día Seleccionado</h6>
+          </nb-card-header>
+          <nb-card-body>
+            <nb-list>
+              <nb-list-item *ngFor="let emp of filteredEmpleadosDia">
+                <div class="d-flex justify-content-between align-items-center">
                   <div>
-                    <h6 class="fw-bold">{{ emp.employee_code }} - {{ emp.first_name }} {{ emp.last_name }} {{ emp.middle_name }}</h6>
+                    <h6 class="fw-bold">
+                      {{ emp.employee_code }} - {{ emp.first_name }} {{ emp.last_name }} {{ emp.middle_name }}
+                    </h6>
                     <p><small>Obra: {{ emp.project_name }}</small></p>
                     <p><small>Estado: {{ emp.project_status }}</small></p>
-  
+
                     <!-- Mostrar información de incidencia si existe -->
                     <div *ngIf="emp.hasIncidencia">
                       <p><small>Tipo de Incidencia: {{ emp.incident_type || 'N/A' }}</small></p>
                       <p><small>Descripción: {{ emp.description || 'N/A' }}</small></p>
                     </div>
                   </div>
-                  <button nbButton status="danger" [disabled]="selectedDia?.status === 'confirmed'" (click)="eliminarEmpleadoDelDia(emp.employee_id)">
+                  <button
+                    nbButton
+                    status="danger"
+                    size="small"
+                    class="ms-3"
+                    [disabled]="selectedDia?.status === 'confirmed'"
+                    (click)="eliminarEmpleadoDelDia(emp.employee_id)"
+                  >
                     Eliminar
                   </button>
-                </nb-list-item>
-              </nb-list>
-            </nb-card-body>
-          </nb-card>
-  
-          <!-- Lista de Empleados solo con Incidencias (sin asignación) -->
-          <nb-card *ngIf="filteredEmpleadosIncidencias.length > 0" class="shadow-lg p-4 mb-4">
-            <nb-card-header>
-              <h6>Empleados con Incidencias para el Día Seleccionado (Sin Asignación)</h6>
-            </nb-card-header>
-            <nb-card-body>
-              <nb-list>
-                <nb-list-item *ngFor="let emp of filteredEmpleadosIncidencias">
+                </div>
+              </nb-list-item>
+            </nb-list>
+          </nb-card-body>
+        </nb-card>
+
+        <!-- Lista de Empleados solo con Incidencias (sin asignación) -->
+        <nb-card *ngIf="filteredEmpleadosIncidencias.length > 0" class="shadow-lg p-4 mb-4">
+          <nb-card-header>
+            <h6>Empleados con Incidencias para el Día Seleccionado (Sin Asignación)</h6>
+          </nb-card-header>
+          <nb-card-body>
+            <nb-list>
+              <nb-list-item *ngFor="let emp of filteredEmpleadosIncidencias">
+                <div class="d-flex justify-content-between align-items-center">
                   <div>
                     <h6 class="fw-bold">{{ emp.employee_code }} - {{ emp.first_name }} {{ emp.last_name }} {{ emp.middle_name }}</h6>
                     <p><small>Tipo de Incidencia: {{ emp.incident_type || 'N/A' }}</small></p>
                     <p><small>Descripción: {{ emp.description || 'N/A' }}</small></p>
                     <p><small>Fecha: {{ emp.created_at | date: 'dd/MM/yyyy' }}</small></p>
                   </div>
-                  <button nbButton status="danger" [disabled]="selectedDia?.status === 'confirmed'" (click)="eliminarEmpleadoDelDia(emp.employee_id)">
+                  <button
+                    nbButton
+                    status="danger"
+                    size="small"
+                    class="ms-3"
+                    [disabled]="selectedDia?.status === 'confirmed'"
+                    (click)="eliminarEmpleadoDelDia(emp.employee_id)"
+                  >
                     Eliminar
                   </button>
-                </nb-list-item>
-              </nb-list>
-            </nb-card-body>
-          </nb-card>
-  
-          <div class="d-flex justify-content-end mt-3">
-            <button nbButton status="primary" *ngIf="selectedDia" [disabled]="selectedDia?.status === 'confirmed'" (click)="confirmarDia(selectedDia)">
-              Confirmar Día
-            </button>
-          </div>
+                </div>
+              </nb-list-item>
+            </nb-list>
+          </nb-card-body>
+        </nb-card>
+
+        <div class="d-flex justify-content-end mt-3">
+          <button nbButton status="primary" *ngIf="selectedDia" [disabled]="selectedDia?.status === 'confirmed'" (click)="confirmarDia(selectedDia)">
+            Confirmar Día
+          </button>
         </div>
       </div>
-    </nb-layout-column>
-  </nb-layout>
-  
+    </div>
+  </nb-layout-column>
+</nb-layout>

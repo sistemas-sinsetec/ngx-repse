@@ -25,11 +25,11 @@ export class IncidentViewerComponent implements OnInit {
   searchUnassigned: string = '';
   diasSemana: any[] = []; // Lista de días de la semana generados
   selectedDia: string = ''; // Día seleccionado
-  companyId: string; // Usar tipo string para companyId
+  companyId: string; // Usar tipo string para companyId, como lo proporciona el AuthService
 
   // Opciones de incidencia para empleados asignados y no asignados
   assignedIncidents = ['Asistencia', 'Retardo', 'Horas Extras'];
-  unassignedIncidents = ['Incapacidad', 'Vacaciones', 'Falta', 'Día Festivo', 'Permiso sin Goce de Sueldo', 'Permiso con Goce de Sueldo', 'Día de castigo'];
+  unassignedIncidents = ['Asistencia sin proyecto', 'Descanso', 'Incapacidad', 'Vacaciones', 'Falta', 'Día Festivo', 'Permiso sin Goce de Sueldo', 'Permiso con Goce de Sueldo', 'Día de castigo'];
 
   constructor(
     private http: HttpClient,
@@ -83,32 +83,32 @@ export class IncidentViewerComponent implements OnInit {
       );
   }
 
+
   onWeekChange(week: any) {
-    this.selectedWeek = week;
-    this.generateDiasSemana(week.start_date, week.end_date);
-    // Resetear el día seleccionado cuando cambia la semana
-    this.selectedDia = null;
-    this.loadEmployees();
+    this.selectedWeek = week; // Actualizar la semana seleccionada
+    this.generateDiasSemana(week.start_date, week.end_date); // Generar los días de la semana
+    this.loadEmployees(); // Cargar empleados asignados y no asignados para la semana seleccionada
   }
+
 
   generateDiasSemana(startDate: string, endDate: string) {
     const start = moment(startDate);
     const end = moment(endDate);
     this.diasSemana = [];
 
-    let day = start.clone(); // Clonar para evitar mutaciones
-    while (day.isSameOrBefore(end, 'day')) {
+    let day = start;
+    while (day <= end) {
       this.diasSemana.push({
         date: day.format('YYYY-MM-DD'),
-        display: day.format('dddd').charAt(0).toUpperCase() + day.format('dddd').slice(1), // Capitalizar el día
+        display: day.format('dddd'), // Nombre del día de la semana (e.g., Lunes)
       });
       day = day.add(1, 'day');
     }
   }
 
   onDiaChange(dia: string): void {
-    this.selectedDia = dia;
-    this.loadEmployees();
+    this.selectedDia = dia; // Actualizar el día seleccionado
+    this.loadEmployees(); // Recargar los empleados asignados y no asignados para el día seleccionado
   }
 
   async loadEmployees() {

@@ -8,6 +8,7 @@ import { PeriodService } from '../../../services/period.service';
 import { NbActionsModule } from '@nebular/theme';
 import * as moment from 'moment';
 import { ProcessedListDialogComponent } from '../processed-list-dialog/processed-list-dialog.component';
+import { LoadingController } from '@ionic/angular';
 
 @Component({
   selector: 'ngx-process-weekly-lists',
@@ -29,7 +30,8 @@ export class ProcessWeeklyListsComponent {
     private companyService: CompanyService,
     private periodService: PeriodService,
     private toastrService: NbToastrService,
-    private dialogService: NbDialogService
+    private dialogService: NbDialogService,
+    private loadingController: LoadingController
   ) {}
 
   ngOnInit() {
@@ -38,15 +40,18 @@ export class ProcessWeeklyListsComponent {
   }
 
   // Cargar las semanas confirmadas
-  loadConfirmedWeeks() {
-    this.spinnerService.load(); // Activar el spinner
+  async loadConfirmedWeeks() {
+    const loading = await this.loadingController.create({
+      message: 'Cargando semanas confirmadas...',
+    });
+    await loading.present();
 
     const companyId = this.companyService.selectedCompany.id; 
     const periodTypeId = this.periodService.selectedPeriod.id; 
 
     if (!companyId || !periodTypeId) {
       console.error('No se proporcionaron company_id o period_type_id');
-      this.spinnerService.clear(); // Detener el spinner
+      loading.dismiss();
       return;
     }
 
@@ -59,11 +64,11 @@ export class ProcessWeeklyListsComponent {
         } else {
           console.error('Datos recibidos no son un array', data);
         }
-        this.spinnerService.clear(); // Detener el spinner
+        loading.dismiss();
       },
       (error) => {
         console.error('Error al cargar semanas confirmadas', error);
-        this.spinnerService.clear(); // Detener el spinner
+        loading.dismiss();
       }
     );
   }
@@ -95,11 +100,13 @@ export class ProcessWeeklyListsComponent {
   }
 
   // Cargar los empleados y sus horas de trabajo para la semana seleccionada
-loadEmployeesForWeek() {
+  async loadEmployeesForWeek() {
   if (!this.selectedWeek) return;
 
-  // Activar el spinner
-  this.spinnerService.load();
+  const loading = await this.loadingController.create({
+    message: 'Cargando datos de empleados...',
+  });
+  await loading.present();
 
   const url = `https://siinad.mx/php/get-employees-weekly-data.php?week_number=${this.selectedWeek.week_number}`;
   
@@ -108,14 +115,13 @@ loadEmployeesForWeek() {
       const processedData = this.processEmployeeData(data);
       this.empleadosSemana = processedData;
 
-      // Detener el spinner después de cargar los datos
-      this.spinnerService.clear();
+      loading.dismiss();
     },
     (error) => {
       console.error('Error al cargar datos de empleados', error);
 
       // Detener el spinner incluso si ocurre un error
-      this.spinnerService.clear();
+      loading.dismiss();
     }
   );
 }
@@ -152,11 +158,14 @@ loadEmployeesForWeek() {
   }
 
    // Procesar la semana seleccionada
-   processSelectedWeek() {
+   async processSelectedWeek() {
     if (!this.selectedWeek) return;
   
-    this.spinnerService.load(); // Activar el spinner
-  
+    const loading = await this.loadingController.create({
+      message: 'Procesando semana seleccionada...',
+    });
+    await loading.present();
+
     const companyId = this.companyService.selectedCompany.id;
     const periodTypeId = this.periodService.selectedPeriod.id;
     const startDate = this.selectedWeek.payroll_period?.start_date;
@@ -172,7 +181,7 @@ loadEmployeesForWeek() {
     };
   
     this.http.post(url, data).subscribe(
-      (response: any) => {
+      async (response: any) => {
         this.spinnerService.clear(); // Detener el spinner
   
         // Mostrar mensaje de éxito
@@ -182,7 +191,7 @@ loadEmployeesForWeek() {
           { duration: 3000, status: 'success' }
         );
       },
-      (error) => {
+      async (error) => {
         this.spinnerService.clear(); // Detener el spinner
   
         // Mostrar mensaje de error
@@ -195,6 +204,14 @@ loadEmployeesForWeek() {
       }
     );
   }
+
+  formatHour(hour: string): string | null {
+    if (!hour || hour === '00:00:00') {
+      return null; // Devuelve null si la hora es '00:00:00' o está vacía
+    }
+    return moment(hour, 'HH:mm:ss').format('hh:mm A'); // Convierte a formato 12 horas con AM/PM
+  }
+  
 
   openProcessedListsModal() {
     this.dialogService.open(ProcessedListDialogComponent, {
