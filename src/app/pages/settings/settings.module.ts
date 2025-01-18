@@ -49,6 +49,7 @@ import { CompanyPermissionsSectionsComponent } from './site/company-permissions-
 import { PremiumAuthComponent } from './site/premium-auth/premium-auth.component';
 
 import { RegistroModalComponent } from './my-company/registro-modal/registro-modal.component';
+import { RegistroModalComponentP } from './business-partner/registro-modal/registro-modal.component';
 import { CompaniesInfoComponent } from './site/companies-info/companies-info.component';
 import { EditCompanyModalComponent } from './site/edit-company-modal/edit-company-modal.component';
 import { RegisterComponent } from './users/register/register.component';
@@ -58,6 +59,15 @@ import { MyProfileComponent } from './users/my-profile/my-profile.component';
 import { RegCompanyComponent } from './site/reg-company/reg-company.component';
 import { CpAuthDialogComponent } from './site/cp-auth-dialog/cp-auth-dialog.component';
 import { CpAuthDeleteDialogComponent } from './site/cp-auth-delete-dialog/cp-auth-delete-dialog.component';
+
+
+import { CpAuthComponent } from './business-partner/cp-auth/cp-auth.component';
+import { CpAuthModalComponent } from './business-partner/cp-auth-modal/cp-auth-modal.component';
+import { CpAuthModalDeleteComponent } from './business-partner/cp-auth-modal-delete/cp-auth-modal-delete.component';
+import { EditRolesComponent } from './business-partner/edit-roles/edit-roles.component';
+import { BusinessPartnerRegisterComponent } from './business-partner/business-partner-register/business-partner-register.component';
+import { CompanyInfoModalComponent } from './business-partner/company-info-modal/company-info-modal.component';
+import { PermissionsBusineesPartnerComponent } from './business-partner/permissions-businees-partner/permissions-businees-partner.component';
 
 @NgModule({
  
@@ -86,6 +96,7 @@ import { CpAuthDeleteDialogComponent } from './site/cp-auth-delete-dialog/cp-aut
     EditCompanyModalComponent,
    
     RegistroModalComponent,
+    RegistroModalComponentP,
     RegisterComponent,
     AgainDialogComponent,
     MyUsersComponent,
@@ -93,6 +104,15 @@ import { CpAuthDeleteDialogComponent } from './site/cp-auth-delete-dialog/cp-aut
     RegCompanyComponent,
     CpAuthDialogComponent,
     CpAuthDeleteDialogComponent,
+
+
+    CpAuthComponent,
+    CpAuthModalComponent,
+    CpAuthModalDeleteComponent,
+    EditRolesComponent,
+    BusinessPartnerRegisterComponent,
+    CompanyInfoModalComponent,
+    PermissionsBusineesPartnerComponent,
 
   ],
   imports: [

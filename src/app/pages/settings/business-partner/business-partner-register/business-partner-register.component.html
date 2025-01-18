@@ -1,0 +1,114 @@
+<nb-layout>
+  <nb-layout-column class="container-fluid d-flex align-items-center justify-content-center">
+    <!-- Selector de modo de registro -->
+    <button nb-button-group status="primary" size="large" class="mb-4">
+      <button nbButton [outline]="registerMode !== 'register'" (click)="registerMode = 'register'">Registro Manual</button>
+      <button nbButton [outline]="registerMode !== 'code'" (click)="registerMode = 'code'">Agregar por Código</button>
+    </button>
+
+    <!-- Sección de formulario de registro manual -->
+    <div *ngIf="registerMode === 'register'" class="col-lg-6">
+      <nb-card class="login-section p-4 rounded shadow">
+        <nb-card-header class="text-center">
+          <h1>{{ labelRegistrarSocioComercialRol }}</h1>
+          <p>{{ labelIngreseDatosParaContinuar }}</p>
+        </nb-card-header>
+        <nb-card-body>
+          <!-- Formulario -->
+          <div class="form-group mb-3">
+            <nb-select [(selected)]="tipoRFC" (selectedChange)="onChangeTipoRFC()" placeholder="Selecciona tipo RFC">
+              <nb-option value="fisica">Persona Física</nb-option>
+              <nb-option value="moral">Persona Moral</nb-option>
+            </nb-select>
+          </div>
+          <div class="form-group mb-3">
+            <div class="d-flex align-items-center">
+              <nb-input-field class="flex-grow-1">
+                <input nbInput placeholder="RFC" [(ngModel)]="usuario.rfc" (input)="validateRFC($event)" />
+              </nb-input-field>
+              <button nbButton (click)="buscarEmpresaPorRFC()">Buscar</button>
+            </div>
+            <small *ngIf="rfcLengthError" class="text-danger">Error en la longitud del RFC</small>
+          </div>
+          <div class="form-group mb-3">
+            <nb-input-field>
+              <input nbInput placeholder="{{ tipoRFC === 'fisica' ? 'Nombre de la persona física' : 'Nombre de la empresa' }}" [(ngModel)]="usuario.nombreEmpresa" (ngModelChange)="showMessage()" (blur)="hideMessage()" (focus)="resetMessage()" />
+            </nb-input-field>
+            <small *ngIf="showMessageFlag" class="text-muted">Escribe el nombre como aparece en la constancia fiscal.</small>
+          </div>
+          <div class="form-group mb-3">
+            <nb-input-field>
+              <input nbInput placeholder="Alias de usuario" [(ngModel)]="usuario.nombreUsuario" />
+            </nb-input-field>
+          </div>
+          <div class="form-group mb-3">
+            <nb-input-field>
+              <input nbInput placeholder="Nombre completo del usuario" [(ngModel)]="usuario.nombreCompleto" />
+            </nb-input-field>
+          </div>
+          <div class="form-group mb-3">
+            <nb-input-field>
+              <input nbInput type="email" placeholder="Correo electrónico" [(ngModel)]="usuario.correo" />
+            </nb-input-field>
+            <small *ngIf="usuario.correo && (!usuario.correo.includes('@'))" class="text-danger">Correo no válido</small>
+          </div>
+          <div class="form-group mb-3">
+            <nb-input-field>
+              <input nbInput type="text" placeholder="Número de teléfono" [(ngModel)]="usuario.numTelefonico" maxlength="10" />
+            </nb-input-field>
+          </div>
+          <div class="form-group mb-3">
+            <nb-input-field>
+              <input nbInput type="password" placeholder="Contraseña" [(ngModel)]="usuario.contrasena" />
+            </nb-input-field>
+          </div>
+          <div class="form-group mb-3">
+            <nb-input-field>
+              <input nbInput type="password" placeholder="Confirmar contraseña" [(ngModel)]="usuario.confirmarContrasena" />
+            </nb-input-field>
+          </div>
+          <div class="form-group mb-3">
+            <nb-select [(selected)]="usuario.roleInCompany" placeholder="Selecciona el rol de usuario">
+              <nb-option *ngFor="let rol of rolesDisponibles" [value]="rol.id">{{ rol.roleName }}</nb-option>
+            </nb-select>
+          </div>
+          <div class="form-group mb-3">
+            <nb-input-field>
+              <input nbInput type="date" placeholder="Fecha de inicio de periodo" [(ngModel)]="usuario.fechaInicio" />
+            </nb-input-field>
+          </div>
+          <div class="form-group mb-3">
+            <nb-input-field>
+              <input nbInput type="date" placeholder="Fecha de fin de periodo" [(ngModel)]="usuario.fechaFin" />
+            </nb-input-field>
+          </div>
+          <div class="text-center mt-4">
+            <button nbButton status="primary" size="large" [disabled]="!camposCompletos()" (click)="registrarUsuario()">
+              Registrar
+            </button>
+          </div>
+        </nb-card-body>
+      </nb-card>
+    </div>
+
+    <!-- Sección para agregar socio comercial por código -->
+    <div *ngIf="registerMode === 'code'" class="col-lg-6">
+      <nb-card class="add-person-card p-4 shadow">
+        <nb-card-header>
+          Agregar socio comercial
+        </nb-card-header>
+        <nb-card-body>
+          <div class="form-group">
+            <nb-input-field>
+              <input nbInput type="text" placeholder="Código del socio comercial" [(ngModel)]="codigoSocioComercial" />
+            </nb-input-field>
+          </div>
+          <small class="text-muted">Ingresa el código del socio comercial que deseas registrar. El código consta de caracteres alfanuméricos.</small>
+          <div class="text-center mt-4">
+            <button nbButton status="primary" (click)="openUserInfoModal()">Agregar</button>
+          </div>
+        </nb-card-body>
+      </nb-card>
+    </div>
+  </nb-layout-column>
+</nb-layout>

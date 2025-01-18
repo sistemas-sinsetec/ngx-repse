@@ -20,6 +20,10 @@ import { MyProfileComponent } from './users/my-profile/my-profile.component';
 import { CompaniesInfoComponent } from './site/companies-info/companies-info.component';
 import { RegCompanyComponent } from './site/reg-company/reg-company.component';
 import { PremiumAuthComponent } from './site/premium-auth/premium-auth.component';
+import { CpAuthComponent } from './business-partner/cp-auth/cp-auth.component';
+import { EditRolesComponent } from './business-partner/edit-roles/edit-roles.component';
+import { BusinessPartnerRegisterComponent } from './business-partner/business-partner-register/business-partner-register.component';
+import { PermissionsBusineesPartnerComponent } from './business-partner/permissions-businees-partner/permissions-businees-partner.component';
 const routes: Routes = [
   {
     path: '',
@@ -67,6 +71,24 @@ const routes: Routes = [
       {
         path: 'permissions-sections',
         component: PermissionsSectionsComponent
+      },
+
+      // business partners settings
+      {
+        path: 'business-partner/cp-auth',
+        component: CpAuthComponent,
+      },
+      {
+        path: 'business-partner/edit-roles',
+        component: EditRolesComponent,
+      },
+      {
+        path: 'business-partner/business-partner-register',
+        component: BusinessPartnerRegisterComponent,
+      },
+      {
+        path: 'business-partner/permissions-businees-partner',
+        component: PermissionsBusineesPartnerComponent,
       },
 
 

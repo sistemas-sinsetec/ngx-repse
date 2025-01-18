@@ -1,0 +1,76 @@
+<nb-layout>
+  <nb-layout-column class="container mt-5 rounded-5">
+    <div class="row justify-content-center">
+      <div class="col-md-6">
+        <div class="text-center pt-4">
+          <h5><strong>Gestión de Permisos de Socios Comerciales</strong></h5>
+        </div>
+        <nb-card class="shadow-lg p-4 rounded-5">
+          <!-- Selector de socio comercial -->
+          <div class="mb-3">
+            <label class="form-label">Selecciona un socio comercial:</label>
+            <nb-select
+              placeholder="Selecciona un socio comercial"
+              [(selected)]="socioComercialSeleccionado"
+              (selectedChange)="mostrarDatosSocioComercial()"
+            >
+              <nb-option *ngFor="let socio of sociosComerciales" [value]="socio">
+                {{ socio.nameCompany }} - {{ socio.roleName }}
+              </nb-option>
+            </nb-select>
+          </div>
+
+          <!-- Secciones disponibles -->
+          <div *ngIf="socioComercialSeleccionado">
+            <h6>Rol del socio: <strong>{{ socioComercialSeleccionado.roleName }}</strong></h6>
+            <div class="mb-3">
+              <label class="form-label">Selecciona las secciones:</label>
+              <nb-select
+                multiple
+                placeholder="Selecciona secciones"
+                [(selected)]="permisosSeleccionados"
+              >
+                <nb-option *ngFor="let section of seccionesDisponibles" [value]="section">
+                  {{ section }}
+                </nb-option>
+              </nb-select>
+            </div>
+
+            <div class="text-center mt-4">
+              <button
+                nbButton
+                status="primary"
+                fullWidth
+                [disabled]="permisosSeleccionados.length === 0"
+                (click)="agregarPermisos()"
+              >
+                Añadir Permisos
+              </button>
+            </div>
+          </div>
+        </nb-card>
+
+        <!-- Lista de permisos actuales -->
+        <nb-card class="shadow-lg p-4 rounded-5 mt-4">
+          <div class="text-center">
+            <h6>Permisos Actuales</h6>
+          </div>
+          <nb-list>
+            <nb-list-item *ngFor="let permiso of permisosActuales">
+              {{ permiso.name_section }}
+              <button
+                nbButton
+                status="danger"
+                size="small"
+                outline
+                (click)="eliminarPermiso(permiso.name_section)"
+              >
+                Quitar
+              </button>
+            </nb-list-item>
+          </nb-list>
+        </nb-card>
+      </div>
+    </div>
+  </nb-layout-column>
+</nb-layout>

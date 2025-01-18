@@ -1,0 +1,43 @@
+<nb-layout>
+    <nb-layout-column>
+      <nb-card>
+        <nb-card-header>
+          <h2>Información de la Empresa</h2>
+        </nb-card-header>
+        <nb-card-body>
+          <nb-list>
+            <nb-list-item>
+              <strong>Nombre del representante:</strong> {{ companyData.representante }}
+            </nb-list-item>
+            <nb-list-item>
+              <strong>Correo del representante:</strong> {{ companyData.representanteCorreo }}
+            </nb-list-item>
+            <nb-list-item>
+              <strong>Número del representante:</strong> {{ companyData.representanteTelefono }}
+            </nb-list-item>
+            <nb-list-item>
+              <strong>Nombre de la empresa:</strong> {{ companyData.empresa }}
+            </nb-list-item>
+            <nb-list-item>
+              <strong>RFC de la empresa:</strong> {{ companyData.rfcEmpresa }}
+            </nb-list-item>
+            <nb-list-item>
+              <strong>Rol del representante:</strong> Representante principal
+            </nb-list-item>
+            <nb-list-item>
+              <strong>Rol de asociación:</strong>
+              <nb-select placeholder="Seleccionar rol" [(selected)]="selectedRole">
+                <nb-option value="proveedor">Proveedor</nb-option>
+                <nb-option value="cliente">Cliente</nb-option>
+                <nb-option value="clienteProveedor">Cliente - Proveedor</nb-option>
+              </nb-select>
+            </nb-list-item>
+          </nb-list>
+          <div class="text-center mt-4">
+            <button nbButton status="primary" fullWidth (click)="addSocioComercialAssociation()">Aceptar</button>
+          </div>
+        </nb-card-body>
+      </nb-card>
+    </nb-layout-column>
+  </nb-layout>
+  

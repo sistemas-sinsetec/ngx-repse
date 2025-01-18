@@ -56,8 +56,8 @@ export class AppConfigService {
 
     // 4. Cargar empresas no principales (opcional, si la app lo requiere al inicio)
     // Por ejemplo, si tu selectedId ya está seteado en CompanyService:
-    if (this.companyService.selectedId) {
-      this.companyService.loadNonPrincipalCompanies(this.companyService.selectedId)
+    if (this.companyService.selectedCompany.id) {
+      this.companyService.loadNonPrincipalCompanies(this.companyService.selectedCompany.id)
         .subscribe((resp: any) => {
           if (resp.success) {
             this.companyService.setNonPrincipalCompanies(resp.nonPrincipalCompanies);
@@ -67,9 +67,9 @@ export class AppConfigService {
     }
 
     // 5. Cargar periodos (opcional, si tu app lo necesita desde el arranque)
-    if (this.companyService.selectedId) {
+    if (this.companyService.selectedCompany.id) {
       try {
-        const data = await this.periodService.loadPeriodTypes(this.companyService.selectedId);
+        const data = await this.periodService.loadPeriodTypes(this.companyService.selectedCompany.id);
         console.log('AppConfigService: Tipos de periodos cargados:', data);
       } catch (error) {
         console.error('AppConfigService: Error al cargar tipos de periodos:', error);
