@@ -27,7 +27,7 @@ export const MENU_ITEMS: CustomMenuItem[] = [
     children: [
       {
         title: 'Asignación de proyectos',
-        link: '',
+        link: '/pages/project-control/assign-projects',
         hidden: false,
         permission: { section: 'Control de proyectos', subSection: 'Asignacion de proyectos' },
       },
