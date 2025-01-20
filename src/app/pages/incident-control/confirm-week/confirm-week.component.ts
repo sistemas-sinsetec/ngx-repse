@@ -6,7 +6,7 @@ import { CompanyService } from '../../../services/company.service';
 import { PeriodService } from '../../../services/period.service';
 import { DialogComponent } from '../../modal-overlays/dialog/dialog.component';
 import * as moment from 'moment';
-import { LoadingController } from '@ionic/angular';
+import { LoadingController, AlertController } from '@ionic/angular';
 
 
 @Component({
@@ -38,7 +38,8 @@ export class ConfirmWeekComponent {
     private spinnerService: NbSpinnerService,
     private toastrService: NbToastrService,
     private dialogService: NbDialogService,
-    private loadingController: LoadingController
+    private loadingController: LoadingController,
+    private alertController: AlertController
   ) { }
 
   ngOnInit() {
@@ -189,7 +190,7 @@ export class ConfirmWeekComponent {
       console.error('Error al cargar los empleados para el día seleccionado', error);
     } finally {
       loading.dismiss();
-    
+
     }
   }
 
@@ -207,22 +208,30 @@ export class ConfirmWeekComponent {
     const confirmedDays = this.diasSemana.filter(dia => dia.status === 'confirmed');
     return confirmedDays.length >= 5;
   }
-  
+
 
   // Confirmar toda la semana
   async confirmarSemana() {
-    const dialogRef = this.dialogService.open(DialogComponent, {
-      context: {
-        title: 'Confirmar Semana',
-        message: '¿Estás seguro de que quieres confirmar toda la semana?',
-      },
+    const alert = await this.alertController.create({
+      header: 'Confirmar Semana',
+      message: '¿Estás seguro de que quieres confirmar toda la semana?',
+      buttons: [
+        {
+          text: 'Cancelar',
+          role: 'cancel',
+          handler: () => {
+            console.log('Confirmación de semana cancelada');
+          }
+        },
+        {
+          text: 'Confirmar',
+          handler: () => {
+            this.confirmarSemanaCompleta();
+          }
+        }
+      ]
     });
-
-    dialogRef.onClose.subscribe((confirmed) => {
-      if (confirmed) {
-        this.confirmarSemanaCompleta();
-      }
-    });
+    await alert.present();
   }
 
   // Confirmar la semana completa
@@ -231,45 +240,47 @@ export class ConfirmWeekComponent {
       message: 'Confirmando semana...',
     });
     await loading.present();
-
+  
     const companyId = this.companyService.selectedCompany.id;
     const periodId = this.currentPeriodId;
     const periodTypeId = this.periodService.selectedPeriod.id;
     const weekNumber = this.currentSemana;
-
+  
     if (!companyId || !periodId || !periodTypeId || !weekNumber) {
       console.error('Faltan datos para confirmar la semana');
-      loading.dismiss();
+      await loading.dismiss();
       return;
     }
-
+  
     const body = {
       company_id: companyId,
       period_id: periodId,
       period_type_id: periodTypeId,
       week_number: weekNumber,
     };
-   
+  
     const url = `https://siinad.mx/php/confirm-week.php`;
-
-    this.http.post(url, body).subscribe(
-      async (response: any) => {
-        if (response && response.success) {
-          console.log('Semana confirmada correctamente');
-          await this.toastrService.success('La semana se ha confirmado exitosamente.');
-        } else {
-          console.error('Error al confirmar la semana:', response.message);
-          await this.toastrService.danger('Hubo un problema al confirmar la semana. Inténtalo de nuevo.');
-        }
-        loading.dismiss();
-      },
-      async (error) => {
-        console.error('Error en la solicitud de confirmación de la semana:', error);
-        await this.toastrService.danger('Hubo un problema al conectar con el servidor. Inténtalo de nuevo.');
-        loading.dismiss();
+  
+    try {
+      const response: any = await this.http.post(url, body).toPromise();
+      if (response && response.success) {
+        console.log('Semana confirmada correctamente');
+        this.isWeekConfirmed = true;
+        await this.toastrService.success('La semana se ha confirmado exitosamente.');
+      } else {
+        console.error('Error al confirmar la semana:', response.message);
+        await this.toastrService.danger('Hubo un problema al confirmar la semana. Inténtalo de nuevo.');
       }
-    );
+    } catch (error) {
+      console.error('Error en la solicitud de confirmación de la semana:', error);
+      await this.toastrService.danger('Hubo un problema al conectar con el servidor. Inténtalo de nuevo.');
+    } finally {
+      // Asegúrate de cerrar el loading en cualquier caso
+      await loading.dismiss();
+    }
   }
+  
+  
 
   // Método para mostrar alertas con Nebular Toastr
   async mostrarAlerta(header: string, message: string) {
@@ -294,5 +305,56 @@ export class ConfirmWeekComponent {
       emp.last_name.toLowerCase().includes(searchTermLower) ||
       (emp.middle_name && emp.middle_name.toLowerCase().includes(searchTermLower))
     );
+  }
+
+  async eliminarEmpleadoDelDia(employeeId: string) {
+    const alert = await this.alertController.create({
+      header: 'Confirmar eliminación',
+      message: '¿Estás seguro de que deseas eliminar este empleado asignado del día y su incidencia (si existe)?',
+      buttons: [
+        {
+          text: 'Cancelar',
+          role: 'cancel',
+        },
+        {
+          text: 'Eliminar',
+          handler: async () => {
+            const loading = await this.loadingController.create({
+              message: 'Eliminando empleado asignado...',
+            });
+            await loading.present();
+
+            const url = `https://siinad.mx/php/delete-employee-assignment-incident.php`;
+            const body = { employee_id: employeeId, date: this.selectedDia.date };
+
+            this.http.post(url, body).subscribe(
+              async (response: any) => {
+                if (response && response.success) {
+                  // Actualizar las listas eliminando el empleado correspondiente
+                  this.empleadosDia = this.empleadosDia.filter(emp => emp.employee_id !== employeeId);
+                  this.filteredEmpleadosDia = this.filteredEmpleadosDia.filter(emp => emp.employee_id !== employeeId);
+
+                  this.empleadosIncidencias = this.empleadosIncidencias.filter(emp => emp.employee_id !== employeeId);
+                  this.filteredEmpleadosIncidencias = this.filteredEmpleadosIncidencias.filter(emp => emp.employee_id !== employeeId);
+
+                  await this.mostrarAlerta('Eliminado', 'El empleado y su incidencia han sido eliminados correctamente.');
+                } else {
+                  console.error('Error al eliminar el empleado:', response.error);
+                  await this.mostrarAlerta('Error', response.error || 'Hubo un problema al eliminar el empleado.');
+                }
+                loading.dismiss();
+              },
+              async (error) => {
+                console.error('Error en la solicitud de eliminación del empleado:', error);
+                await this.mostrarAlerta('Error', 'Hubo un problema al conectar con el servidor. Inténtalo de nuevo.');
+                loading.dismiss();
+              }
+            );
+          },
+        },
+      ],
+    });
+
+    await alert.present();
   }
 } 

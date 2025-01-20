@@ -6,11 +6,13 @@
       <div class="row mb-4">
         <div class="col-12">
           <h5 class="fw-bold">Selecciona la Semana Laboral</h5>
-          <nb-select [(ngModel)]="selectedWeek" (ionChange)="onWeekChange($event.detail.value)" interface="popover">
+          <!-- Usando selectedChange -->
+          <nb-select [(ngModel)]="selectedWeek" (selectedChange)="onWeekChange($event)" interface="popover">
             <nb-option *ngFor="let week of weeks" [value]="week">
               {{ week.week_number }}
             </nb-option>
           </nb-select>
+
         </div>
       </div>
 
@@ -23,7 +25,7 @@
       <div class="row mb-4" *ngIf="diasSemana.length > 0">
         <div class="col-12">
           <h5 class="fw-bold">Selecciona el Día</h5>
-          <nb-select [(selected)]="selectedDia" (selectedChange)="onDiaChange($event)" placeholder="Selecciona un día">
+          <nb-select [(ngModel)]="selectedDia" (selectedChange)="onDiaChange($event)" interface="popover">
             <nb-option *ngFor="let dia of diasSemana" [value]="dia.date">
               {{ dia.display }}
             </nb-option>
