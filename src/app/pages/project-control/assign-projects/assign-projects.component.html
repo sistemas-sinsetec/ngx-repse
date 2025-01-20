@@ -1,1 +1,122 @@
-<p>assign-projects works!</p>
+<nb-layout>
+  <nb-layout-column>
+    <div class="container mt-4">
+      <div class="d-flex justify-content-center mb-4">
+        <h5><strong>Asignación de proyectos</strong></h5>
+      </div>
+
+      <!-- Diseño de dos columnas -->
+      <div class="row">
+        <!-- Columna izquierda fija con el resumen de selección -->
+        <div class="col-lg-4 col-md-5">
+          <nb-card>
+            <nb-card-header>
+              <h6 class="fw-bold">Resumen de Selección</h6>
+            </nb-card-header>
+            <nb-card-body>
+              <p><strong>Semana:</strong> {{ selectedSemana?.week_number || 'No seleccionada' }}</p>
+              <p><strong>Día:</strong> {{ selectedDia || 'No seleccionado' }}</p>
+              <p><strong>Obra:</strong> {{ selectedObra?.project_name || 'No seleccionada' }}</p>
+              <p><strong>{{ selectedEmpleados.length }} empleado(s) seleccionado(s)</strong></p>
+            </nb-card-body>
+          </nb-card>
+        </div>
+
+        <!-- Columna derecha con el formulario -->
+        <div class="col-lg-8 col-md-7">
+          <nb-card>
+            <nb-card-body>
+              <form>
+                <!-- Selector de semana laboral -->
+                <div class="mb-3">
+                  <label for="semanaLaboral" class="form-label fw-bold">Selecciona la semana laboral:</label>
+                  <nb-select [(selected)]="selectedSemana" (selectedChange)="onSemanaChange($event)" id="semanaLaboral">
+                    <nb-option *ngFor="let semana of semanas" [value]="semana">{{ semana.week_number }}</nb-option>
+                  </nb-select>
+                </div>
+
+                <!-- Período seleccionado -->
+                <div id="periodoSeleccionado" class="my-3">
+                  <p>
+                    Período seleccionado: <span>{{ formatDate(selectedSemana?.start_date) }}</span> - <span>{{ formatDate(selectedSemana?.end_date) }}</span>
+                  </p>
+                </div>
+
+                <!-- Selector de día de la semana -->
+                <div class="mb-3">
+                  <label for="diaSemana" class="form-label fw-bold">Selecciona el día de la semana:</label>
+                  <nb-select [(selected)]="selectedDia" (selectedChange)="onDiaChange($event)" id="diaSemana">
+                    <nb-option *ngFor="let dia of diasSemana" [value]="dia.date">{{ dia.display }}</nb-option>
+                  </nb-select>
+                </div>
+
+                <!-- Selector de obra del día con opción de búsqueda -->
+                <div class="mb-3">
+                  <label for="obraDia" class="form-label fw-bold">Selecciona la obra:</label>
+                  <input
+                    nbInput
+                    placeholder="Buscar obra"
+                    [(ngModel)]="searchObra"
+                    [ngModelOptions]="{standalone: true}"
+                    (ngModelChange)="filterObras()"
+                    name="searchObra"
+                  />
+                  <nb-select [(selected)]="selectedObra" (selectedChange)="onObraChange($event)" id="obraDia">
+                    <nb-option *ngFor="let obra of filteredObras" [value]="obra">{{ obra.project_name }}</nb-option>
+                  </nb-select>
+                </div>
+
+                <!-- Fechas de la obra seleccionada -->
+                <div class="mb-3">
+                  <label class="form-label fw-bold">Fecha de la obra:</label>
+                  <p>
+                    <span *ngIf="selectedObra">{{ formatDate(selectedObra?.start_date) }} - {{ formatDate(selectedObra?.end_date) }}</span>
+                  </p>
+                </div>
+
+                <!-- Buscador de empleados -->
+                <div class="mb-3">
+                  <label for="buscarEmpleado" class="form-label fw-bold">Seleccionar empleados:</label>
+                  <input
+                    nbInput
+                    placeholder="Buscar empleado"
+                    [(ngModel)]="searchEmployee"
+                    [ngModelOptions]="{standalone: true}"
+                    (ngModelChange)="onSearchChange()"
+                    name="searchEmployee"
+                  />
+                </div>
+
+                <!-- Lista de empleados -->
+                <div class="mb-3" style="max-height: 200px; overflow-y: auto;">
+                  <nb-list>
+                    <nb-list-item *ngFor="let empleado of filteredEmpleados">
+                      <nb-checkbox
+                        (checkedChange)="toggleEmpleadoSelection(empleado)"
+                        [checked]="selectedEmpleados.includes(empleado)"
+                        [disabled]="empleado.isAssigned"
+                      >
+                      </nb-checkbox>
+                      <span>{{ (empleado.first_name + ' ' + empleado.middle_name + ' ' + empleado.last_name).toUpperCase() }}</span> -
+                      Fecha de alta: {{ empleado.start_date }}
+                    </nb-list-item>
+                  </nb-list>
+                </div>
+
+                <!-- Botón para seleccionar todos los empleados no asignados -->
+                <div *ngIf="filteredEmpleados.length > 0" class="d-flex justify-content-center mb-3">
+                  <button nbButton status="info" (click)="selectAllUnassignedEmployees()">Marcar Todos No Asignados</button>
+                </div>
+
+                <!-- Botón de asignación -->
+                <div class="d-flex justify-content-center">
+                  <button nbButton status="primary" (click)="assignEmployees()" [disabled]="!isFormValid()">Continuar</button>
+                </div>
+              </form>
+            </nb-card-body>
+          </nb-card>
+        </div>
+      </div>
+    </div>
+  </nb-layout-column>
+</nb-layout>

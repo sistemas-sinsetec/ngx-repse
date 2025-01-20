@@ -79,6 +79,11 @@ const routes: Routes = [{
         .then(m => m.IncidentControlModule),
     },
     {
+      path: 'project-control',
+      loadChildren: () => import('./project-control/project-control.module')
+        .then(m => m.ProjectControlModule),
+    },
+    {
       path: '',
       redirectTo: 'dashboard',
       pathMatch: 'full',

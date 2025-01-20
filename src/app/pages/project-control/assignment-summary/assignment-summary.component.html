@@ -1,1 +1,46 @@
-<p>assignment-summary works!</p>
+<nb-layout>
+    <nb-layout-column>
+      <div class="container">
+        <div class="row justify-content-center mb-4">
+          <div class="col-12 text-center">
+            <h5 class="fw-bold">Detalles de la Asignación</h5>
+            <p class="text-muted">Revise la información antes de confirmar la asignación.</p>
+          </div>
+        </div>
+  
+        <!-- Información de Asignación -->
+        <nb-card class="shadow-sm mb-4">
+          <nb-card-body>
+            <p><strong class="text-primary">Semana:</strong> {{ selectedSemana?.week_number }}</p>
+            <p><strong class="text-primary">Día:</strong> {{ selectedDia }}</p>
+            <p><strong class="text-primary">Periodo:</strong> {{ authService.selectedPeriod?.fiscal_year }}</p>
+            <p><strong class="text-primary">Obra:</strong> {{ selectedObra?.project_name }}</p>
+          </nb-card-body>
+        </nb-card>
+  
+        <!-- Lista de Empleados Seleccionados -->
+        <nb-card class="shadow-sm mb-4">
+          <nb-card-body>
+            <h6 class="fw-bold mb-3 text-primary">Empleados Seleccionados:</h6>
+            <nb-list>
+              <nb-list-item *ngFor="let empleado of selectedEmpleados">
+                <nb-icon icon="person-outline" pack="eva" status="info" class="me-2"></nb-icon>
+                <span>{{ empleado.first_name }} {{ empleado.middle_name }} {{ empleado.last_name }}</span>
+              </nb-list-item>
+            </nb-list>
+          </nb-card-body>
+        </nb-card>
+  
+        <!-- Botones de Acción -->
+        <div class="d-flex justify-content-center mt-4">
+          <button nbButton status="success" class="me-2" (click)="confirmAssignment()">
+            <nb-icon icon="checkmark-circle-outline" pack="eva"></nb-icon> Confirmar Asignación
+          </button>
+          <button nbButton status="warning" (click)="closeModal()">
+            <nb-icon icon="close-circle-outline" pack="eva"></nb-icon> Cancelar
+          </button>
+        </div>
+      </div>
+    </nb-layout-column>
+  </nb-layout>
+  
