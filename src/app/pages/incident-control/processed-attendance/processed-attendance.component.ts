@@ -109,19 +109,28 @@ export class ProcessedAttendanceComponent {
   // Cargar los empleados y sus horas de trabajo para la semana seleccionada
   async loadEmployeesForWeek() {
     if (!this.selectedWeek) return;
-
+  
+    const companyId = this.companyService.selectedCompany?.id;
+    if (!companyId) {
+      this.toastrService.warning(
+        'No se pudo obtener el ID de la compañía. Por favor, seleccione una compañía válida.',
+        'Advertencia'
+      );
+      return;
+    }
+  
     const loading = await this.loadingController.create({
       message: 'Cargando datos de empleados...',
     });
     await loading.present();
-
-    const url = `https://siinad.mx/php/get-employees-weekly-data.php?week_number=${this.selectedWeek.week_number}`;
-
+  
+    const url = `https://siinad.mx/php/get-employees-weekly-data.php?week_number=${this.selectedWeek.week_number}&company_id=${companyId}`;
+  
     this.http.get(url).subscribe(
       (data: any) => {
         const processedData = this.processEmployeeData(data);
         this.empleadosSemana = processedData;
-       loading.dismiss();
+        loading.dismiss();
       },
       (error) => {
         console.error('Error al cargar datos de empleados', error);
@@ -130,6 +139,7 @@ export class ProcessedAttendanceComponent {
       }
     );
   }
+  
 
   
   processEmployeeData(data: any[]): any[] {

@@ -5,10 +5,9 @@ import { NbSpinnerService, NbAlertModule, NbToastrService, NbDialogService } fro
 import { AuthService } from '../../../services/auth.service';
 import { CompanyService } from '../../../services/company.service';
 import { PeriodService } from '../../../services/period.service';
-import { NbActionsModule } from '@nebular/theme';
 import * as moment from 'moment';
 import { ProcessedListDialogComponent } from '../processed-list-dialog/processed-list-dialog.component';
-import { LoadingController } from '@ionic/angular';
+import { LoadingController, AlertController } from '@ionic/angular';
 
 @Component({
   selector: 'ngx-process-weekly-lists',
@@ -22,6 +21,9 @@ export class ProcessWeeklyListsComponent {
   diasSemana: any[] = []; // Días de la semana seleccionada
   empleadosSemana: any[] = []; // Lista de empleados con sus horarios y incidencias
 
+  isButtonDisabled: boolean = false;
+
+
   constructor(
     private authService: AuthService,
     private http: HttpClient,
@@ -31,7 +33,8 @@ export class ProcessWeeklyListsComponent {
     private periodService: PeriodService,
     private toastrService: NbToastrService,
     private dialogService: NbDialogService,
-    private loadingController: LoadingController
+    private loadingController: LoadingController,
+    private alertController: AlertController
   ) {}
 
   ngOnInit() {
@@ -75,6 +78,7 @@ export class ProcessWeeklyListsComponent {
 
   // Cargar los días de la semana y los empleados al seleccionar una semana
   async onWeekChange(week: any) {
+    this.isButtonDisabled = false; // Habilitar el botón
     if (week && week.payroll_period && week.payroll_period.start_date && week.payroll_period.end_date) {
       this.selectedWeek = week;
       this.generateWeekDays(week.payroll_period.start_date, week.payroll_period.end_date);
@@ -100,31 +104,34 @@ export class ProcessWeeklyListsComponent {
   }
 
   // Cargar los empleados y sus horas de trabajo para la semana seleccionada
-  async loadEmployeesForWeek() {
-  if (!this.selectedWeek) return;
+  // Cargar los empleados y sus horas de trabajo para la semana seleccionada
+async loadEmployeesForWeek() {
+  if (!this.selectedWeek || !this.companyService.selectedCompany) return;
 
   const loading = await this.loadingController.create({
     message: 'Cargando datos de empleados...',
   });
   await loading.present();
 
-  const url = `https://siinad.mx/php/get-employees-weekly-data.php?week_number=${this.selectedWeek.week_number}`;
-  
+  // Obtener el ID de la compañía
+  const companyId = this.companyService.selectedCompany.id;
+
+  // Incluir el ID de la compañía como parámetro en la URL
+  const url = `https://siinad.mx/php/get-employees-weekly-data.php?week_number=${this.selectedWeek.week_number}&company_id=${companyId}`;
+
   this.http.get(url).subscribe(
     (data: any) => {
       const processedData = this.processEmployeeData(data);
       this.empleadosSemana = processedData;
-
       loading.dismiss();
     },
     (error) => {
       console.error('Error al cargar datos de empleados', error);
-
-      // Detener el spinner incluso si ocurre un error
       loading.dismiss();
     }
   );
 }
+
 
   // Procesar los datos de los empleados para organizar por fecha y evitar repetición
   processEmployeeData(data: any[]): any[] {
@@ -165,7 +172,7 @@ export class ProcessWeeklyListsComponent {
       message: 'Procesando semana seleccionada...',
     });
     await loading.present();
-
+  
     const companyId = this.companyService.selectedCompany.id;
     const periodTypeId = this.periodService.selectedPeriod.id;
     const startDate = this.selectedWeek.payroll_period?.start_date;
@@ -182,9 +189,15 @@ export class ProcessWeeklyListsComponent {
   
     this.http.post(url, data).subscribe(
       async (response: any) => {
-        this.spinnerService.clear(); // Detener el spinner
+        loading.dismiss();
+        this.isButtonDisabled = true; // Deshabilitar el botón
+        const alert = await this.alertController.create({
+          header: 'Éxito',
+          message: 'La semana ha sido procesada exitosamente.',
+          buttons: ['OK'],
+        });
+        await alert.present();
   
-        // Mostrar mensaje de éxito
         this.toastrService.success(
           'La semana ha sido procesada exitosamente.',
           'Éxito',
@@ -192,9 +205,7 @@ export class ProcessWeeklyListsComponent {
         );
       },
       async (error) => {
-        this.spinnerService.clear(); // Detener el spinner
-  
-        // Mostrar mensaje de error
+        loading.dismiss();
         this.toastrService.danger(
           'Hubo un error al procesar la semana. Por favor, intente nuevamente.',
           'Error',

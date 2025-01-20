@@ -72,8 +72,11 @@
           </tbody>
         </table>
         <div class="text-center mt-4">
-          <button nbButton status="primary" (click)="processSelectedWeek()">Procesar Semana</button>
+          <button nbButton status="primary" [disabled]="isButtonDisabled" (click)="processSelectedWeek()">
+            Procesar Semana
+          </button>
         </div>
+        
       </div>
     </div>
   </nb-layout-column>
