@@ -55,14 +55,14 @@ export class PermissionsBusineesPartnerComponent implements OnInit {
 
     if (this.socioComercialSeleccionado) {
       // Determinar las secciones disponibles según el rol del socio comercial
-      switch (this.socioComercialSeleccionado.roleName.toLowerCase()) {
+      switch (this.socioComercialSeleccionado.roleName) {
         case 'cliente':
           this.seccionesDisponibles = ['Sistema REPSE', 'Control de proyectos', 'Empleados'];
           break;
         case 'proveedor':
           this.seccionesDisponibles = ['Incidencias', 'Costos', 'Ventas'];
           break;
-        case 'cliente/proveedor':
+        case 'clienteProveedor':
           this.seccionesDisponibles = [
             'Sistema REPSE', 'Control de proyectos', 'Empleados', 'Incidencias', 'Costos', 'Ventas'
           ];
