@@ -46,6 +46,7 @@ export const routes: Routes = [
     ],
   },
   { path: '', redirectTo: 'pages', pathMatch: 'full' },
+  { path: 'project-control', loadChildren: () => import('./pages/project-control/project-control.module').then(m => m.ProjectControlModule) },
   { path: '**', redirectTo: 'pages' },
 ];
 
