@@ -70,7 +70,7 @@ import { CompanyInfoModalComponent } from './business-partner/company-info-modal
 import { PermissionsBusineesPartnerComponent } from './business-partner/permissions-businees-partner/permissions-businees-partner.component';
 
 @NgModule({
- 
+
   declarations: [
     SettingsComponent,
     UploadLogoComponent,
@@ -113,7 +113,7 @@ import { PermissionsBusineesPartnerComponent } from './business-partner/permissi
     BusinessPartnerRegisterComponent,
     CompanyInfoModalComponent,
     PermissionsBusineesPartnerComponent,
-
+    
   ],
   imports: [
     ThemeModule,

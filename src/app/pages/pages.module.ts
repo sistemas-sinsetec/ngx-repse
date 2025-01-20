@@ -2,6 +2,7 @@ import { NgModule } from '@angular/core';
 import { NbMenuModule, NbCardModule } from '@nebular/theme';
 import { FormsModule } from '@angular/forms'; // Importa FormsModule
 import { SettingsModule } from './settings/settings.module';
+import { ProjectControlModule } from './project-control/project-control.module';
 import { ThemeModule } from '../@theme/theme.module';
 import { PagesComponent } from './pages.component';
 import { DashboardModule } from './dashboard/dashboard.module';
@@ -12,6 +13,7 @@ import { ProcessedAttendanceComponent } from './incident-control/processed-atten
 
 @NgModule({
   imports: [
+    
     PagesRoutingModule,
     ThemeModule,
     NbMenuModule,
