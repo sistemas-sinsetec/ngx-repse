@@ -31,11 +31,13 @@ import { EmployeeControlRoutingModule } from './employee-control-routing.module'
 
 import { IonicModule } from '@ionic/angular';
 import { RequestsEmployeesComponent } from './requests-employees/requests-employees.component';
+import { AddEmployeesComponent } from './add-employees/add-employees.component';
 
 @NgModule({
   declarations: [
     employeeControlComponent,
     RequestsEmployeesComponent,
+    AddEmployeesComponent,
    
 
   ],
@@ -69,4 +71,4 @@ import { RequestsEmployeesComponent } from './requests-employees/requests-employ
 
   ]
 })
-export class IncidentControlModule { }
+export class EmployeeControlModule { }

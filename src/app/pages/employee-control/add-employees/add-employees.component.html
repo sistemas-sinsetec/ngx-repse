@@ -1,0 +1,255 @@
+<nb-layout>
+    <nb-layout-column>
+        <div class="container mt-4">
+            <!-- Columna izquierda: Lista de solicitudes -->
+            <div class="row">
+                <div class="col-md-3">
+                    <nb-card>
+                        <nb-card-header>
+                            <h5 class="text-center"><strong>Solicitudes Registradas (Últimos 15 días)</strong></h5>
+                        </nb-card-header>
+                        <nb-card-body>
+                            <nb-list>
+                                <nb-list-item *ngFor="let solicitud of solicitudes">
+                                    <div>
+                                        <h6>Folio: {{ solicitud.request_id }}</h6>
+                                        <p>Empleado: {{ solicitud.full_name }}</p>
+                                        <p>Departamento: {{ solicitud.department_name }}</p>
+                                        <p>Puesto: {{ solicitud.position_name }}</p>
+                                        <p>Estado: {{ getStatusDescription(solicitud.request_status) }}</p>
+                                        <p>Fecha de Solicitud: {{ solicitud.request_created_at | date: 'short' }}</p>
+                                        <p>Última Actualización: {{ solicitud.request_updated_at | date: 'short' }}</p>
+                                    </div>
+                                </nb-list-item>
+                            </nb-list>
+                        </nb-card-body>
+                    </nb-card>
+                </div>
+
+                <!-- Columna derecha: Formulario de registro -->
+                <div class="col-md-9">
+                    <nb-card>
+                        <nb-card-header>
+                            <h5 class="text-center"><strong>Registrar solicitud de empleado</strong></h5>
+                        </nb-card-header>
+                        <nb-card-body>
+                            <form #empleadoForm="ngForm" (ngSubmit)="onSubmit(empleadoForm)">
+                                <!-- Sección: Datos Personales -->
+                                <h4>Datos Personales</h4>
+                                <hr />
+                                <div class="form-group">
+                                    <label for="nombre">Nombre*</label>
+                                    <input nbInput type="text" class="form-control" name="nombre"
+                                        [(ngModel)]="empleado.nombre" required />
+                                </div>
+
+                                <div class="form-group mt-3">
+                                    <label for="apellidoPaterno">Apellido Paterno*</label>
+                                    <input nbInput type="text" class="form-control" name="apellidoPaterno"
+                                        [(ngModel)]="empleado.apellidoPaterno" required />
+                                </div>
+
+                                <div class="form-group mt-3">
+                                    <label for="apellidoMaterno">Apellido Materno*</label>
+                                    <input nbInput type="text" class="form-control" name="apellidoMaterno"
+                                        [(ngModel)]="empleado.apellidoMaterno" required />
+                                </div>
+
+                                <div class="form-group mt-3">
+                                    <label for="fechaNacimiento">Fecha de Nacimiento</label>
+                                    <input nbInput type="date" class="form-control" name="fechaNacimiento"
+                                        [(ngModel)]="empleado.fechaNacimiento" />
+                                </div>
+
+                                <div class="form-group mt-3">
+                                    <label for="lugarNacimiento">Lugar de Nacimiento</label>
+                                    <input nbInput type="text" class="form-control" name="lugarNacimiento"
+                                        [(ngModel)]="empleado.lugarNacimiento" />
+                                </div>
+
+                                <div class="form-group mt-3">
+                                    <label for="curp">CURP*</label>
+                                    <input nbInput type="text" class="form-control" name="curp"
+                                        [(ngModel)]="empleado.curp" maxlength="18" minlength="18" required />
+                                </div>
+
+                                <!-- Sección: Información Financiera y Bancaria -->
+                                <h4 class="mt-4">Información Financiera y Bancaria</h4>
+                                <hr />
+                                <div class="form-group">
+                                    <label for="numeroSeguroSocial">Número de Seguro Social</label>
+                                    <input nbInput placeholder="Número de Seguro Social" class="form-control"
+                                        name="numeroSeguroSocial" [(ngModel)]="empleado.numeroSeguroSocial"
+                                        maxlength="11" minlength="11" />
+                                </div>
+
+                                <div class="form-group mt-3">
+                                    <label for="numeroCuenta">Número de Cuenta Bancaria</label>
+                                    <input nbInput placeholder="10 a 12 dígitos" class="form-control"
+                                        name="numeroCuenta" [(ngModel)]="empleado.numeroCuenta" maxlength="12"
+                                        minlength="10" />
+                                </div>
+
+                                <div class="form-group mt-3">
+                                    <label for="nombreBanco">Banco</label>
+                                    <input nbInput placeholder="Nombre del Banco" class="form-control"
+                                        name="nombreBanco" [(ngModel)]="empleado.nombreBanco" />
+                                </div>
+
+                                <div class="form-group mt-3">
+                                    <label for="sucursalBanco">Sucursal</label>
+                                    <input nbInput placeholder="Sucursal del Banco" class="form-control"
+                                        name="sucursalBanco" [(ngModel)]="empleado.sucursalBanco" />
+                                </div>
+
+                                <div class="form-group mt-3">
+                                    <label for="clabeInterbancaria">CLABE Interbancaria</label>
+                                    <input nbInput placeholder="18 dígitos" class="form-control"
+                                        name="clabeInterbancaria" [(ngModel)]="empleado.clabeInterbancaria"
+                                        maxlength="18" minlength="18" />
+                                </div>
+
+                                <h4 class="mt-4">Información de Trabajo</h4>
+                                <div class="form-group">
+                                    <label for="departamento">Departamento</label>
+                                    <nb-select [(selected)]="empleado.departamento" placeholder="Seleccionar">
+                                        <nb-option value="" disabled>Seleccionar</nb-option>
+                                        <nb-option *ngFor="let departamento of departamentos"
+                                            [value]="departamento.department_id">
+                                            {{ departamento.department_name }}
+                                        </nb-option>
+                                    </nb-select>
+                                </div>
+
+                                <div class="form-group mt-3">
+                                    <label for="puesto">Puesto</label>
+                                    <nb-select [(selected)]="empleado.puesto" placeholder="Seleccionar">
+                                        <nb-option value="" disabled>Seleccionar</nb-option>
+                                        <nb-option *ngFor="let puesto of puestos" [value]="puesto.position_id">
+                                            {{ puesto.position_name }}
+                                        </nb-option>
+                                    </nb-select>
+                                </div>
+
+                                <div class="form-group mt-3">
+                                    <label for="turno">Turno</label>
+                                    <nb-select [(selected)]="empleado.turno" placeholder="Seleccionar">
+                                        <nb-option value="" disabled>Seleccionar</nb-option>
+                                        <nb-option *ngFor="let turno of turnos" [value]="turno.shift_id">
+                                            {{ turno.shift_name }}
+                                        </nb-option>
+                                    </nb-select>
+                                </div>
+
+                                <div class="form-group mt-3">
+                                    <label for="fechaInicio">Fecha de Inicio*</label>
+                                    <input nbInput type="date" placeholder="Fecha de Inicio" class="form-control"
+                                        name="fechaInicio" [(ngModel)]="empleado.fechaInicio" required />
+                                </div>
+
+                                <h4 class="mt-4">Contacto de Emergencia</h4>
+                                <div class="form-group">
+                                    <label for="contactoEmergencia">Contacto de Emergencia</label>
+                                    <input nbInput placeholder="Contacto de Emergencia" class="form-control"
+                                        name="contactoEmergencia" [(ngModel)]="empleado.contactoEmergencia" />
+                                </div>
+
+                                <div class="form-group mt-3">
+                                    <label for="numEmergencia">Número de Emergencia</label>
+                                    <input nbInput type="tel" placeholder="Número de Emergencia" class="form-control"
+                                        name="numEmergencia" [(ngModel)]="empleado.numEmergencia" maxlength="10"
+                                        minlength="10" />
+                                </div>
+                                <h4 class="mt-4">Archivos del empleado</h4>
+                                <div class="form-group">
+                                    <label for="ineFrente">Identificación INE (frente)</label>
+                                    <input nbInput type="file" (change)="onFileChange($event, 'ineFrente')"
+                                        class="form-control" />
+                                </div>
+
+                                <div class="form-group mt-3">
+                                    <label for="ineReverso">Identificación INE (Reverso)</label>
+                                    <input nbInput type="file" (change)="onFileChange($event, 'ineReverso')"
+                                        class="form-control" />
+                                </div>
+
+                                <div class="form-group mt-3">
+                                    <label for="constanciaFiscal">Constancia de Situación Fiscal</label>
+                                    <input nbInput type="file" (change)="onFileChange($event, 'constanciaFiscal')"
+                                        class="form-control" />
+                                </div>
+
+                                <div class="form-group mt-3">
+                                    <label for="numSeguroSocialArchivo">Número de Seguro Social y Unidad Médica</label>
+                                    <input nbInput type="file" (change)="onFileChange($event, 'numSeguroSocialArchivo')"
+                                        class="form-control" />
+                                </div>
+
+                                <div class="form-group mt-3">
+                                    <label for="actaNacimiento">Acta de Nacimiento</label>
+                                    <input nbInput type="file" (change)="onFileChange($event, 'actaNacimiento')"
+                                        class="form-control" />
+                                </div>
+
+                                <div class="form-group mt-3">
+                                    <label for="CURPFile">CURP</label>
+                                    <input nbInput type="file" (change)="onFileChange($event, 'CURPFile')"
+                                        class="form-control" />
+                                </div>
+
+                                <div class="form-group mt-3">
+                                    <label for="comprobanteDomicilio">Comprobante de Domicilio</label>
+                                    <input nbInput type="file" (change)="onFileChange($event, 'comprobanteDomicilio')"
+                                        class="form-control" />
+                                </div>
+
+                                <div class="form-group mt-3">
+                                    <label for="cuentaInterbancaria">Cuenta Interbancaria</label>
+                                    <input nbInput type="file" (change)="onFileChange($event, 'cuentaInterbancaria')"
+                                        class="form-control" />
+                                </div>
+
+                                <div class="form-group mt-3">
+                                    <label for="tieneInfonavit">¿Tienes Infonavit?</label>
+                                    <nb-select placeholder="Seleccionar"
+                                        (selectedChange)="mostrarOcultarCampo($event)">
+                                        <nb-option value="no">No</nb-option>
+                                        <nb-option value="si">Sí</nb-option>
+                                    </nb-select>
+                                </div>
+
+                                <div *ngIf="mostrarInfonavit" class="form-group mt-3">
+                                    <label for="retencionInfonavit">Carta de Retención de Infonavit</label>
+                                    <input nbInput type="file" (change)="onFileChange($event, 'retencionInfonavit')"
+                                        class="form-control" />
+                                </div>
+
+                                <div class="form-group mt-3">
+                                    <label for="antecedentesPenales">Carta de No Antecedentes Penales</label>
+                                    <input nbInput type="file" (change)="onFileChange($event, 'antecedentesPenales')"
+                                        class="form-control" />
+                                </div>
+
+                                <div class="form-group mt-3">
+                                    <label for="comprobanteEstudios">Comprobante de Estudios</label>
+                                    <input nbInput type="file" (change)="onFileChange($event, 'comprobanteEstudios')"
+                                        class="form-control" />
+                                </div>
+                                <!-- Botones de acción -->
+                                <div class="mt-4 text-center">
+                                    <button nbButton status="primary" type="submit" [disabled]="!empleadoForm.valid">
+                                        Guardar Empleado
+                                    </button>
+                                    <button nbButton status="success" type="submit" class="ms-3"
+                                        [disabled]="!allFieldsCompleted">
+                                        Enviar Solicitud del Empleado
+                                    </button>
+                                </div>
+                            </form>
+                        </nb-card-body>
+                    </nb-card>
+                </div>
+            </div>
+        </div>
+    </nb-layout-column>
+</nb-layout>
