@@ -31,11 +31,15 @@ import { EmployeeControlRoutingModule } from './employee-control-routing.module'
 
 import { IonicModule } from '@ionic/angular';
 import { RequestsEmployeesComponent } from './requests-employees/requests-employees.component';
+import { EmployeeViewComponent } from './employee-view/employee-view.component';
+import { EmployeeDetailsComponent } from './employee-details/employee-details.component';
 
 @NgModule({
   declarations: [
     employeeControlComponent,
     RequestsEmployeesComponent,
+    EmployeeViewComponent,
+    EmployeeDetailsComponent,
    
 
   ],
