@@ -22,6 +22,8 @@ import {
   NbUserModule,
   NbLayoutComponent,
   NbSelectLabelComponent,
+  NbSidebarComponent,
+  NbSidebarModule,
 } from '@nebular/theme';
 import { ThemeModule } from '../../@theme/theme.module';
 
@@ -73,8 +75,9 @@ import { EditEmployeeComponent } from './edit-employee/edit-employee.component';
     NbInputModule,
     NbTagModule,
     NbUserModule,
-    IonicModule
+    IonicModule,
+    NbSidebarModule,
 
   ]
 })
-export class IncidentControlModule { }
+export class EmployeeControlModule { }

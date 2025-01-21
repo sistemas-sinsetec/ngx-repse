@@ -301,15 +301,17 @@ getStatusDescription(status: string): string {
     });
   }
 
-  onSelectEmployee(event: any) {
-
-    const employeeId = event.target.value;
+  onSelectEmployee(employeeId: number) {
     this.selectedEmployee = this.empleadosPendientes.find(emp => emp.employee_id === +employeeId) || null;
+  
     if (this.selectedEmployee) {
       this.fetchEmployeeFiles(this.selectedEmployee.employee_id);
       this.checkAllFieldsCompleted();
+    } else {
+      console.warn('Empleado no encontrado con el ID proporcionado.');
     }
   }
+  
   async eliminarSolicitud() {
     if (this.selectedEmployee) {
       const loading = await this.loadingController.create({
