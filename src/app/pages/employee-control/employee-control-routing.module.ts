@@ -1,6 +1,7 @@
 import { NgModule } from '@angular/core';
 import { RouterModule, Routes } from '@angular/router';
 import { employeeControlComponent } from './employee-control.component';
+import { EmployeeViewComponent } from './employee-view/employee-view.component';
 
 const routes: Routes = [
   {
@@ -8,8 +9,8 @@ const routes: Routes = [
     component: employeeControlComponent,
     children: [
         {
-          path: 'employee-control',
-
+          path: 'employee-view',
+          component: EmployeeViewComponent,
         },
     ],
   },

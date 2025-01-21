@@ -1,1 +1,117 @@
-<p>employee-view works!</p>
+<nb-layout>
+    <nb-layout-column>
+      <div class="container mt-4">
+        <div class="row">
+          <!-- Barra lateral izquierda: Departamentos, Puestos y Turnos -->
+          <div class="col-3">
+            <div class="sidebar-section">
+              <!-- Lista de Departamentos -->
+              <h6>Departamentos</h6>
+              <ul class="list-group department-list">
+                <li *ngFor="let departamento of departamentos" 
+                    class="list-group-item"
+                    [class.selected]="departamento === departamentoSeleccionado"
+                    (click)="selectDepartamento(departamento)">
+                  {{ departamento.department_name }}
+                </li>
+              </ul>
+  
+              <!-- Lista de Puestos -->
+              <h6>Puestos</h6>
+              <ul class="list-group puesto-list">
+                <li *ngFor="let puesto of puestos" 
+                    class="list-group-item"
+                    [class.selected]="puesto === puestoSeleccionado"
+                    (click)="selectPuesto(puesto)">
+                  {{ puesto.position_name }}
+                </li>
+              </ul>
+  
+              <!-- Lista de Turnos -->
+              <h6>Turnos</h6>
+              <ul class="list-group turno-list">
+                <li *ngFor="let turno of turnos" 
+                    class="list-group-item"
+                    [class.selected]="turno === turnoSeleccionado"
+                    (click)="selectTurno(turno)">
+                  {{ turno.shift_name }}
+                </li>
+              </ul>
+            </div>
+          </div>
+  
+          <!-- Detalles a la derecha: Lista de Empleados -->
+          <div class="col-9">
+            <!-- Campo de búsqueda -->
+            <nb-form-field>
+                <label for="searchQuery">Buscar empleados</label>
+                <input nbInput id="searchQuery" [(ngModel)]="searchQuery" (ngModelChange)="buscarEmpleados()" placeholder="Escribe aquí" />
+              </nb-form-field>
+  
+            <nb-card *ngIf="empleadosFiltrados.length > 0">
+              <nb-card-header class="text-center">
+                <nb-title>Empleados</nb-title>
+              </nb-card-header>
+              <nb-card-body>
+                <nb-table>
+                  <thead>
+                    <tr>
+                      <th>Código de empleado</th>
+                      <th>Nombre</th>
+                      <th>Email</th>
+                      <th>Acciones</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr *ngFor="let empleado of empleadosFiltrados" class="table-row">
+                      <td>{{ empleado.employee_code }}</td>
+                      <td>{{ empleado.first_name }} {{ empleado.middle_name }} {{ empleado.last_name }}</td>
+                      <td>{{ empleado.email }}</td>
+                      <td>
+                        <button nbButton (click)="viewEmployeeDetails(empleado.employee_id)" outline size="small">
+                          Ver detalles
+                        </button>
+                      </td>
+                    </tr>
+                  </tbody>
+                </nb-table>
+              </nb-card-body>
+            </nb-card>
+          </div>
+        </div>
+      </div>
+    </nb-layout-column>
+  </nb-layout>
+  
+  <style>
+    /* Estilo para resaltar la opción seleccionada */
+    .selected {
+      background-color: #d0e4f7;
+      font-weight: bold;
+      border-left: 4px solid #007bff;
+    }
+  
+    .selected h2 {
+      color: #007bff;
+    }
+  
+    .steps-container {
+      margin-bottom: 20px;
+    }
+  
+    .sidebar-section h6 {
+      margin-top: 20px;
+      font-weight: bold;
+    }
+  
+    .list-group-item {
+      cursor: pointer;
+      padding: 10px;
+      border-radius: 4px;
+    }
+  
+    .list-group-item:hover {
+      background-color: #f1f1f1;
+    }
+  </style>
+  

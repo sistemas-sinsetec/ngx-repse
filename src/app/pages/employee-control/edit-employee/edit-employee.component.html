@@ -1,0 +1,130 @@
+<nb-layout>
+    <nb-layout-column>
+  
+      <!-- Contenedor principal -->
+      <nb-card>
+        <nb-card-body>
+          <form #empleadoForm="ngForm" (ngSubmit)="enviarSolicitudPendiente(empleadoForm)">
+  
+            <!-- Selección de empleado -->
+            <nb-form-field>
+              <label>Seleccionar Empleado</label>
+              <nb-select id="employeeSelect" (selectedChange)="onSelectEmployee($event)" placeholder="Seleccionar Empleado">
+                <nb-option value="" disabled selected>Seleccionar Empleado</nb-option>
+                <nb-option *ngFor="let empleado of empleadosPendientes" [value]="empleado.employee_id">
+                  {{ empleado.first_name }} {{ empleado.last_name }}
+                </nb-option>
+              </nb-select>
+            </nb-form-field>
+  
+            <!-- Detalles del empleado -->
+            <nb-card *ngIf="selectedEmployee" class="mt-4">
+              <nb-card-header>Editar Empleado Pendiente</nb-card-header>
+              <nb-card-body>
+  
+                <!-- Datos personales -->
+                <h5>Datos Personales</h5>
+                <nb-divider></nb-divider>
+  
+                <nb-form-field>
+                  <label>Nombre</label>
+                  <input nbInput placeholder="Nombre" name="nombre" [(ngModel)]="selectedEmployee.first_name" required />
+                </nb-form-field>
+  
+                <nb-form-field>
+                  <label>Apellido Paterno</label>
+                  <input nbInput placeholder="Apellido Paterno" name="apellidoPaterno" [(ngModel)]="selectedEmployee.last_name" required />
+                </nb-form-field>
+  
+                <nb-form-field>
+                  <label>Apellido Materno</label>
+                  <input nbInput placeholder="Apellido Materno" name="apellidoMaterno" [(ngModel)]="selectedEmployee.middle_name" required />
+                </nb-form-field>
+  
+                <nb-form-field>
+                  <label>CURP</label>
+                  <input nbInput placeholder="CURP" maxlength="18" name="curp" [(ngModel)]="selectedEmployee.curp" required />
+                </nb-form-field>
+  
+                <nb-form-field>
+                  <label>RFC</label>
+                  <input nbInput placeholder="RFC" maxlength="13" name="rfc" [(ngModel)]="selectedEmployee.rfc" required />
+                </nb-form-field>
+  
+                <nb-form-field>
+                  <label>Teléfono</label>
+                  <input nbInput placeholder="Teléfono" type="tel" maxlength="10" name="telefono" [(ngModel)]="selectedEmployee.phone_number" />
+                </nb-form-field>
+  
+                <nb-form-field>
+                  <label>Correo Electrónico</label>
+                  <input nbInput placeholder="Correo Electrónico" type="email" name="correoElectronico" [(ngModel)]="selectedEmployee.email" />
+                </nb-form-field>
+  
+                <!-- Información financiera -->
+                <h5>Información Financiera y Bancaria</h5>
+                <nb-divider></nb-divider>
+  
+                <nb-form-field>
+                  <label>Número de Seguro Social</label>
+                  <input nbInput placeholder="Número de Seguro Social" maxlength="11" name="numeroSeguroSocial" [(ngModel)]="selectedEmployee.social_security_number" />
+                </nb-form-field>
+  
+                <nb-form-field>
+                  <label>Número de Cuenta Bancaria</label>
+                  <input nbInput placeholder="Cuenta Bancaria" maxlength="12" name="numeroCuenta" [(ngModel)]="selectedEmployee.bank_account_number" />
+                </nb-form-field>
+  
+                <nb-form-field>
+                  <label>Banco</label>
+                  <input nbInput placeholder="Banco" name="nombreBanco" [(ngModel)]="selectedEmployee.bank_name" />
+                </nb-form-field>
+  
+                <!-- Información laboral -->
+                <h5>Información Laboral</h5>
+                <nb-divider></nb-divider>
+  
+                <nb-form-field>
+                  <label>Departamento</label>
+                  <nb-select name="departamento" [(ngModel)]="selectedEmployee.department_id">
+                    <nb-option *ngFor="let departamento of departamentos" [value]="departamento.department_id">
+                      {{ departamento.department_name }}
+                    </nb-option>
+                  </nb-select>
+                </nb-form-field>
+  
+                <nb-form-field>
+                  <label>Puesto</label>
+                  <nb-select name="puesto" [(ngModel)]="selectedEmployee.position_id">
+                    <nb-option *ngFor="let puesto of puestos" [value]="puesto.position_id">
+                      {{ puesto.position_name }}
+                    </nb-option>
+                  </nb-select>
+                </nb-form-field>
+  
+                <nb-form-field>
+                  <label>Turno</label>
+                  <nb-select name="turno" [(ngModel)]="selectedEmployee.shift_id">
+                    <nb-option *ngFor="let turno of turnos" [value]="turno.shift_id">
+                      {{ turno.shift_name }}
+                    </nb-option>
+                  </nb-select>
+                </nb-form-field>
+  
+                <!-- Botones de acción -->
+                <div class="button-group mt-4">
+                  <button nbButton status="success" type="submit">Actualizar Solicitud</button>
+                  <button nbButton status="danger" (click)="eliminarSolicitud()">Eliminar Solicitud</button>
+                  <button nbButton status="warning" (click)="rechazarSolicitud()">Rechazar Solicitud</button>
+                </div>
+  
+              </nb-card-body>
+            </nb-card>
+  
+          </form>
+        </nb-card-body>
+      </nb-card>
+  
+    </nb-layout-column>
+  </nb-layout>
+  

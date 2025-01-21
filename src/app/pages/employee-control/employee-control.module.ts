@@ -19,7 +19,9 @@ import {
   NbAccordionModule,
   NbInputModule,
   NbTagModule,
-  NbUserModule
+  NbUserModule,
+  NbLayoutComponent,
+  NbSelectLabelComponent,
 } from '@nebular/theme';
 import { ThemeModule } from '../../@theme/theme.module';
 
@@ -33,6 +35,7 @@ import { IonicModule } from '@ionic/angular';
 import { RequestsEmployeesComponent } from './requests-employees/requests-employees.component';
 import { EmployeeViewComponent } from './employee-view/employee-view.component';
 import { EmployeeDetailsComponent } from './employee-details/employee-details.component';
+import { EditEmployeeComponent } from './edit-employee/edit-employee.component';
 
 @NgModule({
   declarations: [
@@ -40,6 +43,7 @@ import { EmployeeDetailsComponent } from './employee-details/employee-details.co
     RequestsEmployeesComponent,
     EmployeeViewComponent,
     EmployeeDetailsComponent,
+    EditEmployeeComponent,
    
 
   ],

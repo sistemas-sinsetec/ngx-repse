@@ -41,7 +41,7 @@ interface Departamento {
   styleUrls: ['./employee-view.component.scss']
 })
 
-export class EmployeeViewPage implements OnInit {
+export class EmployeeViewComponent implements OnInit {
   departamentos: Departamento[] = [];
   puestos: Puesto[] = [];
   turnos: Turno[] = [];
