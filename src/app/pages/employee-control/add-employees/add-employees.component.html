@@ -35,43 +35,97 @@
                         <nb-card-body>
                             <form #empleadoForm="ngForm" (ngSubmit)="onSubmit(empleadoForm)">
                                 <!-- Sección: Datos Personales -->
-                                <h4>Datos Personales</h4>
+                                <h4 class="m-0">Datos Personales</h4>
                                 <hr />
-                                <div class="form-group">
-                                    <label for="nombre">Nombre*</label>
-                                    <input nbInput type="text" class="form-control" name="nombre"
-                                        [(ngModel)]="empleado.nombre" required />
-                                </div>
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                      <label for="nombre">Nombre*</label>
+                                      <input nbInput fullWidth placeholder="Nombre" name="nombre" [(ngModel)]="empleado.nombre" required />
+                                    </div>
+                                  </div>
 
-                                <div class="form-group mt-3">
-                                    <label for="apellidoPaterno">Apellido Paterno*</label>
-                                    <input nbInput type="text" class="form-control" name="apellidoPaterno"
+                                  <div class="col-md-6">
+                                    <div class="form-group">
+                                      <label for="apellidoPaterno">Apellido Paterno*</label>
+                                      <input nbInput fullWidth placeholder="Apellido Paterno" name="apellidoPaterno"
                                         [(ngModel)]="empleado.apellidoPaterno" required />
-                                </div>
+                                    </div>
+                                  </div>
 
-                                <div class="form-group mt-3">
-                                    <label for="apellidoMaterno">Apellido Materno*</label>
-                                    <input nbInput type="text" class="form-control" name="apellidoMaterno"
+                                  <div class="col-md-6 mt-3">
+                                    <div class="form-group">
+                                      <label for="apellidoMaterno">Apellido Materno*</label>
+                                      <input nbInput fullWidth placeholder="Apellido Materno" name="apellidoMaterno"
                                         [(ngModel)]="empleado.apellidoMaterno" required />
-                                </div>
+                                    </div>
+                                  </div>
 
-                                <div class="form-group mt-3">
-                                    <label for="fechaNacimiento">Fecha de Nacimiento</label>
-                                    <input nbInput type="date" class="form-control" name="fechaNacimiento"
-                                        [(ngModel)]="empleado.fechaNacimiento" />
-                                </div>
+                                  <div class="col-md-6 mt-3">
+                                    <div class="form-group">
+                                      <label for="fechaNacimiento">Fecha de Nacimiento</label>
+                                      <input nbInput fullWidth type="date" name="fechaNacimiento" [(ngModel)]="empleado.fechaNacimiento" />
+                                    </div>
+                                  </div>
 
-                                <div class="form-group mt-3">
-                                    <label for="lugarNacimiento">Lugar de Nacimiento</label>
-                                    <input nbInput type="text" class="form-control" name="lugarNacimiento"
+                                  <div class="col-md-6 mt-3">
+                                    <div class="form-group">
+                                      <label for="lugarNacimiento">Lugar de Nacimiento</label>
+                                      <input nbInput fullWidth placeholder="Lugar de Nacimiento" name="lugarNacimiento"
                                         [(ngModel)]="empleado.lugarNacimiento" />
-                                </div>
+                                    </div>
+                                  </div>
 
-                                <div class="form-group mt-3">
-                                    <label for="curp">CURP*</label>
-                                    <input nbInput type="text" class="form-control" name="curp"
-                                        [(ngModel)]="empleado.curp" maxlength="18" minlength="18" required />
-                                </div>
+                                  <div class="col-md-6 mt-3">
+                                    <div class="form-group">
+                                      <label for="curp">CURP*</label>
+                                      <input nbInput fullWidth placeholder="CURP" name="curp" [(ngModel)]="empleado.curp" maxlength="18" minlength="18"
+                                        required />
+                                    </div>
+                                  </div>
+                                  
+                                  <div class="col-md-6 mt-3">
+                                    <div class="form-group">
+                                      <label for="rfc">RFC</label>
+                                      <input nbInput fullWidth placeholder="RFC" name="rfc" [(ngModel)]="empleado.rfc" maxlength="13"
+                                        minlength="13" />
+                                    </div>
+                                  </div>
+            
+                                  <div class="col-md-6 mt-3">
+                                    <div class="form-group">
+                                      <label for="telefono">Número de Teléfono</label>
+                                      <input nbInput fullWidth placeholder="Número de Teléfono" name="telefono" [(ngModel)]="empleado.telefono"
+                                        maxlength="10" minlength="10" />
+                                    </div>
+                                  </div>
+            
+                                  <div class="col-md-6 mt-3">
+                                    <div class="form-group">
+                                      <label for="correoElectronico">Correo Electrónico</label>
+                                      <input nbInput fullWidth type="email" placeholder="Correo Electrónico" name="correoElectronico"
+                                        [(ngModel)]="empleado.correoElectronico" />
+                                    </div>
+                                  </div>
+                            
+                                  <div class="col-md-6 mt-3">
+                                    <div class="form-group">
+                                      <label for="sexo">Género</label>
+                                      <nb-select placeholder="Seleccionar" fullWidth name="sexo" [(ngModel)]="empleado.sexo">
+                                        <nb-option *ngFor="let gender of genders" [value]="gender.gender_id">{{ gender.gender_name }}</nb-option>
+                                      </nb-select>
+                                    </div>
+                                  </div>
+                            
+                                  <div class="col-md-6 mt-3">
+                                    <div class="form-group">
+                                      <label for="estadoCivil">Estado Civil</label>
+                                      <nb-select placeholder="Seleccionar" fullWidth name="estadoCivil" [(ngModel)]="empleado.estadoCivil">
+                                        <nb-option *ngFor="let status of maritalStatuses" [value]="status.status_id">{{ status.status_name }}
+                                        </nb-option>
+                                      </nb-select>
+                                    </div>
+                                  </div>
+                                
 
                                 <!-- Sección: Información Financiera y Bancaria -->
                                 <h4 class="mt-4">Información Financiera y Bancaria</h4>

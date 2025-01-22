@@ -84,6 +84,11 @@ const routes: Routes = [{
         .then(m => m.ProjectControlModule),
     },
     {
+      path: 'employee-control',
+      loadChildren: () => import('./employee-control/employee-control.module')
+        .then(m => m.EmployeeControlModule),
+    },
+    {
       path: '',
       redirectTo: 'dashboard',
       pathMatch: 'full',
