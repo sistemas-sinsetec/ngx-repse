@@ -1,11 +1,10 @@
 <nb-layout>
   <!-- Barra lateral -->
-  <nb-sidebar tag="menu-sidebar" state="expanded" class="left-column" [fixed]="false">
-    <nb-card>
-      <nb-card-header>
+  <nb-sidebar tag="menu-sidebar" state="expanded" class="left-column" [fixed]="true" right >
+
         <h5>Solicitudes Registradas (Últimos 15 días)</h5>
-      </nb-card-header>
-      <nb-card-body>
+
+
         <nb-list>
           <nb-list-item *ngFor="let solicitud of solicitudes">
             <div>
@@ -19,8 +18,7 @@
             </div>
           </nb-list-item>
         </nb-list>
-      </nb-card-body>
-    </nb-card>
+
   </nb-sidebar>
 
   <!-- Columna principal -->
@@ -103,7 +101,8 @@
                     *ngIf="sharedService.hasPermission('Empleados', 'Aceptar solicitudes de empleados')">*</span></label>
                 <input nbInput type="tel" placeholder="Número de Teléfono" name="telefono" maxlength="10" minlength="10"
                   [(ngModel)]="selectedEmployee.phone_number" (input)="checkAllFieldsCompleted()"
-                  [disabled]="sharedService.hasPermission('Empleados', 'Procesar empleados')" />
+                  [disabled]="sharedService.hasPermission('Empleados', 'Procesar empleados')"
+                  pattern="\d*" oninput="this.value = this.value.replace(/[^0-9]/g, '')" />
               </nb-form-field>
 
               <nb-form-field>
@@ -151,15 +150,17 @@
                     <input nbInput type="text" placeholder="Número de Seguro Social" name="numeroSeguroSocial"
                       maxlength="11" minlength="11" [(ngModel)]="selectedEmployee.social_security_number"
                       (input)="checkAllFieldsCompleted()"
-                      [disabled]="sharedService.hasPermission('Empleados', 'Procesar empleados')" />
+                      [disabled]="sharedService.hasPermission('Empleados', 'Procesar empleados')"
+                      pattern="\d*" oninput="this.value = this.value.replace(/[^0-9]/g, '')" />
                   </nb-form-field>
 
                   <nb-form-field>
                     <label for="numeroCuenta">Número de Cuenta Bancaria</label>
-                    <input nbInput type="number" placeholder="10 a 12 dígitos" name="numeroCuenta" maxlength="12"
+                    <input nbInput type="text" placeholder="10 a 12 dígitos" name="numeroCuenta" maxlength="12"
                       inputmode="numeric" [(ngModel)]="selectedEmployee.bank_account_number"
                       (input)="checkAllFieldsCompleted()"
-                      [disabled]="sharedService.hasPermission('Empleados', 'Procesar empleados')" />
+                      [disabled]="sharedService.hasPermission('Empleados', 'Procesar empleados')"
+                      pattern="\d*" oninput="this.value = this.value.replace(/[^0-9]/g, '')" />
                   </nb-form-field>
 
                   <nb-form-field>
@@ -178,9 +179,10 @@
 
                   <nb-form-field>
                     <label for="clabeInterbancaria">CLABE Interbancaria</label>
-                    <input nbInput type="number" placeholder="18 dígitos" name="clabeInterbancaria" maxlength="18"
+                    <input nbInput type="text" placeholder="18 dígitos" name="clabeInterbancaria" maxlength="18" 
                       inputmode="numeric" [(ngModel)]="selectedEmployee.clabe" (input)="checkAllFieldsCompleted()"
-                      [disabled]="sharedService.hasPermission('Empleados', 'Procesar empleados')" />
+                      [disabled]="sharedService.hasPermission('Empleados', 'Procesar empleados')"
+                      pattern="\d*" oninput="this.value = this.value.replace(/[^0-9]/g, '')" />
                   </nb-form-field>
                 </nb-card-body>
               </nb-card>
@@ -262,7 +264,8 @@
                     <input nbInput type="tel" placeholder="Número de Emergencia" name="numEmergencia" maxlength="10"
                       minlength="10" [(ngModel)]="selectedEmployee.emergency_contact_number"
                       (input)="checkAllFieldsCompleted()"
-                      [disabled]="sharedService.hasPermission('Empleados', 'Procesar empleados')" />
+                      [disabled]="sharedService.hasPermission('Empleados', 'Procesar empleados')"
+                      pattern="\d*" oninput="this.value = this.value.replace(/[^0-9]/g, '')" />
                   </nb-form-field>
                 </nb-card-body>
               </nb-card>
