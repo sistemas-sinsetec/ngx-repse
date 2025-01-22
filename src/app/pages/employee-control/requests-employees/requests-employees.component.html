@@ -1,1 +1,82 @@
-<p>requests-employees works!</p>
+<nb-layout>
+        <nb-layout-column>
+        <nb-card>
+            <nb-card-header> <h2>Registrar solicitud de empleado</h2> </nb-card-header>
+            <nb-card-body>
+                <form #newForm="ngForm" (ngSubmit)="enviarSolicitudPendiente(newForm)">
+                    <p>Campos con un * son obligatorios</p>  
+                    <label for="nombre">Nombre*</label>
+                    <input nbInput name="nombre" fullWidth shape="semi-round" 
+                    type="text" placeholder="Introduzca su nombre">
+
+                    <label for="apellidoPaterno">Apellido Paterno*</label>
+                    <input nbInput name="apellidoPaterno" fullWidth shape="semi-round" 
+                    type="text" placeholder="Introduzca su apellido paterno">
+
+                    <label for="apellidoMaterno">Apellido Materno*</label>
+                    <input nbInput name="apellidoMaterno" fullWidth shape="semi-round" 
+                    type="text" placeholder="Introduzca su apellido Materno">
+
+                    <label for="fechaNacimiento">Fecha de nacimiento</label>
+                    <input nbInput name="fechaNacimiento" fullWidth shape="semi-round" 
+                    type="date" (input)="checkAllFieldsCompleted()"
+                    [disabled]="sharedService.hasPermission('Empleados', 'Procesar empleados')">
+
+                    <label for="lugarNacimiento">Lugar de nacimiento</label>
+                    <input nbInput name="lugarNacimiento" fullWidth shape="semi-round" 
+                    type="text" (input)="checkAllFieldsCompleted()"
+                    placeholder="Introduzca su lugar de nacimiento"
+                    [disabled]="sharedService.hasPermission('Empleados', 'Procesar empleados')">
+
+                    
+                    <label for="curp">CURP*</label>
+                    <input nbInput type="text" placeholder="CURP" name="curp" maxlength="18" minlength="18"
+                    (input)="checkAllFieldsCompleted()" fullWidth shape="semi-round" required
+                    [disabled]="sharedService.hasPermission('Empleados', 'Procesar empleados')" />
+
+                    <label for="telefono">Número de Teléfono<span
+                        *ngIf="sharedService.hasPermission('Empleados', 'Aceptar solicitudes de empleados')">*</span></label>
+                    <input nbInput type="tel" placeholder="Número de Teléfono" name="telefono" maxlength="10" minlength="10"
+                      (input)="checkAllFieldsCompleted()" shape="semi-round" fullWidth
+                      [disabled]="sharedService.hasPermission('Empleados', 'Procesar empleados')" pattern="\d*"
+                      oninput="this.value = this.value.replace(/[^0-9]/g, '')" />
+
+                      <label for="correoElectronico">Correo Electrónico<span
+                        *ngIf="sharedService.hasPermission('Empleados', 'Aceptar solicitudes de empleados')">*</span></label>
+                    <input nbInput fullWidth type="email" placeholder="Correo electrónico" name="correoElectronico"
+                    (input)="checkAllFieldsCompleted()" shape="semi-round"
+                    [disabled]="sharedService.hasPermission('Empleados', 'Procesar empleados')" />
+
+                    <label for="sexo">Género</label>
+                    <nb-select name="sexo" (selectedChange)="checkAllFieldsCompleted()" shape="semi-round" fullWidth
+                      [disabled]="sharedService.hasPermission('Empleados', 'Procesar empleados')" placeholder="Seleccionar">
+                      <nb-option *ngFor="let gender of genders" [value]="gender.gender_id">
+                        {{ gender.gender_name }}
+                      </nb-option>
+                    </nb-select>
+
+                   <!--- <label for="estadoCivil">Estado Civil</label>
+                    <nb-select name="estadoCivil"
+                      (change)="checkAllFieldsCompleted()" fullWidth shape="semi-round" placeholder="Seleccionar"
+                      [disabled]="sharedService.hasPermission('Empleados', 'Procesar empleados')">
+                      <option value="" disabled>Seleccionar</option>
+                      <option *ngFor="let status of maritalStatuses" [value]="status.status_id">
+                        {{ status.status_name }}
+                      </option>
+                    </nb-select>
+
+                -->
+
+                
+                
+                </form>
+                </nb-card-body>
+          </nb-card>
+    </nb-layout-column>
+    <nb-layout-column>
+        <nb-card>
+            <nb-card-header>Ultimos 15 registros</nb-card-header>
+        </nb-card>
+    </nb-layout-column>
+
+  </nb-layout>

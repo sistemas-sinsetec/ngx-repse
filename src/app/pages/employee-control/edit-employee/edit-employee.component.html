@@ -1,23 +1,23 @@
 <nb-layout>
   <!-- Barra lateral -->
-  <nb-sidebar tag="menu-sidebar" state="expanded" class="left-column" [fixed]="true" right >
+  <nb-sidebar tag="menu-sidebar" state="expanded" class="left-column" [fixed]="true" right>
 
-        <h5>Solicitudes Registradas (Últimos 15 días)</h5>
+    <h5>Solicitudes Registradas (Últimos 15 días)</h5>
 
 
-        <nb-list>
-          <nb-list-item *ngFor="let solicitud of solicitudes">
-            <div>
-              <h6>Folio: {{ solicitud.request_id }}</h6>
-              <p>Empleado: {{ solicitud.full_name }}</p>
-              <p>Departamento: {{ solicitud.department_name }}</p>
-              <p>Puesto: {{ solicitud.position_name }}</p>
-              <p>Estado: {{ getStatusDescription(solicitud.request_status) }}</p>
-              <p>Fecha de Solicitud: {{ solicitud.request_created_at | date: 'short' }}</p>
-              <p>Última Actualización: {{ solicitud.request_updated_at | date: 'short' }}</p>
-            </div>
-          </nb-list-item>
-        </nb-list>
+    <nb-list>
+      <nb-list-item *ngFor="let solicitud of solicitudes">
+        <div>
+          <h6>Folio: {{ solicitud.request_id }}</h6>
+          <p>Empleado: {{ solicitud.full_name }}</p>
+          <p>Departamento: {{ solicitud.department_name }}</p>
+          <p>Puesto: {{ solicitud.position_name }}</p>
+          <p>Estado: {{ getStatusDescription(solicitud.request_status) }}</p>
+          <p>Fecha de Solicitud: {{ solicitud.request_created_at | date: 'short' }}</p>
+          <p>Última Actualización: {{ solicitud.request_updated_at | date: 'short' }}</p>
+        </div>
+      </nb-list-item>
+    </nb-list>
 
   </nb-sidebar>
 
@@ -27,13 +27,12 @@
       <nb-card-body>
         <form #empleadoForm="ngForm" (ngSubmit)="enviarSolicitudPendiente(empleadoForm)">
           <!-- Selección de empleado -->
-            <label>Seleccionar Empleado</label>
-            <nb-select id="employeeSelect" placeholder="Seleccionar Empleado"
-              (selectedChange)="onSelectEmployee($event)">
-              <nb-option *ngFor="let empleado of empleadosPendientes" [value]="empleado.employee_id">
-                {{ empleado.first_name }} {{ empleado.last_name }}
-              </nb-option>
-            </nb-select>
+          <label>Seleccionar Empleado</label>
+          <nb-select id="employeeSelect" placeholder="Seleccionar Empleado" (selectedChange)="onSelectEmployee($event)">
+            <nb-option *ngFor="let empleado of empleadosPendientes" [value]="empleado.employee_id">
+              {{ empleado.first_name }} {{ empleado.last_name }}
+            </nb-option>
+          </nb-select>
 
           <!-- Detalles del empleado -->
           <nb-card *ngIf="selectedEmployee" class="mt-4">
@@ -45,14 +44,8 @@
 
               <nb-form-field>
                 <label for="nombre">Nombre</label>
-                <input
-                  nbInput
-                  id="nombre"
-                  placeholder="Nombre"
-                  name="nombre"
-                  [(ngModel)]="selectedEmployee.first_name"
-                  required
-                />
+                <input nbInput id="nombre" placeholder="Nombre" name="nombre" [(ngModel)]="selectedEmployee.first_name"
+                  required />
               </nb-form-field>
 
               <nb-form-field>
@@ -69,7 +62,7 @@
 
               <nb-form-field>
                 <label for="fechaNacimiento">Fecha de Nacimiento</label>
-                <input nbInput type="date" placeholder="Fecha de Nacimiento" name="fechaNacimiento"
+                <input nbInput type="date" name="fechaNacimiento"
                   [(ngModel)]="selectedEmployee.birth_date" (input)="checkAllFieldsCompleted()"
                   [disabled]="sharedService.hasPermission('Empleados', 'Procesar empleados')" />
               </nb-form-field>
@@ -78,7 +71,7 @@
                 <label for="lugarNacimiento">Lugar de Nacimiento</label>
                 <input nbInput type="text" placeholder="Lugar de Nacimiento" name="lugarNacimiento"
                   [(ngModel)]="selectedEmployee.birth_place" (input)="checkAllFieldsCompleted()"
-                  [disabled]="sharedService.hasPermission('Empleados', 'Procesar empleados')" />
+                  [disabled]="sharedService.hasPermission('Empleados', 'Procesar empleados')"/>
               </nb-form-field>
 
               <nb-form-field>
@@ -101,8 +94,8 @@
                     *ngIf="sharedService.hasPermission('Empleados', 'Aceptar solicitudes de empleados')">*</span></label>
                 <input nbInput type="tel" placeholder="Número de Teléfono" name="telefono" maxlength="10" minlength="10"
                   [(ngModel)]="selectedEmployee.phone_number" (input)="checkAllFieldsCompleted()"
-                  [disabled]="sharedService.hasPermission('Empleados', 'Procesar empleados')"
-                  pattern="\d*" oninput="this.value = this.value.replace(/[^0-9]/g, '')" />
+                  [disabled]="sharedService.hasPermission('Empleados', 'Procesar empleados')" pattern="\d*"
+                  oninput="this.value = this.value.replace(/[^0-9]/g, '')" />
               </nb-form-field>
 
               <nb-form-field>
@@ -113,14 +106,11 @@
                   [disabled]="sharedService.hasPermission('Empleados', 'Procesar empleados')" />
               </nb-form-field>
 
-                            <!-- Género -->
+              <!-- Género -->
               <label for="sexo">Género</label>
-              <nb-select
-                name="sexo"
-                [(ngModel)]="selectedEmployee.gender_id"
+              <nb-select name="sexo" [(ngModel)]="selectedEmployee.gender_id"
                 (selectedChange)="checkAllFieldsCompleted()"
-                [disabled]="sharedService.hasPermission('Empleados', 'Procesar empleados')"
-              >
+                [disabled]="sharedService.hasPermission('Empleados', 'Procesar empleados')">
                 <nb-option value="" disabled>Seleccionar</nb-option>
                 <nb-option *ngFor="let gender of genders" [value]="gender.gender_id">
                   {{ gender.gender_name }}
@@ -129,13 +119,9 @@
 
               <!-- Estado Civil -->
               <label for="estadoCivil">Estado Civil</label>
-              <select
-                name="estadoCivil"
-                [(ngModel)]="selectedEmployee.marital_status_id"
+              <select name="estadoCivil" [(ngModel)]="selectedEmployee.marital_status_id"
                 (change)="checkAllFieldsCompleted()"
-                [disabled]="sharedService.hasPermission('Empleados', 'Procesar empleados')"
-              >
-                <option value="" disabled>Seleccionar</option>
+                [disabled]="sharedService.hasPermission('Empleados', 'Procesar empleados')">
                 <option *ngFor="let status of maritalStatuses" [value]="status.status_id">
                   {{ status.status_name }}
                 </option>
@@ -150,8 +136,8 @@
                     <input nbInput type="text" placeholder="Número de Seguro Social" name="numeroSeguroSocial"
                       maxlength="11" minlength="11" [(ngModel)]="selectedEmployee.social_security_number"
                       (input)="checkAllFieldsCompleted()"
-                      [disabled]="sharedService.hasPermission('Empleados', 'Procesar empleados')"
-                      pattern="\d*" oninput="this.value = this.value.replace(/[^0-9]/g, '')" />
+                      [disabled]="sharedService.hasPermission('Empleados', 'Procesar empleados')" pattern="\d*"
+                      oninput="this.value = this.value.replace(/[^0-9]/g, '')" />
                   </nb-form-field>
 
                   <nb-form-field>
@@ -159,8 +145,8 @@
                     <input nbInput type="text" placeholder="10 a 12 dígitos" name="numeroCuenta" maxlength="12"
                       inputmode="numeric" [(ngModel)]="selectedEmployee.bank_account_number"
                       (input)="checkAllFieldsCompleted()"
-                      [disabled]="sharedService.hasPermission('Empleados', 'Procesar empleados')"
-                      pattern="\d*" oninput="this.value = this.value.replace(/[^0-9]/g, '')" />
+                      [disabled]="sharedService.hasPermission('Empleados', 'Procesar empleados')" pattern="\d*"
+                      oninput="this.value = this.value.replace(/[^0-9]/g, '')" />
                   </nb-form-field>
 
                   <nb-form-field>
@@ -179,10 +165,10 @@
 
                   <nb-form-field>
                     <label for="clabeInterbancaria">CLABE Interbancaria</label>
-                    <input nbInput type="text" placeholder="18 dígitos" name="clabeInterbancaria" maxlength="18" 
+                    <input nbInput type="text" placeholder="18 dígitos" name="clabeInterbancaria" maxlength="18"
                       inputmode="numeric" [(ngModel)]="selectedEmployee.clabe" (input)="checkAllFieldsCompleted()"
-                      [disabled]="sharedService.hasPermission('Empleados', 'Procesar empleados')"
-                      pattern="\d*" oninput="this.value = this.value.replace(/[^0-9]/g, '')" />
+                      [disabled]="sharedService.hasPermission('Empleados', 'Procesar empleados')" pattern="\d*"
+                      oninput="this.value = this.value.replace(/[^0-9]/g, '')" />
                   </nb-form-field>
                 </nb-card-body>
               </nb-card>
@@ -264,8 +250,8 @@
                     <input nbInput type="tel" placeholder="Número de Emergencia" name="numEmergencia" maxlength="10"
                       minlength="10" [(ngModel)]="selectedEmployee.emergency_contact_number"
                       (input)="checkAllFieldsCompleted()"
-                      [disabled]="sharedService.hasPermission('Empleados', 'Procesar empleados')"
-                      pattern="\d*" oninput="this.value = this.value.replace(/[^0-9]/g, '')" />
+                      [disabled]="sharedService.hasPermission('Empleados', 'Procesar empleados')" pattern="\d*"
+                      oninput="this.value = this.value.replace(/[^0-9]/g, '')" />
                   </nb-form-field>
                 </nb-card-body>
               </nb-card>
@@ -490,8 +476,6 @@
 
                 </nb-card-body>
               </nb-card>
-
-
             </nb-card-body>
           </nb-card>
         </form>

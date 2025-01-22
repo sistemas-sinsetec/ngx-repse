@@ -469,7 +469,7 @@ getStatusDescription(status: string): string {
     console.log('Empleado seleccionado:', this.selectedEmployee); // Ver el empleado seleccionado
   
     if (form.valid && this.selectedEmployee) {
-      const data: any = {
+      const data: any = { 
         id: this.selectedEmployee.employee_id,
         departamento: this.selectedEmployee.department_id,
         puesto: this.selectedEmployee.position_id,
