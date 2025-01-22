@@ -44,6 +44,11 @@ const routes: Routes = [{
         .then(m => m.ExtraComponentsModule),
     },
     {
+      path: 'employee-control',
+      loadChildren: () => import('./employee-control/employee-control.module')
+        .then(m => m.EmployeeControlModule),
+    },
+    {
       path: 'maps',
       loadChildren: () => import('./maps/maps.module')
         .then(m => m.MapsModule),

@@ -1,0 +1,158 @@
+<nb-layout>
+    <nb-layout-column>
+  
+      <!-- Contenedor del perfil -->
+      <div class="profile-container text-center">
+  
+        <!-- Foto de perfil -->
+        <div class="profile-picture-container mb-4">
+          <p *ngIf="employee.request_id" class="folio-text">
+            Folio: {{ employee.request_id }}
+          </p>
+          <img [src]="employee.photo || 'assets/image/default-profile.png'" alt="Foto de perfil" class="profile-picture">
+          <input type="file" id="photo-input" (change)="onPhotoChange($event)" hidden>
+          <button nbButton status="info" (click)="triggerFileInput('photo-input')">Cambiar Foto</button>
+        </div>
+  
+        <!-- Nombre del empleado -->
+        <h2 class="employee-name">{{ employee.full_name }}</h2>
+        <p class="employee-code">Código: {{ employee.employee_code }}</p>
+  
+        <p *ngIf="employee.folio_number_imss && employee.lot_number_imss">
+          Folio IMSS: {{ employee.folio_number_imss }} <br>
+          Número de Lote IMSS: {{ employee.lot_number_imss }}
+        </p>
+  
+        <p *ngIf="employee.request_id && employee.folio_number_imss && employee.lot_number_imss; else notActiveImss"
+          class="imss-status">
+          Activo en el IMSS
+        </p>
+        <ng-template #notActiveImss>
+          <p class="imss-status">No activo en el IMSS</p>
+        </ng-template>
+  
+        <button nbButton status="success" (click)="downloadEmployeeData()">Descargar Información del Usuario</button>
+      </div>
+  
+      <!-- Tarjetas de información -->
+      <nb-card class="mb-4">
+        <nb-card-header class="bg-primary text-white">
+          <h5 class="mb-0">Información General</h5>
+        </nb-card-header>
+        <nb-card-body>
+          <nb-form-field>
+            <label>Código de Empleado</label>
+            <input nbInput [(ngModel)]="employee.employee_code">
+          </nb-form-field>
+          <nb-form-field>
+            <label>Nombre</label>
+            <input nbInput [(ngModel)]="employee.first_name">
+          </nb-form-field>
+          <nb-form-field>
+            <label>Apellido Paterno</label>
+            <input nbInput [(ngModel)]="employee.last_name">
+          </nb-form-field>
+          <nb-form-field>
+            <label>Apellido Materno</label>
+            <input nbInput [(ngModel)]="employee.middle_name">
+          </nb-form-field>
+          <nb-form-field>
+            <label>Fecha de Nacimiento</label>
+            <input nbInput [(ngModel)]="employee.birth_date" type="date">
+          </nb-form-field>
+          <nb-form-field>
+            <label>Lugar de Nacimiento</label>
+            <input nbInput [(ngModel)]="employee.birth_place">
+          </nb-form-field>
+          <nb-form-field>
+            <label>CURP</label>
+            <input nbInput [(ngModel)]="employee.curp">
+          </nb-form-field>
+          <nb-form-field>
+            <label>RFC</label>
+            <input nbInput [(ngModel)]="employee.rfc">
+          </nb-form-field>
+          <nb-form-field>
+            <label>Teléfono</label>
+            <input nbInput [(ngModel)]="employee.phone_number">
+          </nb-form-field>
+          <nb-form-field>
+            <label>Correo Electrónico</label>
+            <input nbInput [(ngModel)]="employee.email" type="email">
+          </nb-form-field>
+          <nb-form-field>
+            <label>Género</label>
+            <nb-select [(ngModel)]="employee.gender_id">
+              <nb-option *ngFor="let gender of genders" [value]="gender.gender_id">
+                {{ gender.gender_name }}
+              </nb-option>
+            </nb-select>
+          </nb-form-field>
+          <nb-form-field>
+            <label>Estado Civil</label>
+            <nb-select [(ngModel)]="employee.marital_status_id">
+              <nb-option *ngFor="let status of maritalStatuses" [value]="status.status_id">
+                {{ status.status_name }}
+              </nb-option>
+            </nb-select>
+          </nb-form-field>
+          <button nbButton status="primary" (click)="saveGeneralInfo()">Guardar Cambios de Información General</button>
+        </nb-card-body>
+      </nb-card>
+  
+      <!-- Tarjetas similares para Información Financiera, Laboral y de Emergencia -->
+      <nb-card class="mb-4">
+        <nb-card-header class="bg-primary text-white">
+          <h5 class="mb-0">Información Financiera y Bancaria</h5>
+        </nb-card-header>
+        <nb-card-body>
+          <nb-form-field>
+            <label>Número de Seguro Social</label>
+            <input nbInput [(ngModel)]="employee.social_security_number" type="number">
+          </nb-form-field>
+          <nb-form-field>
+            <label>Número de Cuenta Bancaria</label>
+            <input nbInput [(ngModel)]="employee.bank_account_number" type="number">
+          </nb-form-field>
+          <nb-form-field>
+            <label>Banco</label>
+            <input nbInput [(ngModel)]="employee.bank_name">
+          </nb-form-field>
+          <nb-form-field>
+            <label>Sucursal</label>
+            <input nbInput [(ngModel)]="employee.bank_branch">
+          </nb-form-field>
+          <nb-form-field>
+            <label>CLABE Interbancaria</label>
+            <input nbInput [(ngModel)]="employee.clabe" type="number">
+          </nb-form-field>
+          <button nbButton status="primary" (click)="saveFinancialInfo()">Guardar Cambios de Información Financiera</button>
+        </nb-card-body>
+      </nb-card>
+  
+      <!-- Tarjeta de archivos -->
+      <nb-card class="mb-4">
+        <nb-card-header class="bg-primary text-white">
+          <h5 class="mb-0">Archivos del Empleado</h5>
+        </nb-card-header>
+        <nb-card-body>
+          <div *ngFor="let expectedFileType of expectedFileTypes">
+            <label>{{ getLabelForFileType(expectedFileType) }}</label>
+            <div class="d-flex align-items-center">
+              <ng-container *ngIf="getFileByType(expectedFileType) as file; else uploadFile">
+                <button nbButton status="info" (click)="downloadFile(file.file_path)">Descargar</button>
+                <button nbButton status="danger" (click)="deleteFile(file.file_id)">Eliminar</button>
+                <input type="file" id="file-input-{{ file.file_id }}" (change)="onFileChange($event, expectedFileType, file.file_id)" hidden>
+                <button nbButton status="secondary" (click)="triggerFileInput('file-input-' + file.file_id)">Seleccionar Archivo</button>
+              </ng-container>
+              <ng-template #uploadFile>
+                <button nbButton status="secondary" (click)="triggerFileInput('file-input-' + expectedFileType)">Subir Archivo</button>
+                <input type="file" id="file-input-{{ expectedFileType }}" (change)="onFileChange($event, expectedFileType)" hidden>
+              </ng-template>
+            </div>
+          </div>
+        </nb-card-body>
+      </nb-card>
+    </nb-layout-column>
+  </nb-layout>
+  
