@@ -40,7 +40,8 @@ import { RequestsEmployeesComponent } from './requests-employees/requests-employ
 import { EmployeeViewComponent } from './employee-view/employee-view.component';
 import { EmployeeDetailsComponent } from './employee-details/employee-details.component';
 import { EditEmployeeComponent } from './edit-employee/edit-employee.component';
-import { AddEmployeesComponent } from './add-employees/add-employees.component';
+
+
 
 @NgModule({
   declarations: [
@@ -49,7 +50,7 @@ import { AddEmployeesComponent } from './add-employees/add-employees.component';
     EmployeeViewComponent,
     EmployeeDetailsComponent,
     EditEmployeeComponent,
-    AddEmployeesComponent
+
    
 
   ],
