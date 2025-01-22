@@ -24,6 +24,8 @@ import {
   NbSelectLabelComponent,
   NbSidebarComponent,
   NbSidebarModule,
+  NbTreeGridComponent,
+  NbTreeGridModule,
 } from '@nebular/theme';
 import { ThemeModule } from '../../@theme/theme.module';
 
@@ -50,6 +52,7 @@ import { EditEmployeeComponent } from './edit-employee/edit-employee.component';
 
   ],
   imports: [
+    NbTreeGridModule,
     CommonModule,
     ThemeModule,
     NbCardModule,

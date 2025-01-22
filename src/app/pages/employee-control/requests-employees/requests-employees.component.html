@@ -3,7 +3,7 @@
         <nb-card>
             <nb-card-header> <h2>Registrar solicitud de empleado</h2> </nb-card-header>
             <nb-card-body>
-                <form #newForm="ngForm" (ngSubmit)="enviarSolicitudPendiente(newForm)">
+                <form #newForm="ngForm" (ngSubmit)="onSubmit(newForm)">
                     <p>Campos con un * son obligatorios</p>  
                     <label for="nombre">Nombre*</label>
                     <input nbInput name="nombre" fullWidth shape="semi-round" 
@@ -55,17 +55,181 @@
                       </nb-option>
                     </nb-select>
 
-                   <!--- <label for="estadoCivil">Estado Civil</label>
+                    <label for="estadoCivil">Estado Civil</label>
                     <nb-select name="estadoCivil"
                       (change)="checkAllFieldsCompleted()" fullWidth shape="semi-round" placeholder="Seleccionar"
                       [disabled]="sharedService.hasPermission('Empleados', 'Procesar empleados')">
-                      <option value="" disabled>Seleccionar</option>
-                      <option *ngFor="let status of maritalStatuses" [value]="status.status_id">
+                      <nb-option *ngFor="let status of maritalStatuses" [value]="status.status_id">
                         {{ status.status_name }}
-                      </option>
+                      </nb-option>
                     </nb-select>
 
-                -->
+
+                    <h3>Informacion Financiera</h3>
+
+                    <label for="numeroSeguroSocial">Número de Seguro Social*</label>
+                    <input nbInput type="text" placeholder="Número de Seguro Social" name="numeroSeguroSocial"
+                      maxlength="11" minlength="11" fullWidth shape="semi-round"
+                      (input)="checkAllFieldsCompleted()"
+                      [disabled]="sharedService.hasPermission('Empleados', 'Procesar empleados')" pattern="\d*"
+                      oninput="this.value = this.value.replace(/[^0-9]/g, '')" />
+
+                    <label for="numeroCuenta">Número de Cuenta Bancaria</label>
+                    <input nbInput type="text" placeholder="10 a 12 dígitos" name="numeroCuenta" maxlength="12"
+                      inputmode="numeric" fullWidth shape="semi-round"
+                      (input)="checkAllFieldsCompleted()"
+                      [disabled]="sharedService.hasPermission('Empleados', 'Procesar empleados')" pattern="\d*"
+                      oninput="this.value = this.value.replace(/[^0-9]/g, '')" />
+
+                      <label for="nombreBanco">Banco</label>
+                      <input nbInput type="text" placeholder="Nombre del Banco" name="nombreBanco"
+                        fullWidth shape="semi-round" (input)="checkAllFieldsCompleted()"
+                        [disabled]="sharedService.hasPermission('Empleados', 'Procesar empleados')" />
+
+                      <label for="sucursalBanco">Sucursal</label>
+                      <input nbInput type="text" placeholder="Sucursal del Banco" name="sucursalBanco"
+                        fullWidth shape="semi-round" (input)="checkAllFieldsCompleted()"
+                        [disabled]="sharedService.hasPermission('Empleados', 'Procesar empleados')" />
+
+                      <label for="clabeInterbancaria">CLABE Interbancaria</label>
+                      <input nbInput type="text" placeholder="18 dígitos" name="clabeInterbancaria" maxlength="18"
+                        inputmode="numeric" fullWidth shape="semi-round" (input)="checkAllFieldsCompleted()"
+                        [disabled]="sharedService.hasPermission('Empleados', 'Procesar empleados')" pattern="\d*"
+                        oninput="this.value = this.value.replace(/[^0-9]/g, '')" />
+
+                      <h3>Informacion de trabajo</h3>
+
+                      <label for="departamento">Departamento</label>
+                      <nb-select placeholder="Seleccionar" fullWidth shape="semi-round"
+                        [disabled]="sharedService.hasPermission('Empleados', 'Procesar empleados')">
+                        <nb-option *ngFor="let departamento of departamentos" [value]="departamento.department_id">
+                          {{ departamento.department_name }}
+                        </nb-option>
+                      </nb-select>
+
+                      <label for="puesto">Puesto</label>
+                      <nb-select placeholder="Seleccionar" fullWidth shape="semi-round"
+                        [disabled]="sharedService.hasPermission('Empleados', 'Procesar empleados')">
+                        <nb-option value="" disabled>Seleccionar</nb-option>
+                        <nb-option *ngFor="let puesto of puestos" [value]="puesto.position_id">
+                          {{ puesto.position_name }}
+                        </nb-option>
+                      </nb-select>
+
+                      <label for="turno">Turno</label>
+                      <nb-select placeholder="Seleccionar" fullWidth shape="semi-round"
+                        (selectedChange)="checkAllFieldsCompleted()"
+                        [disabled]="sharedService.hasPermission('Empleados', 'Procesar empleados')">
+                        <nb-option *ngFor="let turno of turnos" [value]="turno.shift_id">
+                          {{ turno.shift_name }}
+                        </nb-option>
+                      </nb-select>
+
+                      <label for="fechaInicio">Fecha de Inicio*</label>
+                      <input nbInput type="date" placeholder="Fecha de Inicio" name="fechaInicio"
+                      fullWidth shape="semi-round" (input)="checkAllFieldsCompleted()" required
+                      [disabled]="sharedService.hasPermission('Empleados', 'Procesar empleados')" />
+                      <nb-form-field
+                        *ngIf="sharedService.hasPermission('Empleados', 'Aceptar solicitudes de empleados') || sharedService.hasPermission('Empleados', 'Procesar empleados')">
+                        <label for="netBalance">Sueldo Neto*</label>
+                        <input nbInput type="number" placeholder="Sueldo Neto" name="netBalance"
+                        fullWidth shape="semi-round" (input)="checkAllFieldsCompleted()" />
+                      </nb-form-field>
+
+                      <h3>Contacto de emergencia</h3>
+
+                      <label for="contactoEmergencia">Contacto de Emergencia</label>
+                      <input nbInput type="text" placeholder="Nombre de contacto de emergencia" name="contactoEmergencia"
+                        fullWidth shape="semi-round" (input)="checkAllFieldsCompleted()"
+                        [disabled]="sharedService.hasPermission('Empleados', 'Procesar empleados')" />
+
+                      <label for="numEmergencia">Número de Emergencia</label>
+                      <input nbInput type="tel" placeholder="Número de contacto de emergencia" name="numEmergencia" maxlength="10"
+                        minlength="10" fullWidth shape="semi'rounded"
+                        (input)="checkAllFieldsCompleted()"
+                        [disabled]="sharedService.hasPermission('Empleados', 'Procesar empleados')" pattern="\d*"
+                        oninput="this.value = this.value.replace(/[^0-9]/g, '')" />
+
+                      <h3>Archivos del empleado</h3>
+
+                      <label>Identificación INE (Frente)*</label>
+                      <input nbInput type="file" (change)="onFileChange($event, 'ineFrente')"
+                      [disabled]="sharedService.hasPermission('Empleados', 'Procesar empleados')"
+                      fullWidth shape="semi-round" fullWidth shape="semi'rounded" />
+
+                      <label>Identificación INE (Reverso)*</label>
+                      <input nbInput type="file" (change)="onFileChange($event, 'ineReverso')"
+                      [disabled]="sharedService.hasPermission('Empleados', 'Procesar empleados')"
+                      fullWidth shape="semi'rounded" />
+
+                      <label>Constancia de Situación Fiscal*</label>
+                      <input nbInput type="file" (change)="onFileChange($event, 'constanciaFiscal')"
+                      [disabled]="sharedService.hasPermission('Empleados', 'Procesar empleados')"
+                      fullWidth shape="semi'rounded" />
+
+                      <label>Número de Seguro Social y Unidad Médica</label>
+                      <input nbInput type="file" (change)="onFileChange($event, 'numSeguroSocialArchivo')"
+                      [disabled]="sharedService.hasPermission('Empleados', 'Procesar empleados')"
+                      fullWidth shape="semi'rounded"/>
+                      
+                      <label>Acta de Nacimiento</label>
+                      <input nbInput type="file" (change)="onFileChange($event, 'actaNacimiento')"
+                      [disabled]="sharedService.hasPermission('Empleados', 'Procesar empleados')"
+                      fullWidth shape="semi'rounded"/>
+
+                      <label>Comprobante de Domicilio</label>
+                      <input nbInput type="file" (change)="onFileChange($event, 'comprobanteDomicilio')"
+                      [disabled]="sharedService.hasPermission('Empleados', 'Procesar empleados')"
+                      fullWidth shape="semi'rounded"/>
+
+                      <label>Cuenta Interbancaria<span
+                      *ngIf="sharedService.hasPermission('Empleados', 'Aceptar solicitudes de empleados')">*</span></label>
+                      <input nbInput type="file" (change)="onFileChange($event, 'cuentaInterbancaria')"
+                      [disabled]="sharedService.hasPermission('Empleados', 'Procesar empleados')"
+                      fullWidth shape="semi'rounded"/>
+
+                      <nb-form-field>
+                        <label for="tieneInfonavit">¿Tienes Infonavit?</label>
+                        <nb-select id="tieneInfonavit" placeholder="Seleccionar" [(selected)]="mostrarInfonavit"
+                        (selectedChange)="mostrarOcultarCampo($event)" fullWidth shape="semi-round"
+                        [disabled]="sharedService.hasPermission('Empleados', 'Procesar empleados')">
+                          <nb-option value="no">No</nb-option>
+                          <nb-option value="si">Sí</nb-option>
+                        </nb-select>
+                      </nb-form-field>
+
+                      <nb-form-field *ngIf="mostrarInfonavit">
+                        <label for="retencionInfonavit">Carta de Retención de Infonavit</label>
+                        <input nbInput type="file" (change)="onFileChange($event, 'retencionInfonavit')"
+                        [disabled]="sharedService.hasPermission('Empleados', 'Procesar empleados')"
+                        fullWidth shape="semi'rounded"/>
+                      </nb-form-field>
+
+                      <nb-form-field>
+                        <label for="antecedentesPenales">Carta de No Antecedentes Penales</label>
+                        <input nbInput type="file" (change)="onFileChange($event, 'antecedentesPenales')"
+                        [disabled]="sharedService.hasPermission('Empleados', 'Procesar empleados')"
+                        fullWidth shape="semi'rounded"/>
+                      </nb-form-field>
+
+                      <nb-form-field>
+                        <label for="comprobanteEstudios">Comprobante de Estudios</label>
+                        <input nbInput type="file" (change)="onFileChange($event, 'comprobanteEstudios')"
+                        [disabled]="sharedService.hasPermission('Empleados', 'Procesar empleados')"
+                        fullWidth shape="semi'rounded"/>
+                      </nb-form-field>
+                      <div>
+                        <button nbButton fullWidth shape="round" type="submit" status="primary"
+                        >
+                        Guardar Empleado</button>
+                      </div>
+                      <div *ngIf="allFieldsCompleted">
+                        <button nbButton type="submit">
+                          Enviar Solicitud del Empleado
+                        </button>
+                      </div>
+    
+
 
                 
                 
@@ -75,7 +239,20 @@
     </nb-layout-column>
     <nb-layout-column>
         <nb-card>
-            <nb-card-header>Ultimos 15 registros</nb-card-header>
+            <nb-card-header>Solicitudes Registradas (Últimos 15 días)</nb-card-header>
+            <nb-list>
+              <nb-list-item *ngFor="let solicitud of solicitudes">
+                <div class="requests"> 
+                  <h5>Folio: {{ solicitud.request_id }}</h5>
+                  <p>Empleado: {{ solicitud.full_name }}</p>
+                  <p>Departamento: {{ solicitud.department_name }}</p>
+                  <p>Puesto: {{ solicitud.position_name }}</p>
+                  <p>Estado: {{ getStatusDescription(solicitud.request_status) }}</p>
+                  <p>Fecha de Solicitud: {{ solicitud.request_created_at | date: 'short' }}</p>
+                  <p>Última Actualización: {{ solicitud.request_updated_at | date: 'short' }}</p>
+                </div>
+              </nb-list-item>
+            </nb-list>
         </nb-card>
     </nb-layout-column>
 

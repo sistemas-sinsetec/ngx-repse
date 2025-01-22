@@ -3,10 +3,33 @@
     margin: 0px auto;
 } 
 
-form > p{
+form > p, h3, nb-card-header, h5{
     text-align: center;
+}
+
+.requests {
+    padding: 10px;
+    background-color: rgb(251, 250, 255);
+    border-radius: 5px;
+    border: 1px solid rgb(202, 202, 202);
+    transition: all 0.5s ease;
+}
+
+.requests:hover{
+    border: 1px solid rgb(4, 67, 164);
 }
 
 label{
     margin: 10px;
 }
+
+button{
+    margin-top: 25px;
+    margin-bottom: 15px;
+}
+
+.small-column {
+    width: 25%; /* Ajusta el porcentaje según el tamaño deseado */
+    max-width: 200px; /* Tamaño máximo opcional */
+    word-wrap: break-word; /* Permite ajustar el contenido */
+  }

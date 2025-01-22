@@ -6,7 +6,10 @@ import { SharedService } from '../../../services/shared.service';
 import { NavController, ToastController, LoadingController,  AlertController } from '@ionic/angular';
 import { NbToastrService } from '@nebular/theme';
 import { NgForm } from '@angular/forms';
+
+
 interface Empleado {
+  
   [key: string]: any;
   employee_id: number;
   first_name: string;
@@ -45,6 +48,7 @@ interface Empleado {
 })
 export class RequestsEmployeesComponent {
 
+
   empleadosPendientes: Empleado[] = [];
   selectedEmployee: Empleado | null = null;
   departamentos: any[] = [];
@@ -61,10 +65,10 @@ export class RequestsEmployeesComponent {
 
   solicitudes: any[] = [];
 
+  
+
   constructor(
     private http: HttpClient,
- 
-  
     private authService: AuthService,
     public sharedService: SharedService,
     private companyService: CompanyService,
@@ -77,6 +81,7 @@ export class RequestsEmployeesComponent {
   ngOnInit() {
     this.fetchSolicitudesUltimos15Dias();
     this.loadPermissions();
+    this.fetchMaritalStatuses
   }
 
 
