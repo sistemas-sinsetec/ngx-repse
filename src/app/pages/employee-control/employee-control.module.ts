@@ -19,7 +19,13 @@ import {
   NbAccordionModule,
   NbInputModule,
   NbTagModule,
-  NbUserModule
+  NbUserModule,
+  NbLayoutComponent,
+  NbSelectLabelComponent,
+  NbSidebarComponent,
+  NbSidebarModule,
+  NbTreeGridComponent,
+  NbTreeGridModule,
 } from '@nebular/theme';
 import { ThemeModule } from '../../@theme/theme.module';
 
@@ -31,17 +37,22 @@ import { EmployeeControlRoutingModule } from './employee-control-routing.module'
 
 import { IonicModule } from '@ionic/angular';
 import { RequestsEmployeesComponent } from './requests-employees/requests-employees.component';
-import { AddEmployeesComponent } from './add-employees/add-employees.component';
+import { EmployeeViewComponent } from './employee-view/employee-view.component';
+import { EmployeeDetailsComponent } from './employee-details/employee-details.component';
+import { EditEmployeeComponent } from './edit-employee/edit-employee.component';
 
 @NgModule({
   declarations: [
     employeeControlComponent,
     RequestsEmployeesComponent,
-    AddEmployeesComponent,
+    EmployeeViewComponent,
+    EmployeeDetailsComponent,
+    EditEmployeeComponent,
    
 
   ],
   imports: [
+    NbTreeGridModule,
     CommonModule,
     ThemeModule,
     NbCardModule,
@@ -67,7 +78,8 @@ import { AddEmployeesComponent } from './add-employees/add-employees.component';
     NbInputModule,
     NbTagModule,
     NbUserModule,
-    IonicModule
+    IonicModule,
+    NbSidebarModule,
 
   ]
 })
