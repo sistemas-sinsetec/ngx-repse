@@ -230,10 +230,10 @@ export class AddEmployeesComponent {
     }
   }
 
-  mostrarOcultarCampo(event: any) {
-    this.mostrarInfonavit = event.target.value === 'si';
+  mostrarOcultarCampo(selectedValue: any) {
+    this.mostrarInfonavit = selectedValue === 'si';
   }
-
+  
   async onSubmit(form: NgForm) {
     if (this.isSubmitting) return; // Evita doble envío
     this.isSubmitting = true; // Bloquea envíos adicionales

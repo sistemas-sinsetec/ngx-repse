@@ -3,13 +3,10 @@ import { HttpClient } from '@angular/common/http';
 import { AuthService } from '../../../services/auth.service';
 import { CompanyService } from '../../../services/company.service';
 import { SharedService } from '../../../services/shared.service';
-import { NavController, ToastController, LoadingController,  AlertController } from '@ionic/angular';
+import { NavController, ToastController, LoadingController, AlertController } from '@ionic/angular';
 import { NbToastrService } from '@nebular/theme';
 import { NgForm } from '@angular/forms';
-
-
 interface Empleado {
-  
   [key: string]: any;
   employee_id: number;
   first_name: string;
@@ -48,7 +45,6 @@ interface Empleado {
 })
 export class RequestsEmployeesComponent {
 
-
   empleadosPendientes: Empleado[] = [];
   selectedEmployee: Empleado | null = null;
   departamentos: any[] = [];
@@ -65,10 +61,13 @@ export class RequestsEmployeesComponent {
 
   solicitudes: any[] = [];
 
-  
+  public selectedEmployeeId: number | null = null;   // Para guardar el ID
+
 
   constructor(
     private http: HttpClient,
+
+
     private authService: AuthService,
     public sharedService: SharedService,
     private companyService: CompanyService,
@@ -81,7 +80,6 @@ export class RequestsEmployeesComponent {
   ngOnInit() {
     this.fetchSolicitudesUltimos15Dias();
     this.loadPermissions();
-    this.fetchMaritalStatuses
   }
 
 
@@ -205,7 +203,7 @@ export class RequestsEmployeesComponent {
         } else {
           console.error('Error: la respuesta no es un array');
         }
-    
+
       },
       error => console.error('Error al cargar empleados pendientes', error)
     ).add(() => {
@@ -266,7 +264,7 @@ export class RequestsEmployeesComponent {
     this.http.get<any[]>('https://siinad.mx/php/get_genders.php').subscribe(
       data => {
         this.genders = data;
-        
+
       },
       error => console.error('Error al cargar géneros', error)
     ).add(() => {
@@ -285,7 +283,7 @@ export class RequestsEmployeesComponent {
     this.http.get<any[]>('https://siinad.mx/php/get_marital_statuses.php').subscribe(
       data => {
         this.maritalStatuses = data;
-        
+
       },
       error => console.error('Error al cargar estados civiles', error)
     ).add(() => {
@@ -305,7 +303,7 @@ export class RequestsEmployeesComponent {
       data => {
         this.employeeFiles = data;
         this.checkAllFieldsCompleted();
-      
+
       },
       error => console.error('Error al cargar archivos del empleado', error)
     ).add(() => {
@@ -313,10 +311,13 @@ export class RequestsEmployeesComponent {
     });
   }
 
-  onSelectEmployee(event: any) {
+  onSelectEmployee(employeeId: number) {
+    // El $event trae directamente el employee_id
+    this.selectedEmployeeId = employeeId;
+    this.selectedEmployee = this.empleadosPendientes.find(
+      (emp) => emp.employee_id === employeeId
+    ) || null;
 
-    const employeeId = event.target.value;
-    this.selectedEmployee = this.empleadosPendientes.find(emp => emp.employee_id === +employeeId) || null;
     if (this.selectedEmployee) {
       this.fetchEmployeeFiles(this.selectedEmployee.employee_id);
       this.checkAllFieldsCompleted();
@@ -354,7 +355,7 @@ export class RequestsEmployeesComponent {
               status: 'danger',
             }
           );
-          
+
         }
       ).add(() => {
         loading.dismiss();
@@ -369,12 +370,12 @@ export class RequestsEmployeesComponent {
         spinner: 'crescent',
       });
       await loading.present();
-  
+
       const data = {
         employee_id: this.selectedEmployee.employee_id,
         status: 'Rejected',
       };
-  
+
       this.http
         .post('https://siinad.mx/php/update_employee_status.php', data)
         .subscribe(
@@ -409,7 +410,7 @@ export class RequestsEmployeesComponent {
         });
     }
   }
-  
+
 
 
   onFileChange(event: any, fileType: string) {
@@ -420,10 +421,7 @@ export class RequestsEmployeesComponent {
     }
   }
 
-  mostrarOcultarCampo(event: any) {
-    this.mostrarInfonavit = event.target.value === 'si';
-    this.checkAllFieldsCompleted();
-  }
+
 
 
   eliminarArchivo(fileId: number) {
@@ -481,159 +479,160 @@ export class RequestsEmployeesComponent {
       );
     }
 
-    
+
   }
 
 
   onSubmit(form: NgForm) {
-  console.log('Formulario enviado:', form.value); // Ver los valores del formulario
-  console.log('Formulario válido:', form.valid); // Ver si el formulario es válido
-  console.log('Empleado seleccionado:', this.selectedEmployee); // Ver el empleado seleccionado
+    console.log('Formulario enviado:', form.value); // Ver los valores del formulario
+    console.log('Formulario válido:', form.valid); // Ver si el formulario es válido
+    console.log('Empleado seleccionado:', this.selectedEmployee); // Ver el empleado seleccionado
 
-  if (form.valid && this.selectedEmployee) {
-    const data: any = {
-      id: this.selectedEmployee.employee_id,
-      departamento: this.selectedEmployee.department_id,
-      puesto: this.selectedEmployee.position_id,
-      turno: this.selectedEmployee.shift_id,
-      nombre: this.selectedEmployee.first_name,
-      apellidoPaterno: this.selectedEmployee.last_name,
-      apellidoMaterno: this.selectedEmployee.middle_name,
-      fechaNacimiento: this.selectedEmployee.birth_date,
-      estadoCivil: this.selectedEmployee.marital_status_id,
-      sexo: this.selectedEmployee.gender_id,
-      curp: this.selectedEmployee.curp,
-      numeroSeguroSocial: this.selectedEmployee.social_security_number,
-      rfc: this.selectedEmployee.rfc,
-      correoElectronico: this.selectedEmployee.email,
-      telefono: this.selectedEmployee.phone_number,
-      contactoEmergencia: this.selectedEmployee.emergency_contact_name,
-      numEmergencia: this.selectedEmployee.emergency_contact_number,
-      fechaInicio: this.selectedEmployee.start_date,
-      lugarNacimiento: this.selectedEmployee.birth_place,
-      numeroCuentaBancaria: this.selectedEmployee.bank_account_number,
-      nombreBanco: this.selectedEmployee.bank_name,
-      sucursalBanco: this.selectedEmployee.bank_branch,
-      clabeInterbancaria: this.selectedEmployee.clabe,
-      companyId: this.companyService.selectedCompany.id,
-    };
+    if (form.valid && this.selectedEmployee) {
+      const data: any = {
+        id: this.selectedEmployee.employee_id,
+        departamento: this.selectedEmployee.department_id,
+        puesto: this.selectedEmployee.position_id,
+        turno: this.selectedEmployee.shift_id,
+        nombre: this.selectedEmployee.first_name,
+        apellidoPaterno: this.selectedEmployee.last_name,
+        apellidoMaterno: this.selectedEmployee.middle_name,
+        fechaNacimiento: this.selectedEmployee.birth_date,
+        estadoCivil: this.selectedEmployee.marital_status_id,
+        sexo: this.selectedEmployee.gender_id,
+        curp: this.selectedEmployee.curp,
+        numeroSeguroSocial: this.selectedEmployee.social_security_number,
+        rfc: this.selectedEmployee.rfc,
+        correoElectronico: this.selectedEmployee.email,
+        telefono: this.selectedEmployee.phone_number,
+        contactoEmergencia: this.selectedEmployee.emergency_contact_name,
+        numEmergencia: this.selectedEmployee.emergency_contact_number,
+        fechaInicio: this.selectedEmployee.start_date,
+        lugarNacimiento: this.selectedEmployee.birth_place,
+        numeroCuentaBancaria: this.selectedEmployee.bank_account_number,
+        nombreBanco: this.selectedEmployee.bank_name,
+        sucursalBanco: this.selectedEmployee.bank_branch,
+        clabeInterbancaria: this.selectedEmployee.clabe,
+        companyId: this.companyService.selectedCompany.id,
+      };
 
-    if (this.sharedService.hasPermission('Empleados', 'Aceptar solicitudes de empleados')) {
-      data.net_balance = this.selectedEmployee.net_balance;
-    }
-
-    if (this.sharedService.hasPermission('Empleados', 'Procesar empleados')) {
-      data.daily_salary = this.selectedEmployee.daily_salary;
-      data.employee_code = this.selectedEmployee.employee_code;
-    }
-
-    this.http.post('https://siinad.mx/php/update_employee.php', data).subscribe(
-      (response: any) => {
-        // Toast de éxito con Nebular
-        this.toastrService.success(
-          'Empleado actualizado exitosamente.',
-          'Éxito',
-          {
-            duration: 2000,
-            status: 'success',
-          }
-        );
-      },
-      (error) => {
-        // Toast de error con Nebular
-        this.toastrService.danger(
-          'Error al actualizar empleado.',
-          'Error',
-          {
-            duration: 2000,
-            status: 'danger',
-          }
-        );
-        console.error(error);
+      if (this.sharedService.hasPermission('Empleados', 'Aceptar solicitudes de empleados')) {
+        data.net_balance = this.selectedEmployee.net_balance;
       }
-    );
-  } else {
-    this.validateAllFormFields(form);
-  }
-}
 
-
-async uploadFiles() {
-  if (!this.selectedEmployee || Object.keys(this.files).length === 0) {
-    console.warn('No hay empleado seleccionado o archivos para subir.');
-    this.toastrService.warning(
-      'Debe seleccionar un empleado y archivos antes de continuar.',
-      'Advertencia',
-      {
-        duration: 2000,
-        status: 'warning',
+      if (this.sharedService.hasPermission('Empleados', 'Procesar empleados')) {
+        data.daily_salary = this.selectedEmployee.daily_salary;
+        data.employee_code = this.selectedEmployee.employee_code;
       }
-    );
-    return;
-  }
 
-  const loading = await this.loadingController.create({
-    message: 'Subiendo archivos...',
-    spinner: 'crescent',
-  });
-  await loading.present();
-
-  const formData = new FormData();
-  formData.append('employee_id', this.selectedEmployee.employee_id.toString());
-
-  for (const fileType in this.files) {
-    if (this.files.hasOwnProperty(fileType)) {
-      formData.append(fileType, this.files[fileType]);
+      this.http.post('https://siinad.mx/php/update_employee.php', data).subscribe(
+        (response: any) => {
+          this.uploadFiles();
+          // Toast de éxito con Nebular
+          this.toastrService.success(
+            'Empleado actualizado exitosamente.',
+            'Éxito',
+            {
+              duration: 2000,
+              status: 'success',
+            }
+          );
+        },
+        (error) => {
+          // Toast de error con Nebular
+          this.toastrService.danger(
+            'Error al actualizar empleado.',
+            'Error',
+            {
+              duration: 2000,
+              status: 'danger',
+            }
+          );
+          console.error(error);
+        }
+      );
+    } else {
+      this.validateAllFormFields(form);
     }
   }
 
-  try {
-    const response = await this.http.post('https://siinad.mx/php/update_upload_files.php', formData).toPromise();
 
-    // Toast de éxito con Nebular
-    this.toastrService.success(
-      'Archivos actualizados exitosamente.',
-      'Éxito',
-      {
-        duration: 2000,
-        status: 'success',
-      }
-    );
+  async uploadFiles() {
+    if (!this.selectedEmployee || Object.keys(this.files).length === 0) {
+      console.warn('No hay empleado seleccionado o archivos para subir.');
+      this.toastrService.warning(
+        'Debe seleccionar un empleado y archivos antes de continuar.',
+        'Advertencia',
+        {
+          duration: 2000,
+          status: 'warning',
+        }
+      );
+      return;
+    }
 
-    this.fetchPendingEmployees();
-    this.selectedEmployee = null;
-  } catch (error) {
-    // Toast de error con Nebular
-    this.toastrService.danger(
-      'Error al actualizar archivos.',
-      'Error',
-      {
-        duration: 2000,
-        status: 'danger',
+    const loading = await this.loadingController.create({
+      message: 'Subiendo archivos...',
+      spinner: 'crescent',
+    });
+    await loading.present();
+
+    const formData = new FormData();
+    formData.append('employee_id', this.selectedEmployee.employee_id.toString());
+
+    for (const fileType in this.files) {
+      if (this.files.hasOwnProperty(fileType)) {
+        formData.append(fileType, this.files[fileType]);
       }
-    );
-    console.error('Error al subir archivos:', error);
-  } finally {
-    loading.dismiss();
+    }
+
+    try {
+      const response = await this.http.post('https://siinad.mx/php/update_upload_files.php', formData).toPromise();
+
+      // Toast de éxito con Nebular
+      this.toastrService.success(
+        'Archivos actualizados exitosamente.',
+        'Éxito',
+        {
+          duration: 2000,
+          status: 'success',
+        }
+      );
+
+      this.fetchPendingEmployees();
+      this.selectedEmployee = null;
+    } catch (error) {
+      // Toast de error con Nebular
+      this.toastrService.danger(
+        'Error al actualizar archivos.',
+        'Error',
+        {
+          duration: 2000,
+          status: 'danger',
+        }
+      );
+      console.error('Error al subir archivos:', error);
+    } finally {
+      loading.dismiss();
+    }
   }
-}
 
 
 
   async enviarSolicitudPendiente(form: NgForm) {
 
     this.onSubmit(form);
-  
+
     if (this.selectedEmployee) {
       const loading = await this.loadingController.create({
         message: 'Enviando solicitud pendiente...',
         spinner: 'crescent'
       });
       await loading.present();
-  
+
       let newStatus = 'Pending';
       let employeeStatus = '';
-  
+
       if (this.sharedService.hasPermission('Empleados', 'Aceptar solicitudes de empleados')) {
         newStatus = 'Complete';
         employeeStatus = 'A';
@@ -642,23 +641,23 @@ async uploadFiles() {
       } else if (this.sharedService.hasPermission('Empleados', 'Procesar empleados')) {
         newStatus = 'Finish';
       }
-  
+
       const data: any = {
         employee_id: this.selectedEmployee.employee_id,
         status: newStatus
       };
-  
+
       if (newStatus === 'Complete') {
         data.employee_status = employeeStatus;
       }
-  
+
       // Enviar la solicitud al backend
       this.http.post('https://siinad.mx/php/update_employee_status.php', data).subscribe(
         async (response: any) => {
           if (response && response.folio) {
             console.log('Folio recibido:', response.folio);  // Aquí recibes el folio y lo puedes utilizar
             await this.uploadFiles();
-  
+
             // Mostrar alertas dependiendo del estado
             if (newStatus === 'Pending') {
               const alert = await this.alertController.create({
@@ -697,7 +696,7 @@ async uploadFiles() {
               }
             );
           }
-          
+
           async (error) => {
             // Toast de error con Nebular
             this.toastrService.danger(
@@ -710,14 +709,14 @@ async uploadFiles() {
             );
             console.error(error);
           };
-          
- 
+
+
         }
       ).add(() => {
         loading.dismiss();
       });
     }
-  
+
   }
 
 
@@ -744,6 +743,10 @@ async uploadFiles() {
   downloadFile(filePath: string) {
     const fullUrl = `https://www.siinad.mx/php/${filePath}`; // URL completa del archivo
     window.open(fullUrl, '_blank'); // Abrir el archivo en una nueva pestaña o iniciar la descarga
+  }
+
+  mostrarOcultarCampo(selectedValue: any) {
+    this.mostrarInfonavit = selectedValue === 'si';
   }
 
 
