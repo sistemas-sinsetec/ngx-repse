@@ -9,7 +9,8 @@
           <p *ngIf="employee.request_id" class="folio-text">
             Folio: {{ employee.request_id }}
           </p>
-          <img [src]="employee.photo || 'assets/image/default-profile.png'" alt="Foto de perfil" class="profile-picture">
+          <img [src]="employee.photo || '/assets/images/default-profile.png'" width="150px" alt="Foto de perfil" class="profile-picture"
+          (click)="triggerFileInput('photo-input')">
           <input type="file" id="photo-input" (change)="onPhotoChange($event)" hidden>
           <button nbButton status="info" (click)="triggerFileInput('photo-input')">Cambiar Foto</button>
         </div>
@@ -129,6 +130,10 @@
           <button nbButton status="primary" (click)="saveFinancialInfo()">Guardar Cambios de Información Financiera</button>
         </nb-card-body>
       </nb-card>
+
+      <!--  Informacion de trabajo-->
+
+      
   
       <!-- Tarjeta de archivos -->
       <nb-card class="mb-4">
