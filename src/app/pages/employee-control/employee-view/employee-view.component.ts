@@ -5,6 +5,7 @@ import { Router } from '@angular/router';
 import { EmployeeDetailsComponent } from '../employee-details/employee-details.component';
 import { NbDialogService } from '@nebular/theme';
 import { CompanyService } from '../../../services/company.service';
+import { take } from 'rxjs/operators';
 
 interface Empleado {
   employee_id: number;
@@ -42,6 +43,9 @@ interface Departamento {
 })
 
 export class EmployeeViewComponent implements OnInit {
+  mostrarBusqueda: boolean = false;
+
+
   departamentos: Departamento[] = [];
   puestos: Puesto[] = [];
   turnos: Turno[] = [];
@@ -112,6 +116,7 @@ export class EmployeeViewComponent implements OnInit {
     this.departamentoSeleccionado = departamento;
     this.puestoSeleccionado = null;  // Limpiar selección de puesto
     this.turnoSeleccionado = null;   // Limpiar selección de turno
+    this.mostrarBusqueda = true;
     const companyId = this.companyService.selectedCompany.id;
 
     this.http.get<{ success: boolean, employees: Empleado[] }>(
@@ -135,7 +140,8 @@ export class EmployeeViewComponent implements OnInit {
   selectPuesto(puesto: Puesto) {
     this.puestoSeleccionado = puesto;
     this.departamentoSeleccionado = null;  // Limpiar selección de departamento
-    this.turnoSeleccionado = null;         // Limpiar selección de turno
+    this.turnoSeleccionado = null;
+    this.mostrarBusqueda = true;         // Limpiar selección de turno
     const companyId = this.companyService.selectedCompany.id;
 
     this.http.get<{ success: boolean, employees: Empleado[] }>(
@@ -158,8 +164,9 @@ export class EmployeeViewComponent implements OnInit {
   // Seleccionar y mostrar empleados por turno
   selectTurno(turno: Turno) {
     this.turnoSeleccionado = turno;
-    this.departamentoSeleccionado = null;  // Limpiar selección de departamento
-    this.puestoSeleccionado = null;        // Limpiar selección de puesto
+    this.departamentoSeleccionado = null; // Limpiar selección de departamento
+    this.puestoSeleccionado = null;  
+    this.mostrarBusqueda = true;      // Limpiar selección de puesto
     const companyId = this.companyService.selectedCompany.id;
 
     this.http.get<{ success: boolean, employees: Empleado[] }>(
@@ -194,14 +201,17 @@ export class EmployeeViewComponent implements OnInit {
 // Método para ver detalles del empleado
 async viewEmployeeDetails(employeeId: number) {
   const dialogRef = this.dialogService.open(EmployeeDetailsComponent, {
-    context: { employeeId: employeeId },
+    context: { employeeId }, // Pasa datos al diálogo
   });
 
-  dialogRef.onClose.subscribe((result) => {
+  // Manejar el cierre del diálogo
+  dialogRef.onClose.pipe(take(1)).subscribe((result) => {
     if (result) {
-      console.log('Dialog closed with result:', result);
+      // Realiza acciones si el diálogo devuelve un resultado
+      console.log('Resultado recibido del diálogo:', result);
     } else {
-      console.log('Dialog closed without result');
+      // El usuario cerró el diálogo sin devolver ningún resultado
+      console.log('El diálogo fue cerrado sin resultado.');
     }
   });
 }

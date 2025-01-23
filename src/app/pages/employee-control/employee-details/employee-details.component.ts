@@ -262,6 +262,10 @@ export class EmployeeDetailsComponent implements OnInit {
     dialogRef.close();
   }
 
+  ngOnDestroy() {
+    console.log('EmployeeDetailsComponent destroyed');
+  }
+
 
   downloadFile(filePath: string) {
     const fullUrl = `https://www.siinad.mx/php/${filePath}`; // URL completa del archivo
