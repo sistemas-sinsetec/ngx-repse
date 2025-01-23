@@ -1,0 +1,55 @@
+ /* Estilo para resaltar la opción seleccionada */
+ .selected {
+    background-color: #d0e4f7;
+    font-weight: bold;
+    border-left: 4px solid #007bff;
+  }
+
+  .selected h2 {
+    color: #007bff;
+  }
+
+  .steps-container {
+    margin-bottom: 20px;
+  }
+
+  .sidebar-section h6 {
+    margin-top: 20px;
+    font-weight: bold;
+  }
+
+  .list-group-item {
+    cursor: pointer;
+    padding: 10px;
+    border-radius: 4px;
+  }
+
+  .list-group-item:hover {
+    background-color: #f1f1f1;
+  }
+
+  .busqueda {
+    margin-top: 20px;
+    display: flex;
+    justify-content: center; /* Centrar horizontalmente */
+    align-items: center;    /* Centrar verticalmente */
+    height: 100px;           /* Asegúrate de que la altura ocupe el espacio necesario */
+    text-align: center;     /* Opcional: centrar texto */
+  }
+
+  .busqueda label{
+    font-size: 20px;
+    font-weight: bold;
+  }
+
+  input::placeholder {
+    text-align: center; /* Centra el texto del placeholder */
+    color: gray;        /* Cambia el color del placeholder si lo necesitas */
+    font-style: italic; /* Opcional: estilo adicional */
+  }
+
+  .sidebar-section > h6{
+    text-align: center;
+  }
+
+  
