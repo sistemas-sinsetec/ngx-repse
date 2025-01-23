@@ -1,135 +1,92 @@
-/* upload-logo.component.scss */
-@import '../../../../@theme/styles/themes';
+.corporate-card {
+  border: 1px solid #e5e5e5;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  border-radius: 8px;
+}
 
-/* Encabezado */
-.header-container {
-    display: flex;
-    align-items: center;
-    padding: 1rem;
-    background-color: #f7f9fc;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-  }
-  
-  .back-icon {
-    font-size: 1.5rem;
-    cursor: pointer;
-    margin-right: 1rem;
-    color: #3366ff;
-  }
-  
-  .header-title {
-    font-size: 1.25rem;
-    font-weight: 700;
-    color: #222b45;
-  }
-  
-  /* Tarjeta */
-  .nb-card-header {
-    display: flex;
-    align-items: center;
-    font-size: 1.25rem;
-    font-weight: bold;
-    background-color: #edf1f7;
-    padding: 1rem;
-  }
-  
-  .nb-card-header nb-icon {
-    font-size: 1.5rem;
-    margin-right: 0.5rem;
-    color: #3366ff;
-  }
-  
-  .card-title {
-    color: #222b45;
-    font-weight: bold;
-  }
-  
-  /* Secciones */
-  .section-title {
-    font-size: 1rem;
-    font-weight: 600;
-    margin-bottom: 1rem;
-    color: #4a5568;
-  }
-  
-  .logo-container,
-  .preview-container {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    border: 1px solid #e4e9f2;
-    padding: 1rem;
-    border-radius: 8px;
-    background-color: #f7f9fc;
-  }
-  
-  .logo-img,
-  .preview-img {
-    width: 120px;
-    height: 120px;
-    object-fit: contain;
-    border-radius: 6px;
-    border: 1px solid #d1d5db;
-  }
-  
-  .placeholder-container {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    padding: 1rem;
-    border-radius: 8px;
-    border: 1px dashed #cbd5e0;
-    background-color: #f7f9fc;
-  }
-  
-  .placeholder-icon {
-    font-size: 3rem;
-    color: #a0aec0;
-  }
-  
-  .placeholder-text {
-    margin-top: 0.5rem;
-    font-size: 0.875rem;
-    color: #718096;
-  }
-  
-  /* Subida de archivo */
-  .upload-container {
-    position: relative;
-    text-align: center;
-  }
-  
-  .upload-input {
-    display: none;
-  }
-  
-  .upload-label {
-    display: inline-flex;
-    align-items: center;
-    padding: 0.75rem 1.5rem;
-    border: 2px solid #3366ff;
-    border-radius: 8px;
-    font-weight: 600;
-    cursor: pointer;
-    color: #3366ff;
-    transition: all 0.3s;
-  }
-  
-  .upload-label:hover {
-    background-color: #3366ff;
-    color: #ffffff;
-  }
-  
-  .upload-icon {
-    margin-right: 0.5rem;
-    font-size: 1.25rem;
-  }
-  
-  /* Botón de subida */
-  button[nbButton] {
-    padding: 0.75rem 1.5rem;
-    font-size: 1rem;
-    font-weight: bold;
-  }
-  
-  
+.corporate-container {
+  display: flex;
+  justify-content: space-between;
+  gap: 24px;
+}
+
+.corporate-section {
+  flex: 1;
+  text-align: center;
+}
+
+.section-title {
+  font-size: 16px;
+  font-weight: bold;
+  color: #333;
+  margin-bottom: 16px;
+}
+
+.logo-container img,
+.preview-container img {
+  max-width: 150px;
+  max-height: 150px;
+  border-radius: 8px;
+  border: 1px solid #e5e5e5;
+}
+
+.placeholder-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 150px;
+  border: 2px dashed #d3d3d3;
+  border-radius: 8px;
+}
+
+.placeholder-icon {
+  font-size: 48px;
+  color: #d3d3d3;
+}
+
+.placeholder-text {
+  margin-top: 8px;
+  font-size: 14px;
+  color: #777;
+}
+
+.upload-container {
+  position: relative;
+}
+
+.upload-input {
+  display: none;
+}
+
+.upload-label {
+  display: inline-block;
+  background-color: #007bff;
+  color: white;
+  padding: 8px 16px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 14px;
+  transition: background-color 0.3s;
+}
+
+.upload-label:hover {
+  background-color: #0056b3;
+}
+
+.preview-title {
+  font-size: 14px;
+  font-weight: bold;
+  color: #555;
+  margin-bottom: 8px;
+}
+
+.button-container {
+  margin-top: 24px;
+  text-align: center;
+}
+
+button[nbButton] {
+  font-size: 16px;
+  font-weight: bold;
+}

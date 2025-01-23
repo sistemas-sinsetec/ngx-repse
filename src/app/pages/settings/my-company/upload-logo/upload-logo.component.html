@@ -1,57 +1,54 @@
+<nb-card class="corporate-card">
+  <nb-card-header>
+    <span class="card-title">Subir Logo de Empresa</span>
+  </nb-card-header>
 
+  <nb-card-body>
+    <!-- Contenedor principal -->
+    <div class="corporate-container">
+      <!-- Logo actual -->
+      <div class="corporate-section">
+        <h6 class="section-title">Logo Actual</h6>
+        <div *ngIf="currentLogo" class="logo-container">
+          <img [src]="currentLogo" alt="Logo actual" class="logo-img">
+        </div>
+        <div *ngIf="!currentLogo" class="placeholder-container">
+          <nb-icon icon="image-outline" pack="eva" class="placeholder-icon"></nb-icon>
+          <span class="placeholder-text">Sin logo actual</span>
+        </div>
+      </div>
 
-    <nb-card>
-      <nb-card-header>
-        <span class="card-title">Subir Logo de Empresa</span>
-      </nb-card-header>
-
-      <nb-card-body>
-        <!-- Primera fila: Logo actual -->
-        <div class="row mb-4">
-          <div class="col-md-6 text-center">
-            <h6 class="section-title">Logo Actual</h6>
-            <div *ngIf="currentLogo" class="logo-container">
-              <img [src]="currentLogo" alt="Logo actual" class="logo-img">
-            </div>
-            <div *ngIf="!currentLogo" class="placeholder-container">
-              <nb-icon icon="image-outline" pack="eva" class="placeholder-icon"></nb-icon>
-              <span class="placeholder-text">Sin logo actual</span>
-            </div>
-          </div>
-
-          <!-- Nueva subida -->
-          <div class="col-md-6 text-center">
-            <h6 class="section-title">Subir Nuevo Logo</h6>
-            <div class="upload-container">
-              <input
-                id="logoUpload"
-                type="file"
-                accept="image/*"
-                (change)="onFileSelected($event)"
-                class="upload-input"
-              />
-              <label for="logoUpload" class="upload-label">
-                <nb-icon icon="cloud-upload-outline" pack="eva" class="upload-icon"></nb-icon>
-                Seleccionar archivo
-              </label>
-            </div>
-
-            <!-- Vista previa -->
-            <div *ngIf="previewLogo" class="preview-container mt-3">
-              <h6 class="preview-title">Vista Previa</h6>
-              <img [src]="previewLogo" alt="Vista previa" class="preview-img">
-            </div>
-          </div>
+      <!-- Nueva subida -->
+      <div class="corporate-section">
+        <h6 class="section-title">Subir Nuevo Logo</h6>
+        <div class="upload-container">
+          <input
+            id="logoUpload"
+            type="file"
+            accept="image/*"
+            (change)="onFileSelected($event)"
+            class="upload-input"
+          />
+          <label for="logoUpload" class="upload-label">
+            <nb-icon icon="cloud-upload-outline" pack="eva" class="upload-icon"></nb-icon>
+            Seleccionar archivo
+          </label>
         </div>
 
-        <!-- Botón para subir -->
-        <div class="row mt-4">
-          <div class="col-md-12 text-center">
-            <button nbButton status="success" size="large" (click)="uploadLogo()" [disabled]="!selectedFile">
-              <nb-icon icon="checkmark-outline"></nb-icon>
-              Subir Logo
-            </button>
-          </div>
+        <!-- Vista previa -->
+        <div *ngIf="previewLogo" class="preview-container">
+          <h6 class="preview-title">Vista Previa</h6>
+          <img [src]="previewLogo" alt="Vista previa" class="preview-img">
         </div>
-      </nb-card-body>
-    </nb-card>
+      </div>
+    </div>
+
+    <!-- Botón para subir -->
+    <div class="button-container">
+      <button nbButton status="success" size="large" (click)="uploadLogo()" [disabled]="!selectedFile">
+        <nb-icon icon="checkmark-outline"></nb-icon>
+        Subir Logo
+      </button>
+    </div>
+  </nb-card-body>
+</nb-card>

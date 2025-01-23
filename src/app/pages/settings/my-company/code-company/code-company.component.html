@@ -1,27 +1,27 @@
+<nb-card class="corporate-card mt-4">
+  <nb-card-header>
+    <h5 class="card-title">Código de Empresa</h5>
+  </nb-card-header>
 
-      <nb-card class="shadow-lg mt-4">
-        <nb-card-header class="text-center">
-          <h5><strong>{{ labelCodigoDeEmpresa }}</strong></h5>
-        </nb-card-header>
-  
-        <nb-card-body>
-          <!-- Código de empresa -->
-          <div class="code-container text-center mb-3">
-            <p><strong>Código:</strong> {{ codigoEmpresa }}</p>
-          </div>
-  
-          <!-- Botón de copiar -->
-          <div class="text-center mt-4">
-            <button nbButton status="primary" size="medium" (click)="copiarCodigo()">
-              <nb-icon icon="copy-outline"></nb-icon> Copiar
-            </button>
-          </div>
-        </nb-card-body>
-      </nb-card>
-  
-      <!-- Alerta informativa -->
-      <nb-alert status="info" closable="false" class="mt-4">
-        <p>Este es tu código de empresa. Úsalo con precaución, ya que se actualiza dinámicamente al salir de la página.</p>
-      </nb-alert>
+  <nb-card-body>
+    <!-- Contenedor del código de empresa -->
+    <div class="code-container">
+      <p class="code-text">
+        <strong>Código:</strong> {{ codigoEmpresa }}
+      </p>
+    </div>
 
-  
+    <!-- Botón de copiar -->
+    <div class="button-container">
+      <button nbButton status="info" size="large" (click)="copiarCodigo()">
+        <nb-icon icon="copy-outline" class="icon"></nb-icon>
+        Copiar Código
+      </button>
+    </div>
+  </nb-card-body>
+</nb-card>
+
+<!-- Alerta informativa -->
+<nb-alert status="info" class="corporate-alert mt-4">
+  <p>Este es tu código de empresa. Úsalo con precaución, ya que se actualiza dinámicamente al salir de la página.</p>
+</nb-alert>
