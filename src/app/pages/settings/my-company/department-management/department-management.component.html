@@ -1,3 +1,4 @@
+
 <div class="content-container">
   <div class="row">
 
@@ -65,7 +66,7 @@
           <div *ngIf="isAddingPosition || selectedPosition" class="form-container mt-4">
             <nb-form-field class="full-width">
               <nb-icon nbPrefix icon="person-outline"></nb-icon>
-              <label for="position_name" class="form-label">Nombre del Puesto</label>
+              <label for="position_name" class="form-label">Nombre del turno</label>
               <input nbInput id="position_name" fullWidth placeholder="Nombre del Puesto" [(ngModel)]="getCurrentPosition().position_name">
             </nb-form-field>
           
@@ -109,13 +110,13 @@
             <nb-form-field class="full-width">
               <nb-icon nbPrefix icon="person-outline"></nb-icon>
               <label for="position_name" class="form-label">Nombre del Puesto</label>
-              <input nbInput id="position_name" fullWidth placeholder="Nombre del Puesto" [(ngModel)]="getCurrentPosition().position_name">
+              <input nbInput id="position_name" fullWidth placeholder="Nombre del Puesto" [(ngModel)]="getCurrentShift().shift_name">
             </nb-form-field>
           
             <nb-form-field class="full-width">
               <nb-icon nbPrefix icon="text-outline"></nb-icon>
               <label for="position_description" class="form-label">Descripción</label>
-              <textarea nbInput id="position_description" fullWidth placeholder="Descripción" [(ngModel)]="getCurrentPosition().description"></textarea>
+              <textarea nbInput id="position_description" fullWidth placeholder="Descripción" [(ngModel)]="getCurrentShift().description"></textarea>
             </nb-form-field>
     
             <nb-form-field class="full-width">
