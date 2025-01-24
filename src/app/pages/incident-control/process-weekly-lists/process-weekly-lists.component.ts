@@ -226,10 +226,11 @@ async loadEmployeesForWeek() {
 
   openProcessedListsModal() {
     this.dialogService.open(ProcessedListDialogComponent, {
-      context: {}, // Puedes pasar datos al modal aquí si es necesario
-      closeOnBackdropClick: false, // Opcional: evita que se cierre al hacer clic fuera del modal
-      hasScroll: true, // Opcional: habilita el desplazamiento si el contenido es largo
+      context: {}, 
+      closeOnBackdropClick: true, // Permitir el cierre al hacer clic fuera del modal
+      hasScroll: true,
     });
+    
   }
 
 

@@ -109,6 +109,8 @@ export class ProcessedAttendanceComponent {
   // Cargar los empleados y sus horas de trabajo para la semana seleccionada
   async loadEmployeesForWeek() {
     if (!this.selectedWeek) return;
+
+    
   
     const companyId = this.companyService.selectedCompany?.id;
     if (!companyId) {

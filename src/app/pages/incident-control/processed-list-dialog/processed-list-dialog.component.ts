@@ -4,7 +4,6 @@ import { HttpClient } from '@angular/common/http';
 import { AuthService } from '../../../services/auth.service';
 import { CompanyService } from '../../../services/company.service';
 
-
 @Component({
   selector: 'ngx-processed-list-dialog',
   templateUrl: './processed-list-dialog.component.html',
@@ -12,6 +11,7 @@ import { CompanyService } from '../../../services/company.service';
 })
 export class ProcessedListDialogComponent {
   processedFiles: any[] = []; // Lista de archivos procesados
+  isCardVisible: boolean = true; // Controla la visibilidad del card
 
   constructor(
     private http: HttpClient,
@@ -36,6 +36,10 @@ export class ProcessedListDialogComponent {
 
   // Cerrar el modal
   closeDialog() {
-    this.dialogRef.close(); // Usa la referencia de Nebular para cerrar el modal
+    this.dialogRef.close();
   }
+  
+
+
+
 }

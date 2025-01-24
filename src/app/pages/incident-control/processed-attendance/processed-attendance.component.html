@@ -1,72 +1,103 @@
-<nb-layout>
-  <nb-layout-column>
-    <nb-card class="bg-light p-4 rounded shadow">
-      <!-- Selector de Semana Confirmada -->
-      <div class="mb-4">
-        <h5><strong>Seleccionar Semana Confirmada</strong></h5>
-        <nb-select [(ngModel)]="selectedWeek" (ngModelChange)="onWeekChange($event)" placeholder="Seleccionar Semana">
-          <nb-option *ngFor="let week of processedWeeks" [value]="week">
-            Semana {{ week.week_number }}
-            <span *ngIf="week?.start_date && week?.end_date">
-              ({{ week.start_date }} - {{ week.end_date }})
-            </span>
-          </nb-option>
-        </nb-select>
-      </div>
+<nb-card class="p-4 shadow-sm">
+  <!-- Título Principal -->
+  <nb-card-header>
+    <span class="title">Gestión de Asistencia Semanal</span>
+  </nb-card-header>
+  <nb-card-body>
+    <!-- Selector de Semana Confirmada -->
+    <div class="mb-4">
+      <label for="weekSelector" class="fw-bold">Seleccionar Semana Confirmada:</label>
+      <nb-select
+        id="weekSelector"
+        [(ngModel)]="selectedWeek"
+        (ngModelChange)="onWeekChange($event)"
+        placeholder="Seleccionar Semana"
+      >
+        <nb-option *ngFor="let week of processedWeeks" [value]="week">
+          Semana {{ week.week_number }}
+          <span *ngIf="week?.start_date && week?.end_date">
+            ({{ week.start_date }} - {{ week.end_date }})
+          </span>
+        </nb-option>
+      </nb-select>
+    </div>
 
-      <!-- Tabla de Asistencia de la Semana Confirmada -->
-      <div class="table-responsive mt-4" *ngIf="selectedWeek">
-        <h5 class="text-center bg-primary text-white p-2 rounded">
-          Lista de Asistencia de la Semana {{ selectedWeek.week_number }}
-          ({{ selectedWeek.start_date }} - {{ selectedWeek.end_date }})
-        </h5>
-        <table id="attendance-table" class="table table-bordered table-hover table-striped shadow-sm">
-          <thead class="thead-dark">
-            <tr>
-              <th rowspan="2" class="text-center align-middle">Código</th>
-              <th rowspan="2" class="text-center align-middle">Empleado</th>
-              <ng-container *ngFor="let dia of diasSemana">
-                <th colspan="6" class="text-center">{{ dia.display }} ({{ dia.date | date: 'dd/MM/yyyy' }})</th>
-              </ng-container>
-            </tr>
-            <tr>
-              <ng-container *ngFor="let dia of diasSemana">
-                <th class="text-center">Entrada</th>
-                <th class="text-center">Entrada Comida</th>
-                <th class="text-center">Salida Comida</th>
-                <th class="text-center">Salida</th>
-                <th class="text-center">Incidencia</th>
-                <th class="text-center">Empresa y Obra</th>
-              </ng-container>
-            </tr>
-          </thead>
-          <tbody>
-            <tr *ngFor="let emp of empleadosSemana">
-              <td class="text-center">{{ emp.employee_code || 'N/A' }}</td>
-              <td>{{ emp.first_name || '' }} {{ emp.middle_name || '' }} {{ emp.last_name || '' }}</td>
-              <ng-container *ngFor="let dia of diasSemana">
-                <td class="text-center">{{ emp.work_hours?.[dia.date]?.entry_time || '--:--' }}</td>
-                <td class="text-center">{{ emp.work_hours?.[dia.date]?.lunch_start_time || '--:--' }}</td>
-                <td class="text-center">{{ emp.work_hours?.[dia.date]?.lunch_end_time || '--:--' }}</td>
-                <td class="text-center">{{ emp.work_hours?.[dia.date]?.exit_time || '--:--' }}</td>
-                <td class="text-center">{{ emp.work_hours?.[dia.date]?.incident || 'N/A' }}</td>
-                <td>{{ emp.work_hours?.[dia.date]?.project_name || 'No Asignado' }}</td>
-              </ng-container>
-            </tr>
-          </tbody>
-        </table>
-      </div>
+    <!-- Tabla de Asistencia de la Semana Confirmada -->
+    <div class="table-responsive mt-4" *ngIf="selectedWeek">
+      <h5 class="text-center bg-primary text-white py-2 rounded">
+        Lista de Asistencia: Semana {{ selectedWeek.week_number }}
+        ({{ selectedWeek.start_date }} - {{ selectedWeek.end_date }})
+      </h5>
+      <table id="attendance-table" class="table table-bordered table-hover table-striped shadow-sm">
+        <thead class="thead-dark">
+          <tr>
+            <th rowspan="2" class="text-center align-middle">Código</th>
+            <th rowspan="2" class="text-center align-middle">Empleado</th>
+            <ng-container *ngFor="let dia of diasSemana">
+              <th colspan="6" class="text-center">
+                {{ dia.display }} ({{ dia.date | date: 'dd/MM/yyyy' }})
+              </th>
+            </ng-container>
+          </tr>
+          <tr>
+            <ng-container *ngFor="let dia of diasSemana">
+              <th class="text-center">Entrada</th>
+              <th class="text-center">Entrada Comida</th>
+              <th class="text-center">Salida Comida</th>
+              <th class="text-center">Salida</th>
+              <th class="text-center">Incidencia</th>
+              <th class="text-center">Empresa y Obra</th>
+            </ng-container>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let emp of empleadosSemana">
+            <td class="text-center">{{ emp.employee_code || 'N/A' }}</td>
+            <td>
+              {{ emp.first_name || '' }} {{ emp.middle_name || '' }} {{ emp.last_name || '' }}
+            </td>
+            <ng-container *ngFor="let dia of diasSemana">
+              <td class="text-center">{{ emp.work_hours?.[dia.date]?.entry_time || '--:--' }}</td>
+              <td class="text-center">{{ emp.work_hours?.[dia.date]?.lunch_start_time || '--:--' }}</td>
+              <td class="text-center">{{ emp.work_hours?.[dia.date]?.lunch_end_time || '--:--' }}</td>
+              <td class="text-center">{{ emp.work_hours?.[dia.date]?.exit_time || '--:--' }}</td>
+              <td class="text-center">{{ emp.work_hours?.[dia.date]?.incident || 'N/A' }}</td>
+              <td>{{ emp.work_hours?.[dia.date]?.project_name || 'No Asignado' }}</td>
+            </ng-container>
+          </tr>
+        </tbody>
+      </table>
+    </div>
 
-      <!-- Sección de botones e input de archivo PDF -->
-      <div class="text-center mt-4" *ngIf="selectedWeek">
-        <div class="custom-file mb-3 w-50 mx-auto">
-          <input type="file" class="custom-file-input" id="pdfUpload" (change)="onFileSelected($event)"
-            accept="application/pdf">
+    <!-- Sección de botones e input de archivo PDF -->
+    <div class="text-center mt-4" *ngIf="selectedWeek">
+      <!-- Contenedor para la subida de archivos -->
+      <div class="upload-container p-4 mb-4 border rounded shadow-sm bg-light w-50 mx-auto">
+        <h6 class="mb-3 text-secondary fw-bold">
+          <span class="text-primary">📄 Subir Documento PDF</span>
+        </h6>
+        <div class="custom-file">
+          <input
+            type="file"
+            class="custom-file-input"
+            id="pdfUpload"
+            (change)="onFileSelected($event)"
+            accept="application/pdf"
+          />
           <label class="custom-file-label" for="pdfUpload">Seleccionar archivo PDF</label>
         </div>
-        <nb-button (click)="generatePDF()" status="primary" class="mr-2">Imprimir</nb-button>
-        <nb-button (click)="uploadPDF()" status="success">Subir PDF</nb-button>
       </div>
-    </nb-card>
-  </nb-layout-column>
-</nb-layout>
+    
+      <!-- Botones para acciones -->
+      <div class="button-group d-flex justify-content-center gap-3">
+        <button nbButton (click)="generatePDF()" status="primary" class="px-4">
+          <nb-icon icon="printer-outline" class="me-2"></nb-icon> Imprimir
+        </button>
+        <button nbButton (click)="uploadPDF()" status="success" class="px-4">
+          <nb-icon icon="cloud-upload-outline" class="me-2"></nb-icon> Subir PDF
+        </button>
+      </div>
+    </div>
+    
+  </nb-card-body>
+</nb-card>
