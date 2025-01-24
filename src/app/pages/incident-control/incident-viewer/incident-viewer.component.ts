@@ -50,65 +50,95 @@ export class IncidentViewerComponent implements OnInit {
   }
 
   async loadWeeks() {
-    const selectedPeriod = this.periodService.selectedPeriod.id; // Obtener el periodo seleccionado
-
+    const selectedPeriod = this.periodService.selectedPeriod?.id;
+  
     if (!selectedPeriod) {
-      console.error('No se ha seleccionado un tipo de periodo');
+      console.error('No se ha seleccionado un tipo de periodo.');
+      this.showToast('Por favor selecciona un periodo antes de continuar.', 'danger');
       return;
     }
-
+  
     const loading = await this.loadingController.create({
       message: 'Cargando semanas...',
       spinner: 'circles',
     });
     await loading.present();
-
+  
     this.http
       .get(
         `https://siinad.mx/php/get_weekly_periods.php?company_id=${this.companyId}&period_type_id=${selectedPeriod}`
       )
       .subscribe(
         (data: any) => {
-          this.weeks = data;
-          this.selectedWeek = this.weeks.length ? this.weeks[0] : null;
-          if (this.selectedWeek) {
+          this.weeks = data || [];
+          if (this.weeks.length > 0) {
+            this.selectedWeek = this.weeks[0];
             this.onWeekChange(this.selectedWeek);
-            loading.dismiss();
+          } else {
+            console.error('No se encontraron semanas disponibles.');
+            this.showToast('No hay semanas disponibles para este periodo.', 'danger');
           }
+          loading.dismiss();
         },
         (error) => {
           console.error('Error al cargar las semanas', error);
+          this.showToast('Error al cargar las semanas. Por favor intenta de nuevo.', 'danger');
           loading.dismiss();
         }
       );
   }
-
+  
 
   onWeekChange(week: any) {
-    this.selectedWeek = week; // Actualizar la semana seleccionada
+    if (!week) {
+      console.error('No se seleccionó ninguna semana.');
+      this.showToast('Por favor selecciona una semana válida.', 'danger');
+      return;
+    }
+  
+    this.selectedWeek = week;
     this.generateDiasSemana(week.start_date, week.end_date); // Generar los días de la semana
-    this.loadEmployees(); // Cargar empleados asignados y no asignados para la semana seleccionada
+  
+    this.selectedDia = ''; // Reinicia el día seleccionado
+    console.log('Semana seleccionada:', this.selectedWeek);
+    console.log('Días generados:', this.diasSemana);
+
   }
+  
 
 
   generateDiasSemana(startDate: string, endDate: string) {
+    console.log('Fechas recibidas para generar días:', startDate, endDate);
+  
     const start = moment(startDate);
     const end = moment(endDate);
+  
+    if (!start.isValid() || !end.isValid()) {
+      console.error('Las fechas de inicio o fin no son válidas:', startDate, endDate);
+      this.diasSemana = [];
+      return;
+    }
+  
     this.diasSemana = [];
-
-    let day = start;
-    while (day <= end) {
+    let day = start.clone();
+  
+    while (day.isSameOrBefore(end)) {
       this.diasSemana.push({
         date: day.format('YYYY-MM-DD'),
-        display: day.format('dddd'), // Nombre del día de la semana (e.g., Lunes)
+        display: day.format('dddd'), // Día de la semana
       });
-      day = day.add(1, 'day');
+      day.add(1, 'day');
     }
+  
+    console.log('Días generados:', this.diasSemana);
   }
+  
+  
 
   onDiaChange(dia: string): void {
     this.selectedDia = dia; // Actualizar el día seleccionado
     this.loadEmployees(); // Recargar los empleados asignados y no asignados para el día seleccionado
+    
   }
 
   async loadEmployees() {
@@ -332,6 +362,11 @@ export class IncidentViewerComponent implements OnInit {
   getFormattedDate(date: string): string {
     return moment(date).format('YYYY-MM-DD');
   }
+
+  getFormattedDate2(date: string): string {
+    return moment(date).format('dddd DD [de] MMMM [del] YYYY'); 
+  }
+  
 
   async showAlert(message: string) {
     const alert = await this.alertController.create({

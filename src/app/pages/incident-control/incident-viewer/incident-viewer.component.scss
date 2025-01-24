@@ -1,0 +1,43 @@
+.fixed-height {
+    height: 300px;
+    min-height: 300px; /* Asegura que no se reduzca */
+    display: flex; /* Permite centrar contenido */
+    flex-direction: column; /* Mantiene contenido alineado */
+    justify-content: space-between; /* Espaciado uniforme */
+  }
+
+  .dia-txt{
+    margin-top: 15px;
+  }
+
+  
+  .scroll-container {
+    max-height: 300px; /* Limita la altura de la lista */
+    overflow-y: auto; /* Habilita scroll vertical */
+    scrollbar-width: thin; /* Scroll delgado en Firefox */
+    scrollbar-color: #6c757d #e9ecef; /* Colores del scroll */
+    margin-bottom: 10px;
+  }
+  
+  /* Personalización para navegadores WebKit */
+  html, body::-webkit-scrollbar-track {
+    width: 8px;
+  }
+  
+  html, body::-webkit-scrollbar-track {
+    background-color: #6c757d;
+    border-radius: 4px;
+    border: 2px solid #e9ecef;
+  }
+  
+  html, body::-webkit-scrollbar-track {
+    background-color: #e9ecef;
+    border-radius: 4px;
+  }
+  
+  button{
+    margin-bottom: 10px;
+  }
+  nb-checkbox{
+    margin-right: 10px;
+  }
