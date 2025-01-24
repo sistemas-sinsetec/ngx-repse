@@ -1,5 +1,6 @@
 import { Component, Input } from '@angular/core';
 import { NbDialogRef } from '@nebular/theme';
+import { PeriodService } from '../../../services/period.service';
 
 
 @Component({
@@ -15,6 +16,7 @@ export class AssignmentSummaryComponent {
   @Input() authService: any;
 
   constructor(
+    public periodService: PeriodService,
     private dialogRef: NbDialogRef<AssignmentSummaryComponent>, // Inyección de NbDialogRef
   ) {}
 
