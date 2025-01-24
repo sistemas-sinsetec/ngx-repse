@@ -1,8 +1,8 @@
-import { Component, Input, OnInit } from '@angular/core';
+import { Component, Input, OnInit, Inject } from '@angular/core';
 import { LoadingController } from '@ionic/angular';
 import { NbAlertModule, NbDialogService, NbToastrService } from '@nebular/theme';
 import { CompanyService } from '../../../services/company.service';
-
+import { NbDialogRef } from '@nebular/theme';
 import { HttpClient } from '@angular/common/http';
 import { AuthService } from '../../../services/auth.service'; // Asegúrate de tener el servicio de autenticación
 import * as JSZip from 'jszip';
@@ -222,6 +222,8 @@ export class EmployeeDetailsComponent implements OnInit {
     private http: HttpClient,
     private authService: AuthService,
     private companyService: CompanyService,
+
+    @Inject(NbDialogRef) private dialogRef: NbDialogRef<EmployeeDetailsComponent>
     ) { }
 
   ngOnInit() {
@@ -258,8 +260,8 @@ export class EmployeeDetailsComponent implements OnInit {
 
 
   // Cerrar el diálogo
-  closeModal(dialogRef: any) {
-    dialogRef.close();
+  close() {
+    this.dialogRef.close(); // Cerrar el diálogo
   }
 
   ngOnDestroy() {

@@ -52,4 +52,50 @@
     text-align: center;
   }
 
+  .custom-dialog-scroll {
+    max-height: 80vh; /* Define una altura máxima del 80% del viewport */
+    overflow-y: auto; /* Habilita el scroll vertical cuando el contenido excede la altura */
+  }
+
+
+  /* Asegura que el layout ocupe al menos el alto de la ventana */
+nb-layout, nb-layout-column {
+  height: 100vh;
+  overflow: hidden;
+}
+
+/* Permite el desplazamiento dentro del contenido principal */
+.container-fluid {
+  height: 100%;
+  overflow-y: auto;
+  padding-right: 15px; /* Opcional: para evitar que el contenido quede oculto detrás de barras de scroll */
+}
+
+/* Estilo para resaltar el elemento seleccionado */
+.list-group-item.selected {
+  background-color: #007bff;
+  color: white;
+}
+
+/* Asegura que las tarjetas no excedan el ancho en pantallas pequeñas */
+.nb-card {
+  width: 100%;
+}
+
+/* Opcional: Ajustes adicionales para mejorar la experiencia en móviles */
+@media (max-width: 767.98px) {
+  .sidebar-section h6 {
+    font-size: 1.1rem;
+  }
+
+  .list-group-item {
+    padding: 0.75rem 1rem;
+  }
+
+  .busqueda nb-form-field {
+    width: 100%;
+  }
+}
+
+
   

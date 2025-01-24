@@ -1,0 +1,11 @@
+nb-list-item.selected {
+    background-color: #f0f0f0; /* Fondo gris claro */
+    color: #333; /* Color del texto */
+    font-weight: bold; /* Opcional: resaltar texto */
+  }
+  
+  nb-list-item.disabled {
+    pointer-events: none; /* Deshabilitar clics */
+    opacity: 0.6; /* Visualmente deshabilitado */
+  }
+  

@@ -7,6 +7,7 @@ import { NbDialogService } from '@nebular/theme';
 import { Router } from '@angular/router';
 import { CompanyService } from '../../../services/company.service';
 import { PeriodService } from '../../../services/period.service';
+import { LoadingController } from '@ionic/angular';
 
 @Component({
   selector: 'ngx-assign-projects',
@@ -34,7 +35,8 @@ export class AssignProjectsComponent implements OnInit {
     private router: Router,
     private companyService: CompanyService,
     private periodService: PeriodService,
-  ) {}
+    private loadingController: LoadingController
+  ) { }
 
   ngOnInit() {
     moment.locale('es');
@@ -54,14 +56,29 @@ export class AssignProjectsComponent implements OnInit {
       return;
     }
 
+    let loading = await this.loadingController.create({
+      message: 'Cargando semanas...',
+      spinner: 'circles',
+    });
+
     try {
-      this.semanas = await this.http
-        .get<any[]>(`https://siinad.mx/php/get_weekly_periods.php?company_id=${companyId}&period_type_id=${selectedPeriod}`)
-        .toPromise();
-      this.selectedSemana = this.semanas.length ? this.semanas[0] : null;
-      this.onSemanaChange(this.selectedSemana);
-    } catch (error) {
-      console.error('Error al cargar las semanas', error);
+      await loading.present();
+
+      this.http.get(`https://siinad.mx/php/get_weekly_periods.php?company_id=${companyId}&period_type_id=${selectedPeriod}`)
+        .subscribe((data: any) => {
+          this.semanas = data;
+          this.selectedSemana = this.semanas.length ? this.semanas[0] : null;
+          this.onSemanaChange(this.selectedSemana);
+        }, error => {
+          console.error('Error al cargar las semanas', error);
+        }, () => {
+          loading.dismiss();
+        });
+    } catch (e) {
+      console.error('Error al presentar el loading', e);
+      if (loading) {
+        await loading.dismiss();
+      }
     }
   }
 
@@ -105,15 +122,31 @@ export class AssignProjectsComponent implements OnInit {
   }
 
   async loadObras(startDate: string, endDate: string) {
+    let loading = await this.loadingController.create({
+      message: 'Cargando obras...',
+      spinner: 'circles',
+    });
+
     try {
-      const companyId = this.companyService.selectedCompany.id;
-      this.obras = await this.http
-        .get<any[]>(`https://siinad.mx/php/get_projects_by_date.php?start_date=${startDate}&end_date=${endDate}&company_id=${companyId}`)
-        .toPromise();
-      this.filterObrasByDate(startDate, endDate);
-      this.filterObras();
-    } catch (error) {
-      console.error('Error al cargar las obras', error);
+      await loading.present();
+
+      const companyId = this.companyService.selectedCompany.id; // Obtener el companyId desde AuthService
+
+      this.http.get(`https://siinad.mx/php/get_projects_by_date.php?start_date=${startDate}&end_date=${endDate}&company_id=${companyId}`)
+        .subscribe((data: any) => {
+          this.obras = data;
+          this.filterObrasByDate(startDate, endDate);
+          this.filterObras(); // Inicializar la lista filtrada
+        }, error => {
+          console.error('Error al cargar las obras', error);
+        }, () => {
+          loading.dismiss();
+        });
+    } catch (e) {
+      console.error('Error al presentar el loading', e);
+      if (loading) {
+        await loading.dismiss();
+      }
     }
   }
 
@@ -131,58 +164,99 @@ export class AssignProjectsComponent implements OnInit {
   }
 
   async loadEmpleados(semana: any, dia: string, obra: any) {
-    if (semana && dia && obra) {
-      try {
+    let loading = await this.loadingController.create({
+      message: 'Cargando empleados...',
+      spinner: 'circles',
+    });
+
+    try {
+      await loading.present();
+
+      if (semana && dia && obra) {
         const companyId = this.companyService.selectedCompany.id;
         const startDate = this.selectedSemana?.start_date;
         const endDate = this.selectedSemana?.end_date;
+        const projectId = this.selectedObra?.project_id;
+        const weekNumber = this.selectedSemana?.week_number;
+        const dayOfWeek = this.selectedDia;
 
-        const employees = await this.http
-          .get<any[]>(`https://siinad.mx/php/get_active_employees_by_date.php?start_date=${startDate}&end_date=${endDate}&company_id=${companyId}`)
-          .toPromise();
+        // Obtener empleados activos
+        this.http.get(`https://siinad.mx/php/get_active_employees_by_date.php?start_date=${startDate}&end_date=${endDate}&company_id=${companyId}`)
+          .subscribe((data: any) => {
+            // Asegúrate de que data sea un array
+            this.empleados = Array.isArray(data) ? data : [];
+            this.filterEmpleados();
 
-        this.empleados = employees || [];
-        this.filterEmpleados();
-
-        const assignedEmployees = await this.http
-          .get<any[]>(`https://siinad.mx/php/get_assigned_employees.php?start_date=${startDate}&end_date=${endDate}&company_id=${companyId}&project_id=${obra.project_id}&week_number=${semana.week_number}&day_of_week=${dia}`)
-          .toPromise();
-
-        this.markAssignedEmployees(assignedEmployees);
-      } catch (error) {
-        console.error('Error al cargar los empleados', error);
+            // Obtener empleados ya asignados
+            this.http.get(`https://siinad.mx/php/get_assigned_employees.php?start_date=${startDate}&end_date=${endDate}&company_id=${companyId}&project_id=${projectId}&week_number=${weekNumber}&day_of_week=${dayOfWeek}`)
+              .subscribe((assignedData: any) => {
+                this.markAssignedEmployees(assignedData);
+              }, error => {
+                console.error('Error al cargar empleados asignados', error);
+              }, () => {
+                loading.dismiss();
+              });
+          }, error => {
+            console.error('Error al cargar los empleados', error);
+          }, () => {
+            loading.dismiss();
+          });
+      } else {
+        loading.dismiss();
+      }
+    } catch (e) {
+      console.error('Error al presentar el loading', e);
+      if (loading) {
+        await loading.dismiss();
       }
     }
   }
 
   markAssignedEmployees(assignedEmployees: any) {
-    this.empleados.forEach((empleado) => {
-      empleado.isAssigned = assignedEmployees.includes(empleado.employee_id);
+    this.empleados.forEach(empleado => {
+      if (assignedEmployees.includes(empleado.employee_id)) {
+        empleado.isAssigned = true;
+      } else {
+        empleado.isAssigned = false;
+      }
     });
     this.filterEmpleados();
   }
 
   filterObras() {
     const searchTerm = this.searchObra.toLowerCase();
-    this.filteredObras = this.obras.filter((obra) => obra.project_name.toLowerCase().includes(searchTerm));
+    this.filteredObras = this.obras.filter(obra => {
+      const obraName = obra.project_name.toLowerCase();
+      return obraName.includes(searchTerm);
+    });
   }
 
   filterEmpleados() {
     const searchTerm = this.searchEmployee.toLowerCase();
-    this.filteredEmpleados = this.empleados.filter((empleado) => {
+    this.filteredEmpleados = this.empleados.filter(empleado => {
       const fullName = `${empleado.last_name} ${empleado.middle_name} ${empleado.first_name}`.toLowerCase();
       return fullName.includes(searchTerm);
     });
   }
 
+
   toggleEmpleadoSelection(empleado: any): void {
+    if (empleado.isAssigned) return; // No hacer nada si está asignado
+  
+    empleado.selected = !empleado.selected;
+  
     const index = this.selectedEmpleados.indexOf(empleado);
-    if (index > -1) {
-      this.selectedEmpleados.splice(index, 1);
-    } else {
+    if (empleado.selected && index === -1) {
+      // Agregar empleado a la lista seleccionada
       this.selectedEmpleados.push(empleado);
+    } else if (!empleado.selected && index > -1) {
+      // Remover empleado de la lista seleccionada
+      this.selectedEmpleados.splice(index, 1);
     }
   }
+  
+  
+  
 
   async assignEmployees() {
     const dialogRef = this.dialogService.open(AssignmentSummaryComponent, {
@@ -204,6 +278,15 @@ export class AssignProjectsComponent implements OnInit {
   }
 
   async sendAssignment() {
+    // Crear el spinner de carga
+    const loading = await this.loadingController.create({
+      message: 'Asignando empleados...',
+      spinner: 'circles',
+    });
+  
+    // Mostrar el spinner de carga
+    await loading.present();
+  
     try {
       const data = {
         weekNumber: this.selectedSemana?.week_number,
@@ -214,24 +297,32 @@ export class AssignProjectsComponent implements OnInit {
         obraId: this.selectedObra?.project_id,
         employeeIds: this.selectedEmpleados.map((e) => e.employee_id),
         companyId: this.companyService.selectedCompany.id,
-        fiscalYear: this.periodService.selectedPeriod.fiscal_year,
+        fiscalYear: this.periodService.selectedPeriod.year,
         periodTypeId: this.periodService.selectedPeriod.id,
         periodNumber: this.selectedSemana?.period_number,
         periodId: this.selectedSemana?.period_id,
       };
-
+  
+      // Realizar la solicitud HTTP
       await this.http.post('https://siinad.mx/php/assign-employees.php', data).toPromise();
       console.log('Empleados asignados correctamente');
-
+  
+      // Marcar empleados como asignados
       this.selectedEmpleados.forEach((empleado) => {
         empleado.isAssigned = true;
       });
-
+  
+      // Limpiar la lista de empleados seleccionados
       this.selectedEmpleados = [];
     } catch (error) {
       console.error('Error al asignar empleados', error);
+    } finally {
+      // Cerrar el spinner de carga
+      loading.dismiss();
     }
   }
+  
+  
 
   onObraChange(obra: any): void {
     this.selectedObra = obra;
@@ -252,9 +343,11 @@ export class AssignProjectsComponent implements OnInit {
 
   selectAllUnassignedEmployees(): void {
     this.filteredEmpleados.forEach((empleado) => {
-      if (!empleado.isAssigned && !this.selectedEmpleados.includes(empleado)) {
-        this.selectedEmpleados.push(empleado);
+      if (!empleado.isAssigned && !empleado.selected) {
+        empleado.selected = true; // Marcar el empleado como seleccionado
+        this.selectedEmpleados.push(empleado); // Añadir a la lista de seleccionados
       }
     });
   }
+  
 }

@@ -200,12 +200,12 @@ export class EmployeeViewComponent implements OnInit {
   
 // Método para ver detalles del empleado
 async viewEmployeeDetails(employeeId: number) {
-  const dialogRef = this.dialogService.open(EmployeeDetailsComponent, {
+  this.dialogService.open(EmployeeDetailsComponent, {
     context: { employeeId }, // Pasa datos al diálogo
-  });
-
-  // Manejar el cierre del diálogo
-  dialogRef.onClose.pipe(take(1)).subscribe((result) => {
+    dialogClass: 'custom-dialog-scroll', // Asigna una clase personalizada
+    // Puedes agregar otras configuraciones si es necesario
+  })
+  .onClose.subscribe(result => {
     if (result) {
       // Realiza acciones si el diálogo devuelve un resultado
       console.log('Resultado recibido del diálogo:', result);
@@ -215,6 +215,8 @@ async viewEmployeeDetails(employeeId: number) {
     }
   });
 }
+
+
 
 }
 
