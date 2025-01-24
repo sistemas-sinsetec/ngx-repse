@@ -14,6 +14,9 @@ import { CompanyService } from '../../../../services/company.service';
   styleUrls: ['./business-partner-register.component.scss'],
 })
 export class BusinessPartnerRegisterComponent implements OnInit {
+
+
+
   usuario = {
     nombreUsuario: '',
     nombreCompleto: '',
@@ -70,6 +73,61 @@ export class BusinessPartnerRegisterComponent implements OnInit {
 
   getCountryName(regionCode: string): string {
     return regionCode;
+  }
+
+  onChangeTipoRFC() {
+    this.usuario.rfc = '';
+    this.usuario.nombreEmpresa = '';
+    this.rfcLengthError = '';
+  }
+
+  buscarEmpresaPorRFC() {
+    this.http.post('https://siinad.mx/php/searchCompanies.php', { rfc: this.usuario.rfc }).subscribe(
+      async (response: any) => {
+        if (response.success) {
+          this.usuario.nombreEmpresa = response.nombreEmpresa;
+        } else {
+          await this.mostrarToast(response.message, 'danger');
+        }
+      },
+      error => {
+        console.error('Error en la solicitud:', error);
+      }
+    );
+  }
+
+  hideMessage() {
+    this.showMessageFlag = false;
+  }
+  
+  resetMessage() {
+    this.showMessageFlag = false;
+  }
+
+  showMessage() {
+    this.showMessageFlag = true;
+  }
+
+  validateRFC(event: any) {
+    if (this.tipoRFC === 'fisica') {
+      if (this.usuario.rfc.length >= 13) {
+        this.rfcLengthError = '';
+      } else {
+        this.rfcLengthError = 'El RFC para persona física debe tener 13 dígitos.';
+      }
+    } else if (this.tipoRFC === 'moral') {
+      if (this.usuario.rfc.length >= 12) {
+        this.rfcLengthError = '';
+      } else {
+        this.rfcLengthError = 'El RFC para persona moral debe tener 12 dígitos.';
+      }
+    }
+
+    if (this.usuario.rfc.length > 13 && this.tipoRFC === 'fisica') {
+      this.usuario.rfc = this.usuario.rfc.substring(0, 13);
+    } else if (this.usuario.rfc.length > 12 && this.tipoRFC === 'moral') {
+      this.usuario.rfc = this.usuario.rfc.substring(0, 12);
+    }
   }
 
   async camposCompletos(): Promise<boolean> {
