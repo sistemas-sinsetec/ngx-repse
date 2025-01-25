@@ -67,6 +67,16 @@ export class MyProfileComponent implements OnInit, OnDestroy {
     });
   }
 
+  // Simular clic en un input de archivo oculto
+triggerFileInput(inputId: string) {
+  const fileInput = document.getElementById(inputId) as HTMLElement;
+  if (fileInput) {
+    fileInput.click();
+  } else {
+    console.error('No se pudo encontrar el input de archivo con ID:', inputId);
+  }
+}
+
   changeProfilePicture(event: Event) {
     const input = event.target as HTMLInputElement;
     const file = input.files?.[0];

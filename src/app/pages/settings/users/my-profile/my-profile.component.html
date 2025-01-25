@@ -8,20 +8,21 @@
               <nb-card-header class="text-center">
                 <h5>Editar Perfil del Usuario</h5>
               </nb-card-header>
-              <nb-card-body>
+              <nb-card-body>  
+                <div class="text-center">
                 <!-- Sección para cambiar la imagen de perfil -->
-                <div class="text-center mb-4">
+                <div class="image-container" (click)="triggerFileInput('photo-input')">
                     <!-- Utiliza una etiqueta img estilizada para mostrar la imagen del usuario -->
-                    <img [src]="avatar || 'assets/img/default-avatar.png'" alt="Imagen de perfil" class="avatar-image">
+                    <img class="profile-picture"  [src]="avatar || 'assets/img/default-avatar.png'" (click)="fileInput.click()"
+                    alt="Imagen de perfil" class="avatar-image" width="150px">
                     
                     <!-- Input para cambiar la imagen de perfil -->
-                    <input type="file" hidden (change)="changeProfilePicture($event)" #fileInput>
+                    <input type="file" id="photo-input" hidden (change)="changeProfilePicture($event)" #fileInput>
                     
                     <!-- Botón para activar el input de archivo -->
-                    <button nbButton status="info" (click)="fileInput.click()" class="mt-2">
-                      Cambiar Imagen de Perfil
-                    </button>
                   </div>
+
+                </div>
                   
   
                 <!-- Formulario para los datos del usuario -->
