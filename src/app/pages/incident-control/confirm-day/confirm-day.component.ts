@@ -329,6 +329,11 @@ export class ConfirmDayComponent {
   
     await alert.present();
   }
+
+  canConfirmDay(): boolean {
+    return this.empleadosDia.length > 0 || this.empleadosIncidencias.length > 0;
+  }
+  
   
 
 

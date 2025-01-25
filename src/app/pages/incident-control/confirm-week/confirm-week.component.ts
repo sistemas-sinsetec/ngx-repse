@@ -357,4 +357,14 @@ export class ConfirmWeekComponent {
 
     await alert.present();
   }
+
+
+  canConfirmWeek(): boolean {
+    const confirmedDays = this.diasSemana.filter(dia => dia.status === 'confirmed').length;
+    const hasEmployeesOrIncidences = this.filteredEmpleadosDia.length > 0 || this.filteredEmpleadosIncidencias.length > 0;
+  
+    // Se puede confirmar si hay al menos 5 días confirmados y hay empleados asignados o incidencias
+    return confirmedDays >= 5 && hasEmployeesOrIncidences && !this.isWeekConfirmed;
+  }
+  
 } 

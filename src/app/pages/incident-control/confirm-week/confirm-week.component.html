@@ -89,10 +89,11 @@
         </nb-card>
 
         <div class="text-center mt-3">
-          <button nbButton status="primary" (click)="confirmarSemanaCompleta()" [disabled]="isWeekConfirmed">
+          <button nbButton status="primary" (click)="confirmarSemanaCompleta()" [disabled]="!canConfirmWeek()">
             Confirmar Semana
           </button>
         </div>
+        
       </nb-card>
     </div>
   </div>

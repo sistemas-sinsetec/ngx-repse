@@ -96,11 +96,16 @@
       </nb-card>
 
       <div class="d-flex justify-content-end mt-3">
-        <button nbButton status="primary" *ngIf="selectedDia" [disabled]="selectedDia?.status === 'confirmed'"
+        <button 
+          nbButton 
+          status="primary" 
+          *ngIf="selectedDia" 
+          [disabled]="!canConfirmDay() || selectedDia?.status === 'confirmed'" 
           (click)="confirmarDia(selectedDia)">
           Confirmar Día
         </button>
       </div>
+      
     </nb-card>
   </div>
 

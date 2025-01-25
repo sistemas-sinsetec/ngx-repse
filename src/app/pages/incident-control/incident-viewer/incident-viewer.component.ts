@@ -208,33 +208,27 @@ export class IncidentViewerComponent implements OnInit {
       return;
     }
   
-    // Verificar si el día ya está confirmado
     const dayConfirmed = await this.checkIfDayConfirmed();
     if (dayConfirmed) {
-      return; // Si el día está confirmado, no continuar con el cambio de horas
+      return;
     }
   
-    // Abrir un diálogo con Nebular
     this.dialogService
       .open(ChangeHoursModalComponent, {
         context: {
-          employees: selectedEmployees, // Pasar todos los empleados seleccionados al modal
+          employees: selectedEmployees,
         },
-       
       })
-      .onClose.subscribe((result) => {
+      .onClose.subscribe(async (result) => {
         if (result) {
-          // Guardar las horas para todos los empleados seleccionados
-          for (const employee of selectedEmployees) {
-            this.saveHours(employee, result);
-          }
+          await this.saveHours(selectedEmployees, result);
         }
       });
   }
+  
 
-  async saveHours(employee: any, data: any) {
-    // Preparar los datos de las horas
-    const workHoursData = {
+  async saveHours(employees: any[], data: any) {
+    const hoursDataList = employees.map(employee => ({
       employee_id: employee.employee_id,
       period_id: this.selectedWeek.period_id,
       period_type_id: this.periodService.selectedPeriod.id,
@@ -245,22 +239,22 @@ export class IncidentViewerComponent implements OnInit {
       exit_time: data.exitTime,
       lunch_start_time: data.lunchStart,
       lunch_end_time: data.lunchEnd
-    };
+    }));
   
-    // Realizar la solicitud HTTP para guardar las horas
-    this.http.post('https://siinad.mx/php/save_work_hours.php', workHoursData)
-      .subscribe(
-        async (response) => {
-          console.log('Horas guardadas correctamente:', response);
-          // Mostrar el Toast de éxito
-          await this.showToast('Horas asignadas correctamente.', 'success');
-        },
-        (error) => {
-          console.error('Error al guardar las horas:', error);
-          // En caso de error, mostrar un mensaje
-          this.showToast('Hubo un error al asignar las horas. Intenta nuevamente.', 'danger');
-        }
+    try {
+      // Realizar múltiples solicitudes en paralelo
+      await Promise.all(
+        hoursDataList.map(workHoursData =>
+          this.http.post('https://siinad.mx/php/save_work_hours.php', workHoursData).toPromise()
+        )
       );
+  
+      // Mostrar solo un mensaje de éxito
+      await this.showToast('Todas las horas fueron asignadas correctamente.', 'success');
+    } catch (error) {
+      console.error('Error al guardar algunas horas:', error);
+      await this.showToast('Ocurrió un error al asignar las horas.', 'danger');
+    }
   }
 
   // Asignar incidencia a empleados seleccionados
@@ -286,22 +280,20 @@ export class IncidentViewerComponent implements OnInit {
           incidentOptions,
           employees: selectedEmployees, // Pasar todos los empleados seleccionados al modal
         },
-        closeOnBackdropClick: false, // Opcional: evita cerrar el diálogo al hacer clic fuera
+        closeOnBackdropClick: false,
       })
-      .onClose.subscribe((result) => {
+      .onClose.subscribe(async (result) => {
         if (result) {
-          // Guardar la misma incidencia para todos los empleados seleccionados
-          for (const employee of selectedEmployees) {
-            this.saveIncident(employee, result);
-          }
+          // Procesar incidencias para todos los empleados seleccionados
+          await this.saveIncident(selectedEmployees, result);
         }
       });
   }
+  
 
 
-  async saveIncident(employee: any, data: any) {
-    // Preparar los datos de la incidencia
-    const incidentData = {
+  async saveIncident(employees: any[], data: any) {
+    const incidentDataList = employees.map(employee => ({
       employee_id: employee.employee_id,
       period_id: this.selectedWeek.period_id,
       period_type_id: this.periodService.selectedPeriod.id,
@@ -310,25 +302,25 @@ export class IncidentViewerComponent implements OnInit {
       work_week: this.selectedWeek.week_number,
       incident_type: data.incident,
       description: data.description || null
-    };
+    }));
   
-    // Realizar la solicitud HTTP para guardar la incidencia
-    this.http.post('https://siinad.mx/php/save_incident.php', incidentData)
-      .subscribe(
-        async (response) => {
-          console.log('Incidencia guardada correctamente:', response);
-          // Mostrar el Toast de éxito
-          await this.showToast('Incidencia guardada correctamente.', 'success');
-          // Mostrar la alerta de éxito
-          await this.showAlert('La incidencia ha sido asignada correctamente.');
-        },
-        async (error) => {
-          console.error('Error al guardar la incidencia:', error);
-          // Mostrar alerta si ocurre un error
-          await this.showAlert('Hubo un error al guardar la incidencia. Intenta nuevamente.');
-        }
+    try {
+      // Realizar múltiples solicitudes en paralelo
+      await Promise.all(
+        incidentDataList.map(incidentData =>
+          this.http.post('https://siinad.mx/php/save_incident.php', incidentData).toPromise()
+        )
       );
+  
+      // Mostrar solo un mensaje de éxito después de procesar todos
+      await this.showToast('Todas las incidencias fueron asignadas correctamente.', 'success');
+      await this.showAlert('Se asignaron las incidencias con éxito.');
+    } catch (error) {
+      console.error('Error al guardar algunas incidencias:', error);
+      await this.showToast('Ocurrió un error al asignar las incidencias.', 'danger');
+    }
   }
+  
 
   async checkIfDayConfirmed(): Promise<boolean> {
     const { start_date, end_date, week_number } = this.selectedWeek;

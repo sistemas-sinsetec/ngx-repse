@@ -1,41 +1,53 @@
 <!-- add-incident-dialog.component.html -->
 <nb-card>
-    <nb-card-header class="d-flex justify-content-between align-items-center" style="background-color: var(--nebular-primary-bg); color: var(--nebular-primary-text);">
-      <span>Agregar Incidencia</span>
+  <nb-card-header>
+    <div class="d-flex justify-content-between align-items-center">
+      <span class="title">Agregar Incidencia</span>
       <button nbButton ghost status="danger" size="small" (click)="dismiss()">Cerrar</button>
-    </nb-card-header>
-  
-    <nb-card-body>
-      <div class="container">
-  
-        <!-- Tipo de Incidencia -->
-        <div class="row mb-3">
-          <div class="col">
-            <label for="incidentType" class="form-label"><strong>Tipo de Incidencia</strong></label>
-            <nb-select id="incidentType" [(ngModel)]="selectedIncident" placeholder="Seleccionar">
-              <nb-option *ngFor="let option of incidentOptions" [value]="option">
-                {{ option }}
-              </nb-option>
-            </nb-select>
-          </div>
+    </div>
+  </nb-card-header>
+
+  <nb-card-body>
+    <form (ngSubmit)="saveIncident()" #incidentForm="ngForm">
+      <!-- Tipo de Incidencia -->
+      <div class="mb-4">
+        <label for="incidentType" class="form-label"><strong>Tipo de Incidencia</strong></label>
+        <nb-select
+          id="incidentType"
+          [(ngModel)]="selectedIncident"
+          name="incidentType"
+          placeholder="Seleccionar"
+          required>
+          <nb-option *ngFor="let option of incidentOptions" [value]="option">
+            {{ option }}
+          </nb-option>
+        </nb-select>
+        <div *ngIf="incidentForm.submitted && !selectedIncident" class="text-danger mt-1">
+          Por favor selecciona un tipo de incidencia.
         </div>
-        
-        <!-- Descripción -->
-        <div class="row mb-3">
-          <div class="col">
-            <label for="description" class="form-label"><strong>Descripción</strong></label>
-            <textarea nbInput id="description" rows="4" [(ngModel)]="description" placeholder="Descripción de la incidencia" class="form-control"></textarea>
-          </div>
-        </div>
-        
-        <!-- Botón Guardar -->
-        <div class="row">
-          <div class="col text-center">
-            <button nbButton status="primary" expand="block" (click)="saveIncident()">Guardar Incidencia</button>
-          </div>
-        </div>
-  
       </div>
-    </nb-card-body>
-  </nb-card>
-  
+
+      <!-- Descripción -->
+      <div class="mb-4">
+        <label for="description" class="form-label"><strong>Descripción</strong></label>
+        <textarea
+          nbInput
+          id="description"
+          rows="4"
+          [(ngModel)]="description"
+          name="description"
+          placeholder="Descripción de la incidencia"
+          class="form-control"
+          maxlength="500">
+        </textarea>
+      </div>
+
+      <!-- Botón Guardar -->
+      <div class="text-center">
+        <button nbButton status="primary" size="large" [disabled]="!incidentForm.form.valid" type="submit">
+          Guardar Incidencia
+        </button>
+      </div>
+    </form>
+  </nb-card-body>
+</nb-card>
