@@ -248,19 +248,21 @@
             <div class="form-group">
               <label for="rest_days" class="form-label"><strong>Días de Descanso</strong></label>
               <nb-form-field class="form-field">
-                <nb-select fullWidth
-                  id="rest_days"
-                  placeholder="Seleccionar días de descanso"
-                  [(ngModel)]="getCurrentShift().rest_days"
-                  multiple="true">
-                  <nb-option value="Lunes">Lunes</nb-option>
-                  <nb-option value="Martes">Martes</nb-option>
-                  <nb-option value="Miércoles">Miércoles</nb-option>
-                  <nb-option value="Jueves">Jueves</nb-option>
-                  <nb-option value="Viernes">Viernes</nb-option>
-                  <nb-option value="Sábado">Sábado</nb-option>
-                  <nb-option value="Domingo">Domingo</nb-option>
-                </nb-select>
+                <nb-select
+                fullWidth
+                id="rest_days"
+                placeholder="Seleccionar días de descanso"
+                [(ngModel)]="getCurrentShift().rest_days"
+                multiple="true">
+                <nb-option value="Lunes">Lunes</nb-option>
+                <nb-option value="Martes">Martes</nb-option>
+                <nb-option value="Miércoles">Miércoles</nb-option>
+                <nb-option value="Jueves">Jueves</nb-option>
+                <nb-option value="Viernes">Viernes</nb-option>
+                <nb-option value="Sábado">Sábado</nb-option>
+                <nb-option value="Domingo">Domingo</nb-option>
+              </nb-select>
+              
               </nb-form-field>
             </div>
     

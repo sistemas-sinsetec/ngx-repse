@@ -83,19 +83,32 @@ export class DepartmentManagementComponent {
     }
 
     async fetchShifts() {
-    
       const companyId = this.companyService.selectedCompany.id;
-      this.http.get<any[]>(`https://siinad.mx/php/get_shifts.php?company_id=${companyId}`).subscribe(
-        data => {
-          this.shifts = Array.isArray(data) ? data : [];
-          
-        },
-        error => {
-          console.error('Error al cargar turnos', error);
-       
-        }
-      );
+      this.http.get<any[]>(`https://siinad.mx/php/get_shifts.php?company_id=${companyId}`)
+        .subscribe(
+          data => {
+            // Mapear cada turno para convertir la cadena JSON de 'rest_days' en array
+            this.shifts = Array.isArray(data) ? data.map(shift => {
+              if (shift.rest_days) {
+                try {
+                  // Convertir la cadena JSON en un array real
+                  shift.rest_days = JSON.parse(shift.rest_days);
+                } catch (error) {
+                  console.error('Error al convertir rest_days:', error);
+                  shift.rest_days = [];
+                }
+              } else {
+                shift.rest_days = [];
+              }
+              return shift;
+            }) : [];
+          },
+          error => {
+            console.error('Error al cargar turnos', error);
+          }
+        );
     }
+    
 
     selectDepartment(department: any) {
       this.selectedDepartment = department;
