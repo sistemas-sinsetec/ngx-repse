@@ -173,19 +173,20 @@
               class="form-control" 
               id="codigoUsuario"
               [(ngModel)]="userCode" 
-              (blur)="onUserCodeChange()">
+              (keydown)="onUserCodeChange()">
           </div>
 
           <!-- Información del usuario encontrado -->
           <div *ngIf="selectedUser">
             <div class="form-group mb-3">
               <label>Nombre del Usuario:</label><br/>
-              <nb-tag>{{ selectedUser.name }}</nb-tag>
+              <input nbInput [(ngModel)]="selectedUser.name">
+              
             </div>
 
             <div class="form-group mb-3">
               <label>Correo Electrónico:</label><br/>
-              <nb-tag>{{ selectedUser.email }}</nb-tag>
+              <input nbInput [(ngModel)]="selectedUser.email">
             </div>
 
             <div class="form-group mb-3">

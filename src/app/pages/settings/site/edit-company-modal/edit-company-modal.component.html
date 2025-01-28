@@ -1,49 +1,40 @@
+<div class="scrollable-container main-card">
 <nb-card>
     <nb-card-body>
-      <nb-list>
-        <nb-list-item>
           <label>Nombre de la Empresa</label>
-          <nb-input [(ngModel)]="company.nameCompany" fullWidth></nb-input>
-        </nb-list-item>
-        <nb-list-item>
+          <input nbInput fullWidth [(ngModel)]="company.nameCompany" fullWidth>
+          
           <label>RFC</label>
-          <nb-input [(ngModel)]="company.companyRFC" fullWidth></nb-input>
-        </nb-list-item>
-        <nb-list-item>
+          <input nbInput fullWidth  [(ngModel)]="company.companyRFC" fullWidth>
+
           <label>Nombre Legal</label>
-          <nb-input [(ngModel)]="company.name" fullWidth></nb-input>
-        </nb-list-item>
-        <nb-list-item>
+          <input nbInput fullWidth [(ngModel)]="company.name" fullWidth>
           <label>Usuario Propietario</label>
-          <nb-input [(ngModel)]="company.username" fullWidth></nb-input>
-        </nb-list-item>
-        <nb-list-item>
+          <input nbInput fullWidth  [(ngModel)]="company.username" fullWidth>
+
           <label>Correo Electrónico</label>
-          <nb-input [(ngModel)]="company.email" fullWidth></nb-input>
-        </nb-list-item>
-        <nb-list-item>
+          <input nbInput fullWidth  [(ngModel)]="company.email" fullWidth>
+
           <label>Número de Teléfono</label>
-          <nb-input [(ngModel)]="company.phone" fullWidth></nb-input>
-        </nb-list-item>
-        <nb-list-item>
+          <input nbInput fullWidth  [(ngModel)]="company.phone" fullWidth>
+
           <label>Tipo de Usuario</label>
-          <nb-input [(ngModel)]="company.levelUserName" fullWidth></nb-input>
-        </nb-list-item>
-        <nb-list-item>
+          <input nbInput fullWidth  [(ngModel)]="company.levelUserName" fullWidth>
+
           <label>Fecha de Inicio del Periodo</label>
-          <nb-input [(ngModel)]="company.fecha_inicio" fullWidth></nb-input>
-        </nb-list-item>
-        <nb-list-item>
+          <input nbInput fullWidth  [(ngModel)]="company.fecha_inicio" fullWidth>
+
           <label>Fecha de Fin del Periodo</label>
-          <nb-input [(ngModel)]="company.fecha_fin" fullWidth></nb-input>
-        </nb-list-item>
-        <nb-list-item>
+          <input nbInput fullWidth  [(ngModel)]="company.fecha_fin" fullWidth>
+
           <label>Premium</label>
-          <nb-input [(ngModel)]="company.premium" fullWidth></nb-input>
-        </nb-list-item>
-      </nb-list>
-  
-      <button nbButton status="success" (click)="guardarCambios()" fullWidth>Guardar Cambios</button>
+          <input nbInput fullWidth  [(ngModel)]="company.premium" fullWidth>
+
+      <div class="text-center">
+      <button nbButton status="success" (click)="guardarCambios()"> Guardar Cambios</button>
+      <button nbButton status="danger" (click)="cerrarModal()" >Cancelar</button>
+    </div>
     </nb-card-body>
   </nb-card>
+</div>
   

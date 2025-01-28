@@ -1,0 +1,32 @@
+.main-card{ 
+    max-width: 40% !important; 
+}
+
+label{
+    margin: 20px;
+}
+
+button{
+    margin: 20px;
+}
+.table-horizontal {
+    width: 100%;
+    border-collapse: collapse;
+  }
+  
+  .table-horizontal td {
+    padding: 8px;
+    vertical-align: top;
+  }
+  
+  .table-horizontal td:first-child {
+    font-weight: bold;
+    white-space: nowrap;
+  }
+  
+  .table-horizontal td:last-child {
+    text-align: left;
+  }
+
+  
+  

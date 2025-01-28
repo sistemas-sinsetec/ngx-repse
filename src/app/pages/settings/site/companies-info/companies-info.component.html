@@ -34,39 +34,41 @@
       <!-- Cuerpo del Card: Lista de Empresas -->
       <nb-card-body>
         <div class="row">
-          <div class="col-lg-4 col-md-6 mb-4" *ngFor="let company of filteredCompanies">
+          <div class="col-lg-4 col-md-4 mb-4" *ngFor="let company of filteredCompanies">
             <nb-card class="company-card h-100 shadow-sm">
               <nb-card-header class="bg-primary text-white">
                 <strong>{{ company.nameCompany }}</strong>
               </nb-card-header>
               <nb-card-body>
                 <div class="company-details">
+                  
                   <p><nb-icon icon="hash" pack="eva" class="mr-2"></nb-icon><strong>RFC:</strong> {{ company.companyRFC }}</p>
                   <p><nb-icon icon="file-text" pack="eva" class="mr-2"></nb-icon><strong>Nombre Legal:</strong> {{ company.name }}</p>
-                  <p><nb-icon icon="user" pack="eva" class="mr-2"></nb-icon><strong>Usuario Propietario:</strong> {{ company.username }}</p>
+                  <p><nb-icon icon="person" pack="eva" class="mr-2"></nb-icon><strong>Usuario Propietario:</strong> {{ company.username }}</p>
                   <p><nb-icon icon="email" pack="eva" class="mr-2"></nb-icon><strong>Correo Electrónico:</strong> {{ company.email }}</p>
                   <p><nb-icon icon="phone" pack="eva" class="mr-2"></nb-icon><strong>Número de Teléfono:</strong> {{ company.phone }}</p>
                   <p><nb-icon icon="settings" pack="eva" class="mr-2"></nb-icon><strong>Tipo de Usuario:</strong> {{ company.levelUserName }}</p>
                   <p><nb-icon icon="calendar" pack="eva" class="mr-2"></nb-icon><strong>Inicio:</strong> {{ company.fecha_inicio | date:'shortDate' }}</p>
-                  <p><nb-icon icon="calendar-off" pack="eva" class="mr-2"></nb-icon><strong>Fin:</strong> {{ company.fecha_fin | date:'shortDate' }}</p>
+                  <p><nb-icon icon="calendar" pack="eva" class="mr-2"></nb-icon><strong>Fin:</strong> {{ company.fecha_fin | date:'shortDate' }}</p>
                   <p><nb-icon [icon]="company.isPremium ? 'star' : 'star-outline'" pack="eva" class="mr-2"></nb-icon><strong>Premium:</strong> {{ company.isPremium ? 'Sí' : 'No' }}</p>
                 </div>
               </nb-card-body>
-              <nb-card-footer class="text-right">
-                <button nbButton size="small" status="success" (click)="editarEmpresa(company)">
+              <nb-card-footer class="text-center">
+                <button nbButton size="medium" status="success" (click)="editarEmpresa(company)">
                   <nb-icon icon="edit-2" pack="eva" class="mr-1"></nb-icon> Editar
                 </button>
               </nb-card-footer>
             </nb-card>
           </div>
         </div>
-  
+      
         <!-- Mensaje cuando no hay empresas -->
         <div *ngIf="filteredCompanies.length === 0" class="text-center mt-4">
           <nb-icon icon="inbox" pack="eva" size="giant" class="mb-2"></nb-icon>
           <p>No se encontraron empresas con los criterios de búsqueda proporcionados.</p>
         </div>
       </nb-card-body>
+      
   
       <!-- Paginación (opcional) -->
       
