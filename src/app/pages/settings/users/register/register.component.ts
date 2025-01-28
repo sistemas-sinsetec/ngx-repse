@@ -83,14 +83,24 @@ export class RegisterComponent implements OnInit {
     );
   }
 
+  pressEnter(event: KeyboardEvent): void {
+    // Verificamos si la tecla presionada es 'Enter'
+    if (event.key === 'Enter') {
+      this.onUserCodeChange();
+    }
+  }
+
   /**
    * Buscar usuario por código.
    */
   async onUserCodeChange() {
-    if (!this.userCode) {
-      this.selectedUser = null;
-      return;
+
+
+      if (!this.userCode) {
+        this.selectedUser = null;
+        return;
     }
+
 
     // 1. Crear y mostrar el loading
     const loading = await this.loadingController.create({

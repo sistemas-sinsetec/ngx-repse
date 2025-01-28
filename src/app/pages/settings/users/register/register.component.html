@@ -173,7 +173,7 @@
               class="form-control" 
               id="codigoUsuario"
               [(ngModel)]="userCode" 
-              (keydown)="onUserCodeChange()">
+              (keydown)="pressEnter($event)">
           </div>
 
           <!-- Información del usuario encontrado -->
