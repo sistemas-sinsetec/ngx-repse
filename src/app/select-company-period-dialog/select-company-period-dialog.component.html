@@ -11,10 +11,9 @@
       (selectedChange)="onCompanyChange()"
       style="margin-bottom: 1rem;"
     >
-    <nb-option *ngFor="let company of companies" [value]="company.id">
-      {{ company.name }}
-    </nb-option>
-    
+      <nb-option *ngFor="let company of companies" [value]="company.id">
+        {{ company.name }}
+      </nb-option>
     </nb-select>
 
     <!-- Selector Periodo -->
@@ -24,14 +23,19 @@
       fullWidth
       [(selected)]="selectedPeriodId"
     >
-    <nb-option *ngFor="let period of periods" [value]="period.id">
-      {{ period.name }} - {{ period.year }}
-    </nb-option>
+      <nb-option *ngFor="let period of periods" [value]="period.id">
+        {{ period.name }} - {{ period.year }}
+      </nb-option>
     </nb-select>
 
   </nb-card-body>
   <nb-card-footer style="text-align: right;">
-    <button nbButton status="primary" (click)="confirm()" style="margin-right: 1rem;">
+  
+    <button nbButton status="info" [disabled]="!selectedCompanyId || (periods && periods.length > 0)"  style="margin-right: 1rem;" (click)="navigateToNewPeriodPage()">
+      Crear Nuevo Período
+    </button>
+
+    <button nbButton status="primary" (click)="confirm()" >
       Confirmar
     </button>
   </nb-card-footer>
