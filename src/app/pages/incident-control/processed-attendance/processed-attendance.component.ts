@@ -44,30 +44,39 @@ export class ProcessedAttendanceComponent {
 
   // Cargar las semanas procesadas
   async loadProcessedWeeks() {
-     const loading = await this.loadingController.create({
+    // Mostrar spinner de Ionic
+    const loading = await this.loadingController.create({
       message: 'Cargando semanas procesadas...',
     });
     await loading.present();
-    
+  
     const companyId = this.companyService.selectedCompany.id;
     const periodTypeId = this.periodService.selectedPeriod.id;
-
+  
     if (!companyId || !periodTypeId) {
       console.error('No se proporcionaron company_id o period_type_id');
-      this.spinnerService.clear(); // Ocultar el spinner
+      loading.dismiss();
       return;
     }
-
+  
     const url = `https://siinad.mx/php/get-processed-weeks.php?company_id=${companyId}&period_type_id=${periodTypeId}`;
-
+  
     this.http.get(url).subscribe(
       (data: any) => {
+        loading.dismiss(); // Ocultar el spinner
+  
         if (Array.isArray(data)) {
-          this.processedWeeks = data;
+          if (data.length > 0) {
+            this.processedWeeks = data;
+          } else {
+            // Si es un array vacío, mostrar Toast
+            this.processedWeeks = [];
+            this.toastrService.warning('No hay semanas procesadas por el momento. Inténtalo más tarde.','Aviso');
+          }
         } else {
+          // Si no es array, manejamos el error o avisamos
           console.error('Datos recibidos no son un array', data);
         }
-        loading.dismiss();
       },
       (error) => {
         console.error('Error al cargar semanas procesadas', error);
@@ -76,6 +85,7 @@ export class ProcessedAttendanceComponent {
       }
     );
   }
+  
 
 
   // Cargar los días de la semana y los empleados al seleccionar una semana

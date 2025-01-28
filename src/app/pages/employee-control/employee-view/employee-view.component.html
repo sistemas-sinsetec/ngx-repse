@@ -1,92 +1,103 @@
-
-    <div class="container-fluid mt-4">
-      <div class="row">
-        <!-- Barra lateral izquierda: Departamentos, Puestos y Turnos -->
-        <div class="col-12 col-md-3 mb-4 mb-md-0">
-          <nb-card>
-            <nb-card-header>
-              <div class="sidebar-section">
-                <!-- Lista de Departamentos -->
+<div class="container-fluid mt-4">
+  <div class="row">
+    <!-- Barra lateral izquierda: Departamentos, Puestos y Turnos -->
+    <div class="col-12 col-md-3 mb-4 mb-md-0">
+    
+          <div class="sidebar-section">
+            <!-- Lista de Departamentos -->
+            <!-- Tarjeta de Departamentos -->
+            <nb-card>
+              <nb-card-header class="text-center">
                 <h6>Departamentos</h6>
+              </nb-card-header>
+              <nb-card-body>
                 <ul class="list-group department-list">
-                  <li *ngFor="let departamento of departamentos" 
-                      class="list-group-item"
-                      [class.selected]="departamento === departamentoSeleccionado"
-                      (click)="selectDepartamento(departamento)">
+                  <li *ngFor="let departamento of departamentos" class="list-group-item"
+                    [class.selected]="departamento === departamentoSeleccionado"
+                    (click)="selectDepartamento(departamento)">
                     {{ departamento.department_name }}
                   </li>
                 </ul>
-        
-                <!-- Lista de Puestos -->
-                <h6 class="mt-3">Puestos</h6>
+              </nb-card-body>
+            </nb-card>
+
+            <!-- Tarjeta de Puestos -->
+            <nb-card class="mt-3">
+              <nb-card-header  class="text-center">
+                <h6>Puestos</h6>
+              </nb-card-header>
+              <nb-card-body>
                 <ul class="list-group puesto-list">
-                  <li *ngFor="let puesto of puestos" 
-                      class="list-group-item"
-                      [class.selected]="puesto === puestoSeleccionado"
-                      (click)="selectPuesto(puesto)">
+                  <li *ngFor="let puesto of puestos" class="list-group-item"
+                    [class.selected]="puesto === puestoSeleccionado" (click)="selectPuesto(puesto)">
                     {{ puesto.position_name }}
                   </li>
                 </ul>
-        
-                <!-- Lista de Turnos -->
-                <h6 class="mt-3">Turnos</h6>
+              </nb-card-body>
+            </nb-card>
+
+            <!-- Tarjeta de Turnos -->
+            <nb-card class="mt-3">
+              <nb-card-header  class="text-center">
+                <h6>Turnos</h6>
+              </nb-card-header>
+              <nb-card-body>
                 <ul class="list-group turno-list">
-                  <li *ngFor="let turno of turnos" 
-                      class="list-group-item"
-                      [class.selected]="turno === turnoSeleccionado"
-                      (click)="selectTurno(turno)">
+                  <li *ngFor="let turno of turnos" class="list-group-item"
+                    [class.selected]="turno === turnoSeleccionado" (click)="selectTurno(turno)">
                     {{ turno.shift_name }}
                   </li>
                 </ul>
-              </div>
-            </nb-card-header>
-            <nb-card-body>
-              <!-- Puedes agregar contenido adicional aquí si lo deseas -->
-            </nb-card-body>
-          </nb-card>
-        </div>
-        
-        <!-- Detalles a la derecha: Lista de Empleados -->
-        <div class="col-12 col-md-9">
-          <!-- Campo de búsqueda -->
-          <nb-card class="busqueda mb-4" *ngIf="mostrarBusqueda">
-            <nb-form-field>
-              <label for="searchQuery">Buscar empleados</label>
-              <input nbInput id="searchQuery" [(ngModel)]="searchQuery" (ngModelChange)="buscarEmpleados()" placeholder="Escribe aquí" />
-            </nb-form-field>
-          </nb-card>
+              </nb-card-body>
+            </nb-card>
 
-          <nb-card *ngIf="empleadosFiltrados.length > 0">
-            <nb-card-header class="text-center">
-              <nb-title>Empleados</nb-title>
-            </nb-card-header>
-            <nb-card-body>
-              <div class="table-responsive">
-                <table class="table">
-                  <thead>
-                    <tr>
-                      <th>Código de empleado</th>
-                      <th>Nombre</th>
-                      <th>Email</th>
-                      <th>Acciones</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    <tr *ngFor="let empleado of empleadosFiltrados" class="table-row">
-                      <td>{{ empleado.employee_code }}</td>
-                      <td>{{ empleado.first_name }} {{ empleado.middle_name }} {{ empleado.last_name }}</td>
-                      <td>{{ empleado.email }}</td>
-                      <td>
-                        <button nbButton (click)="viewEmployeeDetails(empleado.employee_id)" outline size="small" status="primary">
-                          Ver detalles
-                        </button>
-                      </td>
-                    </tr>
-                  </tbody>
-                </table>
-              </div>
-            </nb-card-body>
-          </nb-card>
-        </div>
-      </div>
+          </div>
+      
     </div>
+
+    <!-- Detalles a la derecha: Lista de Empleados -->
+    <div class="col-12 col-md-9">
+      <!-- Campo de búsqueda -->
+      <nb-card class="busqueda mb-4" *ngIf="mostrarBusqueda">
+        <nb-form-field>
+          <label for="searchQuery">Buscar empleados</label>
+          <input nbInput id="searchQuery" [(ngModel)]="searchQuery" (ngModelChange)="buscarEmpleados()"
+            placeholder="Escribe aquí" />
+        </nb-form-field>
+      </nb-card>
+
+      <nb-card *ngIf="empleadosFiltrados.length > 0">
+        <nb-card-header class="text-center">
+          <nb-title>Empleados</nb-title>
+        </nb-card-header>
+        <nb-card-body>
+          <div class="table-responsive">
+            <table class="table">
+              <thead>
+                <tr>
+                  <th>Código de empleado</th>
+                  <th>Nombre</th>
+                  <th>Email</th>
+                  <th>Acciones</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr *ngFor="let empleado of empleadosFiltrados" class="table-row">
+                  <td>{{ empleado.employee_code }}</td>
+                  <td>{{ empleado.first_name }} {{ empleado.middle_name }} {{ empleado.last_name }}</td>
+                  <td>{{ empleado.email }}</td>
+                  <td>
+                    <button nbButton (click)="viewEmployeeDetails(empleado.employee_id)" outline size="small"
+                      status="primary">
+                      Ver detalles
+                    </button>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </nb-card-body>
+      </nb-card>
+    </div>
+  </div>
+</div>

@@ -49,8 +49,8 @@ export class ProcessWeeklyListsComponent {
     });
     await loading.present();
 
-    const companyId = this.companyService.selectedCompany.id; 
-    const periodTypeId = this.periodService.selectedPeriod.id; 
+    const companyId = this.companyService.selectedCompany.id;
+    const periodTypeId = this.periodService.selectedPeriod.id;
 
     if (!companyId || !periodTypeId) {
       console.error('No se proporcionaron company_id o period_type_id');
@@ -62,12 +62,14 @@ export class ProcessWeeklyListsComponent {
 
     this.http.get(url).subscribe(
       (data: any) => {
-        if (Array.isArray(data)) {
+        loading.dismiss();
+        if (Array.isArray(data) && data.length > 0) {
           this.confirmedWeeks = data;
         } else {
-          console.error('Datos recibidos no son un array', data);
+          // Si data está vacío o no es un array, muestra el toast
+          this.confirmedWeeks = [];
+          this.toastrService.warning('No hay semanas confirmadas por el momento. Inténtalo más tarde.','Aviso');
         }
-        loading.dismiss();
       },
       (error) => {
         console.error('Error al cargar semanas confirmadas', error);

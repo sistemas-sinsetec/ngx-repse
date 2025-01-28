@@ -73,44 +73,49 @@ export class SelectCompanyPeriodDialogComponent implements OnInit {
   /**
    * Confirmar selección de empresa y período.
    */
-  async confirm(): Promise<void> {
-    if (this.selectedCompanyId && this.selectedPeriodId) {
-      // Actualizar CompanyService
-      const selectedCompany = this.companies.find(
-        (company) => company.id === this.selectedCompanyId,
-      );
-      if (selectedCompany) {
-        await this.companyService.selectAndLoadCompany(selectedCompany);
-      }
-
-      // Actualizar PeriodService
-      const selectedPeriod = this.periods.find(
-        (period) => period.id === this.selectedPeriodId,
-      );
-      if (selectedPeriod) {
-        this.periodService.setSelectedPeriod(selectedPeriod);
-      }
-
-      // **NUEVO: Cargar permisos para la nueva empresa**
-      this.sharedService.loadPermissions().subscribe(
-        (response: any) => {
-          this.sharedService.permissions = response.permissions || [];
-          console.log('Permisos actualizados:', this.sharedService.permissions);
-        },
-        (error) => {
-          console.error('Error al cargar permisos:', error);
-        },
-      );
-
-      // Cerrar el diálogo y devolver las selecciones
-      this.dialogRef.close({
-        companyId: this.selectedCompanyId,
-        periodId: this.selectedPeriodId,
-      });
-    } else {
-      alert('Por favor, selecciona una empresa y un período antes de confirmar.');
+ /**
+ * Confirmar selección de empresa y período.
+ */
+async confirm(): Promise<void> {
+  if (this.selectedCompanyId && this.selectedPeriodId) {
+    const selectedCompany = this.companies.find(
+      (company) => company.id === this.selectedCompanyId,
+    );
+    if (selectedCompany) {
+      await this.companyService.selectAndLoadCompany(selectedCompany);
     }
+
+    const selectedPeriod = this.periods.find(
+      (period) => period.id === this.selectedPeriodId,
+    );
+    if (selectedPeriod) {
+      this.periodService.setSelectedPeriod(selectedPeriod);
+    }
+
+    // Cargar permisos (ejemplo)
+    this.sharedService.loadPermissions().subscribe(
+      (response: any) => {
+        this.sharedService.permissions = response.permissions || [];
+        console.log('Permisos actualizados:', this.sharedService.permissions);
+      },
+      (error) => {
+        console.error('Error al cargar permisos:', error);
+      },
+    );
+
+    // Cerrar el diálogo y devolver valores
+    this.dialogRef.close({
+      companyId: this.selectedCompanyId,
+      periodId: this.selectedPeriodId,
+    });
+
+    // Aquí recargas la página por completo
+    window.location.reload();
+  } else {
+    alert('Por favor, selecciona una empresa y un período antes de confirmar.');
   }
+}
+
 
   /**
    * Cerrar el diálogo sin aplicar cambios.

@@ -84,7 +84,7 @@ export class ConfirmDayComponent {
           this.verificarConfirmacionSemana(companyId, this.currentPeriodId);
         } else {
           console.error('No se encontraron días confirmados para la semana.');
-          this.toastrService.danger('No se encontraron días confirmados para la semana.', 'danger');
+          this.toastrService.warning('No se encontraron días confirmados para la semana.', 'Aviso');
         }
         loading.dismiss();
       },

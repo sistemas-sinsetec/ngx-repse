@@ -1,116 +1,215 @@
-<!-- flip-card.component.html -->
-
-<div class="container">
-    <div class="row justify-content-center">
-      <div class="col-md-10 col-lg-8">
-        <div class="text-center pt-4">
-          <h5><strong>Registrar Usuarios</strong></h5>
-        </div>
+<div class="container py-4">
+  <!-- Tarjeta 1: Registro Manual -->
+  <div class="row justify-content-center">
+    <div class="col-md-8 mb-3">
+      <nb-card class="shadow-sm border-0 p-4 card-corporate">
+        <nb-card-header class="text-center border-0">
+          <h5 class="fw-bold mb-0">Registrar Usuario</h5>
+          <small class="text-muted">Ingrese datos para continuar</small>
+        </nb-card-header>
         
-        <!-- Tarjeta Volteable -->
-        <nb-flip-card class="flip-card-container mb-4">
-          <!-- Cara Frontal: Registro Manual -->
-          <nb-card-front>
-            <nb-card class="shadow-lg p-4">
-              <nb-card-header class="text-center">
-                <h5>Registrar cuenta de usuario para la empresa</h5>
-                <p>Ingrese sus datos para continuar</p>
-              </nb-card-header>
-              <nb-card-body>
-                <form>
-                  <div class="form-group">
-                    <label for="nombreU">Alias de usuario</label>
-                    <input class="form-control" nbInput fullWidth id="nombreU" name="nombreU" type="text" required
-                      [(ngModel)]="usuario.nombreUsuario">
-                  </div>
-                  <div class="form-group">
-                    <label for="nombreC">Nombre completo del usuario</label>
-                    <input class="form-control" nbInput fullWidth id="nombreC" name="nombreC" type="text" required
-                      [(ngModel)]="usuario.nombreCompleto">
-                  </div>
-                  <div class="form-group">
-                    <label for="correoElectronico">Correo</label>
-                    <input class="form-control" nbInput fullWidth id="correoElectronico" name="correoElectronico" type="email" required
-                      [(ngModel)]="usuario.correo">
-                    <div *ngIf="usuario.correo && (!usuario.correo.includes('@') || !isValidEmail(usuario.correo))"
-                      class="error-message text-danger">
-                      El correo electrónico debe contener el símbolo de arroba y un dominio válido después del punto.
-                    </div>
-                  </div>
-                  <div class="form-group">
-                    <label for="contrasena">Contraseña</label>
-                    <input class="form-control" nbInput fullWidth id="contrasena" name="contrasena" type="password" required
-                      [(ngModel)]="usuario.contrasena">
-                  </div>
-                  <div class="form-group">
-                    <label for="confirmarContrasena">Confirmar contraseña</label>
-                    <input class="form-control" nbInput fullWidth id="confirmarContrasena" name="confirmarContrasena" type="password" required
-                      [(ngModel)]="usuario.confirmarContrasena">
-                  </div>
-                  <div class="form-group">
-                    <label for="tipoUsuario">Tipo de usuario</label>
-                    <nb-select fullWidth id="tipoUsuario" fullWidth [(ngModel)]="usuario.levelUser" name="levelUser">
-                      <nb-option *ngIf="companyService.selectedCompany.levelUser == 'adminS'" value="admin">Administrador</nb-option>
-                      <nb-option *ngIf="companyService.selectedCompany.levelUser === 'adminS'" value="superV">Supervisor</nb-option>
-                      <nb-option *ngIf="companyService.selectedCompany.levelUser === 'adminS'" value="adminU">Administrativo</nb-option>
-                      
-                      <nb-option *ngIf="companyService.selectedCompany.levelUser !== 'adminS'" value="admin">Administrador</nb-option>
-                      <nb-option *ngIf="companyService.selectedCompany.levelUser !== 'adminS'" value="superV">Supervisor</nb-option>
-                      <nb-option *ngIf="companyService.selectedCompany.levelUser !== 'adminS'" value="adminU">Administrativo</nb-option>
-                    </nb-select>
-                  </div>
-                  <div class="text-center mt-4">
-                    <button nbButton status="primary" [disabled]="!camposCompletos()" (click)="registrarUsuario()">
-                     Registrar
-                    </button>
-                  </div>
-                </form>
-              </nb-card-body>
-            </nb-card>
-          </nb-card-front>
-          
-          <!-- Cara Trasera: Registro por Código -->
-          <nb-card-back>
-            <nb-card class="shadow-lg p-4">
-              <nb-card-header class="text-center">
-                <h5>Agregar Usuario por Código</h5>
-              </nb-card-header>
-              <nb-card-body>
-                <div class="form-group">
-                  <label>Ingrese Código de Usuario</label>
-                  <input class="form-control" nbInput fullWidth [(ngModel)]="userCode" (blur)="onUserCodeChange()">
+        <nb-card-body>
+          <form>
+            <div class="row">
+              <!-- Columna izquierda -->
+              <div class="col-12 col-md-6">
+                <!-- Alias de usuario -->
+                <div class="form-group mb-3">
+                  <label for="nombreU" class="form-label">Alias de usuario</label>
+                  <input 
+                    nbInput
+                    fullWidth
+                    class="form-control"
+                    id="nombreU"
+                    name="nombreU"
+                    type="text"
+                    required
+                    [(ngModel)]="usuario.nombreUsuario">
                 </div>
-  
-                <div *ngIf="selectedUser" class="form-group">
-                  <label>Nombre del Usuario:</label>
-                  <nb-tag>{{ selectedUser.name }}</nb-tag>
+
+                <!-- Nombre completo -->
+                <div class="form-group mb-3">
+                  <label for="nombreC" class="form-label">Nombre completo</label>
+                  <input
+                    nbInput
+                    fullWidth
+                    class="form-control"
+                    id="nombreC"
+                    name="nombreC"
+                    type="text"
+                    required
+                    [(ngModel)]="usuario.nombreCompleto">
                 </div>
-  
-                <div *ngIf="selectedUser" class="form-group">
-                  <label>Correo Electrónico:</label>
-                  <nb-tag>{{ selectedUser.email }}</nb-tag>
+
+                <!-- Correo -->
+                <div class="form-group mb-3">
+                  <label for="correoElectronico" class="form-label">Correo electrónico</label>
+                  <input
+                    nbInput
+                    fullWidth
+                    class="form-control"
+                    id="correoElectronico"
+                    name="correoElectronico"
+                    type="email"
+                    required
+                    [(ngModel)]="usuario.correo">
+                  <small 
+                    *ngIf="usuario.correo && (!usuario.correo.includes('@') || !isValidEmail(usuario.correo))" 
+                    class="text-danger">
+                    El correo debe contener <strong>arroba</strong> y un dominio válido.
+                  </small>
                 </div>
-  
-                <div *ngIf="selectedUser" class="form-group">
-                  <label>Seleccione Nivel de Usuario</label>
-                  <nb-select fullWidth [(ngModel)]="selectedLevelUser">
-                    <nb-option *ngFor="let level of levelUsers" [value]="level.id">
-                      {{ level.levelUserName }}
+              </div>
+              
+              <!-- Columna derecha -->
+              <div class="col-12 col-md-6">
+                <!-- Contraseña -->
+                <div class="form-group mb-3">
+                  <label for="contrasena" class="form-label">Contraseña</label>
+                  <input
+                    nbInput
+                    fullWidth
+                    class="form-control"
+                    id="contrasena"
+                    name="contrasena"
+                    type="password"
+                    required
+                    [(ngModel)]="usuario.contrasena">
+                </div>
+
+                <!-- Confirmar contraseña -->
+                <div class="form-group mb-3">
+                  <label for="confirmarContrasena" class="form-label">Confirmar contraseña</label>
+                  <input
+                    nbInput
+                    fullWidth
+                    class="form-control"
+                    id="confirmarContrasena"
+                    name="confirmarContrasena"
+                    type="password"
+                    required
+                    [(ngModel)]="usuario.confirmarContrasena">
+                </div>
+
+                <!-- Tipo de usuario -->
+                <div class="form-group mb-3">
+                  <label for="tipoUsuario" class="form-label">Tipo de usuario</label>
+                  <nb-select
+                    fullWidth
+                    id="tipoUsuario"
+                    name="levelUser"
+                    [(ngModel)]="usuario.levelUser">
+                    
+                    <!-- Opciones para 'adminS' -->
+                    <nb-option 
+                      *ngIf="companyService.selectedCompany.levelUser === 'adminS'" 
+                      value="admin">
+                      Administrador
+                    </nb-option>
+                    <nb-option 
+                      *ngIf="companyService.selectedCompany.levelUser === 'adminS'" 
+                      value="superV">
+                      Supervisor
+                    </nb-option>
+                    <nb-option 
+                      *ngIf="companyService.selectedCompany.levelUser === 'adminS'" 
+                      value="adminU">
+                      Administrativo
+                    </nb-option>
+
+                    <!-- Opciones si no es 'adminS' -->
+                    <nb-option 
+                      *ngIf="companyService.selectedCompany.levelUser !== 'adminS'" 
+                      value="admin">
+                      Administrador
+                    </nb-option>
+                    <nb-option 
+                      *ngIf="companyService.selectedCompany.levelUser !== 'adminS'" 
+                      value="superV">
+                      Supervisor
+                    </nb-option>
+                    <nb-option 
+                      *ngIf="companyService.selectedCompany.levelUser !== 'adminS'" 
+                      value="adminU">
+                      Administrativo
                     </nb-option>
                   </nb-select>
                 </div>
-  
-                <div class="text-center mt-4">
-                  <button nbButton status="primary" fullWidth *ngIf="selectedUser && selectedLevelUser"
-                    (click)="assignCompanyToUser()">
-                    Asignar Empresa Secundaria
-                  </button>
-                </div>
-              </nb-card-body>
-            </nb-card>
-          </nb-card-back>
-        </nb-flip-card>
-      </div>
+              </div>
+            </div>
+
+            <!-- Botón Registrar -->
+            <div class="text-center mt-3">
+              <button 
+                nbButton 
+                status="primary"
+                [disabled]="!camposCompletos()"
+                (click)="registrarUsuario()">
+                Registrar
+              </button>
+            </div>
+          </form>
+        </nb-card-body>
+      </nb-card>
     </div>
   </div>
-  
+
+  <!-- Tarjeta 2: Registro por Código -->
+  <div class="row justify-content-center">
+    <div class="col-md-8 mb-3">
+      <nb-card class="shadow-sm border-0 p-4 card-corporate">
+        <nb-card-header class="text-center border-0">
+          <h5 class="fw-bold mb-0">Agregar Usuario por Código</h5>
+          <small class="text-muted">Asigna un usuario existente</small>
+        </nb-card-header>
+        
+        <nb-card-body>
+          <!-- Código de Usuario -->
+          <div class="form-group mb-3">
+            <label for="codigoUsuario" class="form-label">Código de Usuario</label>
+            <input 
+            fullWidth
+              nbInput 
+              class="form-control" 
+              id="codigoUsuario"
+              [(ngModel)]="userCode" 
+              (blur)="onUserCodeChange()">
+          </div>
+
+          <!-- Información del usuario encontrado -->
+          <div *ngIf="selectedUser">
+            <div class="form-group mb-3">
+              <label>Nombre del Usuario:</label><br/>
+              <nb-tag>{{ selectedUser.name }}</nb-tag>
+            </div>
+
+            <div class="form-group mb-3">
+              <label>Correo Electrónico:</label><br/>
+              <nb-tag>{{ selectedUser.email }}</nb-tag>
+            </div>
+
+            <div class="form-group mb-3">
+              <label>Seleccione Nivel de Usuario</label>
+              <nb-select fullWidth [(ngModel)]="selectedLevelUser">
+                <nb-option *ngFor="let level of levelUsers" [value]="level.id">
+                  {{ level.levelUserName }}
+                </nb-option>
+              </nb-select>
+            </div>
+          </div>
+
+          <!-- Botón Asignar -->
+          <div class="text-center mt-4">
+            <button 
+              nbButton 
+              status="primary" 
+              *ngIf="selectedUser && selectedLevelUser"
+              (click)="assignCompanyToUser()">
+              Asignar Empresa Secundaria
+            </button>
+          </div>
+        </nb-card-body>
+      </nb-card>
+    </div>
+  </div>
+</div>
