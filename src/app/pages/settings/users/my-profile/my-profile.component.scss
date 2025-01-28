@@ -70,3 +70,8 @@
 .image-container:hover::after {
     opacity: 1;
 }
+
+::ng-deep nb-flip-card a {
+  position: relative;
+  top: 10px;
+}

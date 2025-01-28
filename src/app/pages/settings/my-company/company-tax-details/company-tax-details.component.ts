@@ -32,7 +32,6 @@ interface Period {
   styleUrls: ['./company-tax-details.component.scss']
 })
 export class CompanyTaxDetailsComponent implements OnInit {
-
   fechaInicioOperaciones: string;
   datosIdentificacion: any = {};
   domicilio: any = {};
@@ -45,102 +44,7 @@ export class CompanyTaxDetailsComponent implements OnInit {
   pdfText: string = '';
   tipoPersona: string = 'moral'; // Valor por defecto
   companyData: any = null;
-
-  // Configuración de ng2-smart-table para Actividades Económicas
-  settingsActividadesEconomicas = {
-    actions: false, // Oculta las acciones predeterminadas
-    columns: {
-      Orden: {
-        title: 'Orden',
-        type: 'number',
-        editable: false,
-      },
-      Actividad: {
-        title: 'Actividad',
-        type: 'string',
-        editable: false,
-      },
-      Porcentaje: {
-        title: '%',
-        type: 'number',
-        editable: false,
-      },
-      FechaInicio: {
-        title: 'Fecha Inicio',
-        type: 'string',
-        editable: false,
-      },
-      FechaFin: {
-        title: 'Fecha Fin',
-        type: 'string',
-        editable: false,
-      },
-    },
-    hideSubHeader: true, // Oculta el filtro superior
-    noDataMessage: 'No hay actividades económicas disponibles',
-    attr: {
-      class: 'table table-bordered',
-    },
-  };
-
-  // Configuración de ng2-smart-table para Regímenes
-  settingsRegimenes = {
-    actions: false, // Oculta las acciones predeterminadas
-    columns: {
-      Regimen: {
-        title: 'Régimen',
-        type: 'string',
-        editable: false,
-      },
-      FechaInicio: {
-        title: 'Fecha Inicio',
-        type: 'string',
-        editable: false,
-      },
-      FechaFin: {
-        title: 'Fecha Fin',
-        type: 'string',
-        editable: false,
-      },
-    },
-    hideSubHeader: true, // Oculta el filtro superior
-    noDataMessage: 'No hay regímenes disponibles',
-    attr: {
-      class: 'table table-bordered',
-    },
-  };
-
-  // Configuración de ng2-smart-table para Obligaciones
-  settingsObligaciones = {
-    actions: false, // Oculta las acciones predeterminadas
-    columns: {
-      Descripcion: {
-        title: 'Descripción',
-        type: 'string',
-        editable: false,
-      },
-      Vencimiento: {
-        title: 'Vencimiento',
-        type: 'string',
-        editable: false,
-      },
-      FechaInicio: {
-        title: 'Fecha Inicio',
-        type: 'string',
-        editable: false,
-      },
-      FechaFin: {
-        title: 'Fecha Fin',
-        type: 'string',
-        editable: false,
-      },
-    },
-    hideSubHeader: true, // Oculta el filtro superior
-    noDataMessage: 'No hay obligaciones disponibles',
-    attr: {
-      class: 'table table-bordered',
-    },
-  };
+ 
 
   constructor(
     private http: HttpClient,
@@ -154,27 +58,38 @@ export class CompanyTaxDetailsComponent implements OnInit {
     this.cargarRegistrosEmpresa();
     pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.10.377/pdf.worker.min.js';
     moment.locale('es'); // Configura moment.js para español
+
   }
 
   cargarRegistrosEmpresa() {
     const companyId = this.companyService.selectedCompany.id;
     const endpoint = `https://siinad.mx/php/get-data-company-s.php?company_id=${companyId}`;
-
+  
     this.http.get<any>(endpoint).subscribe(
       (data) => {
         if (data && data.companyData) {
-          this.companyData = data.companyData; // Cargar solo los datos actuales
+          this.companyData = data.companyData;
+          this.actividadesEconomicas = data.actividadesEconomicas || [];
+          this.regimenes = data.regimenes || [];
+          this.obligaciones = data.obligaciones || [];
         } else {
           console.warn('No se encontraron datos de la empresa.');
-          this.companyData = null; // Asegúrate de limpiar si no hay datos
+          this.companyData = null;
+          this.actividadesEconomicas = [];
+          this.regimenes = [];
+          this.obligaciones = [];
         }
       },
       (error) => {
         console.error('Error al obtener los datos de la empresa:', error);
-        this.companyData = null; // Limpia los datos si ocurre un error
+        this.companyData = null;
+        this.actividadesEconomicas = [];
+        this.regimenes = [];
+        this.obligaciones = [];
       }
     );
   }
+  
 
   obtenerDatosPorSellos(digitalSeal: string, originalChainSeal: string) {
     // URL del endpoint para obtener los datos
@@ -192,6 +107,7 @@ export class CompanyTaxDetailsComponent implements OnInit {
           this.obligaciones = data.obligaciones;
 
           console.log('Datos obtenidos correctamente:', data);
+          console.log(this.datosIdentificacion) // Debería mostrar el contenido del nodo `datosIdentificacion`.
         } else {
           console.warn('No se encontraron datos para los valores proporcionados.');
         }
@@ -201,8 +117,9 @@ export class CompanyTaxDetailsComponent implements OnInit {
       }
     );
   }
-
+ 
   onRegistroSeleccionado(selectedIndex: number) {
+    
     if (this.companyData && this.companyData[selectedIndex]) {
       const selectedData = this.companyData[selectedIndex];
       const digitalSeal = selectedData?.DigitalSeal || '';
@@ -243,14 +160,14 @@ export class CompanyTaxDetailsComponent implements OnInit {
     const cleanedText = text.replace(/\s+/g, ' ').trim();
 
     // Expresiones regulares para datos de identificación
-    const idCifMatch = text.match(/idCIF:\s+([0-9]+)/);
+    const idCifMatch =  text.match(/idCIF:\s+([0-9]+)/);
     const rfcMatch = text.match(/RFC:\s+([A-Z0-9]+)/);
-    const curpMatch = text.match(/CURP:\s+([A-Z0-9]+)/);
-    const nombreMatch = text.match(/Nombre \(s\):\s+(.+?)(?=\s+Primer Apellido)/);
-    const primerApellidoMatch = text.match(/Primer Apellido:\s+(.+?)\s/);
-    const segundoApellidoMatch = text.match(/Segundo Apellido:\s+(.+?)\s/);
+    const curpMatch =  text.match(/CURP:\s+([A-Z0-9]+)/);
+    const nombreMatch = text.match(/Nombre \(s\):\s+(.+?)(?=\s+Primer Apellido)/) ;
+    const primerApellidoMatch = text.match(/Primer Apellido:\s+(.+?)\s/) ;
+    const segundoApellidoMatch =  text.match(/Segundo Apellido:\s+(.+?)\s/) ;
 
-    const razonSocialMatch = text.match(/Denominación\/Razón Social:\s+(.+?)\s+Régimen/);
+    const razonSocialMatch =  text.match(/Denominación\/Razón Social:\s+(.+?)\s+Régimen/);
     const regimenCapitalMatch = text.match(/Régimen Capital:\s+(.+?)\s+Nombre Comercial/);
     const nombreComercialMatch = text.match(/Nombre Comercial:\s+(.+?)\s+Fecha inicio de operaciones/);
     const fechaInicioMatch = text.match(/Fecha inicio de operaciones:\s+(.+?)\s+Estatus/);
@@ -302,8 +219,11 @@ export class CompanyTaxDetailsComponent implements OnInit {
       FechaFin: match[4] ? this.formatDateDMY(match[4]) : '-'
     }));
 
+
     const cadenaOriginalMatch = text.match(/Cadena Original Sello:\s+([\s\S]*?\|\|\s)/);
     const selloDigitalMatch = text.match(/Sello Digital:\s+([\s\S]+?)(?=\s{2,}|$)/);
+
+
 
     // Almacenar los resultados en el objeto `extractedData`
     this.extractedData = {
@@ -347,6 +267,7 @@ export class CompanyTaxDetailsComponent implements OnInit {
       }
 
     };
+
   }
 
   formatDate(dateString: string): string {

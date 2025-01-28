@@ -50,7 +50,7 @@ export class CodeCompanyComponent implements OnInit {
 
           if (response.success) {
             this.codigoEmpresa = response.codigoEmpresa;
-            this.showToast('Código cargado correctamente.', 'success');
+            console.log('Código cargado correctamente.');
           } else {
             this.showToast('No se pudo cargar el código de empresa.', 'danger');
           }
