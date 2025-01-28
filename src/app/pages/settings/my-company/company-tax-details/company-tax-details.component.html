@@ -232,15 +232,24 @@
     <!-- Sección para cargar archivo PDF -->
     <div class="container mt-4">
       <!-- Botón para cargar el archivo PDF -->
-      <div class="mb-3">
-        <div class="form-group text-center">
-          <nb-card-header><h5>Cargar archivo PDF:</h5></nb-card-header>
-          <input nbInput fullWidth
-            type="file" 
-            id="pdfFile" 
-            (change)="onFileSelected($event)" 
-            accept="application/pdf"
-            class="form-control text-center align-content-center input-file" />
+      <div class="mb-3 d-flex justify-content-center">
+        <div class="form-group text-center" style="max-width: 400px; width: 100%;">
+          <nb-card-header class="mb-3">
+            <h5 class="mb-0">Cargar archivo PDF</h5>
+          </nb-card-header>
+          <div class="dropZoneContainer">
+            <input type="file"
+                   id="drop_zone"
+                   class="FileUpload"
+                   accept="application/pdf"
+                   onchange="handleFileSelect(this)" />
+            <div class="dropZoneOverlay">
+              Arrastra y suelta tu archivo PDF <br />o<br />Haz clic para seleccionar
+            </div>
+          </div>
+          <small class="form-text text-muted mt-2">
+            Solo se permiten archivos en formato PDF.
+          </small>
         </div>
       </div>
   

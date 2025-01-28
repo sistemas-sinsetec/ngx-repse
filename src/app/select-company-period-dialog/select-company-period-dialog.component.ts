@@ -3,7 +3,7 @@ import { NbDialogRef } from '@nebular/theme';
 import { CompanyService } from '../services/company.service';
 import { PeriodService } from '../services/period.service';
 import { SharedService } from '../services/shared.service'; // <-- Importamos SharedService
-
+import { Router } from '@angular/router';
 @Component({
   selector: 'app-select-company-period-dialog',
   templateUrl: './select-company-period-dialog.component.html',
@@ -25,6 +25,7 @@ export class SelectCompanyPeriodDialogComponent implements OnInit {
     private companyService: CompanyService,
     private periodService: PeriodService,
     private sharedService: SharedService, // <-- Añadimos SharedService
+    private router: Router
   ) {}
 
   ngOnInit(): void {
@@ -123,4 +124,19 @@ async confirm(): Promise<void> {
   close(): void {
     this.dialogRef.close();
   }
+
+  navigateToNewPeriodPage(): void {
+    // Guardar temporalmente como "Sin período"
+    this.periodService.setSelectedPeriod({ id: 'temp', name: 'Sin período', year: null });
+  
+    // Cerrar el diálogo
+    this.dialogRef.close({
+      companyId: this.selectedCompanyId,
+      periodId: 'temp', // ID temporal para "Sin período"
+    });
+  
+    // Navegar a la página deseada
+    this.router.navigate(['/pages/settings/my-company/initial-periods']);
+  }
+  
 }
