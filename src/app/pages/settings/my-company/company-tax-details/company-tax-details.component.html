@@ -1,45 +1,50 @@
+
 <!-- company-tax-details.component.html -->
 <div class="container mt-4">
+
+  <div class="card shadow-sm p-4 mb-4 bg-white rounded">
     <!-- Fecha de inicio de operaciones y Selección de Registro -->
     <div class="row mb-3">
       <!-- Fecha de inicio de operaciones -->
       <div class="col-md-6">
-        <div class="form-group">
-          <label for="startDate" class="form-label">Fecha de inicio de operaciones:</label>
+        <div class="mb-3">
+          <label for="startDate">Fecha de inicio de operaciones:</label>
           <input 
             id="startDate" 
             type="text" 
-            class="form-control" 
-            [value]="fechaInicioOperaciones || 'No disponible'"
-            readonly />
+            [value]="fechaInicioOperaciones || 'No disponible'" 
+            readonly 
+          />
         </div>
       </div>
   
       <!-- Selección de Registro -->
-      <div class="col-md-6 text-end">
-        <div class="form-group">
-          <label for="infoSelect" class="form-label">Ver Información:</label>
-          <nb-select 
+      <div class="col-md-6">
+        <div class="mb-3">
+          <label for="infoSelect">Ver Información:</label>
+          <select 
             id="infoSelect" 
-            class="form-select" 
-            placeholder="Selecciona una opción" 
-            (selectionChange)="onRegistroSeleccionado($event.value)">
+            (change)="onRegistroSeleccionado($event.target.value)">
             <!-- Opción predeterminada -->
-            <nb-option value="" disabled selected>Selecciona una opción</nb-option>
+            <option value="" disabled selected>Selecciona una opción</option>
             <!-- Opciones basadas en companyData -->
-            <nb-option 
+            <option 
               *ngFor="let item of companyData; let idx = index" 
               [value]="idx">
               Registro {{ idx + 1 }}
-            </nb-option>
-          </nb-select>
+            </option>
+          </select>
         </div>
       </div>
     </div>
+  </div>
   
+  <nb-card>
     <!-- Datos de Identificación del Contribuyente -->
     <div class="mb-4">
-      <h5>Datos de Identificación del Contribuyente</h5>
+      <nb-card-header class="text-center">
+        <h5>Datos de Identificación del Contribuyente</h5>
+      </nb-card-header>
       <table class="table table-bordered">
         <tbody>
           <tr>
@@ -89,10 +94,13 @@
         </tbody>
       </table>
     </div>
-  
+  </nb-card>
+  <nb-card>
     <!-- Datos del Domicilio Registrado -->
     <div class="mb-4">
+      <nb-card-header class="text-center">
       <h5>Datos del Domicilio Registrado</h5>
+      </nb-card-header>
       <table class="table table-bordered">
         <tbody>
           <tr>
@@ -142,37 +150,85 @@
         </tbody>
       </table>
     </div>
-  
-    <!-- Actividades Económicas -->
-    <div class="mb-4">
-      <h5>Actividades Económicas</h5>
-      <ng2-smart-table 
-        [settings]="settingsActividadesEconomicas" 
-        [source]="actividadesEconomicas" 
-        (userRowSelect)="onRowSelectActividad($event)">
-      </ng2-smart-table>
-    </div>
-  
-    <!-- Regímenes -->
-    <div class="mb-4">
-      <h5>Regímenes</h5>
-      <ng2-smart-table 
-        [settings]="settingsRegimenes" 
-        [source]="regimenes" 
-        (userRowSelect)="onRowSelectRegimen($event)">
-      </ng2-smart-table>
-    </div>
-  
-    <!-- Obligaciones -->
-    <div class="mb-4">
-      <h5>Obligaciones</h5>
-      <ng2-smart-table 
-        [settings]="settingsObligaciones" 
-        [source]="obligaciones" 
-        (userRowSelect)="onRowSelectObligacion($event)">
-      </ng2-smart-table>
-    </div>
-  
+  </nb-card>
+  <nb-card>
+   <!-- Actividades Económicas -->
+<div class="mb-4">
+  <nb-card-header class="text-center">
+  <h5>Actividades Económicas</h5>
+  </nb-card-header>
+  <table class="table table-bordered">
+    <thead>
+      <tr>
+        <th>Actividad</th>
+        <th>Porcentaje</th>
+        <th>Fecha Inicio</th>
+        <th>Fecha Fin</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr *ngFor="let actividad of actividadesEconomicas" (click)="onRowSelectActividad(actividad)">
+        <td>{{ actividad.actividad }}</td>
+        <td>{{ actividad.porcentaje }} %</td>
+        <td>{{ actividad.fechaInicio }}</td>
+        <td>{{ actividad.fechaFin }}</td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+</nb-card>
+<nb-card>
+<!-- Regímenes -->
+<div class="mb-4">
+  <nb-card-header class="text-center">
+  <h5>Regímenes</h5>
+  </nb-card-header>
+  <table class="table table-bordered">
+    <thead>
+      <tr>
+        <th>Nombre</th>
+        <th>Fecha de inicio</th>
+        <th>Fecha de fin</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr *ngFor="let regimen of regimenes" (click)="onRowSelectRegimen(regimen)">
+        <td>{{ regimen.regimen }}</td>
+        <td>{{ regimen.fechaInicio}}</td>
+        <td>{{ regimen.fechaFin}}</td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+</nb-card>
+<nb-card>
+<!-- Obligaciones -->
+<div class="mb-4">
+  <nb-card-header class="text-center">
+  <h5>Obligaciones</h5>
+  </nb-card-header>
+  <table class="table table-bordered">
+    <thead>
+      <tr>
+        <th>Obligación</th>
+        <th>Vencimiento</th>
+        <th>Fecha de inicio</th>
+        <th>Fecha de fin</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr *ngFor="let obligacion of obligaciones" (click)="onRowSelectObligacion(obligacion)">
+        <td>{{ obligacion.descripcion }}</td>
+        <td>{{ obligacion.vecnimiento }}</td>
+        <td>{{ obligacion.fechaInicio }}</td>
+        <td>{{ obligacion.fechaFin }}</td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+</nb-card>
+
+  <nb-card>
     <!-- Sección para cargar archivo PDF -->
     <div class="container mt-4">
       <!-- Botón para cargar el archivo PDF -->
@@ -199,6 +255,8 @@
         </button>
       </div>
     </div>
+  </nb-card>
   </div>
+  
 
   

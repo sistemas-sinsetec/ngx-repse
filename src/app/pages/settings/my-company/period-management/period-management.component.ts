@@ -36,11 +36,21 @@ export class PeriodManagementComponent implements OnInit {
 
   // Configuración de la tabla
   settings = {
-    actions: false, // Oculta las acciones predeterminadas
+    actions: false,
     columns: {
       period_number: {
         title: '# Semana',
         type: 'number',
+        compareFunction: (direction: any, a: number, b: number) => {
+          // Compara los números de forma ascendente o descendente
+          if (a < b) {
+            return direction === 'asc' ? -1 : 1;
+          }
+          if (a > b) {
+            return direction === 'asc' ? 1 : -1;
+          }
+          return 0;
+        },
       },
       start_date: {
         title: 'Fecha Inicio',
@@ -61,12 +71,13 @@ export class PeriodManagementComponent implements OnInit {
         type: 'string',
       },
     },
-    hideSubHeader: true, // Oculta el filtro superior
+    hideSubHeader: true,
     noDataMessage: 'No hay periodos disponibles',
     attr: {
-      class: 'table table-bordered', // Clases personalizadas para estilizar la tabla
+      class: 'table table-bordered',
     },
   };
+  
 
   // Formulario
   form: any = {
@@ -178,7 +189,7 @@ export class PeriodManagementComponent implements OnInit {
         console.error('Error al guardar todos los periodos', error);
       });
   }
-
+ 
   // Limpiar formulario
   limpiarFormulario() {
     this.form = {
