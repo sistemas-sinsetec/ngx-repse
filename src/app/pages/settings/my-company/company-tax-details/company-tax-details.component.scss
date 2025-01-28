@@ -1,0 +1,22 @@
+nb-card{
+    padding:20px;
+}
+
+input[type=file]::file-selector-button {
+    cursor: pointer;
+    border: 2px solid #0095ff ;
+    padding: 8px;
+    color: #0095ff;
+    background-color: rgb(255, 255, 255);
+    border-radius: 8px;
+    animation-duration: 0.5s;
+  }
+  
+  input[type=file]::file-selector-button:hover {
+    background-color: #0095ff;
+    color: white;
+  }
+
+  .input-file{
+    min-height: 70px;
+  }

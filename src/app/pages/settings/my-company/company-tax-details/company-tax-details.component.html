@@ -2,14 +2,15 @@
 <!-- company-tax-details.component.html -->
 <div class="container mt-4">
 
-  <div class="card shadow-sm p-4 mb-4 bg-white rounded">
+  <div class="card shadow-sm p-4 mb-4 bg-white rounded text-center">
     <!-- Fecha de inicio de operaciones y Selección de Registro -->
     <div class="row mb-3">
       <!-- Fecha de inicio de operaciones -->
       <div class="col-md-6">
+        
         <div class="mb-3">
           <label for="startDate">Fecha de inicio de operaciones:</label>
-          <input 
+          <input nbInput fullWidth class="text-center"
             id="startDate" 
             type="text" 
             [value]="fechaInicioOperaciones || 'No disponible'" 
@@ -21,25 +22,24 @@
       <!-- Selección de Registro -->
       <div class="col-md-6">
         <div class="mb-3">
-          <label for="infoSelect">Ver Información:</label>
-          <select 
-            id="infoSelect" 
-            (change)="onRegistroSeleccionado($event.target.value)">
-            <!-- Opción predeterminada -->
-            <option value="" disabled selected>Selecciona una opción</option>
-            <!-- Opciones basadas en companyData -->
-            <option 
-              *ngFor="let item of companyData; let idx = index" 
-              [value]="idx">
-              Registro {{ idx + 1 }}
-            </option>
-          </select>
+          <label for="">Ver informacion</label>
+          <nb-select fullWidth
+          id="infoSelect" 
+          [(selected)]="companyData.id" 
+          (selectedChange)="onRegistroSeleccionado($event)">
+          <nb-option
+            *ngFor="let item of companyData; let idx = index" 
+            [value]="idx">
+            Registro {{ idx + 1 }}
+          </nb-option>
+        </nb-select>
+        
         </div>
       </div>
     </div>
   </div>
   
-  <nb-card>
+  <nb-card accent="info">
     <!-- Datos de Identificación del Contribuyente -->
     <div class="mb-4">
       <nb-card-header class="text-center">
@@ -95,7 +95,7 @@
       </table>
     </div>
   </nb-card>
-  <nb-card>
+  <nb-card accent="info">
     <!-- Datos del Domicilio Registrado -->
     <div class="mb-4">
       <nb-card-header class="text-center">
@@ -151,7 +151,7 @@
       </table>
     </div>
   </nb-card>
-  <nb-card>
+  <nb-card accent="info">
    <!-- Actividades Económicas -->
 <div class="mb-4">
   <nb-card-header class="text-center">
@@ -177,7 +177,7 @@
   </table>
 </div>
 </nb-card>
-<nb-card>
+<nb-card accent="info">
 <!-- Regímenes -->
 <div class="mb-4">
   <nb-card-header class="text-center">
@@ -201,7 +201,7 @@
   </table>
 </div>
 </nb-card>
-<nb-card>
+<nb-card accent="info">
 <!-- Obligaciones -->
 <div class="mb-4">
   <nb-card-header class="text-center">
@@ -219,7 +219,7 @@
     <tbody>
       <tr *ngFor="let obligacion of obligaciones" (click)="onRowSelectObligacion(obligacion)">
         <td>{{ obligacion.descripcion }}</td>
-        <td>{{ obligacion.vecnimiento }}</td>
+        <td>{{ obligacion.vencimiento }}</td>
         <td>{{ obligacion.fechaInicio }}</td>
         <td>{{ obligacion.fechaFin }}</td>
       </tr>
@@ -228,19 +228,19 @@
 </div>
 </nb-card>
 
-  <nb-card>
+  <nb-card accent="info">
     <!-- Sección para cargar archivo PDF -->
     <div class="container mt-4">
       <!-- Botón para cargar el archivo PDF -->
       <div class="mb-3">
-        <div class="form-group">
-          <label for="pdfFile" class="form-label">Cargar archivo PDF:</label>
-          <input 
+        <div class="form-group text-center">
+          <nb-card-header><h5>Cargar archivo PDF:</h5></nb-card-header>
+          <input nbInput fullWidth
             type="file" 
             id="pdfFile" 
             (change)="onFileSelected($event)" 
             accept="application/pdf"
-            class="form-control" />
+            class="form-control text-center align-content-center input-file" />
         </div>
       </div>
   
