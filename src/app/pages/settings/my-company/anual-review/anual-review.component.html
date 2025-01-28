@@ -1,6 +1,5 @@
 <!-- revisa-documentos.component.html -->
-<nb-layout>
-    <nb-layout-column>
+
       <nb-card>
         <nb-card-header class="header-title">Revisar documentos anuales</nb-card-header>
         <nb-card-body>
@@ -10,9 +9,11 @@
   
           <div class="text-center mb-3">
             <div class="btn-group">
-              <button (click)="setFilter('cargados')" [class.active]="filter === 'cargados'" class="btn btn-secondary ms-2">Cargados</button>
-              <button (click)="setFilter('aceptados')" [class.active]="filter === 'aceptados'" class="btn btn-success ms-2">Aceptados</button>
-              <button (click)="setFilter('rechazados')" [class.active]="filter === 'rechazados'" class="btn btn-danger ms-2">Rechazados</button>
+              <button nbButton status="basic" (click)="setFilter('cargados')" [class.active]="filter === 'cargados'" class="btn  ms-2">Cargados ({{ cargados }})</button>
+              <button nbButton status="success" (click)="setFilter('aceptados')" [class.active]="filter === 'aceptados'" class="btn ms-2">Aceptados ({{ completos }})</button>
+              <button nbButton status="danger" (click)="setFilter('rechazados')" [class.active]="filter === 'rechazados'" class="btn ms-2">Rechazados ({{ incompletos }})</button>
+              <button nbButton status="warning" class="btn ms-2 text-light font-weight-bold">No cargados ({{ noCargados }})</button>
+
             </div>
           </div>
   
@@ -33,15 +34,32 @@
               <tbody>
                 <tr *ngFor="let archivo of archivosCargados">
                   <td>{{ archivo.tarea_nombre }}</td>
-                  <td>{{ archivo.file_path }}</td>
+                  <td class="col-file">
+                    {{ archivo.file_path.split('/').pop() }}
+                  </td>
                   <td>{{ archivo.upload_date }}</td>
                   <td>{{ archivo.uploaded_by }}</td>
                   <td>{{ archivo.estado }}</td>
-                  <td>
-                    <a [href]="'https://siinad.mx/php/' + archivo.file_path" target="_blank" class="btn btn-primary">Revisar</a>
-                    <button class="btn btn-success" (click)="aceptarArchivo(archivo)">Aceptar</button>
-                    <button class="btn btn-danger" (click)="rechazarArchivo(archivo)">Rechazar</button>
-                    <button class="btn btn-info" (click)="revisarInformacionAdicional(archivo)">Revisar Información Adicional</button>
+                  <td class="acciones">
+                    <!-- Icono para revisar -->
+                    <a title="Revisar" [href]="'https://siinad.mx/php/' + archivo.file_path" target="_blank" nbButton ghost nbTooltip="Revisar">
+                      <nb-icon icon="eye-outline"></nb-icon>
+                    </a>
+                  
+                    <!-- Icono para aceptar -->
+                    <button title="Aceptar" nbButton ghost status="success" (click)="aceptarArchivo(archivo)" nbTooltip="Aceptar">
+                      <nb-icon icon="checkmark-outline"></nb-icon>
+                    </button>
+                  
+                    <!-- Icono para rechazar -->
+                    <button title="Rechazar" nbButton ghost status="danger" (click)="rechazarArchivo(archivo)" nbTooltip="Rechazar">
+                      <nb-icon icon="close-outline"></nb-icon>
+                    </button>
+                  
+                    <!-- Icono para revisar información adicional -->
+                    <button title="Ver informacion" nbButton ghost status="info" (click)="revisarInformacionAdicional(archivo)" nbTooltip="Información Adicional">
+                      <nb-icon icon="info-outline"></nb-icon>
+                    </button>
                   </td>
                 </tr>
               </tbody>
@@ -64,13 +82,22 @@
               <tbody>
                 <tr *ngFor="let archivo of archivosAceptados">
                   <td>{{ archivo.tarea_nombre }}</td>
-                  <td>{{ archivo.file_path }}</td>
+                  <td class="col-file">
+                    {{ archivo.file_path.split('/').pop() }}
+                  </td>
                   <td>{{ archivo.upload_date }}</td>
                   <td>{{ archivo.uploaded_by }}</td>
                   <td>{{ archivo.estado }}</td>
-                  <td>
-                    <a [href]="'https://siinad.mx/php/' + archivo.file_path" target="_blank" class="btn btn-primary">Revisar</a>
-                    <button class="btn btn-info" (click)="revisarInformacionAdicional(archivo)">Revisar Información Adicional</button>
+                  <td class="acciones">
+                    <!-- Icono para revisar -->
+                    <a title="Revisar" [href]="'https://siinad.mx/php/' + archivo.file_path" target="_blank" nbButton ghost nbTooltip="Revisar">
+                      <nb-icon icon="eye-outline"></nb-icon>
+                    </a>
+                  
+                    <!-- Icono para revisar información adicional -->
+                    <button title="Ver Informacion" nbButton ghost status="info" (click)="revisarInformacionAdicional(archivo)" nbTooltip="Información Adicional">
+                      <nb-icon icon="info-outline"></nb-icon>
+                    </button>
                   </td>
                 </tr>
               </tbody>
@@ -93,33 +120,43 @@
               <tbody>
                 <tr *ngFor="let archivo of archivosRechazados">
                   <td>{{ archivo.tarea_nombre }}</td>
-                  <td>{{ archivo.file_path }}</td>
+                  <td class="col-file">
+                    {{ archivo.file_path.split('/').pop() }}
+                  </td>
                   <td>{{ archivo.upload_date }}</td>
                   <td>{{ archivo.uploaded_by }}</td>
                   <td>{{ archivo.estado }}</td>
-                  <td>
-                    <a [href]="'https://siinad.mx/php/' + archivo.file_path" target="_blank" class="btn btn-primary">Revisar</a>
-                    <button class="btn btn-info" (click)="revisarInformacionAdicional(archivo)">Revisar Información Adicional</button>
+                  <td class="acciones">
+                    <!-- Icono para revisar -->
+                    <a title="Revisar" [href]="'https://siinad.mx/php/' + archivo.file_path" target="_blank" nbButton ghost nbTooltip="Revisar">
+                      <nb-icon icon="eye-outline"></nb-icon>
+                    </a>
+                  
+                    <!-- Icono para revisar información adicional -->
+                    <button title="Ver Informacion" nbButton ghost status="info" (click)="revisarInformacionAdicional(archivo)" nbTooltip="Información Adicional">
+                      <nb-icon icon="info-outline"></nb-icon>
+                    </button>
                   </td>
                 </tr>
               </tbody>
             </table>
           </div>
   
-          <!-- Badges -->
+          <!-- Badges 
           <div class="d-flex justify-content-center flex-wrap mb-4">
             <nb-tag class="m-2" status="success" text="Cargados: {{ cargados }}"></nb-tag>
             <nb-tag class="m-2" status="primary" text="Completos: {{ completos }}"></nb-tag>
             <nb-tag class="m-2" status="danger" text="Incompletos: {{ incompletos }}"></nb-tag>
             <nb-tag class="m-2" status="warning" text="No cargados: {{ noCargados }}"></nb-tag>
           </div>
+
+          -->
           
           
           
         </nb-card-body>
       </nb-card>
-    </nb-layout-column>
-  </nb-layout>
+
   
 
   

@@ -294,6 +294,7 @@
         <!-- Botón de Envío -->
         <div class="text-center">
           <button nbButton status="success" type="submit" [disabled]="isSubmitting">Guardar Cambios</button>
+          <button nbButton status="danger" type="button" (click)="dismiss()">Cancelar</button>
         </div>
       </form>
     </nb-card-body>

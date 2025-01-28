@@ -64,7 +64,7 @@ export class AnualReviewComponent implements OnInit {
     public authService: AuthService,
     public companyService: CompanyService,
     private dialogService: NbDialogService,
-    private toastrService: NbToastrService
+    private toastrService: NbToastrService,
   ) { }
 
   ngOnInit() {
@@ -132,6 +132,8 @@ export class AnualReviewComponent implements OnInit {
         });
     }
   }
+
+
 
   rechazarArchivo(archivo: Archivo) {
     this.dialogService.open(RejectionDialogComponent, {

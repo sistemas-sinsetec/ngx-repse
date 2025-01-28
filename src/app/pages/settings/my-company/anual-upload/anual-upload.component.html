@@ -1,4 +1,5 @@
-  <div class="container">
+<nb-card [nbSpinner]="isUploading" nbSpinnerStatus="info" nbSpinnerSize="large">
+ <div class="container">
         <!-- Título Principal -->
         <h2 class="header-title">Subir documentos anuales</h2>
   
@@ -13,7 +14,7 @@
         </nb-alert>
   
         <!-- Tabla de Tareas -->
-        <div class="table-responsive mt-4">
+        <div class="table-responsive mt-4" >
           <table class="table table-striped table-hover">
             <thead>
               <tr>
@@ -36,7 +37,7 @@
                 <td>
                   <input type="file" (change)="onFileSelected($event, tarea)" style="display: none;"
                     id="fileInput{{tarea.id}}">
-                  <button nbButton status="info" (click)="triggerFileInput(tarea.id)"
+                  <button nbButton status="info" (click)="triggerFileInput(tarea.id)" (click)="toggleLoadingAnimation(1000)"
                     [disabled]="tarea.estado === 'aceptado' || tarea.estado === 'cargado'">
                     Cargar documento
                   </button>
@@ -64,11 +65,13 @@
   
         <!-- Badges de Estado -->
         <div class="d-flex justify-content-center flex-wrap mb-4">
-          <nb-tag class="m-2" status="success" text="Cargados: {{ cargados }}"></nb-tag>
-          <nb-tag class="m-2" status="primary" text="Completos: {{ completos }}"></nb-tag>
+          <nb-tag class="m-2" status="info" appearance="outline" text="Cargados: {{ cargados }}"></nb-tag>
+          <nb-tag class="m-2" status="success" text="Completos: {{ completos }}"></nb-tag>
           <nb-tag class="m-2" status="danger" text="Incompletos: {{ incompletos }}"></nb-tag>
           <nb-tag class="m-2" status="warning" text="No cargados: {{ noCargados }}"></nb-tag>
         </div>
       </div>
+
+    </nb-card>
 
   

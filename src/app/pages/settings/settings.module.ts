@@ -19,7 +19,8 @@ import {
   NbAccordionModule,
   NbInputModule,
   NbTagModule,
-  NbUserModule
+  NbUserModule,
+  NbSpinnerModule,
 } from '@nebular/theme';
 
 import { ThemeModule } from '../../@theme/theme.module';
@@ -139,7 +140,8 @@ import { PermissionsBusineesPartnerComponent } from './business-partner/permissi
     NbAccordionModule,
     NbInputModule,
     NbTagModule,
-    NbUserModule
+    NbUserModule,
+    NbSpinnerModule,
 
   ],
 })

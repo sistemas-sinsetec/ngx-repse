@@ -9,6 +9,8 @@ import { AutorizacionStpsModalComponent } from '../autorizacion-stps-modal/autor
 import { EstablecimientosModalComponent } from '../establecimientos-modal/establecimientos-modal.component';
 import { ContratoModalComponent } from '../contrato-modal/contrato-modal.component';
 import { CompanyService } from '../../../../services/company.service';
+import { NbToastrService } from '@nebular/theme';
+import { NbComponentStatus, NbSpinnerService, NbSpinnerModule } from '@nebular/theme';
 
 
 
@@ -44,17 +46,33 @@ export class AnualUploadComponent implements OnInit {
   incompletos: number = 0;
   noCargados: number = this.tareas.length;
 
+  isUploading: boolean = false;
+
   constructor(
     private http: HttpClient,
     public authService: AuthService,
     public companyService: CompanyService,
-    private nbDialogService: NbDialogService
+    private nbDialogService: NbDialogService,
+    private toastrService: NbToastrService,
   ) {}
 
   ngOnInit() {
+    this.isUploading = true;
     this.configurarTareas();
     this.obtenerEstadoArchivos();
+    this.isUploading = false;
   }
+
+    private showToast(message: string, status: NbComponentStatus) {
+      this.toastrService.show(
+        message,
+        'Información', // Título
+        {
+          status: status,
+          duration: 3000,
+        }
+      );
+    }
 
   configurarTareas() {
     if (this.companyService.selectedCompany.rfc.length === 12) {
@@ -80,6 +98,7 @@ export class AnualUploadComponent implements OnInit {
 
 
   async openModal(tarea: Tarea) {
+    this.isUploading = true;
     let component;
 
     switch (tarea.nombre) {
@@ -113,6 +132,12 @@ export class AnualUploadComponent implements OnInit {
         companyId: this.companyService.selectedCompany.id,
       },
     });
+    this.isUploading = false;
+  }
+
+  toggleLoadingAnimation(time: number) {
+    this.isUploading = true;
+    setTimeout(() => this.isUploading = false, time);
   }
 
   triggerFileInput(id: number) {
@@ -141,7 +166,9 @@ export class AnualUploadComponent implements OnInit {
       formData.append('userId', this.authService.userId);
       formData.append('companyId', this.companyService.selectedCompany.id);
       formData.append('tareaId', tarea.id.toString());
-
+  
+      this.isUploading = true; // Activar el spinner
+  
       this.http.post('https://siinad.mx/php/documentUpload.php', formData)
         .subscribe(response => {
           console.log('Respuesta del servidor:', response);
@@ -150,13 +177,18 @@ export class AnualUploadComponent implements OnInit {
           tarea.estado = 'cargado';
           this.updateCounters();
           this.obtenerEstadoArchivos();
+          this.showToast("Se subió el archivo correctamente", 'success');
         }, error => {
           console.error('Error al subir el archivo:', error);
+          this.showToast("Hubo un error al subir el archivo", 'danger');
+        }).add(() => {
+          this.isUploading = false; // Desactivar el spinner
         });
     } else {
       console.error('No file found for upload.');
     }
   }
+  
 
   updateCounters() {
     this.cargados = this.tareas.filter(t => t.estado === 'cargado').length;
