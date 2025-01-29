@@ -2,6 +2,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable, Subject } from 'rxjs';
+import { NbToastrService, NbComponentStatus } from '@nebular/theme';
 
 @Injectable({
   providedIn: 'root',
@@ -10,14 +11,14 @@ export class CompanyService {
   // Datos principales de la empresa
   principalCompanies: any[] = [];
   nonPrincipalCompanies: any[] = [];
-  
+
   // Datos de la empresa seleccionada
   selectedCompany: any = null;
 
   // Subject para emitir cambios
   private companyChange$ = new Subject<{ company: any; logoUrl: string }>();
 
-  constructor(private http: HttpClient) {
+  constructor(private http: HttpClient, private toastrService: NbToastrService) {
     // Cargar las empresas principales almacenadas en localStorage
     this.loadMappedPrincipalCompanies();
 
@@ -89,7 +90,7 @@ export class CompanyService {
       rfc: company.rfc || '',
       levelUser: company.levelUser || '',
       role: company.role || '',
-      logoUrl: '', // Se asignará posteriormente
+      logoUrl: company.logoUrl || '', // Se asignará posteriormente
     };
 
     console.log('Empresa seleccionada:', this.selectedCompany);
@@ -121,7 +122,7 @@ export class CompanyService {
    */
   async loadSelectedCompanyFromLocalStorage(): Promise<void> {
     const selectedCompanyString = localStorage.getItem('selectedCompany');
-    
+
     if (selectedCompanyString) {
       this.selectedCompany = JSON.parse(selectedCompanyString);
 
@@ -133,6 +134,37 @@ export class CompanyService {
 
       console.log('Empresa seleccionada cargada desde localStorage:', this.selectedCompany);
     }
+  }
+
+  /**
+   * Actualizar el logo en el servicio y en el almacenamiento local
+   */
+  updateLogo(newLogoUrl: string): void {
+    if (this.selectedCompany) {
+      // Actualizar el logo en el servicio
+      this.selectedCompany.logoUrl = newLogoUrl;
+
+      // Guardar el objeto completo de la empresa en localStorage
+      localStorage.setItem('selectedCompany', JSON.stringify(this.selectedCompany));
+
+      // Emitir el cambio
+      this.companyChange$.next({
+        company: { id: this.selectedCompany.id, name: this.selectedCompany.name },
+        logoUrl: this.selectedCompany.logoUrl,
+      });
+
+      console.log('Logo actualizado en el servicio y en localStorage:', this.selectedCompany);
+    }
+  }
+
+  /**
+   * Mostrar notificaciones
+   */
+  private showToast(message: string, status: NbComponentStatus): void {
+    this.toastrService.show(message, '', {
+      status: status,
+      duration: 5000,
+    });
   }
 
   /**

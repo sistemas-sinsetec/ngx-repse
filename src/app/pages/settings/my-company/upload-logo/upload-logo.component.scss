@@ -1,58 +1,61 @@
 .corporate-card {
-  border: 1px solid #e5e5e5;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  max-width: 600px;
+  margin: auto;
   border-radius: 8px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
 }
 
-.corporate-container {
-  display: flex;
-  justify-content: space-between;
-  gap: 24px;
+.card-title {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: #2c3e50;
 }
 
 .corporate-section {
-  flex: 1;
-  text-align: center;
+  margin-bottom: 1.5rem;
 }
 
 .section-title {
-  font-size: 16px;
-  font-weight: bold;
-  color: #333;
-  margin-bottom: 16px;
+  font-size: 1rem;
+ 
+  color: #34495e;
+  margin-bottom: 0.5rem;
 }
 
-.logo-container img,
-.preview-container img {
-  max-width: 150px;
-  max-height: 150px;
-  border-radius: 8px;
-  border: 1px solid #e5e5e5;
+.logo-container, .preview-container {
+  text-align: center;
+  margin-top: 1rem;
+}
+
+.logo-img, .preview-img {
+  max-width: 100%;
+  height: auto;
+  border-radius: 4px;
+  border: 1px solid #e0e0e0;
 }
 
 .placeholder-container {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  height: 150px;
-  border: 2px dashed #d3d3d3;
-  border-radius: 8px;
+  text-align: center;
+  padding: 1rem;
+  background-color: #f9f9f9;
+  border: 1px dashed #e0e0e0;
+  border-radius: 4px;
 }
 
 .placeholder-icon {
-  font-size: 48px;
-  color: #d3d3d3;
+  font-size: 2rem;
+  color: #bdc3c7;
 }
 
 .placeholder-text {
-  margin-top: 8px;
-  font-size: 14px;
-  color: #777;
+  display: block;
+  margin-top: 0.5rem;
+  color: #7f8c8d;
 }
 
 .upload-container {
-  position: relative;
+  text-align: center;
+  margin-top: 1rem;
 }
 
 .upload-input {
@@ -60,33 +63,30 @@
 }
 
 .upload-label {
-  display: inline-block;
-  background-color: #007bff;
+  display: inline-flex;
+  align-items: center;
+  padding: 0.5rem 1rem;
+  background-color: #3498db;
   color: white;
-  padding: 8px 16px;
   border-radius: 4px;
   cursor: pointer;
-  font-size: 14px;
-  transition: background-color 0.3s;
+  transition: background-color 0.3s ease;
 }
 
 .upload-label:hover {
-  background-color: #0056b3;
+  background-color: #2980b9;
 }
 
-.preview-title {
-  font-size: 14px;
-  font-weight: bold;
-  color: #555;
-  margin-bottom: 8px;
+.upload-icon {
+  margin-right: 0.5rem;
 }
 
 .button-container {
-  margin-top: 24px;
   text-align: center;
+  margin-top: 1.5rem;
 }
 
-button[nbButton] {
-  font-size: 16px;
-  font-weight: bold;
+button {
+  width: 100%;
+  max-width: 200px;
 }

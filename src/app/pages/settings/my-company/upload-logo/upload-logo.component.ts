@@ -22,7 +22,7 @@ export class UploadLogoComponent implements OnInit {
     public companyService: CompanyService,
     private toastrService: NbToastrService,
     private loadingController: LoadingController
-  ) {}
+  ) { }
 
   ngOnInit() {
     this.loadCurrentLogo();
@@ -48,7 +48,7 @@ export class UploadLogoComponent implements OnInit {
     );
   }
 
-  onFileSelected(event: any) {
+  async onFileSelected(event: any) {
     const file: File = event.target.files[0];
     if (file) {
       // Validar el tipo de archivo
@@ -57,24 +57,30 @@ export class UploadLogoComponent implements OnInit {
         this.showToast('Solo se permiten archivos de imagen compatibles (JPEG, PNG, WebP, GIF).', 'danger');
         return;
       }
-  
+
+      // Mostrar el loading mientras se procesa la imagen
+      const loading = await this.loadingController.create({
+        message: 'Procesando imagen...',
+      });
+      await loading.present();
+
       // Leer y procesar la imagen seleccionada
       const reader = new FileReader();
       reader.onload = async (e) => {
         const image = new Image();
         image.src = e.target?.result as string;
-  
+
         image.onload = () => {
           const canvas = document.createElement('canvas');
           const ctx = canvas.getContext('2d');
-  
+
           const maxWidth = 500; // Ancho deseado
           const scaleFactor = maxWidth / image.width;
           canvas.width = maxWidth;
           canvas.height = image.height * scaleFactor;
-  
+
           ctx?.drawImage(image, 0, 0, canvas.width, canvas.height);
-  
+
           // Convertir a .webp
           canvas.toBlob(
             (blob) => {
@@ -82,9 +88,12 @@ export class UploadLogoComponent implements OnInit {
                 // Quitar la extensión anterior del nombre del archivo
                 const fileNameWithoutExtension = file.name.split('.').slice(0, -1).join('.');
                 const newFileName = `${fileNameWithoutExtension}.webp`;
-  
+
                 this.selectedFile = new File([blob], newFileName, { type: 'image/webp' });
                 this.previewLogo = URL.createObjectURL(blob); // Vista previa
+
+                // Ocultar el loading una vez que la imagen esté lista
+                loading.dismiss();
               }
             },
             'image/webp',
@@ -93,50 +102,61 @@ export class UploadLogoComponent implements OnInit {
         };
       };
       reader.readAsDataURL(file);
+
+      // Restablecer el valor del input para permitir la selección del mismo archivo nuevamente
+      event.target.value = '';
     }
   }
+
+
+
+
+  // upload-logo.component.ts
+  async uploadLogo() {
+    const companyId = this.companyService.selectedCompany.id;
   
+    if (!companyId || !this.selectedFile) {
+      this.showToast('Seleccione un archivo para subir.', 'danger');
+      return;
+    }
   
+    const loading = await this.loadingController.create({
+      message: 'Subiendo logo...',
+    });
+    await loading.present();
   
-
- async uploadLogo() {
-  const companyId = this.companyService.selectedCompany.id;
-
-  if (!companyId || !this.selectedFile) {
-    this.showToast('Seleccione un archivo para subir.', 'danger');
-    return;
-  }
-
-  const loading = await this.loadingController.create({
-    message: 'Subiendo logo...',
-  });
-  await loading.present();
-
-  const formData = new FormData();
-  formData.append('companyId', companyId);
-  formData.append('logo', this.selectedFile);
-  formData.append('currentLogo', this.currentLogo); // Enviar el logo actual al backend
-
-  this.http.post('https://siinad.mx/php/uploadLogo.php', formData).subscribe(
-    (response: any) => {
-      if (response.success) {
-        this.currentLogo = `${response.logoUrl}?t=${new Date().getTime()}`;
-        this.showToast(response.message, 'success');
-        this.loadCurrentLogo(); // Recargar el logo actual
-        this.previewLogo = null; // Limpiar la vista previa
-        this.selectedFile = null; // Limpiar el archivo seleccionado
-      } else {
-        this.showToast(response.error, 'danger');
+    const formData = new FormData();
+    formData.append('companyId', companyId);
+    formData.append('logo', this.selectedFile);
+    formData.append('currentLogo', this.currentLogo); // Enviar el logo actual al backend
+  
+    this.http.post('https://siinad.mx/php/uploadLogo.php', formData).subscribe(
+      (response: any) => {
+        if (response.success) {
+          // Actualizar el logo en el servicio y en el almacenamiento local
+          this.companyService.updateLogo(response.logoUrl);
+  
+          // Actualizar el logo en el componente
+          this.currentLogo = response.logoUrl;
+  
+          // Mostrar mensaje de éxito
+          this.showToast(response.message, 'success');
+  
+          // Limpiar la vista previa y el archivo seleccionado
+          this.previewLogo = null;
+          this.selectedFile = null;
+        } else {
+          this.showToast(response.error, 'danger');
+        }
+        loading.dismiss();
+      },
+      (error) => {
+        loading.dismiss();
+        console.error('Error en la solicitud POST:', error);
+        this.showToast('Error al subir el logo.', 'danger');
       }
-      loading.dismiss();
-    },
-    (error) => {
-      loading.dismiss();
-      console.error('Error en la solicitud POST:', error);
-      this.showToast('Error al subir el logo.', 'danger');
-    }
-  );
-}
+    );
+  }
 
   showToast(message: string, status: NbComponentStatus) {
     this.toastrService.show(
