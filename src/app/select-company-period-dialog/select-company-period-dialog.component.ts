@@ -111,7 +111,10 @@ async confirm(): Promise<void> {
     });
 
     // Aquí recargas la página por completo
+    
     window.location.reload();
+
+    
   } else {
     alert('Por favor, selecciona una empresa y un período antes de confirmar.');
   }

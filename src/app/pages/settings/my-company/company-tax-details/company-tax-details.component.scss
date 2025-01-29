@@ -17,9 +17,11 @@ input[type=file]::file-selector-button {
     color: white;
   }
 
-  .input-file{
-    min-height: 70px;
-    width:100% !important;
+  .dropZoneContainer {
+    position: relative;
+    width: 100%;
+    max-width: 400px;
+    margin: 0 auto;
   }
   
   .dropZoneOverlay, .FileUpload {

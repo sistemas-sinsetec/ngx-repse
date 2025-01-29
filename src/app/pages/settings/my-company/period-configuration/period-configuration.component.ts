@@ -2,6 +2,8 @@ import { Component, OnInit } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { AuthService } from '../../../../services/auth.service';
 import { CompanyService } from '../../../../services/company.service';
+import { LoadingController } from '@ionic/angular'; // Importar LoadingController de Ionic
+import { NbToastrService } from '@nebular/theme'; // Importar NbToastrService de Nebular
 
 @Component({
   selector: 'ngx-period-configuration',
@@ -19,7 +21,9 @@ export class PeriodConfigurationComponent {
   constructor(
     private http: HttpClient,
     private authService: AuthService,
-    private companyService: CompanyService
+    private companyService: CompanyService,
+    private loadingController: LoadingController, // Inyectar LoadingController
+    private toastrService: NbToastrService // Inyectar NbToastrService
   ) { }
 
   ngOnInit() {
@@ -27,13 +31,21 @@ export class PeriodConfigurationComponent {
     this.updateSelectableDates(); // Actualizar las fechas seleccionables al iniciar la página
   }
 
-  loadPeriods() {
+  async loadPeriods() {
+    const loading = await this.loadingController.create({
+      message: 'Cargando periodos...'
+    });
+    await loading.present();
+
     const companyId = this.companyService.selectedCompany.id;
     this.http.get(`https://siinad.mx/php/get-periods.php?company_id=${companyId}`)
       .subscribe((response: any) => {
         this.periods = response;
+        loading.dismiss(); // Ocultar el spinner de carga
       }, error => {
         console.error('Error al cargar los periodos', error);
+        loading.dismiss(); // Ocultar el spinner de carga en caso de error
+        this.toastrService.danger('Error al cargar los periodos', 'Error'); // Mostrar un toast de error
       });
   }
 
@@ -59,33 +71,43 @@ export class PeriodConfigurationComponent {
       custom_period_length: null,
       custom_period_type: '',
     };
-  
+
     // Limitar la fecha seleccionable al mes de enero
     const currentYear = new Date().getFullYear();
     this.minDate = `${currentYear}-01-01`;
     this.maxDate = `${currentYear}-01-31`;
-  
+
     this.updateSelectableDates(); // Actualizar las fechas seleccionables para el nuevo periodo
     this.calculateRestDays(); // Calcular los días de descanso automáticamente
   }
 
   async savePeriodConfig() {
     const periodConfig = { ...this.selectedPeriod, company_id: this.companyService.selectedCompany.id };
-    console.log('Period Config:', periodConfig); // Verificar qué datos se están enviando
-    
+    console.log('Period Config:', periodConfig);
+
     if (!periodConfig.period_type_name || !periodConfig.fiscal_year_start || !periodConfig.period_days || !periodConfig.payment_days) {
       console.error('Datos insuficientes para crear o actualizar el periodo');
-      alert('Por favor, complete todos los campos necesarios antes de guardar.');
+      this.toastrService.warning('Por favor, complete todos los campos necesarios antes de guardar.', 'Advertencia');
       return;
     }
-    
+
+    const loading = await this.loadingController.create({
+      message: 'Guardando configuración del periodo...'
+    });
+    await loading.present();
+
     if (periodConfig.period_type_id) {
       // Si existe period_type_id, entonces es una actualización
       this.http.post('https://siinad.mx/php/update-period.php', periodConfig)
         .subscribe(response => {
           console.log('Cambios guardados correctamente', response);
+          loading.dismiss();
+          this.toastrService.success('Cambios guardados correctamente', 'Éxito');
+          this.loadPeriods(); // Recargar los periodos después de guardar
         }, error => {
           console.error('Error al guardar los cambios', error);
+          loading.dismiss();
+          this.toastrService.danger('Error al guardar los cambios', 'Error');
         });
     } else {
       // Si no existe period_type_id, entonces es una creación de un nuevo periodo
@@ -96,8 +118,13 @@ export class PeriodConfigurationComponent {
           const periodTypeName = this.selectedPeriod.period_type_name; // Obtener el nombre del tipo de periodo
           const periodData = [{ period_type_name: periodTypeName, period_type_id: periodTypeId }];
           await this.createPayrollPeriods(periodData, this.selectedPeriod); // Crear los periodos de nómina de forma secuencial
+          loading.dismiss();
+          this.toastrService.success('Nuevo periodo creado correctamente', 'Éxito');
+          this.loadPeriods(); // Recargar los periodos después de crear
         }, error => {
           console.error('Error al crear el nuevo periodo', error);
+          loading.dismiss();
+          this.toastrService.danger('Error al crear el nuevo periodo', 'Error');
         });
     }
   }
@@ -107,29 +134,29 @@ export class PeriodConfigurationComponent {
       console.error('periodTypes debe ser un array');
       return;
     }
-  
+
     if (periodTypes.length === 0) {
       console.warn('No se seleccionaron tipos de periodos');
       return;
     }
-  
+
     const companyId = this.companyService.selectedCompany.id;
     const startDate = new Date(periodo.fiscal_year_start);
     startDate.setHours(0, 0, 0, 0); // Aseguramos que la fecha de inicio no cambie por la zona horaria
     const fiscalYear = startDate.getFullYear();
-  
+
     let currentStartDate = new Date(startDate);
-  
+
     for (const periodTypeData of periodTypes) {
       const periodType = periodTypeData.period_type_name;
       const periodTypeId = periodTypeData.period_type_id;
-  
+
       // Usar totalPeriods definido por el usuario, o calcularlo automáticamente
       const totalPeriods = periodo.totalPeriods || Math.floor(365 / periodo.period_days);
-  
+
       for (let i = 0; i < totalPeriods; i++) {
         let periodEndDate: Date = new Date(currentStartDate);
-  
+
         if (periodo.payment_frequency === '02') { // Semanal
           periodEndDate.setDate(currentStartDate.getDate() + periodo.period_days - 1);
         } else if (periodo.payment_frequency === '04') { // Quincenal
@@ -153,13 +180,13 @@ export class PeriodConfigurationComponent {
           console.warn('Tipo de periodo desconocido');
           return;
         }
-  
+
         const month = currentStartDate.getMonth() + 1;
         const isMonthStart = currentStartDate.getDate() === 1;
         const isMonthEnd = periodEndDate.getDate() === new Date(periodEndDate.getFullYear(), periodEndDate.getMonth() + 1, 0).getDate();
         const isFiscalStart = i === 0;
         const isFiscalEnd = i === totalPeriods - 1;
-  
+
         const payrollPeriod = {
           company_id: companyId,
           period_type_id: periodTypeId, // Usar el period_type_id recibido en la respuesta
@@ -183,16 +210,17 @@ export class PeriodConfigurationComponent {
           imss_bimonthly_end: 0,
           payment_date: null // Establece la fecha de pago si es necesario
         };
-  
+
         try {
           // Esperar a que se complete la solicitud HTTP antes de proceder
           await this.http.post('https://siinad.mx/php/create-payroll-period.php', payrollPeriod).toPromise();
           console.log(`Periodo de nómina ${i + 1} creado correctamente para ${periodType}`);
         } catch (error) {
           console.error(`Error al crear el periodo de nómina ${i + 1} para ${periodType}`, error);
+          this.toastrService.danger(`Error al crear el periodo de nómina ${i + 1}`, 'Error');
           break; // Si hay un error, detener el proceso para este tipo de periodo
         }
-  
+
         // Actualiza la fecha de inicio para el siguiente periodo
         currentStartDate = new Date(periodEndDate);
         currentStartDate.setDate(currentStartDate.getDate() + 1);
@@ -219,8 +247,10 @@ export class PeriodConfigurationComponent {
           console.log('Periodo eliminado correctamente', response);
           this.loadPeriods();  // Recargar los periodos después de eliminar uno
           this.selectedPeriod = {};  // Limpiar el periodo seleccionado
+          this.toastrService.success('Periodo eliminado correctamente', 'Éxito');
         }, error => {
           console.error('Error al eliminar el periodo', error);
+          this.toastrService.danger('Error al eliminar el periodo', 'Error');
         });
     }
   }
@@ -230,12 +260,12 @@ export class PeriodConfigurationComponent {
       console.warn('No se puede calcular sin los días del periodo o la fecha de inicio.');
       return;
     }
-  
+
     const startDate = this.selectedPeriod.fiscal_year_start;
-  
+
     // Mínima fecha seleccionable: la fecha de inicio del ejercicio
     this.minDate = startDate;
-  
+
     if (!this.selectedPeriod.period_type_id) {
       const currentYear = new Date().getFullYear();
       this.minDate = `${currentYear}-01-01`;
@@ -244,10 +274,10 @@ export class PeriodConfigurationComponent {
       const endDate = this.addDays(startDate, this.selectedPeriod.period_days - 1);
       this.maxDate = endDate;
     }
-  
+
     this.calculateRestDays(); // Calcular los días de descanso automáticamente al actualizar las fechas
   }
-  
+
   // Función para agregar días a una fecha en formato de cadena
   addDays(dateStr: string, days: number): string {
     const date = new Date(dateStr);
@@ -255,25 +285,23 @@ export class PeriodConfigurationComponent {
     return date.toISOString().split('T')[0];
   }
 
-
   updateRestDays() {
     this.updateSelectableDates(); // Asegurarse de que las fechas seleccionables estén actualizadas
-  
+
     // Filtrar los días seleccionados para asegurarse de que están dentro del rango permitido
     const validDates = this.selectedPeriod.rest_days_position.filter((date: string) =>
       date >= this.minDate && date <= this.maxDate
     );
-  
+
     // Convertir las fechas seleccionadas en el formato "01,02,03"
     const daysArray = validDates.map((date: string) => {
       const day = new Date(date).getDate();
       return day < 10 ? `0${day}` : `${day}`;
     });
-  
+
     // Unir los días en una cadena separada por comas
     this.selectedPeriod.rest_days_position = daysArray.join(',');
   }
-  
 
   calculateRestDays() {
     // Verifica que haya una fecha de inicio y un número de días definido
@@ -281,27 +309,20 @@ export class PeriodConfigurationComponent {
       console.warn('No se puede calcular los séptimos días sin la fecha de inicio o los días del periodo.');
       return;
     }
-  
+
     const startDate = new Date(this.selectedPeriod.fiscal_year_start);
     const periodDays = this.selectedPeriod.period_days;
-  
+
     let restDays = []; // Array para almacenar los días de descanso
-  
+
     // Calcula el séptimo día para cada semana dentro del periodo
     for (let i = 6; i < periodDays; i += 7) { // Inicia en 6 para seleccionar el séptimo día
       const restDay = new Date(startDate);
       restDay.setDate(startDate.getDate() + i);
       restDays.push(restDay.toISOString().split('T')[0]); // Añade la fecha al array
     }
-  
+
     // Establece la posición de los días de descanso en el formato "01,02,03"
     this.selectedPeriod.rest_days_position = restDays;
   }
-
-
-
-
-
-
-
 }

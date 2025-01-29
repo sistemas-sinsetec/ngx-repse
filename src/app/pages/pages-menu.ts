@@ -197,12 +197,6 @@ export const MENU_ITEMS: CustomMenuItem[] = [
             permission: { section: 'Configuracion de mi empresa', subSection: 'Departamentos' },
           },
           {
-            title: 'Configuración inicial de periodos',
-            link: '/pages/settings/my-company/initial-periods',
-            hidden: false,
-            permission: { section: 'Configuracion de mi empresa', subSection: 'Configuración inicial de períodos' },
-          },
-          {
             title: 'Tipos de periodos',
             link: '/pages/settings/my-company/period-configuration',
             hidden: false,

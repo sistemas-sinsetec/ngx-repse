@@ -4,24 +4,22 @@ import { AuthService } from '../../../../services/auth.service';
 import { CompanyService } from '../../../../services/company.service';
 import { NbToastrService } from '@nebular/theme';
 import { NbComponentStatus } from '@nebular/theme';
-import { error } from 'console';
+import { LoadingController } from '@ionic/angular'; // Importar LoadingController
+import { SelectCompanyPeriodDialogComponent } from '../../../../select-company-period-dialog/select-company-period-dialog.component';
+import { NbDialogService } from '@nebular/theme';
+import { Router } from '@angular/router';
 @Component({
   selector: 'ngx-initial-periods',
   templateUrl: './initial-periods.component.html',
   styleUrls: ['./initial-periods.component.scss']
 })
 export class InitialPeriodsComponent {
- // Variables para manejar la selección de periodos
- periodoSemanal: boolean = false;
- periodoQuincenal: boolean = false;
- periodoMensual: boolean = false;
-
- // Variables para manejar las fechas de inicio de cada periodo
- fechaSemanal: string;
- fechaQuincenal: string;
- fechaMensual: string;
-
-  // Variables para manejar el rango de fechas (solo enero)
+  periodoSemanal: boolean = false;
+  periodoQuincenal: boolean = false;
+  periodoMensual: boolean = false;
+  fechaSemanal: string;
+  fechaQuincenal: string;
+  fechaMensual: string;
   minDate: string;
   maxDate: string;
 
@@ -30,123 +28,140 @@ export class InitialPeriodsComponent {
     private authService: AuthService,
     private companyService: CompanyService,
     private toastrService: NbToastrService,
-
+    private loadingController: LoadingController, // Inyectar LoadingController
+    private dialogService: NbDialogService,
+    private router: Router
   ) {}
 
-    // Función para mostrar notificaciones
-    private showToast(message: string, status: NbComponentStatus) {
-      this.toastrService.show(
-        message,
-        'Información', // Título
-        {
-          status: status,
-          duration: 3000,
-        }
-      );
-    }
-
-    async guardarConfiguracion() {
-      const companyId = this.companyService.selectedCompany.id;
-    
-      const periodos: Periodo[] = []; // Define el tipo de la variable periodos como un array de Periodo
-      if (this.periodoSemanal) {
-        const ejercicio = new Date(this.fechaSemanal).getFullYear();
-        periodos.push({
-          nombretipoperiodo: 'Semanal',
-          diasdelperiodo: 7,
-          diasdepago: 6,
-          periodotrabajo: 1,
-          modificarhistoria: 1,
-          ajustarperiodoscalendario: 0,
-          numeroseptimos: 1,
-          posicionseptimos: 7,
-          posicionpagonomina: 6,
-          fechainicioejercicio: this.fechaSemanal,
-          ejercicio: ejercicio,
-          ccalculomescalendario: 0,
-          PeriodicidadPago: '02'
-        });
-        this.showToast("Periodo semanal guardado correctamente", 'success');
-      } else if (this.periodoQuincenal) {
-        const ejercicio = new Date(this.fechaQuincenal).getFullYear();
-        periodos.push({
-          nombretipoperiodo: 'Quincenal',
-          diasdelperiodo: 15,
-          diasdepago: 15,
-          periodotrabajo: 1,
-          modificarhistoria: 0,
-          ajustarperiodoscalendario: 1,
-          numeroseptimos: 0,
-          posicionseptimos: null,
-          posicionpagonomina: 15,
-          fechainicioejercicio: this.fechaQuincenal,
-          ejercicio: ejercicio,
-          ccalculomescalendario: 0,
-          PeriodicidadPago: '04'
-        });
-        this.showToast("Periodo quincenal guardado correctamente", 'success');
-      } else if (this.periodoMensual) {
-        const ejercicio = new Date(this.fechaMensual).getFullYear();
-        periodos.push({
-          nombretipoperiodo: 'Mensual',
-          diasdelperiodo: 30,
-          diasdepago: 30,
-          periodotrabajo: 1,
-          modificarhistoria: 0,
-          ajustarperiodoscalendario: 1,
-          numeroseptimos: 0,
-          posicionseptimos: null,
-          posicionpagonomina: 30,
-          fechainicioejercicio: this.fechaMensual,
-          ejercicio: ejercicio,
-          ccalculomescalendario: 0,
-          PeriodicidadPago: '05'
-        });
-        this.showToast("Periodo mensual guardado correctamente", 'success');
-      } else {
-        this.showToast("No se pudo guardar el periodo", 'danger');
-        console.log("No se guardó porque no hay información que guardar");
-        return; // Salir de la función si no hay nada que guardar
+  private showToast(message: string, status: NbComponentStatus) {
+    this.toastrService.show(
+      message,
+      'Información',
+      {
+        status: status,
+        duration: 3000,
       }
-    
-      const configuracion = {
-        companyId: companyId,
-        periodos: periodos
-      };
-    
-      this.http.post('https://siinad.mx/php/save-periods.php', configuracion)
-        .subscribe(async (response: any) => {
-          console.log('Configuración guardada correctamente', response);
-    
-          // Extraer los period_type_ids de la respuesta
-          const periodTypesData = response.periods;
-          const periodTypes = periodTypesData.map((p: any) => ({
-            period_type_name: p.period_type_name,
-            period_type_id: p.period_type_id
-          }));
-    
-          // Llamar a createPayrollPeriods pasando los periodTypes
-          await this.createPayrollPeriods(periodTypes, periodos[0]);
-    
-          localStorage.setItem('isFirstTime', 'false'); // Actualizar el valor en localStorage
-    
-          // Limpiar los campos del formulario
-          this.resetForm();
-        }, error => {
-          console.error('Error al guardar la configuración', error);
+    );
+  }
+
+  async guardarConfiguracion() {
+    // Validar que se haya seleccionado al menos un período
+    if (!this.periodoSemanal && !this.periodoQuincenal && !this.periodoMensual) {
+      this.showToast("Debes seleccionar al menos un período", 'danger');
+      return;
+    }
+  
+    // Validar que se haya seleccionado una fecha para el período habilitado
+    if (
+      (this.periodoSemanal && !this.fechaSemanal) ||
+      (this.periodoQuincenal && !this.fechaQuincenal) ||
+      (this.periodoMensual && !this.fechaMensual)
+    ) {
+      this.showToast("Debes seleccionar una fecha para el período habilitado", 'danger');
+      return;
+    }
+  
+    // Mostrar el indicador de carga
+    const loading = await this.loadingController.create({
+      message: 'Guardando configuración...',
+    });
+    await loading.present();
+  
+    const companyId = this.companyService.selectedCompany.id;
+    const periodos: Periodo[] = [];
+  
+    if (this.periodoSemanal) {
+      const ejercicio = new Date(this.fechaSemanal).getFullYear();
+      periodos.push({
+        nombretipoperiodo: 'Semanal',
+        diasdelperiodo: 7,
+        diasdepago: 6,
+        periodotrabajo: 1,
+        modificarhistoria: 1,
+        ajustarperiodoscalendario: 0,
+        numeroseptimos: 1,
+        posicionseptimos: 7,
+        posicionpagonomina: 6,
+        fechainicioejercicio: this.fechaSemanal,
+        ejercicio: ejercicio,
+        ccalculomescalendario: 0,
+        PeriodicidadPago: '02'
+      });
+      this.showToast("Periodo semanal guardado correctamente", 'success');
+    }
+  
+    if (this.periodoQuincenal) {
+      const ejercicio = new Date(this.fechaQuincenal).getFullYear();
+      periodos.push({
+        nombretipoperiodo: 'Quincenal',
+        diasdelperiodo: 15,
+        diasdepago: 15,
+        periodotrabajo: 1,
+        modificarhistoria: 0,
+        ajustarperiodoscalendario: 1,
+        numeroseptimos: 0,
+        posicionseptimos: null,
+        posicionpagonomina: 15,
+        fechainicioejercicio: this.fechaQuincenal,
+        ejercicio: ejercicio,
+        ccalculomescalendario: 0,
+        PeriodicidadPago: '04'
+      });
+      this.showToast("Periodo quincenal guardado correctamente", 'success');
+    }
+  
+    if (this.periodoMensual) {
+      const ejercicio = new Date(this.fechaMensual).getFullYear();
+      periodos.push({
+        nombretipoperiodo: 'Mensual',
+        diasdelperiodo: 30,
+        diasdepago: 30,
+        periodotrabajo: 1,
+        modificarhistoria: 0,
+        ajustarperiodoscalendario: 1,
+        numeroseptimos: 0,
+        posicionseptimos: null,
+        posicionpagonomina: 30,
+        fechainicioejercicio: this.fechaMensual,
+        ejercicio: ejercicio,
+        ccalculomescalendario: 0,
+        PeriodicidadPago: '05'
+      });
+      this.showToast("Periodo mensual guardado correctamente", 'success');
+    }
+  
+    const configuracion = {
+      companyId: companyId,
+      periodos: periodos
+    };
+  
+    this.http.post('https://siinad.mx/php/save-periods.php', configuracion)
+      .subscribe(async (response: any) => {
+        console.log('Configuración guardada correctamente', response);
+  
+        const periodTypesData = response.periods;
+        const periodTypes = periodTypesData.map((p: any) => ({
+          period_type_name: p.period_type_name,
+          period_type_id: p.period_type_id
+        }));
+  
+        await this.createPayrollPeriods(periodTypes, periodos[0]);
+  
+        localStorage.setItem('isFirstTime', 'false');
+        this.resetForm(); // Limpiar el formulario después de guardar
+        loading.dismiss(); // Ocultar el indicador de carga
+
+        this.router.navigate(['/dashboard']);
+
+        this.dialogService.open(SelectCompanyPeriodDialogComponent, {
+       
         });
-    }
-    
-    // Función para limpiar los campos del formulario
-    resetForm() {
-      this.periodoSemanal = false;
-      this.periodoQuincenal = false;
-      this.periodoMensual = false;
-      this.fechaSemanal = null;
-      this.fechaQuincenal = null;
-      this.fechaMensual = null;
-    }
-    
+      }, error => {
+        console.error('Error al guardar la configuración', error);
+        loading.dismiss(); // Ocultar el indicador de carga en caso de error
+      });
+  }
+
 
   async createPayrollPeriods(periodTypes: { period_type_name: string, period_type_id: number }[], periodo: Periodo) {
     if (!Array.isArray(periodTypes)) {
@@ -180,7 +195,7 @@ export class InitialPeriodsComponent {
           periodEndDate.setDate(currentStartDate.getDate() + periodo.diasdelperiodo - 1);
         } else if (periodType === 'Mensual') {
           periodEndDate.setMonth(currentStartDate.getMonth() + 1);
-          periodEndDate.setDate(0); // Establece el último día del mes
+          periodEndDate.setDate(0);
         }
 
         const month = currentStartDate.getMonth() + 1;
@@ -191,7 +206,7 @@ export class InitialPeriodsComponent {
 
         const payrollPeriod = {
           company_id: companyId,
-          period_type_id: periodTypeId, // Usar el period_type_id recibido en la respuesta
+          period_type_id: periodTypeId,
           period_number: i + 1,
           fiscal_year: fiscalYear,
           month: month,
@@ -210,26 +225,33 @@ export class InitialPeriodsComponent {
           timestamp: new Date().toISOString().split('T')[0],
           imss_bimonthly_start: 0,
           imss_bimonthly_end: 0,
-          payment_date: null // Establece la fecha de pago si es necesario
+          payment_date: null
         };
 
         try {
-          // Esperar a que se complete la solicitud HTTP antes de proceder
           await this.http.post('https://siinad.mx/php/create-payroll-period.php', payrollPeriod).toPromise();
           console.log(`Periodo de nómina ${i + 1} creado correctamente para ${periodType}`);
         } catch (error) {
           console.error(`Error al crear el periodo de nómina ${i + 1} para ${periodType}`, error);
-          break; // Si hay un error, detener el proceso para este tipo de periodo
+          break;
         }
 
-        // Actualiza la fecha de inicio para el siguiente periodo
         currentStartDate = new Date(periodEndDate);
         currentStartDate.setDate(currentStartDate.getDate() + 1);
       }
     }
   }
 
-  
+
+  resetForm() {
+    this.periodoSemanal = false;
+    this.periodoQuincenal = false;
+    this.periodoMensual = false;
+    this.fechaSemanal = null;
+    this.fechaQuincenal = null;
+    this.fechaMensual = null;
+  }
+
 }
 
 interface Periodo {

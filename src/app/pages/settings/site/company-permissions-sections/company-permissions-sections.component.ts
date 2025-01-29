@@ -2,6 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { AuthService } from '../../../../services/auth.service';
 import { NbToastrService } from '@nebular/theme';
+import { LoadingController } from '@ionic/angular';
 
 @Component({
   selector: 'ngx-company-permissions-sections',
@@ -29,46 +30,63 @@ export class CompanyPermissionsSectionsComponent implements OnInit {
   constructor(
     private http: HttpClient,
     public authService: AuthService,
-    private toastrService: NbToastrService, // Inyectamos NbToastrService
+    private toastrService: NbToastrService,
+    private loadingController: LoadingController // Inyectamos LoadingController
   ) {}
 
   ngOnInit() {
     this.loadCompanies();
   }
 
-  loadCompanies() {
+  // Método para presentar el loading
+  async presentLoading(message: string = 'Cargando...') {
+    const loading = await this.loadingController.create({
+      message: message
+    });
+    await loading.present();
+    return loading; // Retornamos la instancia para poder cerrarla luego
+  }
+
+  async loadCompanies() {
+    // Mostramos el loader
+    const loading = await this.presentLoading('Cargando empresas...');
+
     this.http.get('https://siinad.mx/php/get-companies.php').subscribe(
       (response: any) => {
+        loading.dismiss(); // Cerramos el loader al recibir respuesta
         if (response) {
           this.companies = response;
         } else {
-          // Manejo de error
           console.error(response.error);
           this.mostrarToast(response.error, 'danger');
         }
       },
       (error) => {
+        loading.dismiss(); // Cerramos el loader si hay error
         console.error('Error en la solicitud GET:', error);
         this.mostrarToast('Error al cargar empresas.', 'danger');
       }
     );
   }
-  
+
   onCompanyChange(newValue: string) {
     this.selectedCompanyId = newValue;
     this.loadPermissions();
   }
 
   onSectionChange(event: any) {
-    // event puede ser un array seleccionado en un nb-select
+    // event puede ser un array de secciones seleccionadas en nb-select
     this.selectedSections = event;
   }
 
-  loadPermissions() {
+  async loadPermissions() {
     const data = { companyId: this.selectedCompanyId };
+    // Mostramos el loader
+    const loading = await this.presentLoading('Cargando permisos...');
 
     this.http.post('https://siinad.mx/php/loadCompanyPermissions.php', data).subscribe(
       (response: any) => {
+        loading.dismiss();
         if (response.success) {
           this.permissions = response.permissions;
         } else {
@@ -77,20 +95,24 @@ export class CompanyPermissionsSectionsComponent implements OnInit {
         }
       },
       (error) => {
+        loading.dismiss();
         console.error('Error en la solicitud POST:', error);
         this.mostrarToast('Error al cargar permisos.', 'danger');
       }
     );
   }
 
-  addPermission() {
+  async addPermission() {
     const data = {
       companyId: this.selectedCompanyId,
       sections: this.selectedSections,
     };
 
+    const loading = await this.presentLoading('Añadiendo permisos...');
+
     this.http.post('https://siinad.mx/php/addCompanyPermission.php', data).subscribe(
       (response: any) => {
+        loading.dismiss();
         if (response.success) {
           // Agregar permisos en local al array permissions
           this.selectedSections.forEach(section => {
@@ -104,20 +126,24 @@ export class CompanyPermissionsSectionsComponent implements OnInit {
         }
       },
       (error) => {
+        loading.dismiss();
         console.error('Error en la solicitud POST:', error);
         this.mostrarToast('Error al añadir permiso.', 'danger');
       }
     );
   }
 
-  removePermission(NameSection: string) {
+  async removePermission(NameSection: string) {
     const data = {
       companyId: this.selectedCompanyId,
       section: NameSection,
     };
 
+    const loading = await this.presentLoading('Eliminando permiso...');
+
     this.http.post('https://siinad.mx/php/removeCompanyPermission.php', data).subscribe(
       (response: any) => {
+        loading.dismiss();
         if (response.success) {
           // Filtrar permisos localmente
           this.permissions = this.permissions.filter(p => p.NameSection !== NameSection);
@@ -128,6 +154,7 @@ export class CompanyPermissionsSectionsComponent implements OnInit {
         }
       },
       (error) => {
+        loading.dismiss();
         console.error('Error en la solicitud POST:', error);
         this.mostrarToast('Error al eliminar permiso.', 'danger');
       }
@@ -143,5 +170,4 @@ export class CompanyPermissionsSectionsComponent implements OnInit {
     }
   }
 
-  
 }
