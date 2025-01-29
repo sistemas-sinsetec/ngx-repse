@@ -19,7 +19,7 @@
                 <div class="image-container" (click)="triggerFileInput('photo-input')">
                     <!-- Utiliza una etiqueta img estilizada para mostrar la imagen del usuario -->
                     <img class="profile-picture"  [src]="avatar || 'assets/img/default-avatar.png'" (click)="fileInput.click()"
-                    alt="Imagen de perfil" class="avatar-image" width="150px">
+                    alt="Imagen de perfil" class="avatar-image" width="150px" style="border-radius: 50%;">
                     
                     <!-- Input para cambiar la imagen de perfil -->
                     <input type="file" id="photo-input" hidden (change)="changeProfilePicture($event)" #fileInput>

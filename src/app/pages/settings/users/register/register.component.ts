@@ -328,7 +328,7 @@ export class RegisterComponent implements OnInit {
     if (!this.usuario.correo) return 'El correo es obligatorio.';
     if (!this.validarCorreo(this.usuario.correo)) return 'El formato del correo no es válido.';
     if (!this.usuario.contrasena) return 'La contraseña es obligatoria.';
-    if (this.usuario.contrasena.length < 6) return 'La contraseña debe tener al menos 6 caracteres.';
+    if (this.usuario.contrasena.length < 8) return 'La contraseña debe tener al menos 8 caracteres.';
     if (!this.companyService.selectedCompany) return 'Debe seleccionar una empresa.';
     
     return null; // Todos los campos están completos y válidos

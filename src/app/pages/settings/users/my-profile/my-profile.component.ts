@@ -5,6 +5,7 @@ import { CompanyService } from '../../../../services/company.service';
 import { AuthService } from '../../../../services/auth.service';
 import { Router } from '@angular/router';
 import { LoadingController } from '@ionic/angular'; // Importar LoadingController
+import { ChangeDetectorRef } from '@angular/core';
 
 @Component({
   selector: 'ngx-my-profile',
@@ -23,6 +24,7 @@ export class MyProfileComponent implements OnInit, OnDestroy {
   generatedCode: string = ''; // Inicializa el código generado
   employeeName: string;
   employeeId: string;
+  
 
   constructor(
     private http: HttpClient,
@@ -30,7 +32,8 @@ export class MyProfileComponent implements OnInit, OnDestroy {
     private companyService: CompanyService,
     private authService: AuthService,
     private router: Router,
-    private loadingController: LoadingController // Inyectar LoadingController
+    private loadingController: LoadingController, // Inyectar LoadingController
+    private cdr: ChangeDetectorRef,
   ) {
     // Inicialización
     this.idUser = this.authService.userId; // Si tienes un servicio para obtener el userId
@@ -101,8 +104,9 @@ export class MyProfileComponent implements OnInit, OnDestroy {
     }
   }
 
+  
   async changeProfilePicture(event: Event) {
-    const loading = await this.showLoading('Actualizando avatar...'); // Mostrar loading
+    const loading = await this.showLoading('Actualizando avatar...');
     const input = event.target as HTMLInputElement;
     const file = input.files?.[0];
   
@@ -112,9 +116,9 @@ export class MyProfileComponent implements OnInit, OnDestroy {
     }
   
     // Validar tipo de archivo (solo imágenes)
-    const allowedTypes = ['image/jpeg', 'image/png', 'image/jpg'];
+    const allowedTypes = ['image/jpeg', 'image/png', 'image/jpg', 'image/webp', 'image/tiff', 'bmp'];
     if (!allowedTypes.includes(file.type)) {
-      this.showAlert('Error', 'Solo se permiten archivos de imagen (JPG, PNG).');
+      this.showAlert('Error', 'Solo se permiten archivos de imagen (JPG, PNG, WEBP, TIFF y BMP).');
       loading.dismiss();
       return;
     }
@@ -129,26 +133,34 @@ export class MyProfileComponent implements OnInit, OnDestroy {
       this.http.post(url, formData).subscribe(
         (response: any) => {
           if (response.success) {
-            this.avatar = response.filePath;
             this.showAlert('Éxito', 'Avatar actualizado exitosamente.');
+            loading.dismiss();
+  
+            // RECARGAR LA PÁGINA AUTOMÁTICAMENTE
+            setTimeout(() => {
+              window.location.reload();
+            }, 1000); // Se da un pequeño retraso para que el usuario vea la notificación
+            
           } else {
             this.showAlert('Error', response.error);
+            loading.dismiss();
           }
-          loading.dismiss(); // Ocultar loading
         },
         (error) => {
           this.showAlert('Error', 'Error al actualizar el avatar.');
-          loading.dismiss(); // Ocultar loading
+          loading.dismiss();
         }
       );
-    }).catch((error) => {
+    }).catch(() => {
       this.showAlert('Error', 'No se pudo procesar la imagen.');
       loading.dismiss();
     });
   }
+
   
+
   /**
-   * Redimensiona una imagen a un ancho específico y la convierte a WebP
+   * Redimensiona una imagen y la convierte a WebP
    */
   resizeAndConvertToWebP(file: File, maxWidth: number): Promise<File> {
     return new Promise((resolve, reject) => {
@@ -157,18 +169,18 @@ export class MyProfileComponent implements OnInit, OnDestroy {
       reader.onload = (event) => {
         const img = new Image();
         img.src = event.target?.result as string;
-  
+
         img.onload = () => {
           const canvas = document.createElement('canvas');
           const ctx = canvas.getContext('2d');
-  
+
           // Calcular la nueva altura manteniendo la proporción
           const scaleFactor = maxWidth / img.width;
           canvas.width = maxWidth;
           canvas.height = img.height * scaleFactor;
-  
+
           ctx?.drawImage(img, 0, 0, canvas.width, canvas.height);
-  
+
           // Convertir a WebP con calidad 80%
           canvas.toBlob((blob) => {
             if (blob) {
@@ -180,10 +192,11 @@ export class MyProfileComponent implements OnInit, OnDestroy {
           }, 'image/webp', 0.8);
         };
       };
-  
+
       reader.onerror = (error) => reject(error);
     });
   }
+  
   
   
 
