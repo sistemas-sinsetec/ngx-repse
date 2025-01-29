@@ -99,6 +99,13 @@ export class HeaderComponent implements OnInit, OnDestroy {
     // Cargar info del usuario
     this.loadUserInfo();
   
+    // Suscribirse a cambios en el avatar
+    this.authService.onAvatarChange()
+      .pipe(takeUntil(this.destroy$))
+      .subscribe(newAvatarUrl => {
+        this.user.picture = newAvatarUrl; // Actualizar el avatar en el componente
+      });
+  
     // Manejo del menú
     this.menuService.onItemClick()
       .pipe(takeUntil(this.destroy$))
@@ -137,6 +144,7 @@ export class HeaderComponent implements OnInit, OnDestroy {
       )
       .subscribe(themeName => this.currentTheme = themeName);
   }
+  
   
   /**
    * Cargar los valores iniciales de la empresa y el período desde los servicios.
@@ -184,16 +192,24 @@ export class HeaderComponent implements OnInit, OnDestroy {
   }
 
   loadUserInfo() {
+    // Obtener el nombre de usuario
     this.user.name = this.authService.username || 'Invitado';
-    this.authService.loadCurrentAvatar(this.authService.userId)
-      .then(avatarUrl => {
-        this.user.picture = avatarUrl;
-      })
-      .catch(() => {
-        this.user.picture = 'assets/images/avatar.png';
-      });
+  
+    // Obtener el avatar desde el AuthService
+    const avatarUrl = this.authService.avatar || 'assets/images/avatar.png';
+    this.user.picture = avatarUrl;
+  
+    // Si el avatar no está en el AuthService, intentar cargarlo desde el backend
+    if (!this.authService.avatar) {
+      this.authService.loadCurrentAvatar(this.authService.userId)
+        .then(avatarUrl => {
+          this.user.picture = avatarUrl;
+        })
+        .catch(() => {
+          this.user.picture = 'assets/images/avatar.png';
+        });
+    }
   }
-
   logout() {
     this.authService.logout();
     window.location.href = '/auth/login';

@@ -82,6 +82,7 @@ export class MyProfileComponent implements OnInit, OnDestroy {
       (response: any) => {
         if (response.avatarUrl) {
           this.avatar = response.avatarUrl;
+          this.cdr.detectChanges();
         } else {
           this.showAlert('Error', response.error);
         }
@@ -115,48 +116,46 @@ export class MyProfileComponent implements OnInit, OnDestroy {
       return;
     }
   
-    // Validar tipo de archivo (solo imágenes)
-    const allowedTypes = ['image/jpeg', 'image/png', 'image/jpg', 'image/webp', 'image/tiff', 'bmp'];
+    // Validar tipo de archivo
+    const allowedTypes = ['image/jpeg', 'image/png', 'image/jpg', 'image/webp', 'image/tiff', 'image/bmp'];
     if (!allowedTypes.includes(file.type)) {
-      this.showAlert('Error', 'Solo se permiten archivos de imagen (JPG, PNG, WEBP, TIFF y BMP).');
+      this.showAlert('Error', 'Solo se permiten archivos de imagen.');
       loading.dismiss();
       return;
     }
   
-    // Redimensionar y convertir a WebP antes de enviarlo
-    this.resizeAndConvertToWebP(file, 300).then((webpFile) => {
-      const formData = new FormData();
-      formData.append('avatar', webpFile);
-      formData.append('userId', this.idUser);
+    // Redimensionar y convertir a WebP
+    this.resizeAndConvertToWebP(file, 300)
+      .then((webpFile) => {
+        const formData = new FormData();
+        formData.append('avatar', webpFile);
+        formData.append('userId', this.idUser);
   
-      const url = `https://www.siinad.mx/php/upload_avatar.php`;
-      this.http.post(url, formData).subscribe(
-        (response: any) => {
-          if (response.success) {
-            this.showAlert('Éxito', 'Avatar actualizado exitosamente.');
+        const url = `https://www.siinad.mx/php/upload_avatar.php`;
+        this.http.post(url, formData).subscribe(
+          (response: any) => {
+            if (response.success) {
+              this.authService.updateAvatar(response.avatarUrl);
+              this.avatar = response.avatarUrl; // Actualizar la variable local
+              this.cdr.detectChanges();  // Forzar actualización en la UI
+              this.showAlert('Éxito', 'Avatar actualizado exitosamente.');
+            } else {
+              this.showAlert('Error', response.error);
+            }
             loading.dismiss();
-  
-            // RECARGAR LA PÁGINA AUTOMÁTICAMENTE
-            setTimeout(() => {
-              window.location.reload();
-            }, 1000); // Se da un pequeño retraso para que el usuario vea la notificación
-            
-          } else {
-            this.showAlert('Error', response.error);
+          },
+          (error) => {
+            this.showAlert('Error', 'Error al actualizar el avatar.');
             loading.dismiss();
           }
-        },
-        (error) => {
-          this.showAlert('Error', 'Error al actualizar el avatar.');
-          loading.dismiss();
-        }
-      );
-    }).catch(() => {
-      this.showAlert('Error', 'No se pudo procesar la imagen.');
-      loading.dismiss();
-    });
+        );
+      })
+      .catch(() => {
+        this.showAlert('Error', 'No se pudo procesar la imagen.');
+        loading.dismiss();
+      });
   }
-
+  
   
 
   /**

@@ -1,5 +1,6 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
+import { Subject } from 'rxjs';
 
 @Injectable({
   providedIn: 'root'
@@ -11,6 +12,9 @@ export class AuthService {
   userId: string = '';
   avatar: string = '';
 
+  // Subject para emitir cambios en el avatar
+  private avatarChange$ = new Subject<string>();
+
   constructor(private http: HttpClient) {
     // Verificar el estado de la sesión al cargar la aplicación
     this.isLoggedIn = this.checkAuthStatus();
@@ -18,6 +22,7 @@ export class AuthService {
     if (this.isLoggedIn) {
       this.username = localStorage.getItem('username') || '';
       this.userId = localStorage.getItem('userId') || '';
+      this.avatar = localStorage.getItem('avatar') || 'assets/images/avatar.png'; // Cargar avatar desde localStorage
     }
   }
 
@@ -34,6 +39,10 @@ export class AuthService {
     localStorage.setItem('isLoggedIn', 'true');
     localStorage.setItem('username', username);
     localStorage.setItem('userId', userId);
+    localStorage.setItem('avatar', avatar); // Guardar avatar en localStorage
+
+    // Emitir el cambio en el avatar
+    this.avatarChange$.next(avatar);
 
     // Marcar que el usuario ya ha iniciado sesión y no es la primera vez
     this.setFirstTimeComplete();
@@ -95,5 +104,32 @@ export class AuthService {
         console.error('Error al obtener el avatar:', error);
         return 'assets/images/avatar.png'; // Imagen predeterminada en caso de error
       });
+  }
+
+  /**
+   * Actualiza el avatar del usuario en memoria y en localStorage
+   */
+  updateAvatar(newAvatarUrl: string): void {
+    if (this.isLoggedIn) {
+      // Actualizar el avatar en memoria
+      this.avatar = newAvatarUrl;
+
+      // Guardar el nuevo avatar en localStorage
+      localStorage.setItem('avatar', newAvatarUrl);
+
+      // Emitir el cambio en el avatar
+      this.avatarChange$.next(newAvatarUrl);
+
+      console.log('Avatar actualizado en el servicio y en localStorage:', newAvatarUrl);
+    } else {
+      console.warn('No se puede actualizar el avatar: el usuario no ha iniciado sesión.');
+    }
+  }
+
+  /**
+   * Observable para escuchar cambios en el avatar
+   */
+  onAvatarChange(): Subject<string> {
+    return this.avatarChange$;
   }
 }

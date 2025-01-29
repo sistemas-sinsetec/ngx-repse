@@ -4,7 +4,7 @@
     width: 150px;
     display: block;
     object-fit: cover;
-    border-radius: 50%; /* Opcional: hace la imagen circular */
+    border-radius: 50% !important; /* Opcional: hace la imagen circular */
     transition-duration: 0.5s;
 }
 .profile-picture:hover{
