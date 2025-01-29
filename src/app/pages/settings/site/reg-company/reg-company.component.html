@@ -1,70 +1,81 @@
 <div class="row">
-    <div class="col-lg-12">
-      <nb-card>
-        <nb-card-header class="text-center">
-          Registrar cuenta de administrador para empresas
-          <p>Ingrese sus datos para continuar</p>
-        </nb-card-header>
-        <nb-card-body>
-          <!-- Tipo de RFC -->
-          <div class="mb-4">
-            <nb-select fullWidth [(ngModel)]="tipoRFC" placeholder="Tipo de RFC" (selectedChange)="onChangeTipoRFC()">
-              <nb-option value="fisica">Persona Física</nb-option>
-              <nb-option value="moral">Persona Moral</nb-option>
-            </nb-select>
+  <div class="col-lg-12">
+    <nb-card>
+      <nb-card-header class="text-center">
+        Registrar cuenta de administrador para empresas
+        <p>Ingrese sus datos para continuar</p>
+      </nb-card-header>
+      <nb-card-body>
+        <!-- Tipo de RFC -->
+        <div class="mb-4">
+          <label for="tipoRFC">Tipo de RFC</label>
+          <nb-select id="tipoRFC" fullWidth [(ngModel)]="tipoRFC" placeholder="Tipo de RFC" (selectedChange)="onChangeTipoRFC()">
+            <nb-option value="fisica">Persona Física</nb-option>
+            <nb-option value="moral">Persona Moral</nb-option>
+          </nb-select>
+        </div>
+
+        <!-- RFC y Nombre -->
+        <div class="row mb-4">
+          <div class="col-lg-6">
+            <label for="rfc">RFC</label>
+            <input id="rfc" [attr.maxlength]="tipoRFC === 'fisica' ? 13 : 12" [attr.minlength]="tipoRFC === 'fisica' ? 13 : 12"  type="text" nbInput fullWidth placeholder="RFC" [(ngModel)]="usuario.rfc" (input)="validateRFC($event)" />
           </div>
-  
-          <!-- RFC y Nombre -->
-          <div class="row mb-4">
-            <div class="col-lg-6">
-              <input type="text" nbInput fullWidth placeholder="RFC" [(ngModel)]="usuario.rfc" (input)="validateRFC($event)" />
-            </div>
-            <div class="col-lg-6">
-              <button nbButton status="secondary" fullWidth (click)="buscarEmpresaPorRFC()">Buscar</button>
-            </div>
+          <div class="col-lg-6">
+            <button nbButton status="secondary" fullWidth (click)="buscarEmpresaPorRFC()">Buscar</button>
           </div>
-          <div *ngIf="rfcLengthError" class="error-message text-danger">{{ rfcLengthError }}</div>
-  
-          <input type="text" nbInput fullWidth 
-            placeholder="{{ tipoRFC === 'fisica' ? 'Nombre de la persona física' : 'Nombre de la empresa' }}" 
-            [(ngModel)]="usuario.nombreEmpresa" (ngModelChange)="showMessage()" />
-  
-          <div *ngIf="showMessageFlag" class="text-info small">Como aparece en la constancia fiscal</div>
-  
-          <!-- Usuario y Nombre Completo -->
-          <input type="text" nbInput fullWidth placeholder="Alias de Usuario" [(ngModel)]="usuario.nombreUsuario" class="mb-4" />
-          <input type="text" nbInput fullWidth placeholder="Nombre completo del usuario" [(ngModel)]="usuario.nombreCompleto" class="mb-4" />
-  
-          <!-- Correo y Teléfono -->
-          <input type="email" nbInput fullWidth placeholder="Correo Electrónico" [(ngModel)]="usuario.correo" class="mb-4" />
-          <div *ngIf="usuario.correo && (!usuario.correo.includes('@') || !isValidEmail(usuario.correo))" class="text-danger small">
-            El correo electrónico debe contener un dominio válido.
+        </div>
+        <div *ngIf="rfcLengthError" class="error-message text-danger">{{ rfcLengthError }}</div>
+
+        <label for="nombreEmpresa">{{ tipoRFC === 'fisica' ? 'Nombre de la persona física' : 'Nombre de la empresa' }}</label>
+        <input id="nombreEmpresa" type="text" nbInput fullWidth class="mb-4" [(ngModel)]="usuario.nombreEmpresa" (ngModelChange)="showMessage()" />
+        
+        <div *ngIf="showMessageFlag" class="text-info small">Como aparece en la constancia fiscal</div>
+
+        <!-- Usuario y Nombre Completo -->
+        <label for="nombreUsuario">Alias de Usuario</label>
+        <input id="nombreUsuario" type="text" nbInput fullWidth placeholder="Alias de Usuario" [(ngModel)]="usuario.nombreUsuario" class="mb-4" />
+
+        <label for="nombreCompleto">Nombre completo del usuario</label>
+        <input id="nombreCompleto" type="text" nbInput fullWidth placeholder="Nombre completo del usuario" [(ngModel)]="usuario.nombreCompleto" class="mb-4" />
+
+        <!-- Correo y Teléfono -->
+        <label for="correo">Correo Electrónico</label>
+        <input id="correo" type="email" nbInput fullWidth placeholder="Correo Electrónico" [(ngModel)]="usuario.correo" class="mb-4" />
+        <div *ngIf="usuario.correo && (!usuario.correo.includes('@') || !isValidEmail(usuario.correo))" class="text-danger small">
+          El correo electrónico debe contener un dominio válido.
+        </div>
+
+        <label for="numTelefonico">Número de Teléfono</label>
+        <input id="numTelefonico" type="text" nbInput fullWidth placeholder="Número de Teléfono" [(ngModel)]="usuario.numTelefonico" maxlength="10" class="mb-4" />
+
+        <!-- Contraseñas -->
+        <div class="mb-4">
+          <label for="contrasena">Contraseña</label>
+          <input id="contrasena" type="password" nbInput fullWidth placeholder="Contraseña" [(ngModel)]="usuario.contrasena" />
+        </div>
+        <div class="mb-4">
+          <label for="confirmarContrasena">Confirmar Contraseña</label>
+          <input id="confirmarContrasena" type="password" nbInput fullWidth placeholder="Confirmar Contraseña" [(ngModel)]="usuario.confirmarContrasena" />
+        </div>
+
+        <!-- Fechas -->
+        <div class="row">
+          <div class="col-lg-6 mb-4">
+            <label for="fechaInicio">Fecha de inicio del periodo</label>
+            <input id="fechaInicio" type="date" nbInput fullWidth placeholder="Fecha de inicio del periodo" [(ngModel)]="usuario.fechaInicio" />
           </div>
-          <input type="text" nbInput fullWidth placeholder="Número de Teléfono" [(ngModel)]="usuario.numTelefonico" maxlength="10" class="mb-4" />
-  
-          <!-- Contraseñas -->
-          <div class="mb-4">
-            <input type="password" nbInput fullWidth placeholder="Contraseña" [(ngModel)]="usuario.contrasena" />
+          <div class="col-lg-6 mb-4">
+            <label for="fechaFin">Fecha de fin del periodo</label>
+            <input id="fechaFin" type="date" nbInput fullWidth placeholder="Fecha de fin del periodo" [(ngModel)]="usuario.fechaFin" />
           </div>
-          <div class="mb-4">
-            <input type="password" nbInput fullWidth placeholder="Confirmar Contraseña" [(ngModel)]="usuario.confirmarContrasena" />
-          </div>
-  
-          <!-- Fechas -->
-          <div class="row">
-            <div class="col-lg-6 mb-4">
-              <input type="date" nbInput fullWidth placeholder="Fecha de inicio del periodo" [(ngModel)]="usuario.fechaInicio" />
-            </div>
-            <div class="col-lg-6 mb-4">
-              <input type="date" nbInput fullWidth placeholder="Fecha de fin del periodo" [(ngModel)]="usuario.fechaFin" />
-            </div>
-          </div>
-  
-          <!-- Botón de Registro -->
-          <div class="text-center">
-            <button nbButton status="primary" fullWidth [disabled]="!camposCompletos()" (click)="registrarUsuario()">Registrar</button>
-          </div>
-        </nb-card-body>
-      </nb-card>
-    </div>
+        </div>
+
+        <!-- Botón de Registro -->
+        <div class="text-center">
+          <button nbButton status="primary" fullWidth [disabled]="!camposCompletos()" (click)="registrarUsuario()">Registrar</button>
+        </div>
+      </nb-card-body>
+    </nb-card>
   </div>
+</div>

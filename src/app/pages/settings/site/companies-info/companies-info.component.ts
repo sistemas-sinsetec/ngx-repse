@@ -7,6 +7,7 @@ import { EditCompanyModalComponent } from '../edit-company-modal/edit-company-mo
 import { NbToastrService, NbDialogService } from '@nebular/theme';
 import { Subject, Subscription } from 'rxjs';
 import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
+import { CompanyService } from '../../../../services/company.service';
 
 @Component({
   selector: 'ngx-companies-info',
@@ -14,6 +15,7 @@ import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
   styleUrls: ['./companies-info.component.scss']
 })
 export class CompaniesInfoComponent implements OnInit, OnDestroy {
+  logoUrl: string = ''
   companies: any[] = [];
   filteredCompanies: any[] = [];
   searchTerm: string = '';
@@ -34,6 +36,7 @@ export class CompaniesInfoComponent implements OnInit, OnDestroy {
     private http: HttpClient,
     private toastrService: NbToastrService,
     private dialogService: NbDialogService,
+    private companyService: CompanyService,
   ) { }
 
   ngOnInit() {
@@ -45,6 +48,11 @@ export class CompaniesInfoComponent implements OnInit, OnDestroy {
       distinctUntilChanged()
     ).subscribe(() => {
       this.filterCompanies();
+    });
+
+    this.companyService.onCompanyChange().subscribe((data) => {
+      this.logoUrl = data.logoUrl;
+      console.log('Logo recibido:', this.logoUrl);
     });
   }
 

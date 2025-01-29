@@ -23,3 +23,18 @@
   .company-details nb-icon {
     color: #4a4a4a;
   }
+
+  .card-body {
+    display: flex;
+    flex-direction: column;
+    gap: 10px; /* Espacio uniforme entre líneas */
+  }
+  .card-header {
+    font-size: 1.25rem;
+    padding: 10px;
+    text-align: center;
+  }
+  .card-footer button {
+    width: 100%;
+  }
+  
