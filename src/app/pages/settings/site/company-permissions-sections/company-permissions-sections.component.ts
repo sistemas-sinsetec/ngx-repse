@@ -3,7 +3,8 @@ import { HttpClient } from '@angular/common/http';
 import { AuthService } from '../../../../services/auth.service';
 import { NbToastrService } from '@nebular/theme';
 import { LoadingController } from '@ionic/angular';
-
+import { NbDialogService } from '@nebular/theme';
+import { DeleteModalComponent } from '../delete-modal/delete-modal.component';
 @Component({
   selector: 'ngx-company-permissions-sections',
   templateUrl: './company-permissions-sections.component.html',
@@ -31,7 +32,8 @@ export class CompanyPermissionsSectionsComponent implements OnInit {
     private http: HttpClient,
     public authService: AuthService,
     private toastrService: NbToastrService,
-    private loadingController: LoadingController // Inyectamos LoadingController
+    private loadingController: LoadingController, // Inyectamos LoadingController
+    private dialogService: NbDialogService,
   ) {}
 
   ngOnInit() {
@@ -134,31 +136,40 @@ export class CompanyPermissionsSectionsComponent implements OnInit {
   }
 
   async removePermission(NameSection: string) {
-    const data = {
-      companyId: this.selectedCompanyId,
-      section: NameSection,
-    };
-
-    const loading = await this.presentLoading('Eliminando permiso...');
-
-    this.http.post('https://siinad.mx/php/removeCompanyPermission.php', data).subscribe(
-      (response: any) => {
-        loading.dismiss();
-        if (response.success) {
-          // Filtrar permisos localmente
-          this.permissions = this.permissions.filter(p => p.NameSection !== NameSection);
-          this.mostrarToast('Permiso eliminado correctamente.', 'success');
-        } else {
-          console.error(response.error);
-          this.mostrarToast(response.error, 'danger');
-        }
-      },
-      (error) => {
-        loading.dismiss();
-        console.error('Error en la solicitud POST:', error);
-        this.mostrarToast('Error al eliminar permiso.', 'danger');
+    this.dialogService.open(DeleteModalComponent, { 
+      context: {
+        title: 'Confirmación',
+        message: `¿Estás seguro de que deseas eliminar el permiso "${NameSection}"?`
       }
-    );
+    }).onClose.subscribe(async (confirmed: boolean) => {
+      if (confirmed) { // ✅ Solo eliminar si el usuario confirma
+        
+        // 🔹 Definir `data` dentro del bloque correcto
+        const data = {
+          companyId: this.selectedCompanyId,
+          section: NameSection,
+        };
+  
+        const loading = await this.presentLoading('Eliminando permiso...');
+  
+        this.http.post('https://siinad.mx/php/removeCompanyPermission.php', data).subscribe(
+          (response: any) => {
+            loading.dismiss();
+            if (response.success) {
+              this.permissions = this.permissions.filter(p => p.NameSection !== NameSection);
+              this.mostrarToast('Permiso eliminado correctamente.', 'success');
+            } else {
+              this.mostrarToast(response.error, 'danger');
+            }
+          },
+          (error) => {
+            loading.dismiss();
+            this.mostrarToast('Error al eliminar permiso.', 'danger');
+          }
+        );
+      }
+    });
+
   }
 
   // Reemplaza la lógica de IonToast por NbToastrService
