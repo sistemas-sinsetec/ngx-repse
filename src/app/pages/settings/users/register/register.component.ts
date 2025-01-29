@@ -322,53 +322,81 @@ export class RegisterComponent implements OnInit {
     );
   }
 
+  private async validarCampos(): Promise<string | null> {
+    if (!this.usuario.nombreUsuario) return 'El nombre de usuario es obligatorio.';
+    if (!this.usuario.nombreCompleto) return 'El nombre completo es obligatorio.';
+    if (!this.usuario.correo) return 'El correo es obligatorio.';
+    if (!this.validarCorreo(this.usuario.correo)) return 'El formato del correo no es válido.';
+    if (!this.usuario.contrasena) return 'La contraseña es obligatoria.';
+    if (this.usuario.contrasena.length < 6) return 'La contraseña debe tener al menos 6 caracteres.';
+    if (!this.companyService.selectedCompany) return 'Debe seleccionar una empresa.';
+    
+    return null; // Todos los campos están completos y válidos
+  }
+
+  private capitalizarNombreCompleto(nombre: string): string {
+    return nombre
+      .toLowerCase()
+      .split(' ')
+      .map(palabra => palabra.charAt(0).toUpperCase() + palabra.slice(1))
+      .join(' ');
+  }
+  
+  
+
+  private validarCorreo(correo: string): boolean {
+    const regex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return regex.test(correo);
+  }
   /**
    * Registrar un nuevo usuario.
    */
   async registrarUsuario() {
-    if (await this.camposCompletos()) {
-      // 1. Crear y mostrar el loading
-      const loading = await this.loadingController.create({
-        message: 'Registrando usuario...',
-      });
-      await loading.present();
-
-      const data = {
-        association_user_id: this.authService.userId,
-        nombreUsuario: this.usuario.nombreUsuario,
-        nombreCompleto: this.usuario.nombreCompleto,
-        correo: this.usuario.correo,
-        contrasena: this.usuario.contrasena,
-        nombreEmpresa: this.companyService.selectedCompany?.name,
-        rfcEmpresa: this.companyService.selectedCompany?.rfc,
-        levelUser: this.usuario.levelUser,
-      };
-
-      this.http.post('https://siinad.mx/php/registerAdminCompany.php', data).subscribe(
-        async (response: any) => {
-          loading.dismiss();
-          if (response.success) {
-            await this.showToast(response.message, 'success');
-            this.limpiarCampos();
-            this.getEmployees(); // Refrescar empleados
-          } else {
-            await this.showToast(response.message, 'danger');
-          }
-        },
-        async (error) => {
-          loading.dismiss();
-          console.error('Error en la solicitud POST:', error);
-          await this.showToast('Error en la solicitud de registro.', 'danger');
-        }
-      );
-    } else {
-      await this.showToast(
-        'Por favor complete todos los campos obligatorios y verifique el correo y la contraseña.',
-        'warning'
-      );
+    const mensajeValidacion = await this.validarCampos();
+    if (mensajeValidacion) {
+      await this.showToast(mensajeValidacion, 'warning');
+      return;
     }
+  
+    // Capitalizar nombre completo antes de enviarlo
+    this.usuario.nombreCompleto = this.capitalizarNombreCompleto(this.usuario.nombreCompleto);
+  
+    // 1. Crear y mostrar el loading
+    const loading = await this.loadingController.create({
+      message: 'Registrando usuario...',
+    });
+    await loading.present();
+  
+    const data = {
+      association_user_id: this.authService.userId,
+      nombreUsuario: this.usuario.nombreUsuario,
+      nombreCompleto: this.usuario.nombreCompleto,
+      correo: this.usuario.correo,
+      contrasena: this.usuario.contrasena,
+      nombreEmpresa: this.companyService.selectedCompany?.name,
+      rfcEmpresa: this.companyService.selectedCompany?.rfc,
+      levelUser: this.usuario.levelUser,
+    };
+  
+    this.http.post('https://siinad.mx/php/registerAdminCompany.php', data).subscribe(
+      async (response: any) => {
+        loading.dismiss();
+        if (response.success) {
+          await this.showToast(response.message, 'success');
+          this.limpiarCampos();
+          this.getEmployees(); // Refrescar empleados
+        } else {
+          await this.showToast(response.message, 'danger');
+        }
+      },
+      async (error) => {
+        loading.dismiss();
+        console.error('Error en la solicitud POST:', error);
+        await this.showToast('Error en la solicitud de registro.', 'danger');
+      }
+    );
   }
-
+  
   /**
    * Limpiar campos del formulario de registro.
    */

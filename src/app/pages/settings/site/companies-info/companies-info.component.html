@@ -1,7 +1,6 @@
 <div class="container mt-5">
     <!-- Encabezado Corporativo -->
-    <div class="d-flex align-items-center mb-4">
-      <img src="assets/logo.png" alt="Logo de la Empresa" class="logo mr-3" width="60">
+    <div class="d-flex align-items-center mb-4 justify-content-center">
       <h2 class="font-weight-bold">Gestión de Empresas Registradas</h2>
     </div>
   
@@ -34,24 +33,39 @@
       <!-- Cuerpo del Card: Lista de Empresas -->
       <nb-card-body>
         <div class="row">
-          <div class="col-lg-4 col-md-4 mb-4" *ngFor="let company of filteredCompanies">
+          <div class="min-vw-40 mb-4 col-lg-6" *ngFor="let company of filteredCompanies">
             <nb-card class="company-card h-100 shadow-sm">
-              <nb-card-header class="bg-primary text-white">
+              <nb-card-header class="bg-primary text-white text-center">
                 <strong>{{ company.nameCompany }}</strong>
               </nb-card-header>
-              <nb-card-body>
-                <div class="company-details">
-                  
-                  <p><nb-icon icon="hash" pack="eva" class="mr-2"></nb-icon><strong>RFC:</strong> {{ company.companyRFC }}</p>
-                  <p><nb-icon icon="file-text" pack="eva" class="mr-2"></nb-icon><strong>Nombre Legal:</strong> {{ company.name }}</p>
-                  <p><nb-icon icon="person" pack="eva" class="mr-2"></nb-icon><strong>Usuario Propietario:</strong> {{ company.username }}</p>
-                  <p><nb-icon icon="email" pack="eva" class="mr-2"></nb-icon><strong>Correo Electrónico:</strong> {{ company.email }}</p>
-                  <p><nb-icon icon="phone" pack="eva" class="mr-2"></nb-icon><strong>Número de Teléfono:</strong> {{ company.phone }}</p>
-                  <p><nb-icon icon="settings" pack="eva" class="mr-2"></nb-icon><strong>Tipo de Usuario:</strong> {{ company.levelUserName }}</p>
-                  <p><nb-icon icon="calendar" pack="eva" class="mr-2"></nb-icon><strong>Inicio:</strong> {{ company.fecha_inicio | date:'shortDate' }}</p>
-                  <p><nb-icon icon="calendar" pack="eva" class="mr-2"></nb-icon><strong>Fin:</strong> {{ company.fecha_fin | date:'shortDate' }}</p>
-                  <p><nb-icon [icon]="company.isPremium ? 'star' : 'star-outline'" pack="eva" class="mr-2"></nb-icon><strong>Premium:</strong> {{ company.isPremium ? 'Sí' : 'No' }}</p>
-                </div>
+              <nb-card-body class="company-details">
+                
+                  <nb-list>
+                  <nb-list-item>
+                  <p><strong>RFC: </strong> {{ company.companyRFC }}</p>
+                  </nb-list-item>
+                  <nb-list-item>
+                  <p><strong>Nombre Legal: </strong> {{ company.name }}</p>
+                  </nb-list-item>
+                  <nb-list-item>
+                  <p><strong>Usuario: </strong> {{ company.username }}</p>
+                  </nb-list-item>
+                  <nb-list-item>
+                  <p><strong>Correo: </strong> {{ company.email }}</p>
+                  </nb-list-item>
+                  <nb-list-item>
+                  <p><strong>Teléfono: </strong> {{ company.phone }}</p>
+                  </nb-list-item>
+                  <nb-list-item>
+                  <p><strong>Tipo de Usuario: </strong> {{ company.levelUserName }}</p>
+                  </nb-list-item>
+                  <nb-list-item>
+                  <p><strong>Inicio: </strong> {{ company.fecha_inicio | date:'shortDate' }}</p>
+                  </nb-list-item>
+                  <nb-list-item>
+                  <p><strong>Fin: </strong> {{ company.fecha_fin | date:'shortDate' }}</p>
+                  </nb-list-item>
+                </nb-list>
               </nb-card-body>
               <nb-card-footer class="text-center">
                 <button nbButton size="medium" status="success" (click)="editarEmpresa(company)">

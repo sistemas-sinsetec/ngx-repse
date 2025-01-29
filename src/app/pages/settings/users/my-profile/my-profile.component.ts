@@ -66,6 +66,12 @@ export class MyProfileComponent implements OnInit, OnDestroy {
     );
   }
 
+  validarCorreo(correo: string): boolean {
+    // Expresión regular mejorada para validar correos
+    const regex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+    return regex.test(correo);
+  }
+  
   async getUserAvatar() {
     const loading = await this.showLoading('Cargando avatar...'); // Mostrar loading
     const url = `https://www.siinad.mx/php/getUserAvatar.php?userId=${this.idUser}`;
@@ -99,11 +105,26 @@ export class MyProfileComponent implements OnInit, OnDestroy {
     const loading = await this.showLoading('Actualizando avatar...'); // Mostrar loading
     const input = event.target as HTMLInputElement;
     const file = input.files?.[0];
-    if (file) {
+  
+    if (!file) {
+      loading.dismiss();
+      return;
+    }
+  
+    // Validar tipo de archivo (solo imágenes)
+    const allowedTypes = ['image/jpeg', 'image/png', 'image/jpg'];
+    if (!allowedTypes.includes(file.type)) {
+      this.showAlert('Error', 'Solo se permiten archivos de imagen (JPG, PNG).');
+      loading.dismiss();
+      return;
+    }
+  
+    // Redimensionar y convertir a WebP antes de enviarlo
+    this.resizeAndConvertToWebP(file, 300).then((webpFile) => {
       const formData = new FormData();
-      formData.append('avatar', file);
+      formData.append('avatar', webpFile);
       formData.append('userId', this.idUser);
-
+  
       const url = `https://www.siinad.mx/php/upload_avatar.php`;
       this.http.post(url, formData).subscribe(
         (response: any) => {
@@ -120,10 +141,51 @@ export class MyProfileComponent implements OnInit, OnDestroy {
           loading.dismiss(); // Ocultar loading
         }
       );
-    } else {
-      loading.dismiss(); // Ocultar loading si no hay archivo
-    }
+    }).catch((error) => {
+      this.showAlert('Error', 'No se pudo procesar la imagen.');
+      loading.dismiss();
+    });
   }
+  
+  /**
+   * Redimensiona una imagen a un ancho específico y la convierte a WebP
+   */
+  resizeAndConvertToWebP(file: File, maxWidth: number): Promise<File> {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.readAsDataURL(file);
+      reader.onload = (event) => {
+        const img = new Image();
+        img.src = event.target?.result as string;
+  
+        img.onload = () => {
+          const canvas = document.createElement('canvas');
+          const ctx = canvas.getContext('2d');
+  
+          // Calcular la nueva altura manteniendo la proporción
+          const scaleFactor = maxWidth / img.width;
+          canvas.width = maxWidth;
+          canvas.height = img.height * scaleFactor;
+  
+          ctx?.drawImage(img, 0, 0, canvas.width, canvas.height);
+  
+          // Convertir a WebP con calidad 80%
+          canvas.toBlob((blob) => {
+            if (blob) {
+              const webpFile = new File([blob], file.name.replace(/\.\w+$/, '.webp'), { type: 'image/webp' });
+              resolve(webpFile);
+            } else {
+              reject(new Error('No se pudo convertir la imagen a WebP.'));
+            }
+          }, 'image/webp', 0.8);
+        };
+      };
+  
+      reader.onerror = (error) => reject(error);
+    });
+  }
+  
+  
 
   createUniqueCode(): string {
     const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
@@ -169,28 +231,38 @@ export class MyProfileComponent implements OnInit, OnDestroy {
       return;
     }
 
-    const loading = await this.showLoading('Guardando configuración...'); // Mostrar loading
+    if (this.userPassword == null || this.confirmPassword == null) {
+      this.showAlert('Error', 'Debes colocar la contraseña');
+      return;
+    }
+  
+    // Validar correo electrónico
+    if (!this.validarCorreo(this.userEmail)) {
+      this.showAlert('Error', 'Por favor ingresa un correo electrónico válido.');
+      return;
+    }
+  
+    const loading = await this.showLoading('Guardando configuración...');
     const data = {
       idUser: this.idUser,
       fullName: this.fullName,
       userName: this.userName,
       userEmail: this.userEmail,
-      userPassword: this.userPassword // Enviar solo si la contraseña ha sido cambiada
+      userPassword: this.userPassword // Solo si la contraseña ha sido cambiada
     };
-
+  
     const url = `https://www.siinad.mx/php/update_user.php`;
     this.http.post(url, data).subscribe(
       (response: any) => {
         this.showAlert(response.success ? 'Éxito' : 'Error', response.message);
-        loading.dismiss(); // Ocultar loading
+        loading.dismiss();
       },
       (error) => {
         this.showAlert('Error', 'Error al guardar la configuración.');
-        loading.dismiss(); // Ocultar loading
+        loading.dismiss();
       }
     );
   }
-
   async shareCode() {
     if (this.generatedCode) {
       if (navigator.clipboard && navigator.clipboard.writeText) {
