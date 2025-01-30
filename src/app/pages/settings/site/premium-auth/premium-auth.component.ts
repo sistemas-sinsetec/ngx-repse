@@ -6,6 +6,7 @@ import { CpAuthDeleteDialogComponent } from '../cp-auth-delete-dialog/cp-auth-de
 import { Router } from '@angular/router';
 import { NbDialogService, NbToastrService } from '@nebular/theme';
 import { CompanyService } from '../../../../services/company.service';
+
 @Component({
   selector: 'ngx-premium-auth',
   templateUrl: './premium-auth.component.html',
@@ -16,7 +17,6 @@ export class PremiumAuthComponent {
   empleados: any[] = [];
   selectedEmployee: any;
 
-
   constructor(
     private router: Router,
     private authService: AuthService,
@@ -26,8 +26,6 @@ export class PremiumAuthComponent {
     private companyService: CompanyService
   ) 
   { }
-
-
 
   ngOnInit() {
     this.obtenerEmpleadosNoConfirmados();
