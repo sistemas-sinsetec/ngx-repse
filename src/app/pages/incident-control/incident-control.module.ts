@@ -37,6 +37,7 @@ import { ProcessWeeklyListsComponent } from './process-weekly-lists/process-week
 import { IonicModule } from '@ionic/angular';
 import { ProcessedListDialogComponent } from './processed-list-dialog/processed-list-dialog.component';
 
+
 @NgModule({
   declarations: [
     IncidentControlComponent,
@@ -47,7 +48,7 @@ import { ProcessedListDialogComponent } from './processed-list-dialog/processed-
     IncidentModalComponent,
     ConfirmWeekComponent,
     ProcessWeeklyListsComponent,
-    ProcessedListDialogComponent
+    ProcessedListDialogComponent,
 
   ],
   imports: [

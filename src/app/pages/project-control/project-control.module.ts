@@ -7,6 +7,9 @@ import { ProjectControlComponent } from './project-control.component';
 import { AssignProjectsComponent } from './assign-projects/assign-projects.component';
 import { AssignmentSummaryComponent } from './assignment-summary/assignment-summary.component';
 import { FormsModule } from '@angular/forms';
+import { DeployProjectsComponent } from './deploy-projects/deploy-projects.component';
+import { Ng2SmartTableModule } from 'ng2-smart-table'; // Importa Ng2SmartTableModule
+
 import {
   NbButtonModule,
   NbCardModule,
@@ -35,7 +38,8 @@ import {
   declarations: [
     ProjectControlComponent,
     AssignProjectsComponent,
-    AssignmentSummaryComponent
+    AssignmentSummaryComponent,
+    DeployProjectsComponent
   ],
   imports: [
         NbCardModule,
@@ -62,6 +66,7 @@ import {
         FormsModule,
         RouterOutlet,
         CommonModule,
+        Ng2SmartTableModule, // Añade Ng2SmartTableModule aquí
         
   ]
 })

@@ -39,7 +39,7 @@ export const MENU_ITEMS: CustomMenuItem[] = [
       },
       {
         title: 'Visualización de proyectos',
-        link: '',
+        link: '/pages/project-control/deploy-projects',
         hidden: false,
         permission: { section: 'Control de proyectos', subSection: 'Vizualizar proyectos' },
       },

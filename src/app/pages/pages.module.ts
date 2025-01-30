@@ -27,6 +27,7 @@ import { ProcessedAttendanceComponent } from './incident-control/processed-atten
   declarations: [
     PagesComponent,
 
+
   ],
 })
 export class PagesModule {
