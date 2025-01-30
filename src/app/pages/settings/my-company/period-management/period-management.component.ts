@@ -3,6 +3,7 @@ import { HttpClient } from '@angular/common/http';
 import { AuthService } from '../../../../services/auth.service';
 import { CompanyService } from '../../../../services/company.service';
 import { LocalDataSource } from 'ng2-smart-table';
+import { LoadingController } from '@ionic/angular'; // Importar LoadingController
 
 interface Period {
   period_number: number;
@@ -77,7 +78,6 @@ export class PeriodManagementComponent implements OnInit {
       class: 'table table-bordered',
     },
   };
-  
 
   // Formulario
   form: any = {
@@ -95,21 +95,43 @@ export class PeriodManagementComponent implements OnInit {
     finEjercicio: false
   };
 
-  constructor(private http: HttpClient, private authService: AuthService, private companyService: CompanyService) { }
+  constructor(
+    private http: HttpClient,
+    private authService: AuthService,
+    private companyService: CompanyService,
+    private loadingController: LoadingController // Inyectar LoadingController
+  ) { }
 
   ngOnInit() {
     this.loadPeriodTypes();
   }
 
+  // Método para mostrar el loading
+  private async showLoading(message: string) {
+    const loading = await this.loadingController.create({
+      message: message,
+      spinner: 'crescent', // Puedes cambiar el tipo de spinner
+      translucent: true,
+    });
+    await loading.present();
+    return loading;
+  }
+
   // Cargar tipos de periodos
-  loadPeriodTypes() {
+  async loadPeriodTypes() {
+    const loading = await this.showLoading('Cargando tipos de periodos...'); // Mostrar loading
     const companyId = this.companyService.selectedCompany.id;
     this.http.post('https://siinad.mx/php/get-period-types.php', { companyId })
-      .subscribe((response: any) => {
-        this.periodTypes = response.periodTypes;
-      }, error => {
-        console.error('Error al cargar los tipos de periodos', error);
-      });
+      .subscribe(
+        (response: any) => {
+          this.periodTypes = response.periodTypes;
+          loading.dismiss(); // Ocultar loading
+        },
+        error => {
+          console.error('Error al cargar los tipos de periodos', error);
+          loading.dismiss(); // Ocultar loading en caso de error
+        }
+      );
   }
 
   // Seleccionar tipo de periodo
@@ -152,7 +174,8 @@ export class PeriodManagementComponent implements OnInit {
   }
 
   // Guardar los cambios en el periodo
-  guardarPeriodo() {
+  async guardarPeriodo() {
+    const loading = await this.showLoading('Guardando periodo...'); // Mostrar loading
     const updatedPeriod: Period = {
       period_number: this.form.numeroPeriodo,
       start_date: this.form.fechaInicio,
@@ -171,25 +194,36 @@ export class PeriodManagementComponent implements OnInit {
     };
 
     this.http.post('https://siinad.mx/php/update-period.php', updatedPeriod)
-      .subscribe(response => {
-        console.log('Periodo actualizado exitosamente', response);
-        this.loadPeriodTypes(); // Actualiza los tipos de periodos
-      }, error => {
-        console.error('Error al actualizar el periodo', error);
-      });
+      .subscribe(
+        response => {
+          console.log('Periodo actualizado exitosamente', response);
+          this.loadPeriodTypes(); // Actualiza los tipos de periodos
+          loading.dismiss(); // Ocultar loading
+        },
+        error => {
+          console.error('Error al actualizar el periodo', error);
+          loading.dismiss(); // Ocultar loading en caso de error
+        }
+      );
   }
 
   // Guardar todos los cambios
-  guardarTodosLosPeriodos() {
+  async guardarTodosLosPeriodos() {
+    const loading = await this.showLoading('Guardando todos los periodos...'); // Mostrar loading
     this.http.post('https://siinad.mx/php/save-all-periods.php', this.selectedYearPeriods)
-      .subscribe(response => {
-        console.log('Todos los periodos actualizados exitosamente', response);
-        this.loadPeriodTypes();
-      }, error => {
-        console.error('Error al guardar todos los periodos', error);
-      });
+      .subscribe(
+        response => {
+          console.log('Todos los periodos actualizados exitosamente', response);
+          this.loadPeriodTypes();
+          loading.dismiss(); // Ocultar loading
+        },
+        error => {
+          console.error('Error al guardar todos los periodos', error);
+          loading.dismiss(); // Ocultar loading en caso de error
+        }
+      );
   }
- 
+
   // Limpiar formulario
   limpiarFormulario() {
     this.form = {

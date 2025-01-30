@@ -86,7 +86,7 @@ export class AuthService {
   }
 
   /**
-   * Carga el avatar del usuario desde el backend
+   * Carga el avatar del usuario desde el backend y lo guarda en el servicio
    */
   loadCurrentAvatar(userId: string): Promise<string> {
     return this.http
@@ -94,6 +94,13 @@ export class AuthService {
       .toPromise()
       .then((response: any) => {
         if (response && response.avatarUrl) {
+          // Guardar el avatar en el servicio y en localStorage
+          this.avatar = response.avatarUrl;
+          localStorage.setItem('avatar', response.avatarUrl);
+
+          // Emitir el cambio en el avatar
+          this.avatarChange$.next(response.avatarUrl);
+
           return response.avatarUrl; // Devuelve la URL del avatar
         } else {
           console.error('Estructura de respuesta inválida o falta avatarUrl:', response);
