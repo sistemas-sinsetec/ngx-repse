@@ -6,6 +6,7 @@ import { CpAuthDeleteDialogComponent } from '../cp-auth-delete-dialog/cp-auth-de
 import { Router } from '@angular/router';
 import { NbDialogService, NbToastrService } from '@nebular/theme';
 import { CompanyService } from '../../../../services/company.service';
+
 @Component({
   selector: 'ngx-premium-auth',
   templateUrl: './premium-auth.component.html',
@@ -15,7 +16,6 @@ export class PremiumAuthComponent {
 
   empleados: any[] = [];
   selectedEmployee: any;
-
 
   constructor(
     private router: Router,
@@ -27,8 +27,6 @@ export class PremiumAuthComponent {
   ) 
   { }
 
-
-
   ngOnInit() {
     this.obtenerEmpleadosNoConfirmados();
   }
@@ -36,14 +34,22 @@ export class PremiumAuthComponent {
 
   obtenerEmpleadosNoConfirmados() {
     this.http.get<any[]>('https://siinad.mx/php/get_infoSocioComercial.php')
-      .subscribe((data: any[]) => {
-        this.empleados = data;
+      .subscribe((data: any) => {
+        // Verificamos si la respuesta es un array
+        if (Array.isArray(data)) {
+          this.empleados = data;
+        } else {
+          this.empleados = []; // Evitamos el error en el *ngFor
+          console.warn('La respuesta del backend no es un array:', data);
+          this.mostrarToast('No hay socios pendientes', 'danger');
+        }
       }, (error) => {
         console.error('Error al obtener empleados:', error);
         this.mostrarToast('Error al cargar empleados', 'danger');
+        this.empleados = []; // Evitamos el error si hay un fallo en la petición
       });
   }
-
+  
   getEmployeeDetails() {
     // Solo para depurar
     console.log('Detalles del empleado seleccionado:', this.selectedEmployee);
