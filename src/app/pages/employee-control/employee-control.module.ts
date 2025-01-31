@@ -41,6 +41,7 @@ import { EmployeeViewComponent } from './employee-view/employee-view.component';
 import { EmployeeDetailsComponent } from './employee-details/employee-details.component';
 import { EditEmployeeComponent } from './edit-employee/edit-employee.component';
 import { AddEmployeesComponent } from './add-employees/add-employees.component';
+import { VacationsKardexComponent } from './vacations-kardex/vacations-kardex.component';
 
 
 @NgModule({
@@ -50,7 +51,8 @@ import { AddEmployeesComponent } from './add-employees/add-employees.component';
     EmployeeViewComponent,
     EmployeeDetailsComponent,
     EditEmployeeComponent,
-    AddEmployeesComponent
+    AddEmployeesComponent,
+    VacationsKardexComponent
 
    
 
