@@ -16,7 +16,7 @@
               (click)="selectPeriod(period)" 
               [class.selected]="period === selectedPeriod"
               class="pointer">
-              {{ period.period_type_name }}
+              {{ period.period_type_name }} - {{ period.fiscal_year}}
             </nb-list-item>
             <nb-list-item (click)="createNewPeriod()" class="pointer">
               <nb-icon icon="plus-circle-outline" pack="eva"></nb-icon>
