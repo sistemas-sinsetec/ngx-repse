@@ -97,6 +97,12 @@ export const MENU_ITEMS: CustomMenuItem[] = [
         hidden: false,
         permission: { section: 'Empleados', subSection: 'Ver empleados registrados' },
       },
+      {
+        title: 'Kardex de vacaciones',
+        link: '/pages/employee-control/vacations-kardex',
+        hidden: false,
+        permission: { section: 'Empleados', subSection: 'Kardex de vacaciones' },
+      },
     ],
   },
 

@@ -31,7 +31,7 @@ import { ThemeModule } from '../../@theme/theme.module';
 
 import { CommonModule } from '@angular/common';
 import { employeeControlComponent } from './employee-control.component';
-import { FormsModule, ReactiveFormsModule } from '@angular/forms';
+import { FormsModule, ReactiveFormsModule, FormBuilder, FormGroup } from '@angular/forms';
 import { Ng2SmartTableModule } from 'ng2-smart-table';
 import { EmployeeControlRoutingModule } from './employee-control-routing.module';
 

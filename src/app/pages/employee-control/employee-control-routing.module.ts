@@ -4,6 +4,7 @@ import { employeeControlComponent } from './employee-control.component';
 import { RequestsEmployeesComponent } from './requests-employees/requests-employees.component';
 import { AddEmployeesComponent } from './add-employees/add-employees.component';
 import { EmployeeViewComponent } from './employee-view/employee-view.component';
+import { VacationsKardexComponent } from './vacations-kardex/vacations-kardex.component';
 
 const routes: Routes = [
   {
@@ -21,6 +22,10 @@ const routes: Routes = [
       {
         path: 'employee-view',
         component: EmployeeViewComponent
+      },
+      {
+        path: 'vacations-kardex',
+        component: VacationsKardexComponent
       }
     ],
   },
