@@ -101,6 +101,7 @@ export class PeriodManagementComponent implements OnInit {
     this.selectedPeriod = {
       period_type_id: selectedRow.period_type_id, // Asegúrate de que esta propiedad esté presente
       period_type_name: selectedRow.period_type_name, // Asignar el nombre del periodo
+      period_id: selectedRow.period_id,
       period_number: selectedRow.period_number,
       start_date: selectedRow.start_date,
       end_date: selectedRow.end_date,
@@ -190,17 +191,24 @@ export class PeriodManagementComponent implements OnInit {
       message: 'Guardando periodo...'
     });
     await loading.present();
-
-    const periodData = { ...this.selectedPeriod, company_id: this.companyService.selectedCompany.id };
-
-    if (this.selectedPeriod.period_type_id) {
-      // Actualizar un periodo existente
+  
+    const periodData = { 
+      ...this.selectedPeriod, 
+      company_id: this.companyService.selectedCompany.id 
+    };
+  
+    console.log('Datos enviados al backend:', periodData); // Verifica los datos
+  
+    if (this.selectedPeriod.period_id) {
       this.http.post('https://siinad.mx/php/update-period.php', periodData)
         .subscribe(response => {
           console.log('Periodo actualizado correctamente', response);
           loading.dismiss();
           this.toastrService.success('Periodo actualizado correctamente', 'Éxito');
-          this.loadPeriods(); // Recargar los periodos
+  
+          // Recargar los períodos y las semanas del período actualizado
+          this.loadPeriods(); // Recargar la lista de períodos
+          this.loadPayrollPeriods(this.selectedPeriod.period_type_id); // Recargar las semanas del período actualizado
         }, error => {
           console.error('Error al actualizar el periodo', error);
           loading.dismiss();
