@@ -48,9 +48,13 @@ export class VacationsKardexComponent {
   
     this.kardexService.getKardex(this.empleadoId).subscribe(
       (data) => {
-        console.log('Respuesta del backend:', data);
+        console.log('Respuesta del backend:', data); // Verificar datos
         this.vacaciones = Array.isArray(data?.Vacaciones) ? data.Vacaciones : [];
-  
+
+        // Verificar si la respuesta incluye vacaciones
+        console.log('Vacaciones recibidas:', this.vacaciones);
+
+        // Actualizar el valor de vacaciones antes de la alta
         const vacacionesAlta = this.vacaciones.find(v => v.Concepto === "Vacaciones tomadas antes de la alta") || null;
         this.vacacionesAlta = vacacionesAlta ? vacacionesAlta.Tomadas : 0;
       },
@@ -58,7 +62,8 @@ export class VacationsKardexComponent {
         this.toastrService.danger('Error al generar el reporte', 'Error');
       }
     );
-  }
+}
+
   
 
   actualizarVacacionesAlta(): void {
