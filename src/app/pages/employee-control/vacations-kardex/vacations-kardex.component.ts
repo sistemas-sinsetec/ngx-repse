@@ -2,17 +2,33 @@ import { Component, OnInit } from '@angular/core';
 import { KardexService } from '../../../services/kardex.service';
 import { CompanyService } from '../../../services/company.service';
 import { NbToastrService } from '@nebular/theme';
-import { NbButtonModule } from '@nebular/theme';
+
+interface Vacacion {
+  Concepto: string;
+  FechaRegistro?: string;
+  DiasVacaciones?: number;
+  Tomadas?: number;
+  Saldo?: number;
+  DetalleTomados?: DetalleTomado[];
+  expanded?: boolean; // Propiedad para controlar si la fila está expandida
+}
+
+interface DetalleTomado {
+  FechaInicio: string;
+  FechaFin: string;
+  DiasTomados: number;
+}
+
 @Component({
   selector: 'ngx-vacations-kardex',
   templateUrl: './vacations-kardex.component.html',
   styleUrls: ['./vacations-kardex.component.scss']
 })
-export class VacationsKardexComponent {
+export class VacationsKardexComponent implements OnInit {
   empleados: any[] = [];
   empleadoId: string = '';
   vacacionesAlta: number = 0;
-  vacaciones: any[] = [];
+  vacaciones: Vacacion[] = [];
 
   constructor(
     private kardexService: KardexService,
@@ -28,7 +44,6 @@ export class VacationsKardexComponent {
     const companyId = this.companyService.selectedCompany.id;
     this.kardexService.getEmpleados(companyId).subscribe(
       (data) => {
-        console.log('Empleados recibidos:', data); // Verifica qué datos llegan
         this.empleados = data.map((emp: any) => ({
           employee_id: emp.employee_id,
           full_name: emp.full_name || 'Empleado sin nombre',
@@ -45,13 +60,19 @@ export class VacationsKardexComponent {
       this.toastrService.warning('Selecciona un empleado', 'Atención');
       return;
     }
-  
+
     this.kardexService.getKardex(this.empleadoId).subscribe(
       (data) => {
         console.log('Respuesta del backend:', data);
-        this.vacaciones = Array.isArray(data?.Vacaciones) ? data.Vacaciones : [];
-  
-        const vacacionesAlta = this.vacaciones.find(v => v.Concepto === "Vacaciones tomadas antes de la alta") || null;
+
+        // Transformar los datos para la tabla
+        this.vacaciones = data.Vacaciones.map((vacacion: Vacacion) => ({
+          ...vacacion,
+          expanded: false, // Inicialmente, las filas no están expandidas
+        }));
+
+        // Actualizar vacaciones antes de la alta
+        const vacacionesAlta = data.Vacaciones.find((v: Vacacion) => v.Concepto === "Vacaciones tomadas antes de la alta");
         this.vacacionesAlta = vacacionesAlta ? vacacionesAlta.Tomadas : 0;
       },
       (error) => {
@@ -59,7 +80,10 @@ export class VacationsKardexComponent {
       }
     );
   }
-  
+
+  toggleDetalle(vacacion: Vacacion): void {
+    vacacion.expanded = !vacacion.expanded; // Alternar estado de expansión
+  }
 
   actualizarVacacionesAlta(): void {
     if (!this.empleadoId) {
@@ -77,5 +101,4 @@ export class VacationsKardexComponent {
       }
     );
   }
-
 }

@@ -9,6 +9,7 @@ import {
   NbResetPasswordComponent,
 } from '@nebular/auth';
 import { CustomLoginComponent } from './custom-login/custom-login.component';
+
 export const routes: Routes = [
   {
     path: 'pages',
@@ -45,8 +46,8 @@ export const routes: Routes = [
       },
     ],
   },
-  { path: '', redirectTo: 'pages', pathMatch: 'full' },
-  { path: '**', redirectTo: 'pages' },
+  { path: '', redirectTo: 'auth/login', pathMatch: 'full' }, // Redirigir a 'auth/login' en lugar de 'pages'
+  { path: '**', redirectTo: 'auth/login' }, // Redirigir cualquier ruta no encontrada a 'auth/login'
 ];
 
 const config: ExtraOptions = {
