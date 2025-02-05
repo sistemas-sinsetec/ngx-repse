@@ -3,7 +3,6 @@ import { KardexService } from '../../../services/kardex.service';
 import { CompanyService } from '../../../services/company.service';
 import { NbToastrService } from '@nebular/theme';
 
-<<<<<<< HEAD
 interface Vacacion {
   Concepto: string;
   FechaRegistro?: string;
@@ -18,38 +17,18 @@ interface DetalleTomado {
   FechaInicio: string;
   FechaFin: string;
   DiasTomados: number;
-=======
-interface VacationRecord {
-  Concepto: string;
-  FechaRegistro?: string;
-  FechaInicio?: string;
-  FechaFin?: string;
-  Tomadas?: number;
-  DiasVacaciones?: number;
-  Saldo?: number;
-  DetalleTomados?: Array<{
-    FechaInicio: string;
-    FechaFin: string;
-    DiasTomados: number;
-  }>;
->>>>>>> fc337ba876dad2db05a694424716a4c5441754ba
 }
 
 @Component({
   selector: 'ngx-vacations-kardex',
   templateUrl: './vacations-kardex.component.html',
-  styleUrls: ['./vacations-kardex.component.scss'],
+  styleUrls: ['./vacations-kardex.component.scss']
 })
 export class VacationsKardexComponent implements OnInit {
   empleados: any[] = [];
-  selectedEmployee: string = '';
+  empleadoId: string = '';
   vacacionesAlta: number = 0;
-<<<<<<< HEAD
   vacaciones: Vacacion[] = [];
-=======
-  data: VacationRecord[] = []; // Inicializamos como un array vacío
-  expandedRows: boolean[] = []; // Inicializamos como un array vacío
->>>>>>> fc337ba876dad2db05a694424716a4c5441754ba
 
   constructor(
     private kardexService: KardexService,
@@ -66,23 +45,22 @@ export class VacationsKardexComponent implements OnInit {
     this.kardexService.getEmpleados(companyId).subscribe(
       (data) => {
         this.empleados = data.map((emp: any) => ({
-          IDEmpleado: emp.employee_id,
-          NombreCompleto: emp.full_name || 'Empleado sin nombre',
+          employee_id: emp.employee_id,
+          full_name: emp.full_name || 'Empleado sin nombre',
         }));
       },
-      () => {
+      (error) => {
         this.toastrService.danger('Error al cargar empleados', 'Error');
       }
     );
   }
 
   generarReporte(): void {
-    if (!this.selectedEmployee) {
+    if (!this.empleadoId) {
       this.toastrService.warning('Selecciona un empleado', 'Atención');
       return;
     }
 
-<<<<<<< HEAD
     this.kardexService.getKardex(this.empleadoId).subscribe(
       (data) => {
         console.log('Respuesta del backend:', data);
@@ -96,50 +74,31 @@ export class VacationsKardexComponent implements OnInit {
         // Actualizar vacaciones antes de la alta
         const vacacionesAlta = data.Vacaciones.find((v: Vacacion) => v.Concepto === "Vacaciones tomadas antes de la alta");
         this.vacacionesAlta = vacacionesAlta ? vacacionesAlta.Tomadas : 0;
-=======
-    this.kardexService.getKardex(this.selectedEmployee).subscribe(
-      (data) => {
-        // Aseguramos que `data.Vacaciones` sea un array antes de asignarlo
-        this.data = Array.isArray(data.Vacaciones) ? data.Vacaciones : [];
-        // Inicializamos `expandedRows` para coincidir con el número de filas
-        this.expandedRows = new Array(this.data.length).fill(false);
->>>>>>> fc337ba876dad2db05a694424716a4c5441754ba
       },
-      () => {
+      (error) => {
         this.toastrService.danger('Error al generar el reporte', 'Error');
       }
     );
   }
 
-<<<<<<< HEAD
   toggleDetalle(vacacion: Vacacion): void {
     vacacion.expanded = !vacacion.expanded; // Alternar estado de expansión
-=======
-  toggleRow(index: number): void {
-    if (this.expandedRows && index < this.expandedRows.length) {
-      this.expandedRows[index] = !this.expandedRows[index];
-    }
->>>>>>> fc337ba876dad2db05a694424716a4c5441754ba
   }
 
   actualizarVacacionesAlta(): void {
-    if (!this.selectedEmployee) {
+    if (!this.empleadoId) {
       this.toastrService.warning('Selecciona un empleado', 'Atención');
       return;
     }
 
-    this.kardexService.actualizarVacaciones(this.selectedEmployee, this.vacacionesAlta).subscribe(
-      () => {
+    this.kardexService.actualizarVacaciones(this.empleadoId, this.vacacionesAlta).subscribe(
+      (data) => {
         this.toastrService.success('Vacaciones actualizadas', 'Éxito');
         this.generarReporte();
       },
-      () => {
+      (error) => {
         this.toastrService.danger('Error al actualizar vacaciones', 'Error');
       }
     );
   }
-<<<<<<< HEAD
 }
-=======
-}
->>>>>>> fc337ba876dad2db05a694424716a4c5441754ba
