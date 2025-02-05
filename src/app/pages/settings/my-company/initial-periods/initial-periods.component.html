@@ -1,62 +1,85 @@
+<div class="container-fluid mt-4">
+  <div class="text-center pt-4">
+    <h5><strong>Configuración de Tipos de Periodo</strong></h5>
+  </div>
 
-  
-      <div class="container-fluid mt-4">
-        <div class="text-center pt-4">
-          <h5><strong>Configuración de Tipos de Periodo</strong></h5>
-        </div>
-  
-        <div class="row">
-          <!-- Semanal -->
-          <div class="col-md-4 mb-3">
-            <nb-card>
-              <nb-card-header>Semanal</nb-card-header>
-              <nb-card-body>
-                <nb-checkbox [(ngModel)]="periodoSemanal">Habilitar Semanal</nb-checkbox>
-                <div *ngIf="periodoSemanal" class="mt-3">
-                  <label>Fecha de inicio</label>
-                  <input required nbInput fullWidth placeholder="Seleccione la fecha de inicio" [nbDatepicker]="datepickerSemanal" [(ngModel)]="fechaSemanal">
-                  <nb-datepicker #datepickerSemanal [min]="minDate" [max]="maxDate"></nb-datepicker>
-                </div>
-              </nb-card-body>
-            </nb-card>
-          </div>
-  
-          <!-- Quincenal -->
-          <div class="col-md-4 mb-3">
-            <nb-card>
-              <nb-card-header>Quincenal</nb-card-header>
-              <nb-card-body>
-                <nb-checkbox [(ngModel)]="periodoQuincenal">Habilitar Quincenal</nb-checkbox>
-                <div *ngIf="periodoQuincenal" class="mt-3">
-                  <label>Fecha de inicio</label>
-                  <input required nbInput fullWidth placeholder="Seleccione la fecha de inicio" [nbDatepicker]="datepickerQuincenal" [(ngModel)]="fechaQuincenal">
-                  <nb-datepicker #datepickerQuincenal [min]="minDate" [max]="maxDate"></nb-datepicker>
-                </div>
-              </nb-card-body>
-            </nb-card>
-          </div>
-  
-          <!-- Mensual -->
-          <div class="col-md-4 mb-3">
-            <nb-card>
-              <nb-card-header>Mensual</nb-card-header>
-              <nb-card-body>
-                <nb-checkbox [(ngModel)]="periodoMensual">Habilitar Mensual</nb-checkbox>
-                <div *ngIf="periodoMensual" class="mt-3">
-                  <label>Fecha de inicio</label>
-                  <input required nbInput fullWidth placeholder="Seleccione la fecha de inicio" [nbDatepicker]="datepickerMensual" [(ngModel)]="fechaMensual">
-                  <nb-datepicker #datepickerMensual [min]="minDate" [max]="maxDate"></nb-datepicker>
-                </div>
-              </nb-card-body>
-            </nb-card>
-          </div>
-        </div>
-  
-        <div class="row">
-          <div class="col-md-6 offset-md-3">
-            <button nbButton status="success" fullWidth (click)="guardarConfiguracion()">Guardar configuración</button>
-          </div>
-        </div>
-      </div>
+  <div class="row">
+    <!-- Semanal -->
+    <div class="col-md-4 mb-3">
+      <nb-card>
+        <nb-card-header>Semanal</nb-card-header>
+        <nb-card-body>
+          <nb-checkbox [(ngModel)]="periodoSemanal">Habilitar Semanal</nb-checkbox>
+          <div *ngIf="periodoSemanal" class="mt-3">
+            <label>Fecha de inicio</label>
+            <input required nbInput fullWidth placeholder="Seleccione la fecha de inicio"
+              [nbDatepicker]="datepickerSemanal" [(ngModel)]="fechaSemanal"
+              (ngModelChange)="onDateChange($event, 'semanal')">
+            <nb-datepicker #datepickerSemanal [min]="minDate" [max]="maxDate"></nb-datepicker>
 
-  
+            <label>Año Fiscal</label>
+            <input nbInput fullWidth type="number" [(ngModel)]="ejercicioSemanal" [disabled]="!periodoSemanal">
+            <!-- Comentario informativo -->
+            <small class="text-info">
+              El año fiscal se calcula automáticamente, pero puedes modificarlo manualmente si lo deseas.
+            </small>
+          </div>
+        </nb-card-body>
+      </nb-card>
+    </div>
+
+    <!-- Quincenal -->
+    <div class="col-md-4 mb-3">
+      <nb-card>
+        <nb-card-header>Quincenal</nb-card-header>
+        <nb-card-body>
+          <nb-checkbox [(ngModel)]="periodoQuincenal">Habilitar Quincenal</nb-checkbox>
+          <div *ngIf="periodoQuincenal" class="mt-3">
+            <label>Fecha de inicio</label>
+            <input required nbInput fullWidth placeholder="Seleccione la fecha de inicio"
+              [nbDatepicker]="datepickerQuincenal" [(ngModel)]="fechaQuincenal"
+              (ngModelChange)="onDateChange($event, 'quincenal')">
+            <nb-datepicker #datepickerQuincenal [min]="minDate" [max]="maxDate"></nb-datepicker>
+
+            <label>Año Fiscal</label>
+            <input nbInput fullWidth type="number" [(ngModel)]="ejercicioQuincenal" [disabled]="!periodoQuincenal">
+            <!-- Comentario informativo -->
+            <small class="text-info">
+              El año fiscal se calcula automáticamente, pero puedes modificarlo manualmente si lo deseas.
+            </small>
+          </div>
+        </nb-card-body>
+      </nb-card>
+    </div>
+
+    <!-- Mensual -->
+    <div class="col-md-4 mb-3">
+      <nb-card>
+        <nb-card-header>Mensual</nb-card-header>
+        <nb-card-body>
+          <nb-checkbox [(ngModel)]="periodoMensual">Habilitar Mensual</nb-checkbox>
+          <div *ngIf="periodoMensual" class="mt-3">
+            <label>Fecha de inicio</label>
+            <input required nbInput fullWidth placeholder="Seleccione la fecha de inicio"
+              [nbDatepicker]="datepickerMensual" [(ngModel)]="fechaMensual"
+              (ngModelChange)="onDateChange($event, 'mensual')">
+            <nb-datepicker #datepickerMensual [min]="minDate" [max]="maxDate"></nb-datepicker>
+
+            <label>Año Fiscal</label>
+            <input nbInput fullWidth type="number" [(ngModel)]="ejercicioMensual" [disabled]="!periodoMensual">
+            <!-- Comentario informativo -->
+            <small class="text-info">
+              El año fiscal se calcula automáticamente, pero puedes modificarlo manualmente si lo deseas.
+            </small>
+          </div>
+        </nb-card-body>
+      </nb-card>
+    </div>
+  </div>
+
+  <div class="row">
+    <div class="col-md-6 offset-md-3">
+      <button nbButton status="success" fullWidth (click)="guardarConfiguracion()">Guardar configuración</button>
+    </div>
+  </div>
+</div>

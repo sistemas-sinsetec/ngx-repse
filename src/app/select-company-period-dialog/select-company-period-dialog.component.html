@@ -30,8 +30,10 @@
 
   </nb-card-body>
   <nb-card-footer style="text-align: right;">
+
+    <!--  [disabled]="!selectedCompanyId || (periods && periods.length > 0)" -->
   
-    <button nbButton status="info" [disabled]="!selectedCompanyId || (periods && periods.length > 0)"  style="margin-right: 1rem;" (click)="navigateToNewPeriodPage()">
+    <button nbButton status="info"  style="margin-right: 1rem;" (click)="navigateToNewPeriodPage()">
       Crear Nuevo Período
     </button>
 

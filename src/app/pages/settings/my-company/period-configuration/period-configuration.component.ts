@@ -98,7 +98,7 @@ export class PeriodConfigurationComponent {
 
     if (periodConfig.period_type_id) {
       // Si existe period_type_id, entonces es una actualización
-      this.http.post('https://siinad.mx/php/update-period.php', periodConfig)
+      this.http.post('https://siinad.mx/php/update-payroll-period.php', periodConfig)
         .subscribe(response => {
           console.log('Cambios guardados correctamente', response);
           loading.dismiss();
@@ -323,6 +323,6 @@ export class PeriodConfigurationComponent {
     }
 
     // Establece la posición de los días de descanso en el formato "01,02,03"
-    this.selectedPeriod.rest_days_position = restDays;
+    this.selectedPeriod.rest_days_position = new Date().toISOString().split('T')[0]; // Formato YYYY-MM-DD
   }
 }
