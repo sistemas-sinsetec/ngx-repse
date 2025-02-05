@@ -1,51 +1,102 @@
-<nb-card>
-    <nb-card-header>
-      <h2>Kardex de Vacaciones</h2>
-    </nb-card-header>
-    <nb-card-body>
-      <div class="row">
+<div class="container mt-5">
+  <div class="card shadow rounded-4">
+    <div class="card-body">
+      <h1 class="text-center mb-3">Kardex de Vacaciones</h1>
+
+      <!-- Selector de empleado -->
+      <div class="row g-3 align-items-center mb-3">
         <div class="col-md-8">
-          <nb-select placeholder="Selecciona un empleado" [(ngModel)]="empleadoId">
-            <nb-option *ngFor="let emp of empleados" [value]="emp.employee_id">
-              {{ emp.full_name || 'Empleado sin nombre' }}
-            </nb-option>
-          </nb-select>
-          
-          <button nbButton status="primary" (click)="generarReporte()">Generar Reporte</button>
+          <label for="empleadoId" class="form-label fw-semibold">Selecciona empleado:</label>
+          <div class="input-group">
+            <select id="empleadoId" class="form-select" [(ngModel)]="selectedEmployee" (change)="generarReporte()">
+              <option *ngFor="let emp of empleados" [value]="emp.IDEmpleado">
+                {{ emp.NombreCompleto }}
+              </option>
+            </select>
+            <button class="btn btn-primary" (click)="generarReporte()">Generar reporte</button>
+          </div>
         </div>
       </div>
-  
-      <div class="row mt-3">
+
+      <!-- Vacaciones antes de la alta -->
+      <div class="row g-3 align-items-center mb-3">
         <div class="col-md-8">
-          <nb-input placeholder="Vacaciones antes de la alta" [(ngModel)]="vacacionesAlta" type="number"></nb-input>
-          <button status="success" (click)="actualizarVacacionesAlta()">Actualizar</button>
+          <label for="vacacionesAlta" class="form-label fw-semibold">Vacaciones tomadas antes de la alta:</label>
+          <div class="input-group">
+            <input
+              type="number"
+              id="vacacionesAlta"
+              class="form-control"
+              min="0"
+              [(ngModel)]="vacacionesAlta"
+            />
+            <button class="btn btn-success" (click)="actualizarVacacionesAlta()">Actualizar</button>
+          </div>
         </div>
       </div>
-  
-      <table class="table table-bordered table-striped">
-        <thead class="table-dark">
-          <tr>
-            <th>Concepto</th>
-            <th>Fecha Registro</th>
-            <th>Fecha Inicio</th>
-            <th>Fecha Fin</th>
-            <th>Tomadas</th>
-            <th>Días Con Derecho</th>
-            <th>Saldo</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr *ngFor="let vac of vacaciones">
-            <td>{{ vac.Concepto }}</td>
-            <td>{{ vac.FechaRegistro }}</td>
-            <td>{{ vac.FechaInicio }}</td>
-            <td>{{ vac.FechaFin }}</td>
-            <td>{{ vac.Tomadas }}</td>
-            <td>{{ vac.DiasVacaciones }}</td>
-            <td>{{ vac.Saldo }}</td>
-          </tr>
-        </tbody>
-      </table>
-    </nb-card-body>
-  </nb-card>
-  
+
+      <!-- Tabla de vacaciones -->
+      <div class="table-responsive">
+        <table class="table table-striped table-bordered">
+          <thead class="table-dark">
+            <tr>
+              <th></th> <!-- Ícono de expansión -->
+              <th>Concepto</th>
+              <th>Fecha Registro</th>
+              <th>Fecha Inicio</th>
+              <th>Fecha Fin</th>
+              <th>Tomadas</th>
+              <th>Días Con Derecho</th>
+              <th>Saldo</th>
+            </tr>
+          </thead>
+          <tbody>
+            <!-- Fila principal -->
+            <ng-container *ngFor="let row of data; let i = index">
+              <tr>
+                <td>
+                  <button
+                    class="btn btn-sm btn-link"
+                    (click)="toggleRow(i)"
+                    [attr.aria-expanded]="expandedRows[i] ? 'true' : 'false'"
+                  >
+                    <i class="bi" [ngClass]="expandedRows[i] ? 'bi-chevron-down' : 'bi-chevron-right'"></i>
+                  </button>
+                </td>
+                <td>{{ row.Concepto }}</td>
+                <td>{{ row.FechaRegistro || 'N/A' }}</td>
+                <td>{{ row.FechaInicio || 'N/A' }}</td>
+                <td>{{ row.FechaFin || 'N/A' }}</td>
+                <td>{{ row.Tomadas || 0 }}</td>
+                <td>{{ row.DiasVacaciones || 0 }}</td>
+                <td>{{ row.Saldo || 0 }}</td>
+              </tr>
+
+              <!-- Subfila (desplegable) -->
+              <tr *ngIf="expandedRows[i]" class="bg-light">
+                <td colspan="8">
+                  <table class="table table-sm mb-0">
+                    <thead>
+                      <tr>
+                        <th>Fecha Inicio</th>
+                        <th>Fecha Fin</th>
+                        <th>Días Tomados</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <tr *ngFor="let detalle of row.DetalleTomados">
+                        <td>{{ detalle.FechaInicio || 'N/A' }}</td>
+                        <td>{{ detalle.FechaFin || 'N/A' }}</td>
+                        <td>{{ detalle.DiasTomados || 0 }}</td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </td>
+              </tr>
+            </ng-container>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>

@@ -2,17 +2,33 @@ import { Component, OnInit } from '@angular/core';
 import { KardexService } from '../../../services/kardex.service';
 import { CompanyService } from '../../../services/company.service';
 import { NbToastrService } from '@nebular/theme';
-import { NbButtonModule } from '@nebular/theme';
+
+interface VacationRecord {
+  Concepto: string;
+  FechaRegistro?: string;
+  FechaInicio?: string;
+  FechaFin?: string;
+  Tomadas?: number;
+  DiasVacaciones?: number;
+  Saldo?: number;
+  DetalleTomados?: Array<{
+    FechaInicio: string;
+    FechaFin: string;
+    DiasTomados: number;
+  }>;
+}
+
 @Component({
   selector: 'ngx-vacations-kardex',
   templateUrl: './vacations-kardex.component.html',
-  styleUrls: ['./vacations-kardex.component.scss']
+  styleUrls: ['./vacations-kardex.component.scss'],
 })
-export class VacationsKardexComponent {
+export class VacationsKardexComponent implements OnInit {
   empleados: any[] = [];
-  empleadoId: string = '';
+  selectedEmployee: string = '';
   vacacionesAlta: number = 0;
-  vacaciones: any[] = [];
+  data: VacationRecord[] = []; // Inicializamos como un array vacío
+  expandedRows: boolean[] = []; // Inicializamos como un array vacío
 
   constructor(
     private kardexService: KardexService,
@@ -28,59 +44,56 @@ export class VacationsKardexComponent {
     const companyId = this.companyService.selectedCompany.id;
     this.kardexService.getEmpleados(companyId).subscribe(
       (data) => {
-        console.log('Empleados recibidos:', data); // Verifica qué datos llegan
         this.empleados = data.map((emp: any) => ({
-          employee_id: emp.employee_id,
-          full_name: emp.full_name || 'Empleado sin nombre',
+          IDEmpleado: emp.employee_id,
+          NombreCompleto: emp.full_name || 'Empleado sin nombre',
         }));
       },
-      (error) => {
+      () => {
         this.toastrService.danger('Error al cargar empleados', 'Error');
       }
     );
   }
 
   generarReporte(): void {
-    if (!this.empleadoId) {
+    if (!this.selectedEmployee) {
       this.toastrService.warning('Selecciona un empleado', 'Atención');
       return;
     }
-  
-    this.kardexService.getKardex(this.empleadoId).subscribe(
+
+    this.kardexService.getKardex(this.selectedEmployee).subscribe(
       (data) => {
-        console.log('Respuesta del backend:', data); // Verificar datos
-        this.vacaciones = Array.isArray(data?.Vacaciones) ? data.Vacaciones : [];
-
-        // Verificar si la respuesta incluye vacaciones
-        console.log('Vacaciones recibidas:', this.vacaciones);
-
-        // Actualizar el valor de vacaciones antes de la alta
-        const vacacionesAlta = this.vacaciones.find(v => v.Concepto === "Vacaciones tomadas antes de la alta") || null;
-        this.vacacionesAlta = vacacionesAlta ? vacacionesAlta.Tomadas : 0;
+        // Aseguramos que `data.Vacaciones` sea un array antes de asignarlo
+        this.data = Array.isArray(data.Vacaciones) ? data.Vacaciones : [];
+        // Inicializamos `expandedRows` para coincidir con el número de filas
+        this.expandedRows = new Array(this.data.length).fill(false);
       },
-      (error) => {
+      () => {
         this.toastrService.danger('Error al generar el reporte', 'Error');
-      }
-    );
-}
-
-  
-
-  actualizarVacacionesAlta(): void {
-    if (!this.empleadoId) {
-      this.toastrService.warning('Selecciona un empleado', 'Atención');
-      return;
-    }
-
-    this.kardexService.actualizarVacaciones(this.empleadoId, this.vacacionesAlta).subscribe(
-      (data) => {
-        this.toastrService.success('Vacaciones actualizadas', 'Éxito');
-        this.generarReporte();
-      },
-      (error) => {
-        this.toastrService.danger('Error al actualizar vacaciones', 'Error');
       }
     );
   }
 
+  toggleRow(index: number): void {
+    if (this.expandedRows && index < this.expandedRows.length) {
+      this.expandedRows[index] = !this.expandedRows[index];
+    }
+  }
+
+  actualizarVacacionesAlta(): void {
+    if (!this.selectedEmployee) {
+      this.toastrService.warning('Selecciona un empleado', 'Atención');
+      return;
+    }
+
+    this.kardexService.actualizarVacaciones(this.selectedEmployee, this.vacacionesAlta).subscribe(
+      () => {
+        this.toastrService.success('Vacaciones actualizadas', 'Éxito');
+        this.generarReporte();
+      },
+      () => {
+        this.toastrService.danger('Error al actualizar vacaciones', 'Error');
+      }
+    );
+  }
 }
