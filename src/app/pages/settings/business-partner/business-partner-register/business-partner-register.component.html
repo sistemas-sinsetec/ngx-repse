@@ -7,16 +7,33 @@
         <p>Ingresar datos para continuar</p>
       </nb-card-header>
       <nb-card-body>
-        <nb-select fullWidth [(selected)]="tipoRFC" (selectedChange)="onChangeTipoRFC()" placeholder="Selecciona tipo RFC">
-          <nb-option value="fisica">Persona Física</nb-option>
-          <nb-option value="moral">Persona Moral</nb-option>
-        </nb-select>
-
-        <nb-form-field class="d-flex align-items-center flex-grow-1">
-          <input fullWidth nbInput placeholder="RFC" [(ngModel)]="usuario.rfc" (input)="validateRFC($event)" />
-        </nb-form-field>
-        <button fullWidth nbButton (click)="buscarEmpresaPorRFC()">Buscar</button>
-        <small *ngIf="rfcLengthError" class="text-danger">Error en la longitud del RFC</small>
+        <nb-select
+        fullWidth
+        [(selected)]="tipoRFC"
+        (selectedChange)="onChangeTipoRFC()"
+        placeholder="Selecciona tipo RFC"
+      >
+        <nb-option value="fisica">Persona Física</nb-option>
+        <nb-option value="moral">Persona Moral</nb-option>
+      </nb-select>
+      <nb-form-field class="d-flex align-items-center flex-grow-1">
+        <input
+          fullWidth
+          nbInput
+          placeholder="RFC"
+          [(ngModel)]="usuario.rfc"
+          (input)="validateRFC($event)"
+          (keypress)="filterRFCInput($event)"
+          [maxlength]="tipoRFC === 'fisica' ? 13 : 12"
+        />
+      </nb-form-field>
+      <small *ngIf="rfcLengthError" class="text-danger">
+        {{ rfcLengthError }}
+      </small>
+      
+      
+      
+      
 
         <nb-form-field>
           <input nbInput fullWidth placeholder="{{ tipoRFC === 'fisica' ? 'Nombre de la persona física' : 'Nombre de la empresa' }}" [(ngModel)]="usuario.nombreEmpresa" (ngModelChange)="showMessage()" (blur)="hideMessage()" (focus)="resetMessage()" />

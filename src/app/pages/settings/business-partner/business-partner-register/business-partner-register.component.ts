@@ -80,6 +80,7 @@ export class BusinessPartnerRegisterComponent implements OnInit {
     this.usuario.nombreEmpresa = '';
     this.rfcLengthError = '';
   }
+  
 
   buscarEmpresaPorRFC() {
     this.http.post('https://siinad.mx/php/searchCompanies.php', { rfc: this.usuario.rfc }).subscribe(
@@ -108,31 +109,41 @@ export class BusinessPartnerRegisterComponent implements OnInit {
     this.showMessageFlag = true;
   }
 
-  validateRFC(event: any) {
-    if (this.tipoRFC === 'fisica') {
-      if (this.usuario.rfc.length >= 13) {
-        this.rfcLengthError = '';
-      } else {
-        this.rfcLengthError = 'El RFC para persona física debe tener 13 dígitos.';
-      }
-    } else if (this.tipoRFC === 'moral') {
-      if (this.usuario.rfc.length >= 12) {
-        this.rfcLengthError = '';
-      } else {
-        this.rfcLengthError = 'El RFC para persona moral debe tener 12 dígitos.';
-      }
-    }
-
-    if (this.usuario.rfc.length > 13 && this.tipoRFC === 'fisica') {
+  validateRFC(event: Event): void {
+    const input = (event.target as HTMLInputElement).value.toUpperCase();
+    this.usuario.rfc = input;
+  
+    // Limitar longitud del RFC dependiendo del tipo
+    if (this.tipoRFC === 'fisica' && this.usuario.rfc.length > 13) {
       this.usuario.rfc = this.usuario.rfc.substring(0, 13);
-    } else if (this.usuario.rfc.length > 12 && this.tipoRFC === 'moral') {
+    } else if (this.tipoRFC === 'moral' && this.usuario.rfc.length > 12) {
       this.usuario.rfc = this.usuario.rfc.substring(0, 12);
     }
+  
+    // Expresiones regulares para validar RFC
+    const rfcFisicaRegex = /^[A-ZÑ&]{4}\d{6}[A-Z\d]{3}$/;
+    const rfcMoralRegex = /^[A-ZÑ&]{3}\d{6}[A-Z\d]{3}$/;
+  
+    // Validar formato y mostrar mensaje de error
+    if (this.tipoRFC === 'fisica') {
+      if (!rfcFisicaRegex.test(this.usuario.rfc)) {
+        this.rfcLengthError = 'El RFC para persona física debe tener 13 caracteres y cumplir el formato.';
+      } else {
+        this.rfcLengthError = '';
+      }
+    } else if (this.tipoRFC === 'moral') {
+      if (!rfcMoralRegex.test(this.usuario.rfc)) {
+        this.rfcLengthError = 'El RFC para persona moral debe tener 12 caracteres y cumplir el formato.';
+      } else {
+        this.rfcLengthError = '';
+      }
+    }
   }
+  
 
   async camposCompletos(): Promise<boolean> {
     const regexPuntoCom = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-
+  
     return (
       typeof this.usuario.nombreUsuario === 'string' &&
       this.usuario.nombreUsuario.trim() !== '' &&
@@ -151,10 +162,11 @@ export class BusinessPartnerRegisterComponent implements OnInit {
       this.usuario.correo.includes('@') &&
       regexPuntoCom.test(this.usuario.correo) &&
       this.usuario.contrasena === this.usuario.confirmarContrasena &&
-      this.validarTelefono()
+      this.validarTelefono() &&
+      this.rfcLengthError === '' // Asegura que el RFC sea válido
     );
   }
-
+  
   validarTelefono(): boolean {
     const telefonoRegex = /^\d{10}$/;
     if (!telefonoRegex.test(this.usuario.numTelefonico)) {
@@ -166,6 +178,54 @@ export class BusinessPartnerRegisterComponent implements OnInit {
       return true;
     }
   }
+
+  filterRFCInput(event: KeyboardEvent): void {
+    const key = event.key.toUpperCase(); // Convertimos a mayúsculas
+    const input = event.target as HTMLInputElement;
+    const position = input.value.length;
+  
+    if (this.tipoRFC === 'fisica') {
+      if (position < 4) {
+        // Solo permite letras A-Z, Ñ y &
+        if (!/^[A-ZÑ&]$/.test(key)) {
+          event.preventDefault();
+        }
+      } else if (position >= 4 && position < 10) {
+        // Solo permite números del 0 al 9
+        if (!/^\d$/.test(key)) {
+          event.preventDefault();
+        }
+      } else if (position >= 10 && position < 13) {
+        // Permite letras A-Z o números
+        if (!/^[A-Z\d]$/.test(key)) {
+          event.preventDefault();
+        }
+      } else {
+        event.preventDefault(); // Evita escribir más de 13 caracteres
+      }
+    } else if (this.tipoRFC === 'moral') {
+      if (position < 3) {
+        // Solo permite letras en las primeras 3 posiciones
+        if (!/^[A-ZÑ&]$/.test(key)) {
+          event.preventDefault();
+        }
+      } else if (position >= 3 && position < 9) {
+        // Solo permite números en la fecha de constitución
+        if (!/^\d$/.test(key)) {
+          event.preventDefault();
+        }
+      } else if (position >= 9 && position < 12) {
+        // Permite letras o números
+        if (!/^[A-Z\d]$/.test(key)) {
+          event.preventDefault();
+        }
+      } else {
+        event.preventDefault(); // Evita escribir más de 12 caracteres
+      }
+    }
+  }
+  
+  
 
   mostrarToast(mensaje: string, status: 'success' | 'danger' | 'warning') {
     this.toastrService.show(mensaje, 'Notificación', { status });
