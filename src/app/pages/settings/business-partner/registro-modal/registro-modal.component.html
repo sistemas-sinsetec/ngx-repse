@@ -1,13 +1,12 @@
-  <nb-layout>
-    <nb-layout-column class="modal-content">
-       <strong>¿Desea registrar otro socio?</strong>
-      <button nbButton status="success" fullWidth (click)="cerrarModal(true)">
-        Sí
-      </button>
-      <button nbButton status="danger" fullWidth (click)="cerrarModal(false)">
-        No, regresar a inicio
-      </button>
-    </nb-layout-column>
-  </nb-layout>
 
-
+<nb-card>
+  <nb-card-body>
+    <strong>¿Desea registrar otro socio?</strong>
+    <button nbButton status="success" fullWidth (click)="cerrarModal(true)">
+      Sí
+    </button>
+    <button nbButton status="danger" fullWidth (click)="cerrarModal(false)">
+      No, regresar a inicio
+    </button>
+  </nb-card-body>
+</nb-card>

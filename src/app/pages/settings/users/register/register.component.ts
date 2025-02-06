@@ -37,6 +37,8 @@ export class RegisterComponent implements OnInit {
   secondaryCompanies: any[] = []; // Empresas secundarias
   isModalOpen = false;
 
+  showValidationMessages = false; // <-- Nueva variable
+
   constructor(
     private router: Router,
     private http: HttpClient,
@@ -48,40 +50,13 @@ export class RegisterComponent implements OnInit {
   ) { }
 
   ngOnInit() {
-    this.getEmployees(); 
-    this.loadLevelUsers(); 
     this.loadSecondaryCompanies(); 
   }
 
   /**
    * Cargar niveles de usuario desde el backend.
    */
-  async loadLevelUsers() {
-    // 1. Crear y mostrar el loading
-    const loading = await this.loadingController.create({
-      message: 'Cargando niveles de usuario...',
-    });
-    await loading.present();
 
-    // 2. Realizar la petición HTTP
-    this.http.get('https://siinad.mx/php/get-level-users.php').subscribe(
-      async (response: any) => {
-        loading.dismiss(); // Ocultar el spinner al terminar
-
-        if (response) {
-          this.levelUsers = response;
-        } else {
-          console.error('Error al cargar niveles de usuario');
-          await this.showToast('Error al cargar niveles de usuario.', 'danger');
-        }
-      },
-      async (error) => {
-        loading.dismiss();
-        console.error('Error en la solicitud GET:', error);
-        await this.showToast('Error al cargar niveles de usuario.', 'danger');
-      }
-    );
-  }
 
   pressEnter(event: KeyboardEvent): void {
     // Verificamos si la tecla presionada es 'Enter'
@@ -94,8 +69,6 @@ export class RegisterComponent implements OnInit {
    * Buscar usuario por código.
    */
   async onUserCodeChange() {
-
-
       if (!this.userCode) {
         this.selectedUser = null;
         return;
@@ -207,131 +180,31 @@ export class RegisterComponent implements OnInit {
     this.isModalOpen = false;
   }
 
-  /**
-   * Mostrar un Toast de Nebular.
-   * @param message Mensaje a mostrar
-   * @param status Tipo de estado: 'success', 'danger', 'warning'
-   */
+ 
   async showToast(message: string, status: 'success' | 'danger' | 'warning') {
     this.toastrService.show(message, 'Notificación', { status });
   }
 
-  /**
-   * Obtener empleados de la empresa.
-   */
-  async getEmployees() {
-    // 1. Crear y mostrar el loading
-    const loading = await this.loadingController.create({
-      message: 'Cargando empleados...',
-    });
-    await loading.present();
 
-    const data = {
-      companyId: this.companyService.selectedCompany.id,
-    };
+  camposCompletos(): boolean {
+    return this.getValidationMessages().length === 0;
+  }
+
+  private validarCampos(): string | null {
+    const errors = [
+      [!this.usuario.nombreUsuario, 'El nombre de usuario es obligatorio.'],
+      [!this.usuario.nombreCompleto, 'El nombre completo es obligatorio.'],
+      [!this.usuario.correo, 'El correo es obligatorio.'],
+      [!this.validarCorreo(this.usuario.correo), 'Formato de correo inválido.'],
+      [!this.usuario.contrasena, 'La contraseña es obligatoria.'],
+      [this.usuario.contrasena.length < 8, 'La contraseña debe tener al menos 8 caracteres.'],
+      [this.usuario.contrasena !== this.usuario.confirmarContrasena, 'Las contraseñas no coinciden.'],
+      [!this.usuario.levelUser, 'Debes seleccionar un tipo de usuario.'], // Validación del select
+      [!this.companyService.selectedCompany, 'Debe seleccionar una empresa.']
+    ];
   
-    this.http.post('https://siinad.mx/php/searchUsers.php', data).subscribe(
-      async (response: any) => {
-        loading.dismiss();
-        if (response.success) {
-          this.employees = response.employees;
-          this.filteredEmployees = this.employees; 
-          console.log('Datos de empleados obtenidos:', this.employees);
-        } else {
-          await this.showToast('Error en la solicitud', 'danger');
-        }
-      },
-      async (error) => {
-        loading.dismiss();
-        console.error('Error al realizar la solicitud:', error);
-        await this.showToast('Error al realizar la solicitud', 'danger');
-      }
-    );
-  }
-
-  /**
-   * Eliminar usuario por ID.
-   */
-  async eliminarUsuario(id: number) {
-    if (!confirm("¿Estás seguro de que quieres eliminar este usuario?")) {
-      return;
-    }
-
-    // 1. Crear y mostrar el loading
-    const loading = await this.loadingController.create({
-      message: 'Eliminando usuario...',
-    });
-    await loading.present();
-
-    this.http.delete(`https://siinad.mx/php/deleteUser.php?id=${id}`).subscribe(
-      async (response: any) => {
-        loading.dismiss();
-        if (response.success) {
-          await this.showToast('Usuario eliminado exitosamente', 'success');
-        } else {
-          await this.showToast('Error al eliminar usuario: ' + response.message, 'danger');
-        }
-        this.getEmployees(); // Refrescar la lista
-      },
-      async (error) => {
-        loading.dismiss();
-        console.error('Error en la solicitud DELETE:', error);
-        await this.showToast('Error al eliminar usuario.', 'danger');
-        this.getEmployees(); // Refrescar la lista
-      }
-    );
-  }
-
-  /**
-   * Filtrar usuarios por búsqueda y rol.
-   */
-  buscarUsuarios() {
-    if (this.filtroUsuarios.trim() !== '') {
-      this.filteredEmployees = this.employees.filter(employee =>
-        (employee.username.toLowerCase().includes(this.filtroUsuarios.toLowerCase()) ||
-         employee.name.toLowerCase().includes(this.filtroUsuarios.toLowerCase())) &&
-        (this.filtroRol === '' || employee.role === this.filtroRol)
-      );
-      this.busquedaActiva = true;
-    } else if (this.filtroRol !== '') {
-      this.filteredEmployees = this.employees.filter(employee =>
-        employee.role === this.filtroRol
-      );
-      this.busquedaActiva = true;
-    } else {
-      this.filteredEmployees = this.employees;
-      this.busquedaActiva = false;
-    }
-  }
-
-  /**
-   * Verificar que los campos de registro estén completos y sean válidos.
-   */
-  async camposCompletos(): Promise<boolean> {
-    const regexPuntoCom = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-  
-    return (
-      typeof this.usuario.nombreUsuario === 'string' && this.usuario.nombreUsuario.trim() !== '' &&
-      typeof this.usuario.nombreCompleto === 'string' && this.usuario.nombreCompleto.trim() !== '' &&
-      typeof this.usuario.correo === 'string' && this.usuario.correo.trim() !== '' &&
-      typeof this.usuario.contrasena === 'string' && this.usuario.contrasena.trim() !== '' &&
-      typeof this.usuario.levelUser === 'string' && this.usuario.levelUser.trim() !== '' &&
-      this.usuario.correo.includes('@') &&
-      regexPuntoCom.test(this.usuario.correo) &&
-      this.usuario.contrasena === this.usuario.confirmarContrasena 
-    );
-  }
-
-  private async validarCampos(): Promise<string | null> {
-    if (!this.usuario.nombreUsuario) return 'El nombre de usuario es obligatorio.';
-    if (!this.usuario.nombreCompleto) return 'El nombre completo es obligatorio.';
-    if (!this.usuario.correo) return 'El correo es obligatorio.';
-    if (!this.validarCorreo(this.usuario.correo)) return 'El formato del correo no es válido.';
-    if (!this.usuario.contrasena) return 'La contraseña es obligatoria.';
-    if (this.usuario.contrasena.length < 8) return 'La contraseña debe tener al menos 8 caracteres.';
-    if (!this.companyService.selectedCompany) return 'Debe seleccionar una empresa.';
-    
-    return null; // Todos los campos están completos y válidos
+    const error = errors.find(([condition]) => condition);
+    return error ? error[1] as string : null;
   }
 
   private capitalizarNombreCompleto(nombre: string): string {
@@ -342,23 +215,19 @@ export class RegisterComponent implements OnInit {
       .join(' ');
   }
   
-  
-
   private validarCorreo(correo: string): boolean {
     const regex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     return regex.test(correo);
   }
-  /**
-   * Registrar un nuevo usuario.
-   */
-  async registrarUsuario() {
-    const mensajeValidacion = await this.validarCampos();
-    if (mensajeValidacion) {
-      await this.showToast(mensajeValidacion, 'warning');
-      return;
-    }
-  
-    // Capitalizar nombre completo antes de enviarlo
+
+async registrarUsuario() {
+  this.showValidationMessages = true; // Activar la visualización de mensajes
+
+  const validationMessages = this.getValidationMessages();
+  if (validationMessages.length > 0) {
+    validationMessages.forEach(message => this.showToast(message, 'warning'));
+    return;
+  }
     this.usuario.nombreCompleto = this.capitalizarNombreCompleto(this.usuario.nombreCompleto);
   
     // 1. Crear y mostrar el loading
@@ -384,7 +253,6 @@ export class RegisterComponent implements OnInit {
         if (response.success) {
           await this.showToast(response.message, 'success');
           this.limpiarCampos();
-          this.getEmployees(); // Refrescar empleados
         } else {
           await this.showToast(response.message, 'danger');
         }
@@ -409,11 +277,8 @@ export class RegisterComponent implements OnInit {
       confirmarContrasena: '',
       levelUser: ''
     };
+    this.showValidationMessages = false; // Reiniciar la visualización de mensajes
   }
-
-  /**
-   * Mostrar el rol con una descripción más legible.
-   */
   getRolLegible(rol: string): string {
     switch (rol) {
       case 'adminS':
@@ -436,6 +301,46 @@ export class RegisterComponent implements OnInit {
   isValidEmail(email: string): boolean {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     return emailRegex.test(email);
+  }
+
+  getValidationMessages(): string[] {
+    if (!this.showValidationMessages) {
+      return []; // No mostrar mensajes si no se ha intentado enviar el formulario
+    }
+  
+    const messages: string[] = [];
+  
+    if (!this.usuario.nombreUsuario) {
+      messages.push('El nombre de usuario es obligatorio.');
+    }
+  
+    if (!this.usuario.nombreCompleto) {
+      messages.push('El nombre completo es obligatorio.');
+    }
+  
+    if (!this.usuario.correo) {
+      messages.push('El correo es obligatorio.');
+    } else if (!this.isValidEmail(this.usuario.correo)) {
+      messages.push('Formato de correo inválido.');
+    }
+  
+    if (!this.usuario.contrasena) {
+      messages.push('La contraseña es obligatoria.');
+    } else if (this.usuario.contrasena.length < 8) {
+      messages.push('La contraseña debe tener al menos 8 caracteres.');
+    }
+  
+    if (!this.usuario.confirmarContrasena) {
+      messages.push('Debes confirmar la contraseña.');
+    } else if (this.usuario.contrasena !== this.usuario.confirmarContrasena) {
+      messages.push('Las contraseñas no coinciden.');
+    }
+  
+    if (!this.usuario.levelUser) {
+      messages.push('Debes seleccionar un tipo de usuario.');
+    }
+  
+    return messages;
   }
 }
 
