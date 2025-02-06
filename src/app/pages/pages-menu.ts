@@ -238,6 +238,7 @@ export const MENU_ITEMS: CustomMenuItem[] = [
         title: 'Secciones de perfiles',
         icon: 'eye-off-outline',
         link: '/pages/settings/permissions-sections',
+        requiredLevel: ['adminS', 'adminE', 'adminEE'], // Arreglo de valores permitidos
       },
       {
         title: 'Socios comerciales',
@@ -262,14 +263,14 @@ export const MENU_ITEMS: CustomMenuItem[] = [
             link: 'settings/business-partner/business-partner-register',
             hidden: false,
             permission: { section: 'Configuracion de socios comerciales', subSection: 'Registrar socio comercial' },
-        
+
           },
           {
             title: 'Secciones visibles de mis socios comerciales',
             link: 'settings/business-partner/permissions-businees-partner',
             hidden: false,
             permission: { section: 'Configuracion de socios comerciales', subSection: 'Secciones visibles de los socios comerciales' },
-        
+
           },
         ],
       },
@@ -281,13 +282,13 @@ export const MENU_ITEMS: CustomMenuItem[] = [
         children: [
           {
             title: 'Registrar usuarios',
-            link: '/pages/settings/users/register', 
+            link: '/pages/settings/users/register',
             hidden: false,
             permission: { section: 'Configuracion de usuarios', subSection: 'Registrar usuarios' },
           },
           {
             title: 'Mis usuarios',
-            link: '/pages/settings/users/my-users', 
+            link: '/pages/settings/users/my-users',
             hidden: false,
             permission: { section: 'Configuracion de usuarios', subSection: 'Mis usuarios' },
           },
@@ -301,8 +302,8 @@ export const MENU_ITEMS: CustomMenuItem[] = [
       },
       {
         title: 'App',
-
         icon: 'smartphone-outline',
+        requiredLevel: ['adminS'], // Asegúrate de que esta propiedad esté definida
         children: [
           {
             title: 'Secciones visibles de empresas',

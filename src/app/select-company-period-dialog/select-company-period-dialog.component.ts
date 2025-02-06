@@ -2,51 +2,57 @@ import { Component, OnInit } from '@angular/core';
 import { NbDialogRef } from '@nebular/theme';
 import { CompanyService } from '../services/company.service';
 import { PeriodService } from '../services/period.service';
-import { SharedService } from '../services/shared.service'; // <-- Importamos SharedService
+import { SharedService } from '../services/shared.service';
 import { Router } from '@angular/router';
+
 @Component({
   selector: 'app-select-company-period-dialog',
   templateUrl: './select-company-period-dialog.component.html',
   styleUrls: ['./select-company-period-dialog.component.scss'],
 })
 export class SelectCompanyPeriodDialogComponent implements OnInit {
-  // Listas a mostrar en la interfaz
   companies: any[] = [];
   title: string = '';
-  // Lista de periodos según la empresa seleccionada
   periods: any[] = [];
-
-  // Selecciones del usuario
   selectedCompanyId: string | null = null;
   selectedPeriodId: string | null = null;
+
+  // Getter para verificar el rol del usuario
+  get isAllowedUser(): boolean {
+    const allowedLevels = ['adminE', 'adminEE', 'adminS'];
+    if (!this.selectedCompanyId) return false;
+    
+    const selectedCompany = this.companies.find(company => 
+      company.id === this.selectedCompanyId
+    );
+    
+    return selectedCompany ? 
+      allowedLevels.includes(selectedCompany.levelUser) : 
+      false;
+  }
 
   constructor(
     protected dialogRef: NbDialogRef<SelectCompanyPeriodDialogComponent>,
     private companyService: CompanyService,
     private periodService: PeriodService,
-    private sharedService: SharedService, // <-- Añadimos SharedService
+    private sharedService: SharedService,
     private router: Router
   ) {}
 
   ngOnInit(): void {
-    // Copiar empresas desde CompanyService
     this.companies = this.companyService.principalCompanies;
 
-    // Preseleccionar la empresa si ya existe
-    if (this.companyService.selectedCompany && this.companyService.selectedCompany.id) {
+    if (this.companyService.selectedCompany?.id) {
       this.selectedCompanyId = this.companyService.selectedCompany.id;
       this.loadPeriodsForCompany(this.selectedCompanyId);
     }
 
-    // Preseleccionar período si ya existe
     if (this.periodService.selectedPeriod) {
       this.selectedPeriodId = this.periodService.selectedPeriod.id;
     }
   }
 
-  /**
-   * Cargar los períodos cuando cambia la empresa seleccionada.
-   */
+  // Resto de tus métodos existentes sin cambios...
   async onCompanyChange() {
     if (this.selectedCompanyId) {
       await this.loadPeriodsForCompany(this.selectedCompanyId);
@@ -56,14 +62,11 @@ export class SelectCompanyPeriodDialogComponent implements OnInit {
     }
   }
 
-  /**
-   * Obtener períodos para la empresa seleccionada.
-   */
   async loadPeriodsForCompany(companyId: string) {
     try {
       const data = await this.periodService.loadPeriodTypes(companyId);
-      this.periods = data;      // Actualiza los períodos
-      this.selectedPeriodId = null;  // Reinicia la selección
+      this.periods = data;
+      this.selectedPeriodId = null;
     } catch (error) {
       console.error('Error al cargar periodos:', error);
       this.periods = [];
@@ -71,75 +74,52 @@ export class SelectCompanyPeriodDialogComponent implements OnInit {
     }
   }
 
-  /**
-   * Confirmar selección de empresa y período.
-   */
- /**
- * Confirmar selección de empresa y período.
- */
-async confirm(): Promise<void> {
-  if (this.selectedCompanyId && this.selectedPeriodId) {
-    const selectedCompany = this.companies.find(
-      (company) => company.id === this.selectedCompanyId,
-    );
-    if (selectedCompany) {
-      await this.companyService.selectAndLoadCompany(selectedCompany);
+  async confirm(): Promise<void> {
+    if (this.selectedCompanyId && this.selectedPeriodId) {
+      const selectedCompany = this.companies.find(
+        (company) => company.id === this.selectedCompanyId,
+      );
+      if (selectedCompany) {
+        await this.companyService.selectAndLoadCompany(selectedCompany);
+      }
+
+      const selectedPeriod = this.periods.find(
+        (period) => period.id === this.selectedPeriodId,
+      );
+      if (selectedPeriod) {
+        this.periodService.setSelectedPeriod(selectedPeriod);
+      }
+
+      this.sharedService.loadPermissions().subscribe(
+        (response: any) => {
+          this.sharedService.permissions = response.permissions || [];
+        },
+        (error) => {
+          console.error('Error al cargar permisos:', error);
+        },
+      );
+
+      this.dialogRef.close({
+        companyId: this.selectedCompanyId,
+        periodId: this.selectedPeriodId,
+      });
+
+      window.location.reload();
+    } else {
+      alert('Por favor, selecciona una empresa y un período antes de confirmar.');
     }
-
-    const selectedPeriod = this.periods.find(
-      (period) => period.id === this.selectedPeriodId,
-    );
-    if (selectedPeriod) {
-      this.periodService.setSelectedPeriod(selectedPeriod);
-    }
-
-    // Cargar permisos (ejemplo)
-    this.sharedService.loadPermissions().subscribe(
-      (response: any) => {
-        this.sharedService.permissions = response.permissions || [];
-        console.log('Permisos actualizados:', this.sharedService.permissions);
-      },
-      (error) => {
-        console.error('Error al cargar permisos:', error);
-      },
-    );
-
-    // Cerrar el diálogo y devolver valores
-    this.dialogRef.close({
-      companyId: this.selectedCompanyId,
-      periodId: this.selectedPeriodId,
-    });
-
-    // Aquí recargas la página por completo
-    
-    window.location.reload();
-
-    
-  } else {
-    alert('Por favor, selecciona una empresa y un período antes de confirmar.');
   }
-}
 
-
-  /**
-   * Cerrar el diálogo sin aplicar cambios.
-   */
   close(): void {
     this.dialogRef.close();
   }
 
   navigateToNewPeriodPage(): void {
-    // Guardar temporalmente como "Sin período"
     this.periodService.setSelectedPeriod({ id: 'temp', name: 'Sin período', year: null });
-  
-    // Cerrar el diálogo
     this.dialogRef.close({
       companyId: this.selectedCompanyId,
-      periodId: 'temp', // ID temporal para "Sin período"
+      periodId: 'temp',
     });
-  
-    // Navegar a la página deseada
     this.router.navigate(['/pages/settings/my-company/initial-periods']);
   }
-  
 }

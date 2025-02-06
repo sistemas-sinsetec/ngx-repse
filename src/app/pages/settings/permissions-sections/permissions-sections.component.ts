@@ -183,7 +183,8 @@ export class PermissionsSectionsComponent implements OnInit {
       ],
       'Configuracion de usuarios': [
         'Registrar usuarios',
-        'Mis usuarios'
+        'Mis usuarios',
+        'Editar mi usuario'
       ],
     };
 

@@ -4,13 +4,8 @@
 
     <!-- Selector Empresa -->
     <label>Empresa</label>
-    <nb-select
-      placeholder="Seleccionar Empresa"
-      fullWidth
-      [(selected)]="selectedCompanyId"
-      (selectedChange)="onCompanyChange()"
-      style="margin-bottom: 1rem;"
-    >
+    <nb-select placeholder="Seleccionar Empresa" fullWidth [(selected)]="selectedCompanyId"
+      (selectedChange)="onCompanyChange()" style="margin-bottom: 1rem;">
       <nb-option *ngFor="let company of companies" [value]="company.id">
         {{ company.name }}
       </nb-option>
@@ -18,11 +13,7 @@
 
     <!-- Selector Periodo -->
     <label>Período</label>
-    <nb-select
-      placeholder="Seleccionar Período"
-      fullWidth
-      [(selected)]="selectedPeriodId"
-    >
+    <nb-select placeholder="Seleccionar Período" fullWidth [(selected)]="selectedPeriodId">
       <nb-option *ngFor="let period of periods" [value]="period.id">
         {{ period.name }} - {{ period.year }}
       </nb-option>
@@ -32,12 +23,14 @@
   <nb-card-footer style="text-align: right;">
 
     <!--  [disabled]="!selectedCompanyId || (periods && periods.length > 0)" -->
-  
-    <button nbButton status="info"  style="margin-right: 1rem;" (click)="navigateToNewPeriodPage()">
+
+    <!-- Modifica el botón en tu HTML -->
+    <button nbButton status="info" style="margin-right: 1rem;" (click)="navigateToNewPeriodPage()"
+      [disabled]="!isAllowedUser || !selectedCompanyId">
       Crear Nuevo Período
     </button>
 
-    <button nbButton status="primary" (click)="confirm()" >
+    <button nbButton status="primary" (click)="confirm()">
       Confirmar
     </button>
   </nb-card-footer>
