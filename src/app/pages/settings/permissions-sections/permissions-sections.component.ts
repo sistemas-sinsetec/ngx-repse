@@ -182,8 +182,8 @@ export class PermissionsSectionsComponent implements OnInit {
         'Confirmar solicitudes premium'
       ],
       'Configuracion de usuarios': [
-        'Registrar, eliminar, ver y editar usuarios',
-        'Editar mi usuario'
+        'Registrar usuarios',
+        'Mis usuarios'
       ],
     };
 

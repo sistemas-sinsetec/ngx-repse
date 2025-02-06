@@ -1,6 +1,4 @@
-<nb-layout>
-  <nb-layout-column>
-    <div class="container mt-4">
+ <div class="container mt-4">
       <nb-icon icon="arrow-back-outline" pack="eva" class="back-button" (click)="goBack()"></nb-icon>
       
       <nb-card class="text-center">
@@ -39,36 +37,4 @@
         </nb-card-body>
       </nb-card>
     </div>
-  </nb-layout-column>
-</nb-layout>
 
-<style>
-  .container {
-    max-width: 800px;
-    margin: auto;
-  }
-
-  .back-button {
-    position: absolute;
-    top: 20px;
-    left: 20px;
-    font-size: 24px;
-    cursor: pointer;
-  }
-
-  .list-group-item {
-    border: none;
-    padding: 10px 0;
-  }
-
-  nb-card {
-    border-radius: 10px;
-    background-color: #ffffff;
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-  }
-
-  button[nbButton] {
-    width: 100%;
-    margin: 10px 0;
-  }
-</style>
