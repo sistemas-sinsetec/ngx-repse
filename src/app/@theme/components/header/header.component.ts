@@ -14,6 +14,7 @@ import { LayoutService } from '../../../@core/utils';
 import { map, takeUntil } from 'rxjs/operators';
 import { Subject } from 'rxjs';
 import { SelectCompanyPeriodDialogComponent } from '../../../select-company-period-dialog/select-company-period-dialog.component';
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'ngx-header',
@@ -70,7 +71,8 @@ export class HeaderComponent implements OnInit, OnDestroy {
     private authService: AuthService,
     public companyService: CompanyService,
     public periodService: PeriodService,
-    private dialogService: NbDialogService
+    private dialogService: NbDialogService,
+    private router: Router
   ) { }
 
   ngOnInit() {
@@ -186,9 +188,9 @@ export class HeaderComponent implements OnInit, OnDestroy {
     return false;
   }
 
-  navigateHome() {
-    this.menuService.navigateHome();
-    return false;
+  navigateHome(event: Event): void {
+    event.preventDefault(); // Prevenir el comportamiento predeterminado del enlace
+    this.router.navigate(['/']); // Navegar a la ruta deseada
   }
 
   loadUserInfo() {

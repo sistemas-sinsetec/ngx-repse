@@ -53,41 +53,66 @@ export class PagesComponent implements OnInit {
    */
   filterMenuItems(items: CustomMenuItem[]): CustomMenuItem[] {
     const levelUser = this.companyService.selectedCompany?.levelUser || '';
-    console.log('LevelUser actual:', levelUser);
   
-    return items
+    // Primer filtrado: se eliminan ítems según permisos, requiredLevel y children.
+    const filtered = items
       .map((item) => {
-        console.log('Procesando elemento:', item.title);
-  
-        // 1. Verificar si el elemento padre cumple con el requiredLevel
+        // Si el item tiene restricción de nivel y no coincide, se descarta.
         if (item.requiredLevel && !item.requiredLevel.includes(levelUser)) {
-          console.log(`Elemento "${item.title}" oculto por levelUser incorrecto.`);
-          return null; // Oculta el elemento padre y todos sus hijos
+          return null;
         }
   
-        // 2. Filtrar los hijos si existen
+        // Si el ítem tiene hijos, se filtran recursivamente.
         if (item.children) {
           const filteredChildren = this.filterMenuItems(item.children);
           if (filteredChildren.length === 0) {
-            return null; // Si no hay hijos válidos, oculta el padre
+            return null; // Si después del filtrado no quedan hijos, se descarta el padre.
           }
           return { ...item, children: filteredChildren };
         }
   
-        // 3. Verificar permisos solo si no es un grupo
+        // Si el ítem requiere permiso y no es un grupo, se verifica el permiso.
         if (item.permission && !item.group) {
           const hasPermission = this.sharedService.hasPermission(
             item.permission.section,
             item.permission.subSection,
           );
           if (!hasPermission) {
-            console.log(`Elemento "${item.title}" oculto por falta de permisos.`);
             return null;
           }
         }
   
+        // Si no cumple ninguna condición de eliminación, se devuelve el ítem.
         return item;
       })
       .filter((item) => item !== null) as CustomMenuItem[];
+  
+    // Segundo filtrado: se eliminan los grupos sin secciones.
+    // Dado que en tu estructura los títulos (grupos) son elementos separados,
+    // se recorre el arreglo filtrado y se descartan aquellos grupos que no tienen un ítem de sección a continuación.
+    const finalFiltered: CustomMenuItem[] = [];
+    for (let i = 0; i < filtered.length; i++) {
+      const currentItem = filtered[i];
+      if (currentItem.group) {
+        // Se asume que los ítems pertenecientes al grupo son los que siguen hasta encontrar otro grupo o llegar al final.
+        let j = i + 1;
+        let foundSection = false;
+        while (j < filtered.length && !filtered[j].group) {
+          // Si se encuentra al menos un elemento que no es grupo, se considera que el grupo tiene secciones.
+          foundSection = true;
+          break;
+        }
+        if (foundSection) {
+          finalFiltered.push(currentItem);
+        }
+        // Si no se encontró ningún ítem, se omite el grupo.
+      } else {
+        finalFiltered.push(currentItem);
+      }
+    }
+  
+    return finalFiltered;
   }
+  
+  
 }
