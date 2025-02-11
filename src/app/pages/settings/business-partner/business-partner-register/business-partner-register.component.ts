@@ -167,6 +167,7 @@ export class BusinessPartnerRegisterComponent implements OnInit {
     );
   }
   
+
   validarTelefono(): boolean {
     const telefonoRegex = /^\d{10}$/;
     if (!telefonoRegex.test(this.usuario.numTelefonico)) {

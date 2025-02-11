@@ -3,6 +3,8 @@ import { HttpClient } from '@angular/common/http';
 import { AuthService } from './auth.service';
 import { CompanyService } from './company.service';
 import { Observable } from 'rxjs';
+import { tap } from 'rxjs/operators';
+
 
 export interface Permission {
   section: string;
@@ -15,6 +17,8 @@ export interface Permission {
 export class SharedService {
   // Variable para almacenar los permisos cargados
   permissions: Permission[] = [];
+  permissionsLoaded: boolean = false;
+
 
   constructor(
     private http: HttpClient,
@@ -29,18 +33,37 @@ export class SharedService {
   loadPermissions(): Observable<any> {
     const userId = this.authService.userId;
     const companyId = this.companyService.selectedCompany?.id || '';
-
+  
     if (!userId || !companyId) {
       console.warn('No se pueden cargar los permisos: falta userId o companyId.');
       return new Observable(observer => {
-        observer.next([]);
+        observer.next({ success: false, permissions: [] });
         observer.complete();
       });
     }
-
+  
     const data = { userId, companyId };
-    return this.http.post('https://siinad.mx/php/loadPermissions.php', data);
+    return this.http.post<{ success: boolean; permissions: Permission[] }>('https://siinad.mx/php/loadPermissions.php', data).pipe(
+      tap(response => {
+        if (response.success) {
+          this.permissions = response.permissions || [];
+          this.permissionsLoaded = true; // Se marcan como cargados
+          console.log('Permisos cargados:', this.permissions);
+        } else {
+          console.warn('Error al cargar permisos:', response);
+          this.permissionsLoaded = false;
+        }
+      })
+    );
   }
+
+  setPermissions(permissions: Permission[]): void {
+    this.permissions = permissions || [];
+    this.permissionsLoaded = true; 
+    console.log('Permisos establecidos:', this.permissions);
+  }
+  
+  
 
   /**
    * Sincroniza los permisos con el backend cada vez que cambia la empresa seleccionada.
