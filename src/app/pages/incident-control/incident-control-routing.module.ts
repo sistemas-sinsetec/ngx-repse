@@ -6,6 +6,7 @@ import { ConfirmDayComponent } from './confirm-day/confirm-day.component';
 import { ConfirmWeekComponent } from './confirm-week/confirm-week.component';
 import { ProcessWeeklyListsComponent } from './process-weekly-lists/process-weekly-lists.component';
 import { ProcessedAttendanceComponent } from './processed-attendance/processed-attendance.component';
+import { authGuard } from '../../services/auth-guard';
 
 const routes: Routes = [
   {
@@ -14,7 +15,9 @@ const routes: Routes = [
     children: [
         {
           path: 'incident-viewer',
-          component: IncidentViewerComponent
+          component: IncidentViewerComponent,
+          canActivate: [authGuard],
+          data: { section: 'Incidencias', subSection: 'Control de incidencias' } // Sección requerida para acceder
         },
         {
           path:'change-hours-modal',
@@ -22,19 +25,27 @@ const routes: Routes = [
         },
         {
           path:'confirm-day',
-          component: ConfirmDayComponent
+          component: ConfirmDayComponent,
+          canActivate: [authGuard],
+          data: { section: 'Incidencias', subSection: 'Confirmar dia' } // Sección requerida para acceder
         },
         {
           path:'confirm-week',
-          component: ConfirmWeekComponent
+          component: ConfirmWeekComponent,
+          canActivate: [authGuard],
+          data: { section: 'Incidencias', subSection: 'Confirmar semana' } // Sección requerida para acceder
         },
         {
           path:'process-weekly-lists',
-          component: ProcessWeeklyListsComponent
+          component: ProcessWeeklyListsComponent,
+          canActivate: [authGuard],
+          data: { section: 'Incidencias', subSection: 'Semanas procesadas' } // Sección requerida para acceder
         },
         {
           path:'processed-attendance',
-          component: ProcessedAttendanceComponent
+          component: ProcessedAttendanceComponent,
+          canActivate: [authGuard],
+          data: { section: 'Incidencias', subSection: 'Lista de asistencias' } // Sección requerida para acceder
         },
 
 

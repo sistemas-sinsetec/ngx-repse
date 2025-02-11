@@ -73,9 +73,7 @@ export const MENU_ITEMS: CustomMenuItem[] = [
       },
       {
         title: 'Editar solicitudes',
-
-        link: '/pages/employee-control/requests-employees',
-
+        link: '/pages/employee-control/edit-employee',
         hidden: false,
         permission: { section: 'Empleados', subSection: 'Editar solicitudes de empleados' },
       },

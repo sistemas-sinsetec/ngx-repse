@@ -22,8 +22,10 @@ import { RegCompanyComponent } from './site/reg-company/reg-company.component';
 import { PremiumAuthComponent } from './site/premium-auth/premium-auth.component';
 import { CpAuthComponent } from './business-partner/cp-auth/cp-auth.component';
 import { EditRolesComponent } from './business-partner/edit-roles/edit-roles.component';
+import { authGuard } from '../../services/auth-guard';
 import { BusinessPartnerRegisterComponent } from './business-partner/business-partner-register/business-partner-register.component';
 import { PermissionsBusineesPartnerComponent } from './business-partner/permissions-businees-partner/permissions-businees-partner.component';
+
 const routes: Routes = [
   {
     path: '',
@@ -32,106 +34,143 @@ const routes: Routes = [
       {
         path: 'my-company/upload-logo',
         component: UploadLogoComponent,
+        canActivate: [authGuard],
+        data: { section: 'Configuracion de mi empresa', subSection: 'Asignar logo de la empresa' } 
       },
       {
         path: 'my-company/code-company',
         component: CodeCompanyComponent,
+        canActivate: [authGuard],
+        data: { section: 'Configuracion de mi empresa', subSection: 'Código de la empresa' } 
       },
       {
         path: 'my-company/department-management',
         component: DepartmentManagementComponent,
+        canActivate: [authGuard],
+        data: { section: 'Configuracion de mi empresa', subSection: 'Departamentos' } 
       },
       {
         path: 'my-company/initial-periods',
         component: InitialPeriodsComponent,
+        
       },
       {
         path: 'my-company/period-configuration',
         component: PeriodConfigurationComponent,
+        canActivate: [authGuard],
+        data: { section: 'Configuracion de mi empresa', subSection: 'Tipos de período' } 
       },
       {
         path: 'my-company/period-management',
-        component: PeriodManagementComponent
+        component: PeriodManagementComponent,
+        canActivate: [authGuard],
+        data: { section: 'Configuracion de mi empresa', subSection: 'Catálogo de períodos' } 
       },
       {
         path: 'my-company/company-tax-details',
-        component: CompanyTaxDetailsComponent
+        component: CompanyTaxDetailsComponent,
+        canActivate: [authGuard],
+        data: { section: 'Configuracion de mi empresa', subSection: 'Mi informacion fiscal' } 
       },
       {
         path: 'my-company/anual-review',
-        component: AnualReviewComponent
+        component: AnualReviewComponent,
+        canActivate: [authGuard],
+        data: { section: 'Configuracion de mi empresa', subSection: 'Confirmar expendientes digitales' } 
       },
 
       {
         path: 'my-company/anual-upload',
-        component: AnualUploadComponent
+        component: AnualUploadComponent,
+        canActivate: [authGuard],
+        data: { section: 'Configuracion de mi empresa', subSection: 'Subir expendientes digitales' } 
       },
 
       //user permissions 
       {
         path: 'permissions-sections',
-        component: PermissionsSectionsComponent
+        component: PermissionsSectionsComponent,
       },
 
       // business partners settings
       {
         path: 'business-partner/cp-auth',
         component: CpAuthComponent,
+        canActivate: [authGuard],
+        data: { section: 'Configuracion de socios comerciales', subSection: 'Autorizar socio comercial' } 
       },
       {
         path: 'business-partner/edit-roles',
         component: EditRolesComponent,
+        canActivate: [authGuard],
+        data: { section: 'Configuracion de socios comerciales', subSection: 'Editar roles de los socios comerciales' } 
       },
       {
         path: 'business-partner/business-partner-register',
         component: BusinessPartnerRegisterComponent,
+        canActivate: [authGuard],
+        data: { section: 'Configuracion de socios comerciales', subSection: 'Registrar socio comercial' } 
       },
       {
         path: 'business-partner/permissions-businees-partner',
         component: PermissionsBusineesPartnerComponent,
+        canActivate: [authGuard],
+        data: { section: 'Configuracion de socios comerciales', subSection: 'Secciones visibles de los socios comerciales' }
       },
 
 
       //site routes
       {
         path: 'site/company-permissions-sections',
-        component: CompanyPermissionsSectionsComponent
+        component: CompanyPermissionsSectionsComponent,
       },
       {
         path: 'site/companies-info',
-        component: CompaniesInfoComponent
+        component: CompaniesInfoComponent,
+        canActivate: [authGuard],
+        data: { section: 'Configuracion de sitio', subSection: 'Empresas registradas en la página' }
       },
       {
         path: 'site/reg-company',
-        component: RegCompanyComponent
+        component: RegCompanyComponent,
+        canActivate: [authGuard],
+        data: { section: 'Configuracion de sitio', subSection: 'Registrar empresas' }
       },
       {
         path: 'site/premium-auth',
-        component: PremiumAuthComponent
+        component: PremiumAuthComponent,
+        canActivate: [authGuard],
+        data: { section: 'Configuracion de sitio', subSection: 'Confirmar solicitudes premium' }
       },
-
 
       //user routes
       {
         path: 'users/register',
-        component: RegisterComponent
+        component: RegisterComponent,
+        canActivate: [authGuard],
+        data: { section: 'Configuracion de usuarios', subSection: 'Registrar usuarios' } 
       },
       {
         path: 'users/my-users',
-        component: MyUsersComponent
+        component: MyUsersComponent,
+        canActivate: [authGuard],
+        data: { section: 'Configuracion de usuarios', subSection: 'Mis usuarios' } 
       },
       {
         path: 'users/my-profile',
-        component: MyProfileComponent
+        component: MyProfileComponent,
+        canActivate: [authGuard],
+        data: { section: 'Configuracion de usuarios', subSection: 'Editar mi usuario' } 
       }
-
     ],
   },
 ];
+
 
 @NgModule({
   imports: [RouterModule.forChild(routes)],
   exports: [RouterModule],
 })
 export class SettingsRoutingModule {
+
 }
