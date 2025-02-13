@@ -1,4 +1,8 @@
 import { NgModule } from '@angular/core';
+
+import { IonicModule } from '@ionic/angular';
+
+
 import {
   NbButtonModule,
   NbCardModule,
@@ -70,6 +74,7 @@ import { BusinessPartnerRegisterComponent } from './business-partner/business-pa
 import { CompanyInfoModalComponent } from './business-partner/company-info-modal/company-info-modal.component';
 import { PermissionsBusineesPartnerComponent } from './business-partner/permissions-businees-partner/permissions-businees-partner.component';
 import { DeleteModalComponent } from './site/delete-modal/delete-modal.component';
+
 
 @NgModule({
 
@@ -144,7 +149,8 @@ import { DeleteModalComponent } from './site/delete-modal/delete-modal.component
     NbTagModule,
     NbUserModule,
     NbSpinnerModule,
-
+    IonicModule.forRoot(),
+ 
   ],
 })
 export class SettingsModule { }

@@ -4,5 +4,31 @@
   
   .selected {
     background-color: #f0f0f0; /* Ajusta el color según tu tema */
+  
+  
+  
+  }
+
+
+  .selected-days {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 8px;
+  }
+  
+  .day-tag {
+    display: flex;
+    align-items: center;
+    background: #3366ff;
+    color: white;
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-size: 14px;
+  
+    nb-icon {
+      margin-left: 8px;
+      cursor: pointer;
+    }
   }
   
