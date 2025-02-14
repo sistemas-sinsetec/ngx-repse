@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, HostListener, ElementRef } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { AuthService } from '../../../../services/auth.service';
 import { CompanyService } from '../../../../services/company.service';
@@ -14,6 +14,12 @@ export class PeriodConfigurationComponent {
 
   periods: any[] = [];  // Array para almacenar los periodos cargados desde la base de datos
   selectedPeriod: any = {};  // Objeto para almacenar el periodo seleccionado o nuevo
+  
+  currentMonth: number = new Date().getMonth();
+  currentYear: number = new Date().getFullYear();
+  daysInMonth: number[] = [];
+  selectedDates: Set<string> = new Set();
+  isCalendarOpen: boolean = false; // Controla si el calendario está abierto
 
   minDate: string = ''; // Mínima fecha seleccionable
   maxDate: string = ''; // Máxima fecha seleccionable
@@ -23,13 +29,87 @@ export class PeriodConfigurationComponent {
     private authService: AuthService,
     private companyService: CompanyService,
     private loadingController: LoadingController, // Inyectar LoadingController
-    private toastrService: NbToastrService // Inyectar NbToastrService
-  ) { }
+    private toastrService: NbToastrService, // Inyectar NbToastrService
+    private elementRef: ElementRef,
+  ) { this.generateDays();}
 
   ngOnInit() {
     this.loadPeriods();
     this.updateSelectableDates(); // Actualizar las fechas seleccionables al iniciar la página
   }
+
+  generateDays() {
+    const days = new Date(this.currentYear, this.currentMonth + 1, 0).getDate();
+    this.daysInMonth = Array.from({ length: days }, (_, i) => i + 1);
+  }
+
+  // Formatea la fecha en YYYY-MM-DD
+  getFormattedDate(day: number): string {
+    const month = (this.currentMonth + 1).toString().padStart(2, '0');
+    const dayStr = day.toString().padStart(2, '0');
+    return `${this.currentYear}-${month}-${dayStr}`;
+  }
+
+  // Agrega o elimina una fecha seleccionada
+  toggleDate(day: number) {
+    const formattedDate = this.getFormattedDate(day);
+
+    // Validar si la fecha está dentro del rango permitido
+    if (formattedDate >= this.minDate && formattedDate <= this.maxDate) {
+      if (this.selectedDates.has(formattedDate)) {
+        this.selectedDates.delete(formattedDate);
+      } else {
+        this.selectedDates.add(formattedDate);
+      }
+
+      // Actualizar el modelo de Angular (ngModel) con las fechas seleccionadas
+      this.updateRestDays();
+    }
+  }
+
+  // Verifica si una fecha está seleccionada
+  isSelected(day: number): boolean {
+    return this.selectedDates.has(this.getFormattedDate(day));
+  }
+
+  // Cambia al mes anterior
+  previousMonth() {
+    if (this.currentMonth === 0) {
+      this.currentMonth = 11;
+      this.currentYear--;
+    } else {
+      this.currentMonth--;
+    }
+    this.generateDays();
+  }
+
+  // Cambia al mes siguiente
+  nextMonth() {
+    if (this.currentMonth === 11) {
+      this.currentMonth = 0;
+      this.currentYear++;
+    } else {
+      this.currentMonth++;
+    }
+    this.generateDays();
+  }
+
+  // Abre o cierra el calendario al hacer clic en el input
+  toggleCalendar() {
+    this.isCalendarOpen = !this.isCalendarOpen;
+  }
+
+  // Obtener las fechas seleccionadas como una cadena para mostrar en el input
+  getSelectedDatesString(): string {
+    return Array.from(this.selectedDates).join(', ');
+  }
+
+  // Actualiza el valor en el modelo ngModel
+  updateRestDays() {
+    // Convertimos el Set a un array para pasarlo a selectedPeriod.rest_days_position
+    this.selectedPeriod.rest_days_position = Array.from(this.selectedDates);
+  }
+
 
   async loadPeriods() {
     const loading = await this.loadingController.create({
@@ -285,23 +365,7 @@ export class PeriodConfigurationComponent {
     return date.toISOString().split('T')[0];
   }
 
-  updateRestDays() {
-    this.updateSelectableDates(); // Asegurarse de que las fechas seleccionables estén actualizadas
 
-    // Filtrar los días seleccionados para asegurarse de que están dentro del rango permitido
-    const validDates = this.selectedPeriod.rest_days_position.filter((date: string) =>
-      date >= this.minDate && date <= this.maxDate
-    );
-
-    // Convertir las fechas seleccionadas en el formato "01,02,03"
-    const daysArray = validDates.map((date: string) => {
-      const day = new Date(date).getDate();
-      return day < 10 ? `0${day}` : `${day}`;
-    });
-
-    // Unir los días en una cadena separada por comas
-    this.selectedPeriod.rest_days_position = daysArray.join(',');
-  }
 
   calculateRestDays() {
     // Verifica que haya una fecha de inicio y un número de días definido

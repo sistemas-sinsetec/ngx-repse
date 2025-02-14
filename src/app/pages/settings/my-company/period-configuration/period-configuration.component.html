@@ -1,3 +1,6 @@
+
+
+
 <div class="container mt-4">
   <div class="d-flex justify-content-center mb-4">
     <h5><strong>{{ selectedPeriod.period_type_id ? 'Editar Periodo' : 'Crear Nuevo Periodo' }}</strong></h5>
@@ -162,23 +165,45 @@
               <div class="col-md-6">
                 <div class="form-group">
                   <label>Posición de los séptimos días</label>
+                  
+                  <!-- Input personalizado para abrir el calendario -->
                   <input 
-                    type="date" 
+                    type="text" 
                     nbInput 
                     fullWidth 
-                    placeholder="Posición de los Séptimos Días" 
-                    [(ngModel)]="selectedPeriod.rest_days_position" 
-                    name="rest_days_position" 
-                    (change)="updateRestDays()"
-                    [min]="minDate" 
-                    [max]="maxDate" 
-                    class="form-control">
+                    placeholder="Selecciona fechas" 
+                    [value]="getSelectedDatesString()"
+                    (click)="toggleCalendar()"
+                    class="form-control"
+                    readonly
+                  />
+              
+                  <!-- Calendario que se muestra solo si isCalendarOpen es true -->
+                  <div *ngIf="isCalendarOpen" class="calendar-container">
+                    <div class="calendar-header">
+                      <button (click)="previousMonth()">◀</button>
+                      <span>{{ currentYear }} - {{ (currentMonth + 1) | number:'2.0' }}</span>
+                      <button (click)="nextMonth()">▶</button>
+                    </div>
+              
+                    <div class="calendar-grid">
+                      <button 
+                        *ngFor="let day of daysInMonth" 
+                        (click)="toggleDate(day)" 
+                        [class.selected]="isSelected(day)">
+                        {{ day }}
+                      </button>
+                    </div>
+                  </div>
+              
                   <small class="form-text text-muted">
                     Especifica la posición del séptimo día (día de descanso) dentro del periodo. Solo puedes seleccionar fechas dentro del rango de días del periodo.
                   </small>
                 </div>
               </div>
             </div>
+
+              <!---->
 
             <div class="row">
               <!-- Posición del día de pago -->
@@ -237,6 +262,7 @@
               </div>
             </div>
 
+
             <!-- Botones de acción -->
             <div class="row">
               <div class="col-md-12">
@@ -259,3 +285,7 @@
     </div>
   </div>
 </div>
+
+
+
+
