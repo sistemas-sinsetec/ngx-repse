@@ -6,23 +6,6 @@ import { LoadingController } from '@ionic/angular'; // Importar LoadingControlle
 import { NbToastrService } from '@nebular/theme'; // Importar NbToastrService de Nebular
 import { LocalDataSource } from 'ng2-smart-table'; // Importar LocalDataSource para ng2-smart-table
 
-interface Period {
-  period_number: number;
-  start_date: string;
-  end_date: string;
-  payment_date: string;
-  year: number;
-  month: number;
-  imss_bimonthly_start: boolean;
-  imss_bimonthly_end: boolean;
-  month_start: boolean;
-  month_end: boolean;
-  fiscal_year: string;
-  fiscal_start: boolean;
-  fiscal_end: boolean;
-  payment_days: number;
-}
-
 @Component({
   selector: 'ngx-period-management',
   templateUrl: './period-management.component.html',
@@ -103,9 +86,9 @@ export class PeriodManagementComponent implements OnInit {
       period_type_name: selectedRow.period_type_name, // Asignar el nombre del periodo
       period_id: selectedRow.period_id,
       period_number: selectedRow.period_number,
-      start_date: selectedRow.start_date,
-      end_date: selectedRow.end_date,
-      payment_date: selectedRow.payment_date,
+      start_date: new Date(selectedRow.start_date + 'T00:00:00'), // Convert to Date
+      end_date: new Date(selectedRow.end_date + 'T00:00:00'),     // Convert to Date
+      payment_date: new Date(selectedRow.payment_date + 'T00:00:00'), // Convert to Date
       fiscal_year: selectedRow.fiscal_year,
       month: selectedRow.month,
       imss_bimonthly_start: selectedRow.imss_bimonthly_start === 1, // Convertir a booleano
@@ -165,24 +148,6 @@ export class PeriodManagementComponent implements OnInit {
           this.toastrService.danger('Error al cargar las semanas del periodo', 'Error');
         }
       );
-  }
-
-  // Crear un nuevo periodo
-  createNewPeriod() {
-    this.selectedPeriod = {
-      period_type_name: '',
-      period_days: null,
-      payment_days: null,
-      work_period: null,
-      adjust_calendar_periods: null,
-      rest_days_position: [],
-      payroll_position: null,
-      fiscal_year_start: '',
-      payment_frequency: '',
-      totalPeriods: null,
-      custom_period_length: null,
-      custom_period_type: '',
-    };
   }
 
   // Guardar los detalles del periodo

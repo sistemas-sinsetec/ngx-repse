@@ -209,27 +209,31 @@ export class InitialPeriodsComponent {
   
     const companyId = this.companyService.selectedCompany.id;
     const startDate = new Date(periodo.fechainicioejercicio);
-    const allPeriods = []; // Array para almacenar todos los periodos
+    const allPeriods = [];
   
     for (const periodTypeData of periodTypes) {
       const periodType = periodTypeData.period_type_name;
       const periodTypeId = periodTypeData.period_type_id;
   
-      // Determinar el número total de periodos según el tipo
-      const totalPeriods = periodType === 'Semanal' ? 52 :
-        periodType === 'Quincenal' ? 24 :
-          12;
+      if (!['Semanal', 'Quincenal', 'Mensual'].includes(periodType)) {
+        console.error(`Tipo de período no válido: ${periodType}`);
+        continue;
+      }
   
-      // Determinar el valor de fiscal_year según el tipo de periodo
+      const totalPeriods = periodType === 'Semanal' ? 52 :
+        periodType === 'Quincenal' ? 24 : 12;
+  
       const fiscalYear = periodType === 'Semanal' ? this.ejercicioSemanal :
         periodType === 'Quincenal' ? this.ejercicioQuincenal :
-          this.ejercicioMensual;
+        this.ejercicioMensual;
   
       let currentStartDate = startDate;
   
       for (let i = 0; i < totalPeriods; i++) {
-        let periodEndDate: Date = new Date(currentStartDate);
+        let periodEndDate = new Date(currentStartDate);
+        let paymentDate: Date | null = null;
   
+        // Calcular fecha de fin de período
         if (periodType === 'Semanal' || periodType === 'Quincenal') {
           periodEndDate.setDate(currentStartDate.getDate() + periodo.diasdelperiodo - 1);
         } else if (periodType === 'Mensual') {
@@ -237,19 +241,33 @@ export class InitialPeriodsComponent {
           periodEndDate.setDate(0);
         }
   
-        const month = currentStartDate.getMonth() + 1;
-        const isMonthStart = currentStartDate.getDate() === 1;
-        const isMonthEnd = periodEndDate.getDate() === new Date(periodEndDate.getFullYear(), periodEndDate.getMonth() + 1, 0).getDate();
-        const isFiscalStart = i === 0;
-        const isFiscalEnd = i === totalPeriods - 1;
+        // Calcular payment_date según el tipo
+        if (periodType === 'Semanal') {
+          paymentDate = new Date(periodEndDate);
+          paymentDate.setDate(paymentDate.getDate() + 3);
+          paymentDate = this.adjustPaymentDate(paymentDate);
+        } else if (periodType === 'Quincenal') {
+          paymentDate = new Date(periodEndDate);
+          paymentDate = this.adjustPaymentDateQuincenal(paymentDate);
+        } else if (periodType === 'Mensual') {
+          paymentDate = new Date(currentStartDate);
+          paymentDate.setDate(15);
+          paymentDate = this.adjustPaymentDateQuincenal(paymentDate);
+        }
+  
+        // Validar fecha de pago
+        if (!paymentDate || isNaN(paymentDate.getTime())) {
+          console.error('Fecha de pago inválida para el período:', periodType);
+          continue;
+        }
   
         const payrollPeriod = {
           company_id: companyId,
           period_type_id: periodTypeId,
           period_number: i + 1,
-          fiscal_year: fiscalYear, // Usar el valor correcto de fiscal_year
-          month: month,
-          payment_days: periodo.diasdelperiodo,
+          fiscal_year: fiscalYear,
+          month: currentStartDate.getMonth() + 1,
+          payment_days: periodType === 'Mensual' ? periodEndDate.getDate() : periodo.diasdelperiodo,
           rest_days: periodo.numeroseptimos,
           interface_check: 0,
           net_modification: 0,
@@ -257,32 +275,51 @@ export class InitialPeriodsComponent {
           affected: 0,
           start_date: currentStartDate.toISOString().split('T')[0],
           end_date: periodEndDate.toISOString().split('T')[0],
-          fiscal_start: isFiscalStart ? 1 : 0,
-          month_start: isMonthStart ? 1 : 0,
-          month_end: isMonthEnd ? 1 : 0,
-          fiscal_end: isFiscalEnd ? 1 : 0,
+          fiscal_start: i === 0 ? 1 : 0,
+          month_start: currentStartDate.getDate() === 1 ? 1 : 0,
+          month_end: periodEndDate.getDate() === new Date(periodEndDate.getFullYear(), periodEndDate.getMonth() + 1, 0).getDate() ? 1 : 0,
+          fiscal_end: i === totalPeriods - 1 ? 1 : 0,
           timestamp: new Date().toISOString().split('T')[0],
           imss_bimonthly_start: 0,
           imss_bimonthly_end: 0,
-          payment_date: null
+          payment_date: paymentDate.toISOString().split('T')[0]
         };
   
-        allPeriods.push(payrollPeriod); // Agregar el periodo al array
+        allPeriods.push(payrollPeriod);
   
+        // Preparar siguiente período
         currentStartDate = new Date(periodEndDate);
         currentStartDate.setDate(currentStartDate.getDate() + 1);
       }
     }
   
     try {
-      // Enviar todos los periodos en una sola solicitud
       await this.http.post('https://siinad.mx/php/create-payroll-period.php', { periods: allPeriods }).toPromise();
-      console.log('Todos los periodos de nómina creados correctamente');
+      console.log('Periodos creados correctamente');
     } catch (error) {
-      console.error('Error al crear los periodos de nómina', error);
+      console.error('Error al crear periodos:', error);
     }
   }
 
+  private adjustPaymentDate(date: Date): Date {
+    const dayOfWeek = date.getDay();
+    if (dayOfWeek === 0) { // Domingo → Lunes
+      date.setDate(date.getDate() + 1);
+    } else if (dayOfWeek === 6) { // Sábado → Lunes
+      date.setDate(date.getDate() + 2);
+    }
+    return date;
+  }
+
+  private adjustPaymentDateQuincenal(date: Date): Date {
+    const dayOfWeek = date.getDay();
+    if (dayOfWeek === 0) { // Domingo → Viernes
+      date.setDate(date.getDate() - 2);
+    } else if (dayOfWeek === 6) { // Sábado → Viernes
+      date.setDate(date.getDate() - 1);
+    }
+    return date;
+  }
 
   resetForm() {
     this.periodoSemanal = false;

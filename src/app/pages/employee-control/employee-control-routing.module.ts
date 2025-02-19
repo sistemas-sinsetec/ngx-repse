@@ -5,7 +5,6 @@ import { RequestsEmployeesComponent } from './requests-employees/requests-employ
 import { AddEmployeesComponent } from './add-employees/add-employees.component';
 import { EmployeeViewComponent } from './employee-view/employee-view.component';
 import { VacationsKardexComponent } from './vacations-kardex/vacations-kardex.component';
-import { authGuard } from '../../services/auth-guard';
 
 const routes: Routes = [
   {
@@ -29,9 +28,7 @@ const routes: Routes = [
       },
       {
         path: 'vacations-kardex',
-        component: VacationsKardexComponent,
-        canActivate: [authGuard],
-        data: { Section: 'employee-control', subSection: 'vacations-kardex' } // Sección requerida para acceder
+        component: VacationsKardexComponent
       }
     ],
   },

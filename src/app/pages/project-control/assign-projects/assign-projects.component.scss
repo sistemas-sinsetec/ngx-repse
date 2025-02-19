@@ -5,7 +5,58 @@ nb-list-item.selected {
   }
   
   nb-list-item.disabled {
-    pointer-events: none; /* Deshabilitar clics */
-    opacity: 0.6; /* Visualmente deshabilitado */
+    pointer-events: none; /* Deshabilita clics */
+    cursor: not-allowed; /* Cambia el cursor */
+    background-color: #f8f9fa; /* Fondo gris claro */
+    color: #6c757d; /* Texto gris oscuro */
+    border-left: 4px solid #dc3545; /* Borde rojo a la izquierda */
+    opacity: 0.8; /* Ligera transparencia */
+    transition: all 0.3s ease; /* Transición suave */
   }
   
+  nb-list-item.disabled:hover {
+    background-color: #e9ecef; /* Cambio de fondo al pasar el mouse */
+  }
+
+  /* Contenedor principal del mensaje */
+.no-employees-message {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100%; /* Ocupa toda la altura disponible */
+  min-height: 200px; /* Altura mínima para asegurar visibilidad */
+  padding: 20px;
+ 
+
+}
+
+/* Contenedor interno del mensaje */
+.message-container {
+  text-align: center;
+  max-width: 300px; /* Ancho máximo para mejor legibilidad */
+}
+
+/* Ícono del mensaje */
+.message-icon {
+  font-size: 2.5rem;
+  color: #6c757d; /* Color gris oscuro */
+  margin-bottom: 15px;
+}
+
+/* Texto del mensaje */
+.message-text {
+  font-size: 1rem;
+  color: #495057; /* Color gris más oscuro */
+  margin: 0;
+  line-height: 1.5;
+  font-weight: 400; /* Peso de la fuente normal */
+}
+
+.scrollable-container {
+  max-height: 400px; /* Altura máxima del contenedor */
+  overflow-y: auto; /* Habilita el scroll vertical */
+ 
+  padding: 8px; /* Espaciado interno */
+}
+
+

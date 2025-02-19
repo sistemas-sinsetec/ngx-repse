@@ -24,6 +24,7 @@ import { CpAuthComponent } from './business-partner/cp-auth/cp-auth.component';
 import { EditRolesComponent } from './business-partner/edit-roles/edit-roles.component';
 import { BusinessPartnerRegisterComponent } from './business-partner/business-partner-register/business-partner-register.component';
 import { PermissionsBusineesPartnerComponent } from './business-partner/permissions-businees-partner/permissions-businees-partner.component';
+
 const routes: Routes = [
   {
     path: '',
@@ -123,8 +124,8 @@ const routes: Routes = [
       {
         path: 'users/my-profile',
         component: MyProfileComponent
-      }
-
+      },
+     
     ],
   },
 ];

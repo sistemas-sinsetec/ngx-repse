@@ -43,6 +43,7 @@ import { EmployeeDetailsComponent } from './employee-details/employee-details.co
 import { EditEmployeeComponent } from './edit-employee/edit-employee.component';
 import { AddEmployeesComponent } from './add-employees/add-employees.component';
 import { VacationsKardexComponent } from './vacations-kardex/vacations-kardex.component';
+import { EmployeeHierarchyComponent } from './employee-hierarchy/employee-hierarchy.component';
 
 
 @NgModule({
@@ -53,7 +54,8 @@ import { VacationsKardexComponent } from './vacations-kardex/vacations-kardex.co
     EmployeeDetailsComponent,
     EditEmployeeComponent,
     AddEmployeesComponent,
-    VacationsKardexComponent
+    VacationsKardexComponent,
+    EmployeeHierarchyComponent
 
    
 

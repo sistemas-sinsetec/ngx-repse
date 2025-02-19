@@ -1,4 +1,5 @@
 import { NgModule } from '@angular/core';
+import { IonicModule } from '@ionic/angular';
 import {
   NbButtonModule,
   NbCardModule,
@@ -22,7 +23,6 @@ import {
   NbUserModule,
   NbSpinnerModule,
 } from '@nebular/theme';
-
 import { ThemeModule } from '../../@theme/theme.module';
 import { SettingsRoutingModule } from './settings-routing.module';
 import { SettingsComponent } from './settings.component';
@@ -48,7 +48,6 @@ import { Afil01ModalComponent } from './my-company/afil01-modal/afil01-modal.com
 import { AutorizacionStpsModalComponent } from './my-company/autorizacion-stps-modal/autorizacion-stps-modal.component';
 import { CompanyPermissionsSectionsComponent } from './site/company-permissions-sections/company-permissions-sections.component';
 import { PremiumAuthComponent } from './site/premium-auth/premium-auth.component';
-
 import { RegistroModalComponent } from './my-company/registro-modal/registro-modal.component';
 import { RegistroModalComponentP } from './business-partner/registro-modal/registro-modal.component';
 import { CompaniesInfoComponent } from './site/companies-info/companies-info.component';
@@ -60,8 +59,6 @@ import { MyProfileComponent } from './users/my-profile/my-profile.component';
 import { RegCompanyComponent } from './site/reg-company/reg-company.component';
 import { CpAuthDialogComponent } from './site/cp-auth-dialog/cp-auth-dialog.component';
 import { CpAuthDeleteDialogComponent } from './site/cp-auth-delete-dialog/cp-auth-delete-dialog.component';
-
-
 import { CpAuthComponent } from './business-partner/cp-auth/cp-auth.component';
 import { CpAuthModalComponent } from './business-partner/cp-auth-modal/cp-auth-modal.component';
 import { CpAuthModalDeleteComponent } from './business-partner/cp-auth-modal-delete/cp-auth-modal-delete.component';
@@ -71,8 +68,8 @@ import { CompanyInfoModalComponent } from './business-partner/company-info-modal
 import { PermissionsBusineesPartnerComponent } from './business-partner/permissions-businees-partner/permissions-businees-partner.component';
 import { DeleteModalComponent } from './site/delete-modal/delete-modal.component';
 
-@NgModule({
 
+@NgModule({
   declarations: [
     SettingsComponent,
     UploadLogoComponent,
@@ -93,10 +90,8 @@ import { DeleteModalComponent } from './site/delete-modal/delete-modal.component
     AutorizacionStpsModalComponent,
     CompanyPermissionsSectionsComponent,
     PremiumAuthComponent,
-
     CompaniesInfoComponent,
     EditCompanyModalComponent,
-   
     RegistroModalComponent,
     RegistroModalComponentP,
     RegisterComponent,
@@ -106,8 +101,6 @@ import { DeleteModalComponent } from './site/delete-modal/delete-modal.component
     RegCompanyComponent,
     CpAuthDialogComponent,
     CpAuthDeleteDialogComponent,
-
-
     CpAuthComponent,
     CpAuthModalComponent,
     CpAuthModalDeleteComponent,
@@ -116,6 +109,7 @@ import { DeleteModalComponent } from './site/delete-modal/delete-modal.component
     CompanyInfoModalComponent,
     PermissionsBusineesPartnerComponent,
     DeleteModalComponent,
+
     
   ],
   imports: [
@@ -144,7 +138,7 @@ import { DeleteModalComponent } from './site/delete-modal/delete-modal.component
     NbTagModule,
     NbUserModule,
     NbSpinnerModule,
-
+    IonicModule.forRoot()
   ],
 })
 export class SettingsModule { }
