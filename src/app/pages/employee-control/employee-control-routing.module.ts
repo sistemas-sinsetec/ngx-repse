@@ -5,6 +5,7 @@ import { RequestsEmployeesComponent } from './requests-employees/requests-employ
 import { AddEmployeesComponent } from './add-employees/add-employees.component';
 import { EmployeeViewComponent } from './employee-view/employee-view.component';
 import { VacationsKardexComponent } from './vacations-kardex/vacations-kardex.component';
+import { authGuard } from '../../services/auth-guard';
 
 const routes: Routes = [
   {
