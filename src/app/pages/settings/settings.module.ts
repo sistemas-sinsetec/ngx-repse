@@ -70,6 +70,8 @@ import { BusinessPartnerRegisterComponent } from './business-partner/business-pa
 import { CompanyInfoModalComponent } from './business-partner/company-info-modal/company-info-modal.component';
 import { PermissionsBusineesPartnerComponent } from './business-partner/permissions-businees-partner/permissions-businees-partner.component';
 import { DeleteModalComponent } from './site/delete-modal/delete-modal.component';
+import { DepartmentRangesComponent } from './my-company/department-ranges/department-ranges.component';
+import { DepartmentRangesDialogComponent } from './my-company/department-ranges-dialog/department-ranges-dialog.component';
 
 @NgModule({
 
@@ -116,6 +118,8 @@ import { DeleteModalComponent } from './site/delete-modal/delete-modal.component
     CompanyInfoModalComponent,
     PermissionsBusineesPartnerComponent,
     DeleteModalComponent,
+    DepartmentRangesComponent,
+    DepartmentRangesDialogComponent,
     
   ],
   imports: [
