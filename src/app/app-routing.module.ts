@@ -50,6 +50,8 @@ export const routes: Routes = [
   { path: '**', redirectTo: 'auth/login' }, // Redirigir cualquier ruta no encontrada a 'auth/login'
 ];
 
+
+
 const config: ExtraOptions = {
   useHash: false,
 };

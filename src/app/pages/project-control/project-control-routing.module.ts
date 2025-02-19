@@ -4,6 +4,7 @@ import { ProjectControlComponent } from './project-control.component';
 import { ProjectControlModule } from './project-control.module';
 import { AssignProjectsComponent } from './assign-projects/assign-projects.component';
 import { DeployProjectsComponent } from './deploy-projects/deploy-projects.component';
+import { authGuard } from '../../services/auth-guard';
 
 const routes: Routes = [
   {
@@ -13,11 +14,17 @@ const routes: Routes = [
       {
         path: 'assign-projects',
         component: AssignProjectsComponent,
+        canActivate: [authGuard],
+        data: { section: 'Control de proyectos', subSection: 'Asignacion de proyectos' } // Sección requerida para acceder        
       },
       {
         path: 'deploy-projects',
-        component: DeployProjectsComponent
+        component: DeployProjectsComponent,
+        canActivate: [authGuard],
+        data: { section: 'Control de proyectos', subSection: 'Visualizacion de proyectos' } // Sección requerida para acceder 
       }
+      
+
     ]
   },
 ];

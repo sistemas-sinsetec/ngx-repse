@@ -14,28 +14,42 @@ const routes: Routes = [
     children: [
       {
         path: 'add-employees',
-        component: AddEmployeesComponent
+        component: AddEmployeesComponent,
+        canActivate: [authGuard],
+        data: { section: 'Empleados', subSection: 'Registrar solicitudes de empleados' } // Sección requerida para acceder
       },
       {
         path: 'requests-employees',
-        component: RequestsEmployeesComponent
+        component: RequestsEmployeesComponent,
+        
+        canActivate: [authGuard],
+        data: { section: 'Empleados', subSection: 'Editar solicitudes de empleados' } // Sección requerida para acceder
       },
       // Ruta de vista de empleados con permisos de AuthGuard
       {
         path: 'employee-view',
         component: EmployeeViewComponent,
         canActivate: [authGuard],
+        data: { section: 'Empleados', subSection: 'Ver empleados registrados' } // Sección requerida para acceder
+      },
+      {
+        path: 'edit-employee',
+        component: EmployeeViewComponent,
+        canActivate: [authGuard],
         data: { section: 'Empleados', subSection: 'Editar solicitudes de empleados' } // Sección requerida para acceder
       },
       {
         path: 'vacations-kardex',
-        component: VacationsKardexComponent
-      }
+
+        component: VacationsKardexComponent,
+        canActivate: [authGuard],
+        data: { section: 'Empleados', subSection: 'Kardex de vacaciones' } // Sección requerida para acceder
+      },
+      
     ],
   },
 
 ];
-
 
 @NgModule({
   imports: [RouterModule.forChild(routes)],

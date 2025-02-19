@@ -12,6 +12,9 @@ export class AuthService {
   userId: string = '';
   avatar: string = '';
 
+  employeeId: string = ''; // <-- NUEVO
+
+
   // Subject para emitir cambios en el avatar
   private avatarChange$ = new Subject<string>();
 
@@ -21,6 +24,7 @@ export class AuthService {
 
     if (this.isLoggedIn) {
       this.username = localStorage.getItem('username') || '';
+      this.employeeId = localStorage.getItem('employeeId') || ''; // <-- NUEVO
       this.userId = localStorage.getItem('userId') || '';
       this.avatar = localStorage.getItem('avatar') || 'assets/images/avatar.png'; // Cargar avatar desde localStorage
     }
@@ -30,16 +34,18 @@ export class AuthService {
    * Manejo de Login
    * Guarda estado en localStorage y marca sesión como iniciada
    */
-  login(username: string, userId: string, avatar: string) {
+  login(username: string, userId: string, employeeId: string, avatar: string) {
     this.isLoggedIn = true;
     this.username = username;
     this.userId = userId;
     this.avatar = avatar;
+    this.employeeId = employeeId; // <-- NUEVO
 
     localStorage.setItem('isLoggedIn', 'true');
     localStorage.setItem('username', username);
     localStorage.setItem('userId', userId);
     localStorage.setItem('avatar', avatar); // Guardar avatar en localStorage
+    localStorage.setItem('employeeId', employeeId); // <-- NUEVO
 
     // Emitir el cambio en el avatar
     this.avatarChange$.next(avatar);

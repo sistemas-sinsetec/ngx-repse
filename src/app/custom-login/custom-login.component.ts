@@ -67,7 +67,8 @@ export class CustomLoginComponent implements OnInit {
           this.authService.login(
             this.user.username,  // o response.username si te lo regresa el backend
             response.userId,
-            response.avatar
+            response.avatar,
+            response.employee_id,
           );
 
           // 2. Manejar las empresas principales en CompanyService

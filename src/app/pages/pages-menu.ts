@@ -73,9 +73,7 @@ export const MENU_ITEMS: CustomMenuItem[] = [
       },
       {
         title: 'Editar solicitudes',
-
-        link: '/pages/employee-control/requests-employees',
-
+        link: '/pages/employee-control/edit-employee',
         hidden: false,
         permission: { section: 'Empleados', subSection: 'Editar solicitudes de empleados' },
       },
@@ -199,6 +197,12 @@ export const MENU_ITEMS: CustomMenuItem[] = [
           {
             title: 'Mis departamentos',
             link: '/pages/settings/my-company/department-management',
+            hidden: false,
+            permission: { section: 'Configuracion de mi empresa', subSection: 'Departamentos' },
+          },
+          {
+            title: 'Administrar Rangos',
+            link: '/pages/settings/my-company/department-ranges',
             hidden: false,
             permission: { section: 'Configuracion de mi empresa', subSection: 'Departamentos' },
           },
