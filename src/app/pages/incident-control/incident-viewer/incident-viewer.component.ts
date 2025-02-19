@@ -30,7 +30,7 @@ export class IncidentViewerComponent implements OnInit {
   // Opciones de incidencia para empleados asignados y no asignados
   assignedIncidents = ['Asistencia', 'Retardo', 'Horas Extras'];
   unassignedIncidents = ['Asistencia sin proyecto', 'Descanso', 'Incapacidad', 'Vacaciones', 'Falta', 'Día Festivo', 'Permiso sin Goce de Sueldo', 'Permiso con Goce de Sueldo', 'Día de castigo'];
-
+  userId: number;
   constructor(
     private http: HttpClient,
     private dialogService: NbDialogService, // Usar NbDialogService de Nebular
@@ -45,6 +45,7 @@ export class IncidentViewerComponent implements OnInit {
 
   ngOnInit() {
     this.companyId = this.companyService.selectedCompany.id; // Obtener el companyId directamente desde AuthService
+    this.userId = parseInt(this.authService.userId); 
     this.loadWeeks(); // Cargar semanas laborales disponibles
     moment.locale('es'); // Configurar moment.js para usar el idioma español
   }
@@ -148,7 +149,7 @@ export class IncidentViewerComponent implements OnInit {
     }
 
     const { start_date, end_date, week_number } = this.selectedWeek;
-    const day_of_week = this.selectedDia; // Usar el día seleccionado
+    const day_of_week = this.selectedDia;
 
     const loading = await this.loadingController.create({
       message: 'Cargando empleados...',
@@ -156,8 +157,8 @@ export class IncidentViewerComponent implements OnInit {
     });
     await loading.present();
 
-    // Cargar empleados asignados
-    this.http.get(`https://siinad.mx/php/get_assigned_employees1.php?start_date=${start_date}&end_date=${end_date}&company_id=${this.companyId}&project_id=0&week_number=${week_number}&day_of_week=${day_of_week}`)
+    // Cargar empleados asignados con el filtro de department_range
+    this.http.get(`https://siinad.mx/php/get_assigned_employees1.php?start_date=${start_date}&end_date=${end_date}&company_id=${this.companyId}&project_id=0&week_number=${week_number}&day_of_week=${day_of_week}&user_id=${this.userId}`)
       .subscribe((data: any) => {
         this.assignedEmployees = data;
         this.filteredAssignedEmployees = [...this.assignedEmployees];
@@ -167,8 +168,8 @@ export class IncidentViewerComponent implements OnInit {
         loading.dismiss();
       });
 
-    // Cargar empleados no asignados
-    this.http.get(`https://siinad.mx/php/get_unassigned_employees.php?company_id=${this.companyId}&start_date=${start_date}&end_date=${end_date}&week_number=${week_number}&day_of_week=${day_of_week}`)
+    // Cargar empleados no asignados con el filtro de department_range
+    this.http.get(`https://siinad.mx/php/get_unassigned_employees.php?company_id=${this.companyId}&start_date=${start_date}&end_date=${end_date}&week_number=${week_number}&day_of_week=${day_of_week}&user_id=${this.userId}`)
       .subscribe((data: any) => {
         this.unassignedEmployees = data;
         this.filteredUnassignedEmployees = [...this.unassignedEmployees];

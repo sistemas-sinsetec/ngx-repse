@@ -7,7 +7,6 @@ import { NbDialogService } from '@nebular/theme';
 import { DepartmentRangesDialogComponent } from '../department-ranges-dialog/department-ranges-dialog.component';
 import { FormBuilder, FormGroup } from '@angular/forms';  // Asegúrate de importar FormBuilder y FormGroup
 
-
 @Component({
   selector: 'ngx-department-ranges',
   templateUrl: './department-ranges.component.html',
@@ -19,7 +18,6 @@ export class DepartmentRangesComponent implements OnInit {
   userId: string = '';
   companyId: string = '';
   positions: any[] = []; // Lista de puestos
-
   departamentos: any[] = [];
   empleados: any[] = [];
   selectedDepartment: string = ''; // Departamento seleccionado
@@ -36,8 +34,7 @@ export class DepartmentRangesComponent implements OnInit {
   ) {}
 
   ngOnInit(): void {
-
-    
+  
     this.userId = this.authService.userId;
     this.companyId = this.companyService.selectedCompany?.id || '';
 
@@ -71,7 +68,6 @@ export class DepartmentRangesComponent implements OnInit {
     });
   }
   
-
   getEmpleadosFiltrados(): any[] {
     if (!this.selectedDepartment) {
       return this.empleadosTodos; // Si no hay departamento seleccionado, mostrar todos
@@ -99,7 +95,6 @@ export class DepartmentRangesComponent implements OnInit {
     });
   }
   
-
   onDepartamentoChange() {
     if (this.selectedDepartment) {
       this.obtenerRangos();
@@ -107,7 +102,6 @@ export class DepartmentRangesComponent implements OnInit {
     }
   }
   
-
   obtenerEmpleados() {
     if (!this.companyId) {
       console.error("Error: companyId no está definido antes de llamar la API");
@@ -146,12 +140,10 @@ export class DepartmentRangesComponent implements OnInit {
     });
   }
   
-
   obtenerRangoEmpleado(employeeId: number): number {
     const rango = this.rangosEmpleados.find(r => r.user_id == employeeId);
     return rango ? rango.department_range : 0; // 🔹 Si no hay rango, devolver 0
   }
-  
 
   obtenerRangos() {
     if (!this.companyId || !this.userId) {
@@ -178,11 +170,6 @@ export class DepartmentRangesComponent implements OnInit {
       console.error("Error al obtener rangos:", error);
     });
   }
-  
-
-
-
-  
 
   actualizarRango(empleado: any) {
     if (empleado.department_range === 0 || !empleado.department_range) {

@@ -4,7 +4,7 @@
     </nb-card-header>
     <nb-card-body>
       <!-- Selector de Departamento -->
-      <div style="text-align: center; margin-bottom: 20px;">
+      <div style="text-align: center; margin-bottom: 20px;" class="text-center">
         <nb-select placeholder="Seleccione un departamento" [(selected)]="selectedDepartment" (selectedChange)="onDepartamentoChange()">
             <nb-option *ngFor="let depto of departamentos" [value]="depto.id">
               {{ depto.nombre }}
@@ -28,7 +28,7 @@
             <td>{{ empleado.nombre }}</td>
             <td>{{ empleado.position_name}}</td>
             <td>
-                <nb-select [(selected)]="empleado.department_range">
+                  <nb-select  [(selected)]="empleado.department_range" >
                     <nb-option *ngFor="let r of rangos" [value]="r">{{ r }}</nb-option>
                   </nb-select>
                   
