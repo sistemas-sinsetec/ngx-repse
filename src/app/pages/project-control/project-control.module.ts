@@ -33,13 +33,13 @@ import {
   NbUserModule
 } from '@nebular/theme';
 
-
 @NgModule({
   declarations: [
     ProjectControlComponent,
     AssignProjectsComponent,
     AssignmentSummaryComponent,
-    DeployProjectsComponent
+    DeployProjectsComponent,
+
   ],
   imports: [
         NbCardModule,

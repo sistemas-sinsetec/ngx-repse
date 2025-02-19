@@ -50,24 +50,35 @@ export class AssignProjectsComponent implements OnInit {
   async loadWeeks() {
     const companyId = this.companyService.selectedCompany.id;
     const selectedPeriod = this.periodService.selectedPeriod.id;
-
+  
     if (!selectedPeriod) {
       console.error('No se ha seleccionado un tipo de periodo');
       return;
     }
-
+  
     let loading = await this.loadingController.create({
       message: 'Cargando semanas...',
       spinner: 'circles',
     });
-
+  
     try {
       await loading.present();
-
+  
       this.http.get(`https://siinad.mx/php/get_weekly_periods.php?company_id=${companyId}&period_type_id=${selectedPeriod}`)
         .subscribe((data: any) => {
           this.semanas = data;
-          this.selectedSemana = this.semanas.length ? this.semanas[0] : null;
+          
+          // Encontrar la semana actual
+          const today = moment();
+          const currentWeek = this.semanas.find(semana => {
+            const start = moment(semana.start_date);
+            const end = moment(semana.end_date);
+            return today.isBetween(start, end, null, '[]'); // [] incluye los extremos
+          });
+  
+          // Establecer la semana seleccionada
+          this.selectedSemana = currentWeek || this.semanas[0];
+          
           this.onSemanaChange(this.selectedSemana);
         }, error => {
           console.error('Error al cargar las semanas', error);
@@ -80,6 +91,13 @@ export class AssignProjectsComponent implements OnInit {
         await loading.dismiss();
       }
     }
+  }
+
+  isCurrentWeek(semana: any): boolean {
+    const today = moment();
+    const start = moment(semana.start_date);
+    const end = moment(semana.end_date);
+    return today.isBetween(start, end, null, '[]');
   }
 
   resetFields(): void {
@@ -134,7 +152,7 @@ export class AssignProjectsComponent implements OnInit {
 
       this.http.get(`https://siinad.mx/php/get_projects_by_date.php?start_date=${startDate}&end_date=${endDate}&company_id=${companyId}`)
         .subscribe((data: any) => {
-          this.obras = data;
+          this.obras = data.sort((a, b) => a.project_name.localeCompare(b.project_name, 'es'));
           this.filterObrasByDate(startDate, endDate);
           this.filterObras(); // Inicializar la lista filtrada
         }, error => {
@@ -160,7 +178,7 @@ export class AssignProjectsComponent implements OnInit {
       return obraStartDate.isBetween(start, end, 'day', '[]') || obraEndDate.isBetween(start, end, 'day', '[]');
     });
 
-    this.selectedObra = this.filteredObras.length ? this.filteredObras[0] : null;
+
   }
 
   async loadEmpleados(semana: any, dia: string, obra: any) {
@@ -176,7 +194,7 @@ export class AssignProjectsComponent implements OnInit {
         const companyId = this.companyService.selectedCompany.id;
         const startDate = this.selectedSemana?.start_date;
         const endDate = this.selectedSemana?.end_date;
-        const projectId = this.selectedObra?.project_id;
+   
         const weekNumber = this.selectedSemana?.week_number;
         const dayOfWeek = this.selectedDia;
 
@@ -188,11 +206,11 @@ export class AssignProjectsComponent implements OnInit {
             this.filterEmpleados();
 
             // Obtener empleados ya asignados
-            this.http.get(`https://siinad.mx/php/get_assigned_employees.php?start_date=${startDate}&end_date=${endDate}&company_id=${companyId}&project_id=${projectId}&week_number=${weekNumber}&day_of_week=${dayOfWeek}`)
-              .subscribe((assignedData: any) => {
-                this.markAssignedEmployees(assignedData);
-              }, error => {
-                console.error('Error al cargar empleados asignados', error);
+            this.http.get(`https://siinad.mx/php/get_assigned_employees.php?start_date=${startDate}&end_date=${endDate}&company_id=${companyId}&week_number=${weekNumber}&day_of_week=${dayOfWeek}`)
+            .subscribe((assignedData: any) => {
+              this.markAssignedEmployees(assignedData);
+            }, error => {
+              console.error('Error al cargar empleados asignados', error);
               }, () => {
                 loading.dismiss();
               });
@@ -213,22 +231,32 @@ export class AssignProjectsComponent implements OnInit {
   }
 
   markAssignedEmployees(assignedEmployees: any) {
+
+    const assignedIds = assignedEmployees.map(id => Number(id));
+
     this.empleados.forEach(empleado => {
-      if (assignedEmployees.includes(empleado.employee_id)) {
-        empleado.isAssigned = true;
-      } else {
-        empleado.isAssigned = false;
+    
+      // Verificar si el ID existe en la lista de asignados
+      empleado.isAssigned = assignedIds.includes(empleado.employee_id);
+      
+      // Si está asignado, quitar selección si existe
+      if (empleado.isAssigned && empleado.selected) {
+        empleado.selected = false;
+        const index = this.selectedEmpleados.indexOf(empleado);
+        if (index > -1) {
+          this.selectedEmpleados.splice(index, 1);
+        }
       }
     });
+    
     this.filterEmpleados();
   }
 
   filterObras() {
     const searchTerm = this.searchObra.toLowerCase();
-    this.filteredObras = this.obras.filter(obra => {
-      const obraName = obra.project_name.toLowerCase();
-      return obraName.includes(searchTerm);
-    });
+    this.filteredObras = this.obras
+      .filter(obra => obra.project_name.toLowerCase().includes(searchTerm))
+      .sort((a, b) => a.project_name.localeCompare(b.project_name, 'es')); // Orden adicional
   }
 
   filterEmpleados() {
@@ -295,7 +323,7 @@ export class AssignProjectsComponent implements OnInit {
         dayOfWeek: this.selectedDia,
         dayText: moment(this.selectedDia).format('dddd'),
         obraId: this.selectedObra?.project_id,
-        employeeIds: this.selectedEmpleados.map((e) => e.employee_id),
+        employeeIds: this.selectedEmpleados.map((e) => Number(e.employee_id)),
         companyId: this.companyService.selectedCompany.id,
         fiscalYear: this.periodService.selectedPeriod.year,
         periodTypeId: this.periodService.selectedPeriod.id,
