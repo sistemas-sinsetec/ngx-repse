@@ -186,31 +186,30 @@ export class AssignProjectsComponent implements OnInit {
       message: 'Cargando empleados...',
       spinner: 'circles',
     });
-
+  
     try {
       await loading.present();
-
+  
       if (semana && dia && obra) {
         const companyId = this.companyService.selectedCompany.id;
+        const userId = this.authService.userId; // Agregado: Obtener el user_id del usuario autenticado
         const startDate = this.selectedSemana?.start_date;
         const endDate = this.selectedSemana?.end_date;
-   
         const weekNumber = this.selectedSemana?.week_number;
         const dayOfWeek = this.selectedDia;
-
-        // Obtener empleados activos
-        this.http.get(`https://siinad.mx/php/get_active_employees_by_date.php?start_date=${startDate}&end_date=${endDate}&company_id=${companyId}`)
+  
+        // Obtener empleados activos con filtro de department_range
+        this.http.get(`https://siinad.mx/php/get_active_employees_by_date.php?start_date=${startDate}&end_date=${endDate}&company_id=${companyId}&user_id=${userId}`)
           .subscribe((data: any) => {
-            // Asegúrate de que data sea un array
             this.empleados = Array.isArray(data) ? data : [];
             this.filterEmpleados();
-
-            // Obtener empleados ya asignados
-            this.http.get(`https://siinad.mx/php/get_assigned_employees.php?start_date=${startDate}&end_date=${endDate}&company_id=${companyId}&week_number=${weekNumber}&day_of_week=${dayOfWeek}`)
-            .subscribe((assignedData: any) => {
-              this.markAssignedEmployees(assignedData);
-            }, error => {
-              console.error('Error al cargar empleados asignados', error);
+  
+            // Obtener empleados ya asignados con el filtro de department_range
+            this.http.get(`https://siinad.mx/php/get_assigned_employees.php?start_date=${startDate}&end_date=${endDate}&company_id=${companyId}&week_number=${weekNumber}&day_of_week=${dayOfWeek}&user_id=${userId}`)
+              .subscribe((assignedData: any) => {
+                this.markAssignedEmployees(assignedData);
+              }, error => {
+                console.error('Error al cargar empleados asignados', error);
               }, () => {
                 loading.dismiss();
               });
@@ -229,7 +228,7 @@ export class AssignProjectsComponent implements OnInit {
       }
     }
   }
-
+  
   markAssignedEmployees(assignedEmployees: any) {
 
     const assignedIds = assignedEmployees.map(id => Number(id));
