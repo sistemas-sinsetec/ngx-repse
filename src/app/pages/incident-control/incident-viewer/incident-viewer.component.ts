@@ -158,7 +158,7 @@ export class IncidentViewerComponent implements OnInit {
     await loading.present();
 
     // Cargar empleados asignados con el filtro de department_range
-    this.http.get(`https://siinad.mx/php/get_assigned_employees1.php?start_date=${start_date}&end_date=${end_date}&company_id=${this.companyId}&project_id=0&week_number=${week_number}&day_of_week=${day_of_week}&user_id=${this.userId}`)
+    this.http.get(`https://siinad.mx/php/get_assigned_employees1.php?start_date=${start_date}&end_date=${end_date}&company_id=${this.companyId}&project_id=0&week_number=${week_number}&day_of_week=${day_of_week}`)
       .subscribe((data: any) => {
         this.assignedEmployees = data;
         this.filteredAssignedEmployees = [...this.assignedEmployees];
@@ -169,7 +169,7 @@ export class IncidentViewerComponent implements OnInit {
       });
 
     // Cargar empleados no asignados con el filtro de department_range
-    this.http.get(`https://siinad.mx/php/get_unassigned_employees.php?company_id=${this.companyId}&start_date=${start_date}&end_date=${end_date}&week_number=${week_number}&day_of_week=${day_of_week}&user_id=${this.userId}`)
+    this.http.get(`https://siinad.mx/php/get_unassigned_employees.php?company_id=${this.companyId}&start_date=${start_date}&end_date=${end_date}&week_number=${week_number}&day_of_week=${day_of_week}`)
       .subscribe((data: any) => {
         this.unassignedEmployees = data;
         this.filteredUnassignedEmployees = [...this.unassignedEmployees];
@@ -281,7 +281,7 @@ export class IncidentViewerComponent implements OnInit {
           incidentOptions,
           employees: selectedEmployees, // Pasar todos los empleados seleccionados al modal
         },
-        closeOnBackdropClick: false,
+        
       })
       .onClose.subscribe(async (result) => {
         if (result) {

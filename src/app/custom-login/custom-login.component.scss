@@ -9,7 +9,6 @@ nb-auth-block {
     color: #3366ff;
   }
   
-  ::ng-deep nb-card-header {
+  ::ng-deep nb-auth nb-card-header {
     display: none !important;
   }
-  

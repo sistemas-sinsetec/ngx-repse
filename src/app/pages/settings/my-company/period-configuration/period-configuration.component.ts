@@ -14,7 +14,7 @@ export class PeriodConfigurationComponent {
 
   periods: any[] = [];  // Array para almacenar los periodos cargados desde la base de datos
   selectedPeriod: any = {};  // Objeto para almacenar el periodo seleccionado o nuevo
-  
+
   currentMonth: number = new Date().getMonth();
   currentYear: number = new Date().getFullYear();
   daysInMonth: number[] = [];
@@ -31,7 +31,7 @@ export class PeriodConfigurationComponent {
     private loadingController: LoadingController, // Inyectar LoadingController
     private toastrService: NbToastrService, // Inyectar NbToastrService
     private elementRef: ElementRef,
-  ) { this.generateDays();}
+  ) { this.generateDays(); }
 
   ngOnInit() {
     this.loadPeriods();
@@ -39,8 +39,20 @@ export class PeriodConfigurationComponent {
   }
 
   generateDays() {
-    const days = new Date(this.currentYear, this.currentMonth + 1, 0).getDate();
-    this.daysInMonth = Array.from({ length: days }, (_, i) => i + 1);
+    const daysInMonth = new Date(this.currentYear, this.currentMonth + 1, 0).getDate(); // Total de días en el mes
+    const firstDayOfMonth = new Date(this.currentYear, this.currentMonth, 1).getDay(); // Día de la semana del primer día del mes (0 = domingo, 1 = lunes, ..., 6 = sábado)
+
+    // Ajustar el primer día para que el lunes sea 0 (en lugar de domingo)
+    const offset = (firstDayOfMonth + 6) % 7; // Esto convierte domingo = 6, lunes = 0, martes = 1, ..., sábado = 5
+
+    // Crear un array con espacios vacíos para los días anteriores al primer día del mes
+    const emptyDays = Array(offset).fill(null);
+
+    // Crear un array con los días del mes
+    const days = Array.from({ length: daysInMonth }, (_, i) => i + 1);
+
+    // Combinar los espacios vacíos con los días del mes
+    this.daysInMonth = [...emptyDays, ...days];
   }
 
   // Formatea la fecha en YYYY-MM-DD
@@ -53,23 +65,33 @@ export class PeriodConfigurationComponent {
   // Agrega o elimina una fecha seleccionada
   toggleDate(day: number) {
     const formattedDate = this.getFormattedDate(day);
+    console.log('Fecha seleccionada:', formattedDate);
+    console.log('minDate:', this.minDate);
+    console.log('maxDate:', this.maxDate);
 
-    // Validar si la fecha está dentro del rango permitido
     if (formattedDate >= this.minDate && formattedDate <= this.maxDate) {
       if (this.selectedDates.has(formattedDate)) {
         this.selectedDates.delete(formattedDate);
+        console.log('Fecha eliminada:', formattedDate);
       } else {
         this.selectedDates.add(formattedDate);
+        console.log('Fecha agregada:', formattedDate);
       }
 
-      // Actualizar el modelo de Angular (ngModel) con las fechas seleccionadas
       this.updateRestDays();
+    } else {
+      console.log('Fecha fuera de rango:', formattedDate);
     }
   }
 
   // Verifica si una fecha está seleccionada
   isSelected(day: number): boolean {
     return this.selectedDates.has(this.getFormattedDate(day));
+  }
+
+  isDateSelectable(day: number): boolean {
+    const formattedDate = this.getFormattedDate(day);
+    return formattedDate >= this.minDate && formattedDate <= this.maxDate;
   }
 
   // Cambia al mes anterior
@@ -101,9 +123,14 @@ export class PeriodConfigurationComponent {
 
   // Obtener las fechas seleccionadas como una cadena para mostrar en el input
   getSelectedDatesString(): string {
-    return Array.from(this.selectedDates).join(', ');
-  }
+    // Convertir las fechas seleccionadas a días (DD)
+    const days = Array.from(this.selectedDates).map(date => {
+      const day = new Date(date).getDate(); // Obtener el día del mes
+      return day.toString().padStart(2, '0'); // Formatear como "02", "03", etc.
+    });
 
+    return days.join(', '); // Unir los días con comas
+  }
   // Actualiza el valor en el modelo ngModel
   updateRestDays() {
     // Convertimos el Set a un array para pasarlo a selectedPeriod.rest_days_position
@@ -162,7 +189,19 @@ export class PeriodConfigurationComponent {
   }
 
   async savePeriodConfig() {
-    const periodConfig = { ...this.selectedPeriod, company_id: this.companyService.selectedCompany.id };
+    // Convertir los días seleccionados a un array de strings (ejemplo: ["08", "09"])
+    const selectedDaysArray = Array.from(this.selectedDates).map(date => {
+      const day = new Date(date).getDate(); // Obtener el día del mes
+      return day.toString().padStart(2, '0'); // Formatear como "08", "09", etc.
+    });
+
+    // Agregar los días seleccionados al objeto periodConfig
+    const periodConfig = {
+      ...this.selectedPeriod,
+      company_id: this.companyService.selectedCompany.id,
+      selected_days: selectedDaysArray // Enviar los días como un array
+    };
+
     console.log('Period Config:', periodConfig);
 
     if (!periodConfig.period_type_name || !periodConfig.fiscal_year_start || !periodConfig.period_days || !periodConfig.payment_days) {
@@ -350,6 +389,9 @@ export class PeriodConfigurationComponent {
       const currentYear = new Date().getFullYear();
       this.minDate = `${currentYear}-01-01`;
       this.maxDate = `${currentYear}-01-31`;
+
+      console.log('minDate:', this.minDate);
+      console.log('maxDate:', this.maxDate);
     } else {
       const endDate = this.addDays(startDate, this.selectedPeriod.period_days - 1);
       this.maxDate = endDate;

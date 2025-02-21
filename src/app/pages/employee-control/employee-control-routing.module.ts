@@ -5,6 +5,7 @@ import { RequestsEmployeesComponent } from './requests-employees/requests-employ
 import { AddEmployeesComponent } from './add-employees/add-employees.component';
 import { EmployeeViewComponent } from './employee-view/employee-view.component';
 import { VacationsKardexComponent } from './vacations-kardex/vacations-kardex.component';
+import { EditEmployeeComponent } from './edit-employee/edit-employee.component';
 import { authGuard } from '../../services/auth-guard';
 
 const routes: Routes = [
@@ -19,24 +20,29 @@ const routes: Routes = [
         data: { section: 'Empleados', subSection: 'Registrar solicitudes de empleados' } // Sección requerida para acceder
       },
       {
-        path: 'requests-employees',
+        path: 'edit-employees',
         component: RequestsEmployeesComponent,
         
         canActivate: [authGuard],
         data: { section: 'Empleados', subSection: 'Editar solicitudes de empleados' } // Sección requerida para acceder
       },
-      // Ruta de vista de empleados con permisos de AuthGuard
+      {
+        path: 'accept-requests',
+        component: RequestsEmployeesComponent,
+        canActivate: [authGuard],
+        data: { section: 'Empleados', subSection: 'Aceptar solicitudes de empleados' } // Sección requerida para acceder
+      },
+      {
+        path: 'process-employees',
+        component: RequestsEmployeesComponent,
+        canActivate: [authGuard],
+        data: { section: 'Empleados', subSection: 'Procesar empleados' }
+      },
       {
         path: 'employee-view',
         component: EmployeeViewComponent,
         canActivate: [authGuard],
         data: { section: 'Empleados', subSection: 'Ver empleados registrados' } // Sección requerida para acceder
-      },
-      {
-        path: 'edit-employee',
-        component: EmployeeViewComponent,
-        canActivate: [authGuard],
-        data: { section: 'Empleados', subSection: 'Editar solicitudes de empleados' } // Sección requerida para acceder
       },
       {
         path: 'vacations-kardex',
