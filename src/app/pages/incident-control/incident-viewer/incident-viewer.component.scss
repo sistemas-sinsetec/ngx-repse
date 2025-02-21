@@ -11,12 +11,11 @@
   }
 
   
-  .scroll-container {
-    max-height: 300px; /* Limita la altura de la lista */
-    overflow-y: auto; /* Habilita scroll vertical */
-    scrollbar-width: thin; /* Scroll delgado en Firefox */
-    scrollbar-color: #6c757d #e9ecef; /* Colores del scroll */
-    margin-bottom: 10px;
+  .scrollable-container {
+    max-height: 500px; /* Altura máxima del contenedor */
+    overflow-y: auto; /* Habilita el scroll vertical */
+   
+    padding: 8px; /* Espaciado interno */
   }
   
   /* Personalización para navegadores WebKit */
@@ -41,3 +40,25 @@
   nb-checkbox{
     margin-right: 10px;
   }
+
+
+  .button-container {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: stretch;
+  }
+  
+  @media (max-width: 767.98px) {
+    .button-container {
+      flex-direction: column;
+    }
+    .button-container button {
+      margin-bottom: 10px; /* Espacio entre botones */
+    }
+    .button-container button:last-child {
+      margin-bottom: 0; /* Elimina el margen del último botón */
+    }
+  }
+
+  

@@ -21,7 +21,7 @@ const routes: Routes = [
         path: 'deploy-projects',
         component: DeployProjectsComponent,
         canActivate: [authGuard],
-        data: { section: 'Control de proyectos', subSection: 'Visualizacion de proyectos' } // Sección requerida para acceder 
+        data: { section: 'Control de proyectos', subSection: 'Vizualizar proyectos' } // Sección requerida para acceder 
       }
       
 

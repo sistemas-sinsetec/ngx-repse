@@ -29,6 +29,10 @@ export class DeployProjectsComponent implements OnInit {
         title: 'Fecha de Fin',
         type: 'string',
       },
+      project_status: {
+        title: 'Estatus del Proyecto', // Nueva columna
+        type: 'string',
+      },
     },
     actions: {
       add: false,      // Deshabilitar botón de agregar

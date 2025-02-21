@@ -14,9 +14,8 @@ export class IncidentModalComponent {
 
   constructor(private dialogRef: NbDialogRef<IncidentModalComponent>) {}
 
-  dismiss() {
-    // Cierra el modal sin devolver datos
-    this.dialogRef.close();
+  close() {
+    this.dialogRef.close(); // Cierra el diálogo sin guardar
   }
 
   saveIncident() {
