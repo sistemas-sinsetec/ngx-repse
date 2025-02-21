@@ -44,8 +44,8 @@ const routes: Routes = [
         {
           path:'processed-attendance',
           component: ProcessedAttendanceComponent,
-          canActivate: [authGuard],
-          data: { section: 'Incidencias', subSection: 'Lista de asistencias' } // Sección requerida para acceder
+          //canActivate: [authGuard],
+          //data: { section: 'Incidencias', subSection: 'Lista de asistencias' } // Sección requerida para acceder
         },
 
 

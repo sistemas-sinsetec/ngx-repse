@@ -190,95 +190,139 @@ export class ProcessedAttendanceComponent {
       message: 'Generando PDF...',
     });
     await loading.present();
-
+  
     const pdf = new jsPDF('l', 'mm', 'a4'); // 'l' para orientación landscape
     const pageWidth = pdf.internal.pageSize.getWidth();
+    const pageHeight = pdf.internal.pageSize.getHeight();
     const marginX = 10;
     const marginY = 10;
-    const rowHeight = 8; // Reducir la altura de la fila
-
-    // Ajustar el ancho de las columnas
+    const rowHeight = 6; // Se redujo la altura de las filas
+    let currentY = marginY;
+  
     const codeWidth = 15;
     const nameWidth = 40;
     const entryWidth = 20;
+    const firmaWidth = 35;
+    const tableWidth = pageWidth - marginX * 2;
+  
+    this.diasSemana.forEach((dia, index) => {
+      // Calcular la altura total de la tabla antes de imprimirla
+      let estimatedTableHeight = rowHeight * 2; // Título + cabecera
+      this.empleadosSemana.forEach(emp => {
+        const nameText = `${emp.first_name} ${emp.middle_name} ${emp.last_name}`;
+        const nameLines = pdf.splitTextToSize(nameText, nameWidth - 5).length;
+        
+        let maxLines = nameLines;
+        const workHours = emp.work_hours[dia.date] || {};
+        const dayData = [
+          this.formatHour(workHours.entry_time) || '--:--',
+          this.formatHour(workHours.lunch_start_time) || '--:--',
+          this.formatHour(workHours.lunch_end_time) || '--:--',
+          this.formatHour(workHours.second_lunch_start_time) || '--:--',
+          this.formatHour(workHours.second_lunch_end_time) || '--:--',
+          this.formatHour(workHours.exit_time) || '--:--',
+          workHours.incident || 'N/A',
+          workHours.project_name || 'No Asignado'
+        ];
+  
+        dayData.forEach(text => {
+          const splitLines = pdf.splitTextToSize(text, entryWidth - 5);
+          maxLines = Math.max(maxLines, splitLines.length);
+        });
 
-    // Definir días de la semana para mostrar cada uno en una nueva página
-    this.diasSemana.forEach((dia) => {
-      // Nueva página para cada día
-      if (pdf.internal.pages.length > 1) {
+        estimatedTableHeight += rowHeight * maxLines;
+      });
+
+      // Si la tabla NO cabe en la página actual, agregar una nueva antes de imprimirla
+      if (currentY + estimatedTableHeight > pageHeight - marginY) {
         pdf.addPage();
+        currentY = marginY;
       }
-      let currentY = marginY + rowHeight; // Posición inicial en Y
-
-      // Título de la tabla
-      pdf.setFontSize(12); // Reducir el tamaño de la fuente del título
+  
+      // Título del día
+      pdf.setFontSize(10); // Reducimos un poco la fuente del título
       pdf.text(`Lista de Asistencia para ${dia.display} (${dia.date})`, marginX, currentY);
-      currentY += rowHeight;
-
+      currentY += rowHeight; // Menos espacio debajo del título
+  
       // Cabecera de la tabla
-      pdf.setFontSize(8); // Reducir el tamaño de la fuente para la cabecera
+      pdf.setFontSize(7); // Reducimos el tamaño de fuente de la cabecera
       pdf.setFillColor(240, 240, 240);
-      pdf.rect(marginX, currentY, pageWidth - marginX * 2, rowHeight, 'F'); // Fondo gris para la cabecera
-      pdf.text('Código', marginX + 2, currentY + 5);
-      pdf.text('Empleado', marginX + codeWidth + 2, currentY + 5);
-      pdf.text('Entrada', marginX + codeWidth + nameWidth + 2, currentY + 5);
-      pdf.text('Entrada C', marginX + codeWidth + nameWidth + entryWidth + 5, currentY + 5);
-      pdf.text('Salida C', marginX + codeWidth + nameWidth + entryWidth * 2 + 5, currentY + 5);
-      pdf.text('Entrada 2da C', marginX + codeWidth + nameWidth + entryWidth * 3 + 5, currentY + 5);
-      pdf.text('Salida 2da C', marginX + codeWidth + nameWidth + entryWidth * 4 + 5, currentY + 5);
-      pdf.text('Salida', marginX + codeWidth + nameWidth + entryWidth * 5 + 5, currentY + 5);
-      pdf.text('Incidencia', marginX + codeWidth + nameWidth + entryWidth * 6 + 5, currentY + 5);
-      pdf.text('Empresa y Obra', marginX + codeWidth + nameWidth + entryWidth * 7 + 5, currentY + 5);
-      pdf.text('Firma', marginX + codeWidth + nameWidth + entryWidth * 9 + 8, currentY + 5); // Nueva columna de Firma
-
+      pdf.rect(marginX, currentY, tableWidth, rowHeight, 'F');
+  
+      const headers = [
+        'Código',
+        'Empleado',
+        'Entrada',
+        'Entrada C',
+        'Salida C',
+        'Entrada 2da C',
+        'Salida 2da C',
+        'Salida',
+        'Incidencia',
+        'Empresa y Obra',
+        'Firma'
+      ];
+  
+      let xPosition = marginX + 2;
+      headers.forEach(header => {
+        pdf.text(header, xPosition, currentY + 4); // Ajuste fino en alineación vertical
+        xPosition += (header === 'Empleado' ? nameWidth : entryWidth);
+      });
+  
       currentY += rowHeight;
-
+  
       // Filas de empleados
       this.empleadosSemana.forEach((emp) => {
-        // Ajustar el nombre del empleado para que no sobresalga
         const nameText = `${emp.first_name} ${emp.middle_name} ${emp.last_name}`;
         const nameLines = pdf.splitTextToSize(nameText, nameWidth - 5);
-
-        // Datos del día específico para el empleado
+        
         const workHours = emp.work_hours[dia.date] || {};
-
-        // Ajustar la altura dinámica de la fila según el número de líneas del nombre
-        const rowHeightDynamic = rowHeight * nameLines.length;
-
-        // Ajustar filas dinámicas si hay muchas líneas
-        pdf.text(emp.employee_code.toString(), marginX + 2, currentY + 5);
-        pdf.text(nameLines, marginX + codeWidth + 2, currentY + 5);
-
-        // Usar formatHour para convertir las horas a formato 12 horas con AM/PM
-        pdf.text(this.formatHour(workHours.entry_time) || '--:--', marginX + codeWidth + nameWidth + 2, currentY + 5);
-        pdf.text(this.formatHour(workHours.lunch_start_time) || '--:--', marginX + codeWidth + nameWidth + entryWidth + 5, currentY + 5);
-        pdf.text(this.formatHour(workHours.lunch_end_time) || '--:--', marginX + codeWidth + nameWidth + entryWidth * 2 + 5, currentY + 5);
-        pdf.text(this.formatHour(workHours.second_lunch_start_time) || '--:--', marginX + codeWidth + nameWidth + entryWidth * 3 + 5, currentY + 5);
-        pdf.text(this.formatHour(workHours.second_lunch_end_time) || '--:--', marginX + codeWidth + nameWidth + entryWidth * 4 + 5, currentY + 5);
-        pdf.text(this.formatHour(workHours.exit_time) || '--:--', marginX + codeWidth + nameWidth + entryWidth * 5 + 5, currentY + 5);
-        pdf.text(workHours.incident || 'N/A', marginX + codeWidth + nameWidth + entryWidth * 6 + 5, currentY + 5);
-        pdf.text(workHours.project_name || 'No Asignado', marginX + codeWidth + nameWidth + entryWidth * 7 + 5, currentY + 5);
-
-        // Espacio para firma
-        pdf.text('_____________________', marginX + codeWidth + nameWidth + entryWidth * 9 + 8, currentY + 5);
-
-        // Incrementar la posición Y para la siguiente fila
+        const dayData = [
+          this.formatHour(workHours.entry_time) || '--:--',
+          this.formatHour(workHours.lunch_start_time) || '--:--',
+          this.formatHour(workHours.lunch_end_time) || '--:--',
+          this.formatHour(workHours.second_lunch_start_time) || '--:--',
+          this.formatHour(workHours.second_lunch_end_time) || '--:--',
+          this.formatHour(workHours.exit_time) || '--:--',
+          workHours.incident || 'N/A',
+          workHours.project_name || 'No Asignado'
+        ];
+  
+        let maxLines = nameLines.length;
+        const dayLines = dayData.map(text => {
+          const splitLines = pdf.splitTextToSize(text, entryWidth - 5);
+          maxLines = Math.max(maxLines, splitLines.length);
+          return splitLines;
+        });
+  
+        const rowHeightDynamic = rowHeight * maxLines;
+  
+        let xPos = marginX + 2;
+        pdf.text(emp.employee_code.toString(), xPos, currentY + 4);
+        xPos += codeWidth;
+  
+        pdf.text(nameLines, xPos, currentY + 4);
+        xPos += nameWidth;
+  
+        dayLines.forEach(dayLine => {
+          pdf.text(dayLine, xPos, currentY + 4);
+          xPos += entryWidth;
+        });
+  
+        pdf.text('_____________________', xPos + 5, currentY + 4);
+  
         currentY += rowHeightDynamic;
       });
+  
+      // Pequeño espacio entre tablas de diferentes días
+      currentY += rowHeight / 2; // Se redujo aún más
     });
-
-    // Guardar el PDF
+  
     pdf.save('asistencia-semanal.pdf');
     loading.dismiss();
-  }
+}
 
-  onFileSelected(event: Event) {
-    const input = event.target as HTMLInputElement;
-    if (input.files && input.files[0]) {
-      this.file = input.files[0]; // Guardar el archivo seleccionado
-    }
-  }
-  
+
 
   
   async uploadPDF() {

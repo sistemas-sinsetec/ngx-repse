@@ -13,7 +13,7 @@ export class DepartmentManagementComponent {
   positions: any[] = [];
   shifts: any[] = [];
   newDepartment: any = { department_name: '', description: '', company_id: '' };
-  newPosition: any = { position_name: '', description: '', company_id: '' };
+  newPosition: any = { position_name: '', description: '', company_id: '', position_range: null };
 
     // Actualización del modelo de datos para manejar múltiples días de descanso
     newShift: any = {
@@ -121,7 +121,7 @@ export class DepartmentManagementComponent {
     startAddPosition() {
       this.isAddingPosition = true;
       this.selectedPosition = null;
-      this.newPosition = { position_name: '', description: '', company_id: this.companyService.selectedCompany.id };
+      this.newPosition = { position_name: '', description: '', position_range: null, company_id: this.companyService.selectedCompany.id };
     }
 
     selectShift(shift: any) {
@@ -138,6 +138,35 @@ export class DepartmentManagementComponent {
       this.selectedDepartment = { department_name: '', description: '', company_id: this.companyService.selectedCompany.id };
     }
 
+    restrictInput(event: KeyboardEvent) {
+      const inputElement = event.target as HTMLInputElement;
+    
+      // Bloquea la escritura si ya hay más de 2 caracteres
+      if (inputElement.value.length >= 2 && event.key !== 'Backspace' && event.key !== 'Delete') {
+        event.preventDefault();
+      }
+    
+      // Verifica después de un pequeño retraso para permitir el cambio de valor
+      setTimeout(() => {
+        let value = parseInt(inputElement.value, 10);
+    
+        // Si el valor es menor a 1, establecerlo en 1
+        if (value < 1 || isNaN(value)) {
+          inputElement.value = '1';
+          this.getCurrentPosition().position_range = 1;
+        }
+      }, 10);
+    }
+    
+    validatePositionRange() {
+      if (this.getCurrentPosition().position_range > 50) {
+        this.getCurrentPosition().position_range = 50;
+      } else if (this.getCurrentPosition().position_range < 1) {
+        this.getCurrentPosition().position_range = 1;
+      }
+    }
+
+    
     async saveDepartmentConfig() {
       if (this.selectedDepartment.department_name) {
       
@@ -180,7 +209,8 @@ export class DepartmentManagementComponent {
           ? 'https://siinad.mx/php/update_position.php'
           : 'https://siinad.mx/php/add_position.php';
   
-        this.http.post(url, positionData).subscribe(
+          this.http.post(url, JSON.stringify(positionData), { headers: { 'Content-Type': 'application/json' } })
+          .subscribe(
           () => {
             
             this.fetchPositions();
