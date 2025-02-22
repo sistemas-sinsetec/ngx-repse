@@ -66,7 +66,7 @@
           <nb-list>
             <nb-list-item *ngFor="let employee of filteredAssignedEmployees" class="d-flex align-items-center">
               <nb-checkbox [(ngModel)]="employee.selected" class="me-2"></nb-checkbox>
-              <span>{{ employee.first_name }} {{ employee.middle_name }} {{ employee.last_name }}</span>
+              <span>{{ employee.last_name }} {{ employee.middle_name }} {{ employee.first_name }}</span>
             </nb-list-item>
           </nb-list>
           <p *ngIf="filteredAssignedEmployees.length === 0" class="text-muted mt-3">
@@ -98,7 +98,7 @@
           <nb-list >
             <nb-list-item *ngFor="let employee of filteredUnassignedEmployees" class="d-flex align-items-center">
               <nb-checkbox [(ngModel)]="employee.selected" class="me-2"></nb-checkbox>
-              <span>{{ employee.first_name }} {{ employee.middle_name }} {{ employee.last_name }}</span>
+              <span>{{ employee.last_name }} {{ employee.middle_name }} {{ employee.first_name }}</span>
             </nb-list-item>
           </nb-list>
           <p *ngIf="filteredUnassignedEmployees.length === 0" class="text-muted mt-3">
