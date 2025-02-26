@@ -165,7 +165,7 @@ export class PeriodManagementComponent implements OnInit {
     console.log('Datos enviados al backend:', periodData); // Verifica los datos
   
     if (this.selectedPeriod.period_id) {
-      this.http.post('https://siinad.mx/php/update-period.php', periodData)
+      this.http.post('https://siinad.mx/php/update-payroll-period.php', periodData)
         .subscribe(response => {
           console.log('Periodo actualizado correctamente', response);
           loading.dismiss();
