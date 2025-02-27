@@ -142,6 +142,20 @@ export class IncidentViewerComponent implements OnInit {
     
   }
 
+  // Método para obtener la información del turno basado en el shift_id del empleado
+  getShiftInfo(shift_id: number): Promise<any> {
+    return this.http.get(`https://siinad.mx/php/get_shifts.php?company_id=${this.companyId}`)
+      .toPromise()
+      .then((shifts: any[]) => {
+        // Ajusta la propiedad 'shift_id' según la respuesta real del endpoint
+        return shifts.find(shift => Number(shift.shift_id) === Number(shift_id));
+        // Si la propiedad en tu BD es 'id', reemplaza por: 
+        // return shifts.find(shift => Number(shift.id) === Number(shift_id));
+      });
+  }
+
+
+
   async loadEmployees() {
     if (!this.selectedWeek || !this.selectedDia) {
       console.error('No se ha seleccionado una semana laboral o día');
@@ -231,6 +245,7 @@ export class IncidentViewerComponent implements OnInit {
 
   async saveHours(employees: any[], data: any) {
     const hoursDataList = employees.map(employee => ({
+      work_hours_id: 0,
       employee_id: employee.employee_id,
       period_id: this.selectedWeek.period_id,
       period_type_id: this.periodService.selectedPeriod.id,
@@ -294,7 +309,60 @@ export class IncidentViewerComponent implements OnInit {
   
 
 
-  async saveIncident(employees: any[], data: any) {
+ // Modificación del método saveIncident para manejar el caso "Asistencia sin proyecto"
+ async saveIncident(employees: any[], data: any) {
+  if (data.incident === 'Asistencia sin proyecto') {
+    try {
+      await Promise.all(employees.map(async (employee) => {
+        // Verificar que employee.shift_id esté definido
+        if (!employee.shift_id) {
+          console.error(`El empleado ${employee.employee_id} no tiene shift_id asignado.`);
+          throw new Error(`Shift no asignado para el empleado ${employee.employee_id}`);
+        }
+        // Obtener la información del turno
+        const shiftInfo = await this.getShiftInfo(employee.shift_id);
+        if (!shiftInfo) {
+          console.error(`No se encontró turno para el shift_id ${employee.shift_id}`);
+          throw new Error(`Turno no encontrado para el empleado ${employee.employee_id}`);
+        }
+        
+        // Guardar en work_hours
+        const workHoursData = {
+          work_hours_id: 0,
+          employee_id: employee.employee_id,
+          period_id: this.selectedWeek.period_id,
+          period_type_id: this.periodService.selectedPeriod.id,
+          company_id: this.companyId,
+          day_of_week: moment(this.selectedDia).format('YYYY-MM-DD'),
+          work_week: this.selectedWeek.week_number,
+          entry_time: shiftInfo.start_time,
+          lunch_start_time: shiftInfo.lunch_start_time,
+          lunch_end_time: shiftInfo.lunch_end_time,
+          exit_time: shiftInfo.end_time
+          // Agrega second_lunch_start_time y second_lunch_end_time si aplican
+        };
+        await this.http.post('https://siinad.mx/php/save_work_hours.php', workHoursData).toPromise();
+        
+        // Además, guardar la incidencia correspondiente
+        const incidentData = {
+          employee_id: employee.employee_id,
+          period_id: this.selectedWeek.period_id,
+          period_type_id: this.periodService.selectedPeriod.id,
+          company_id: this.companyId,
+          day_of_week: moment(this.selectedDia).format('YYYY-MM-DD'),
+          work_week: this.selectedWeek.week_number,
+          incident_type: data.incident,
+          description: data.description || null
+        };
+        await this.http.post('https://siinad.mx/php/save_incident.php', incidentData).toPromise();
+      }));
+      await this.showToast('Se registraron correctamente las horas y la incidencia de asistencia sin proyecto.', 'success');
+    } catch (error) {
+      console.error('Error al guardar work hours e incidencia:', error);
+      await this.showToast('Ocurrió un error al guardar los registros de asistencia sin proyecto.', 'danger');
+    }
+  } else {
+    // Lógica para otros tipos de incidencias
     const incidentDataList = employees.map(employee => ({
       employee_id: employee.employee_id,
       period_id: this.selectedWeek.period_id,
@@ -307,14 +375,11 @@ export class IncidentViewerComponent implements OnInit {
     }));
   
     try {
-      // Realizar múltiples solicitudes en paralelo
       await Promise.all(
         incidentDataList.map(incidentData =>
           this.http.post('https://siinad.mx/php/save_incident.php', incidentData).toPromise()
         )
       );
-  
-      // Mostrar solo un mensaje de éxito después de procesar todos
       await this.showToast('Todas las incidencias fueron asignadas correctamente.', 'success');
       await this.showAlert('Se asignaron las incidencias con éxito.');
     } catch (error) {
@@ -322,8 +387,7 @@ export class IncidentViewerComponent implements OnInit {
       await this.showToast('Ocurrió un error al asignar las incidencias.', 'danger');
     }
   }
-  
-
+}
   async checkIfDayConfirmed(): Promise<boolean> {
     const { start_date, end_date, week_number } = this.selectedWeek;
     const day_of_week = this.selectedDia; // Usar el día seleccionado

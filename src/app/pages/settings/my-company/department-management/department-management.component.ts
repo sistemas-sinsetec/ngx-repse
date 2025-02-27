@@ -141,22 +141,35 @@ export class DepartmentManagementComponent {
     restrictInput(event: KeyboardEvent) {
       const inputElement = event.target as HTMLInputElement;
     
-      // Bloquea la escritura si ya hay más de 2 caracteres
-      if (inputElement.value.length >= 2 && event.key !== 'Backspace' && event.key !== 'Delete') {
+      // Solo permitir números, Backspace y Delete
+      if (!/^[0-9]$/.test(event.key) && event.key !== 'Backspace' && event.key !== 'Delete') {
         event.preventDefault();
+        return;
       }
     
-      // Verifica después de un pequeño retraso para permitir el cambio de valor
+      // Permite que el campo quede vacío sin forzar un valor inmediato
       setTimeout(() => {
-        let value = parseInt(inputElement.value, 10);
+        let value = inputElement.value.trim();
     
-        // Si el valor es menor a 1, establecerlo en 1
-        if (value < 1 || isNaN(value)) {
-          inputElement.value = '1';
-          this.getCurrentPosition().position_range = 1;
+        // Si el campo está vacío, permitirlo
+        if (value === '') {
+          this.getCurrentPosition().position_range = null;
+          return;
+        }
+    
+        let numericValue = parseInt(value, 10);
+    
+        // Limitar el valor entre 1 y 50
+        if (isNaN(numericValue) || numericValue < 1) {
+          inputElement.value = '';
+          this.getCurrentPosition().position_range = null;
+        } else if (numericValue > 50) {
+          inputElement.value = '50';
+          this.getCurrentPosition().position_range = 50;
         }
       }, 10);
     }
+    
     
     validatePositionRange() {
       if (this.getCurrentPosition().position_range > 50) {

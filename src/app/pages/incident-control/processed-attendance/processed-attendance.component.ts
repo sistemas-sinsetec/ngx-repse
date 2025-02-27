@@ -7,8 +7,12 @@ import { CompanyService } from '../../../services/company.service';
 import { PeriodService } from '../../../services/period.service';
 import * as moment from 'moment';
 import jsPDF from 'jspdf';
+
+
+import autoTable from 'jspdf-autotable';
 import html2canvas from 'html2canvas';
 import { LoadingController, AlertController } from '@ionic/angular';
+
 
 
 @Component({
@@ -185,99 +189,89 @@ export class ProcessedAttendanceComponent {
   }
 
   // Generar el PDF con los datos de asistencia
+  
   async generatePDF() {
     const loading = await this.loadingController.create({
-      message: 'Generando PDF...',
+      message: 'Generando PDF...'
     });
     await loading.present();
   
-    const pdf = new jsPDF('l', 'mm', 'a4'); // 'l' para orientación landscape
+    const pdf = new jsPDF('l', 'mm', 'a4');
     const pageWidth = pdf.internal.pageSize.getWidth();
-    const pageHeight = pdf.internal.pageSize.getHeight();
-    const marginX = 10;
-    const marginY = 10;
-    const rowHeight = 6; // Se redujo la altura de las filas
-    let currentY = marginY;
+    const marginLeft = 5;
+    const marginRight = 5;
+    const tableWidth = pageWidth - (marginLeft + marginRight);
+    let currentY = 5; // margen superior mínimo
   
-    const codeWidth = 15;
-    const nameWidth = 40;
-    const entryWidth = 20;
-    const firmaWidth = 35;
-    const tableWidth = pageWidth - marginX * 2;
+    // Nueva distribución de columnas:
+    // Código: 6.8%
+    // Empleado: 19.8%
+    // Entrada: 5%
+    // Entrada C: 5%
+    // Salida C: 5%
+    // Entrada 2da C: 5.6%
+    // Salida 2da C: 5.6%
+    // Salida: 5%
+    // Incidencia: 8%
+    // Empresa y Obra: 24.2%
+    // Firma: 10%
+    const colWidths = [
+      tableWidth * 0.068,  // Código (6.8%)
+      tableWidth * 0.198,  // Empleado (19.8%)
+      tableWidth * 0.05,   // Entrada (5%)
+      tableWidth * 0.05,   // Entrada C (5%)
+      tableWidth * 0.05,   // Salida C (5%)
+      tableWidth * 0.056,  // Entrada 2da C (5.6%)
+      tableWidth * 0.056,  // Salida 2da C (5.6%)
+      tableWidth * 0.05,   // Salida (5%)
+      tableWidth * 0.08,   // Incidencia (8%)
+      tableWidth * 0.242,  // Empresa y Obra (24.2%)
+      tableWidth * 0.10    // Firma (10%)
+    ];
   
-    this.diasSemana.forEach((dia, index) => {
-      // Calcular la altura total de la tabla antes de imprimirla
-      let estimatedTableHeight = rowHeight * 2; // Título + cabecera
-      this.empleadosSemana.forEach(emp => {
-        const nameText = `${emp.first_name} ${emp.middle_name} ${emp.last_name}`;
-        const nameLines = pdf.splitTextToSize(nameText, nameWidth - 5).length;
-        
-        let maxLines = nameLines;
-        const workHours = emp.work_hours[dia.date] || {};
-        const dayData = [
-          this.formatHour(workHours.entry_time) || '--:--',
-          this.formatHour(workHours.lunch_start_time) || '--:--',
-          this.formatHour(workHours.lunch_end_time) || '--:--',
-          this.formatHour(workHours.second_lunch_start_time) || '--:--',
-          this.formatHour(workHours.second_lunch_end_time) || '--:--',
-          this.formatHour(workHours.exit_time) || '--:--',
-          workHours.incident || 'N/A',
-          workHours.project_name || 'No Asignado'
-        ];
+    // Recorrer cada día de la semana
+    for (let i = 0; i < this.diasSemana.length; i++) {
+      const dia = this.diasSemana[i];
   
-        dayData.forEach(text => {
-          const splitLines = pdf.splitTextToSize(text, entryWidth - 5);
-          maxLines = Math.max(maxLines, splitLines.length);
-        });
-
-        estimatedTableHeight += rowHeight * maxLines;
-      });
-
-      // Si la tabla NO cabe en la página actual, agregar una nueva antes de imprimirla
-      if (currentY + estimatedTableHeight > pageHeight - marginY) {
-        pdf.addPage();
-        currentY = marginY;
-      }
-  
-      // Título del día
-      pdf.setFontSize(10); // Reducimos un poco la fuente del título
-      pdf.text(`Lista de Asistencia para ${dia.display} (${dia.date})`, marginX, currentY);
-      currentY += rowHeight; // Menos espacio debajo del título
-  
-      // Cabecera de la tabla
-      pdf.setFontSize(7); // Reducimos el tamaño de fuente de la cabecera
-      pdf.setFillColor(240, 240, 240);
-      pdf.rect(marginX, currentY, tableWidth, rowHeight, 'F');
-  
+      // Cabecera en dos filas:
+      // La primera fila muestra el título del día, abarcando las 11 columnas.
+      // La segunda fila, los títulos de cada columna.
       const headers = [
-        'Código',
-        'Empleado',
-        'Entrada',
-        'Entrada C',
-        'Salida C',
-        'Entrada 2da C',
-        'Salida 2da C',
-        'Salida',
-        'Incidencia',
-        'Empresa y Obra',
-        'Firma'
+        [
+          {
+            content: `Lista de Asistencia para ${dia.display} (${dia.date})`,
+            colSpan: 11,
+            styles: {
+              halign: 'center',
+              fontSize: 7,
+              fillColor: [220, 220, 220],
+              textColor: 0,
+              cellPadding: 1,
+              overflow: 'ellipsize'
+            }
+          }
+        ],
+        [
+          { content: 'Código', styles: { fontSize: 6, cellPadding: 1, textColor: 0, overflow: 'ellipsize' } },
+          { content: 'Empleado', styles: { fontSize: 6, cellPadding: 1, textColor: 0, overflow: 'ellipsize' } },
+          { content: 'Entrada', styles: { fontSize: 6, cellPadding: 1, textColor: 0, overflow: 'ellipsize' } },
+          { content: 'Entrada C', styles: { fontSize: 6, cellPadding: 1, textColor: 0, overflow: 'ellipsize' } },
+          { content: 'Salida C', styles: { fontSize: 6, cellPadding: 1, textColor: 0, overflow: 'ellipsize' } },
+          { content: 'Entrada 2da C', styles: { fontSize: 6, cellPadding: 1, textColor: 0, overflow: 'ellipsize' } },
+          { content: 'Salida 2da C', styles: { fontSize: 6, cellPadding: 1, textColor: 0, overflow: 'ellipsize' } },
+          { content: 'Salida', styles: { fontSize: 6, cellPadding: 1, textColor: 0, overflow: 'ellipsize' } },
+          { content: 'Incidencia', styles: { fontSize: 6, cellPadding: 1, textColor: 0, overflow: 'ellipsize' } },
+          { content: 'Empresa y Obra', styles: { fontSize: 6, cellPadding: 1, textColor: 0, overflow: 'ellipsize' } },
+          { content: 'Firma', styles: { fontSize: 6, cellPadding: 1, textColor: 0, overflow: 'ellipsize' } }
+        ]
       ];
   
-      let xPosition = marginX + 2;
-      headers.forEach(header => {
-        pdf.text(header, xPosition, currentY + 4); // Ajuste fino en alineación vertical
-        xPosition += (header === 'Empleado' ? nameWidth : entryWidth);
-      });
-  
-      currentY += rowHeight;
-  
-      // Filas de empleados
-      this.empleadosSemana.forEach((emp) => {
-        const nameText = `${emp.first_name} ${emp.middle_name} ${emp.last_name}`;
-        const nameLines = pdf.splitTextToSize(nameText, nameWidth - 5);
-        
+      // Construir las filas de datos para el día
+      const data = this.empleadosSemana.map(emp => {
         const workHours = emp.work_hours[dia.date] || {};
-        const dayData = [
+        return [
+          emp.employee_code?.toString() || '',
+          `${emp.first_name} ${emp.middle_name} ${emp.last_name}`,
           this.formatHour(workHours.entry_time) || '--:--',
           this.formatHour(workHours.lunch_start_time) || '--:--',
           this.formatHour(workHours.lunch_end_time) || '--:--',
@@ -285,45 +279,53 @@ export class ProcessedAttendanceComponent {
           this.formatHour(workHours.second_lunch_end_time) || '--:--',
           this.formatHour(workHours.exit_time) || '--:--',
           workHours.incident || 'N/A',
-          workHours.project_name || 'No Asignado'
+          workHours.project_name || 'No Asignado',
+          '' // Firma vacía
         ];
-  
-        let maxLines = nameLines.length;
-        const dayLines = dayData.map(text => {
-          const splitLines = pdf.splitTextToSize(text, entryWidth - 5);
-          maxLines = Math.max(maxLines, splitLines.length);
-          return splitLines;
-        });
-  
-        const rowHeightDynamic = rowHeight * maxLines;
-  
-        let xPos = marginX + 2;
-        pdf.text(emp.employee_code.toString(), xPos, currentY + 4);
-        xPos += codeWidth;
-  
-        pdf.text(nameLines, xPos, currentY + 4);
-        xPos += nameWidth;
-  
-        dayLines.forEach(dayLine => {
-          pdf.text(dayLine, xPos, currentY + 4);
-          xPos += entryWidth;
-        });
-  
-        pdf.text('_____________________', xPos + 5, currentY + 4);
-  
-        currentY += rowHeightDynamic;
       });
   
-      // Pequeño espacio entre tablas de diferentes días
-      currentY += rowHeight / 2; // Se redujo aún más
-    });
+      // Si no hay suficiente espacio en la página, se agrega una nueva
+      if (currentY + 10 > pdf.internal.pageSize.getHeight()) {
+        pdf.addPage();
+        currentY = 5;
+      }
+  
+      // Generar la tabla con autoTable, aplicando los estilos y anchos definidos
+      autoTable(pdf, {
+        head: headers,
+        body: data,
+        startY: currentY,
+        margin: { left: marginLeft, right: marginRight },
+        styles: { fontSize: 5, cellPadding: 1, textColor: 0, overflow: 'ellipsize' },
+        headStyles: { fillColor: [220, 220, 220], halign: 'center', cellPadding: 1, textColor: 0, overflow: 'ellipsize' },
+        theme: 'grid',
+        columnStyles: {
+          0: { cellWidth: colWidths[0] },
+          1: { cellWidth: colWidths[1] },
+          2: { cellWidth: colWidths[2] },
+          3: { cellWidth: colWidths[3] },
+          4: { cellWidth: colWidths[4] },
+          5: { cellWidth: colWidths[5] },
+          6: { cellWidth: colWidths[6] },
+          7: { cellWidth: colWidths[7] },
+          8: { cellWidth: colWidths[8] },
+          9: { cellWidth: colWidths[9] },
+          10: { cellWidth: colWidths[10] }
+        }
+      });
+  
+      // Actualizar la posición vertical para la siguiente tabla (con un margen mínimo)
+      currentY = (pdf as any).lastAutoTable.finalY + 2;
+    }
   
     pdf.save('asistencia-semanal.pdf');
     loading.dismiss();
-}
-
-
-
+  }
+  
+  
+  
+  
+  
   
   async uploadPDF() {
     if (!this.file) {
