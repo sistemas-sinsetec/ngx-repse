@@ -79,6 +79,7 @@ export class PeriodConfigurationComponent {
         ? this.selectedDates.delete(formattedDate)
         : this.selectedDates.add(formattedDate);
     }
+    
   }
 
 
