@@ -4,6 +4,7 @@ import { AuthService } from '../../../../services/auth.service';
 import { CompanyService } from '../../../../services/company.service';
 import { LoadingController } from '@ionic/angular'; // Importar LoadingController de Ionic
 import { NbToastrService } from '@nebular/theme'; // Importar NbToastrService de Nebular
+import * as moment from 'moment'; // Importar moment.js para manejar fechas y tiempos
 
 @Component({
   selector: 'ngx-period-configuration',
@@ -38,62 +39,67 @@ export class PeriodConfigurationComponent {
     this.updateSelectableDates(); // Actualizar las fechas seleccionables al iniciar la página
   }
 
+
+  @HostListener('document:click', ['$event'])
+  onClickOutside(event: MouseEvent) {
+    if (!this.isCalendarOpen) return; // Solo actúa si el calendario está abierto
+    
+    const calendarContainer = this.elementRef.nativeElement.querySelector('.calendar-container');
+    const input = this.elementRef.nativeElement.querySelector('input[type="text"]');
+  
+    if (!input.contains(event.target) && !calendarContainer.contains(event.target)) {
+      this.isCalendarOpen = false;
+    }
+  }
   generateDays() {
-    const daysInMonth = new Date(this.currentYear, this.currentMonth + 1, 0).getDate(); // Total de días en el mes
-    const firstDayOfMonth = new Date(this.currentYear, this.currentMonth, 1).getDay(); // Día de la semana del primer día del mes (0 = domingo, 1 = lunes, ..., 6 = sábado)
+    const firstDayOfMonth = new Date(Date.UTC(this.currentYear, this.currentMonth, 1));
+    const offset = (firstDayOfMonth.getUTCDay() + 6) % 7; // Ajuste para lunes como primer día
 
-    // Ajustar el primer día para que el lunes sea 0 (en lugar de domingo)
-    const offset = (firstDayOfMonth + 6) % 7; // Esto convierte domingo = 6, lunes = 0, martes = 1, ..., sábado = 5
-
-    // Crear un array con espacios vacíos para los días anteriores al primer día del mes
+  
     const emptyDays = Array(offset).fill(null);
+    const daysInMonth = new Date(Date.UTC(this.currentYear, this.currentMonth + 1, 0)).getUTCDate();
+  
 
-    // Crear un array con los días del mes
-    const days = Array.from({ length: daysInMonth }, (_, i) => i + 1);
-
-    // Combinar los espacios vacíos con los días del mes
-    this.daysInMonth = [...emptyDays, ...days];
+    this.daysInMonth = [...emptyDays, ...Array.from({ length: daysInMonth }, (_, i) => i + 1)];
   }
 
   // Formatea la fecha en YYYY-MM-DD
   getFormattedDate(day: number): string {
-    const month = (this.currentMonth + 1).toString().padStart(2, '0');
-    const dayStr = day.toString().padStart(2, '0');
-    return `${this.currentYear}-${month}-${dayStr}`;
+    const utcDate = new Date(Date.UTC(this.currentYear, this.currentMonth, day));
+    return utcDate.toISOString().split('T')[0]; // Formato YYYY-MM-DD
   }
-
   // Agrega o elimina una fecha seleccionada
   toggleDate(day: number) {
-    const formattedDate = this.getFormattedDate(day);
-    console.log('Fecha seleccionada:', formattedDate);
-    console.log('minDate:', this.minDate);
-    console.log('maxDate:', this.maxDate);
 
-    if (formattedDate >= this.minDate && formattedDate <= this.maxDate) {
+    const formattedDate = this.getFormattedDate(day);
+    
+    if (this.isDateSelectable(day)) {
       if (this.selectedDates.has(formattedDate)) {
         this.selectedDates.delete(formattedDate);
-        console.log('Fecha eliminada:', formattedDate);
       } else {
         this.selectedDates.add(formattedDate);
-        console.log('Fecha agregada:', formattedDate);
       }
-
       this.updateRestDays();
-    } else {
-      console.log('Fecha fuera de rango:', formattedDate);
+
     }
   }
 
+
   // Verifica si una fecha está seleccionada
   isSelected(day: number): boolean {
-    return this.selectedDates.has(this.getFormattedDate(day));
-  }
+
+    const formattedDate = this.getFormattedDate(day);
+    return this.selectedDates.has(formattedDate);
+}
+  
 
   isDateSelectable(day: number): boolean {
     const formattedDate = this.getFormattedDate(day);
-    return formattedDate >= this.minDate && formattedDate <= this.maxDate;
-  }
+    const minDateUTC = new Date(this.minDate + 'T00:00:00Z').toISOString().split('T')[0];
+    const maxDateUTC = new Date(this.maxDate + 'T23:59:59Z').toISOString().split('T')[0];
 
+    return formattedDate >= minDateUTC && formattedDate <= maxDateUTC;
+  }
   // Cambia al mes anterior
   previousMonth() {
     if (this.currentMonth === 0) {
@@ -117,18 +123,21 @@ export class PeriodConfigurationComponent {
   }
 
   // Abre o cierra el calendario al hacer clic en el input
-  toggleCalendar() {
+  toggleCalendar(event: MouseEvent) {
+    event.stopPropagation(); // Detiene la propagación del clic
     this.isCalendarOpen = !this.isCalendarOpen;
   }
-
   // Obtener las fechas seleccionadas como una cadena para mostrar en el input
   getSelectedDatesString(): string {
-    // Convertir las fechas seleccionadas a días (DD)
-    const days = Array.from(this.selectedDates).map(date => {
-      const day = new Date(date).getDate(); // Obtener el día del mes
-      return day.toString().padStart(2, '0'); // Formatear como "02", "03", etc.
-    });
+    console.log('Fechas seleccionadas:', Array.from(this.selectedDates)); // Verificar las fechas seleccionadas
 
+  
+    const days = Array.from(this.selectedDates).map(dateStr => {
+      return moment.utc(dateStr).format('DD'); // Mostrar día UTC
+    });
+  
+
+    console.log('Días formateados:', days); // Verificar los días formateados
     return days.join(', '); // Unir los días con comas
   }
   // Actualiza el valor en el modelo ngModel
@@ -147,7 +156,11 @@ export class PeriodConfigurationComponent {
     const companyId = this.companyService.selectedCompany.id;
     this.http.get(`https://siinad.mx/php/get-periods.php?company_id=${companyId}`)
       .subscribe((response: any) => {
-        this.periods = response;
+        this.periods = response.map((period: any) => ({
+          ...period,
+          rest_days_position: JSON.parse(period.rest_days_position) // Convertir a array
+        }));
+
         loading.dismiss(); // Ocultar el spinner de carga
       }, error => {
         console.error('Error al cargar los periodos', error);
@@ -157,11 +170,30 @@ export class PeriodConfigurationComponent {
   }
 
   selectPeriod(period: any) {
-    this.selectedPeriod = { ...period }; // Copiar el periodo seleccionado para edición
-    this.updateSelectableDates(); // Actualizar las fechas seleccionables cuando se selecciona un periodo
-    this.calculateRestDays(); // Calcular los días de descanso automáticamente
-  }
+    this.selectedPeriod = { ...period };
 
+  
+    this.selectedDates = new Set(
+      period.rest_days_position.map(day => {
+        const year = this.currentYear;
+        const month = this.currentMonth;
+        return moment.utc({ year, month, date: parseInt(day) }).format('YYYY-MM-DD');
+      })
+    );
+
+
+    // Parsear la fecha en UTC
+    const [year, month, day] = this.selectedPeriod.fiscal_year_start.split('-');
+    const utcDate = new Date(Date.UTC(year, month - 1, day)); // Mes 0 = enero
+  
+    this.currentMonth = utcDate.getUTCMonth();
+    this.currentYear = utcDate.getUTCFullYear();
+  
+    this.generateDays();
+    this.updateSelectableDates();
+    this.calculateRestDays();
+
+  }
   createNewPeriod() {
     // Crear un nuevo objeto vacío para un nuevo periodo
     this.selectedPeriod = {
@@ -190,16 +222,17 @@ export class PeriodConfigurationComponent {
 
   async savePeriodConfig() {
     // Convertir los días seleccionados a un array de strings (ejemplo: ["08", "09"])
-    const selectedDaysArray = Array.from(this.selectedDates).map(date => {
-      const day = new Date(date).getDate(); // Obtener el día del mes
-      return day.toString().padStart(2, '0'); // Formatear como "08", "09", etc.
+    const restDaysArray = Array.from(this.selectedDates).map(date => {
+      const dateObj = moment.utc(date); // Interpretar la fecha como UTC
+      return dateObj.format('DD'); // Devuelve el día en dos dígitos (ej: "08")
     });
 
+    console.log(restDaysArray); // ["08", "09"]
     // Agregar los días seleccionados al objeto periodConfig
     const periodConfig = {
       ...this.selectedPeriod,
       company_id: this.companyService.selectedCompany.id,
-      selected_days: selectedDaysArray // Enviar los días como un array
+      rest_days_position: restDaysArray // Enviar solo los días como un array
     };
 
     console.log('Period Config:', periodConfig);
@@ -217,7 +250,7 @@ export class PeriodConfigurationComponent {
 
     if (periodConfig.period_type_id) {
       // Si existe period_type_id, entonces es una actualización
-      this.http.post('https://siinad.mx/php/update-payroll-period.php', periodConfig)
+      this.http.post('https://siinad.mx/php/update-period.php', periodConfig)
         .subscribe(response => {
           console.log('Cambios guardados correctamente', response);
           loading.dismiss();
@@ -246,7 +279,7 @@ export class PeriodConfigurationComponent {
           this.toastrService.danger('Error al crear el nuevo periodo', 'Error');
         });
     }
-  }
+}
 
   async createPayrollPeriods(periodTypes: { period_type_name: string, period_type_id: number }[], periodo: any) {
     if (!Array.isArray(periodTypes)) {
@@ -375,29 +408,16 @@ export class PeriodConfigurationComponent {
   }
 
   updateSelectableDates() {
-    if (!this.selectedPeriod.fiscal_year_start || !this.selectedPeriod.period_days) {
-      console.warn('No se puede calcular sin los días del periodo o la fecha de inicio.');
-      return;
-    }
+    if (!this.selectedPeriod.fiscal_year_start) return;
 
-    const startDate = this.selectedPeriod.fiscal_year_start;
+  
+    const startDate = new Date(this.selectedPeriod.fiscal_year_start + 'T00:00:00Z');
+    this.minDate = startDate.toISOString().split('T')[0];
+  
 
-    // Mínima fecha seleccionable: la fecha de inicio del ejercicio
-    this.minDate = startDate;
-
-    if (!this.selectedPeriod.period_type_id) {
-      const currentYear = new Date().getFullYear();
-      this.minDate = `${currentYear}-01-01`;
-      this.maxDate = `${currentYear}-01-31`;
-
-      console.log('minDate:', this.minDate);
-      console.log('maxDate:', this.maxDate);
-    } else {
-      const endDate = this.addDays(startDate, this.selectedPeriod.period_days - 1);
-      this.maxDate = endDate;
-    }
-
-    this.calculateRestDays(); // Calcular los días de descanso automáticamente al actualizar las fechas
+    const endDate = new Date(startDate);
+    endDate.setUTCDate(startDate.getUTCDate() + (this.selectedPeriod.period_days - 1));
+    this.maxDate = endDate.toISOString().split('T')[0];
   }
 
   // Función para agregar días a una fecha en formato de cadena

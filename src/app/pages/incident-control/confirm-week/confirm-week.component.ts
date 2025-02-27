@@ -30,6 +30,9 @@ export class ConfirmWeekComponent {
   filteredEmpleadosIncidencias: any[] = []; // Lista filtrada de empleados con incidencias
   searchTerm: string = ''; // Término de búsqueda
 
+  restDays: string[] = []; // Días de descanso del periodo seleccionado
+
+
   constructor(
     private authService: AuthService,
     private companyService: CompanyService,
@@ -40,7 +43,9 @@ export class ConfirmWeekComponent {
     private dialogService: NbDialogService,
     private loadingController: LoadingController,
     private alertController: AlertController
-  ) { }
+  ) {
+    this.restDays = this.periodService.getSelectedPeriod()?.rest_days_position || [];
+   }
 
   ngOnInit() {
     this.loadWeekData();
@@ -48,7 +53,6 @@ export class ConfirmWeekComponent {
 
   // Cargar los datos de la semana
   async loadWeekData() {
-
     const loading = await this.loadingController.create({
       message: 'Cargando datos de la semana...',
     });
@@ -58,7 +62,7 @@ export class ConfirmWeekComponent {
     const periodTypeId = this.periodService.selectedPeriod.id;
 
     if (!companyId || !periodTypeId) {
-      console.error('No se proporcionaron company_id o period_id');
+      console.error('No se proporcionaron company_id o period_type_id');
       loading.dismiss();
       return;
     }
@@ -77,11 +81,19 @@ export class ConfirmWeekComponent {
           this.periodEndDate = semanaActual.period_end_date;
           this.currentPeriodId = semanaActual.period_id;
 
-          this.generarDiasDeSemana(this.periodStartDate, this.periodEndDate, this.currentPeriodId);
+          // Usar el servicio para generar los días de la semana
+          this.diasSemana = this.periodService.generarDiasDeSemana(
+            this.periodStartDate,
+            this.periodEndDate,
+            this.currentPeriodId,
+            this.diasSemana, // El arreglo original que obtuviste de la API
+            this.companyService.selectedCompany.id
+          );
+
           this.verificarConfirmacionSemana(companyId, this.currentPeriodId);
         } else {
           console.error('No se encontraron días confirmados para la semana.');
-          this.mostrarAlerta('Sin datos', 'No hay días confirmados para la semana actual.');
+          this.toastrService.warning('No se encontraron días confirmados para la semana.', 'Aviso');
         }
         loading.dismiss();
       },
@@ -106,27 +118,7 @@ export class ConfirmWeekComponent {
     );
   }
   // Generar los días de la semana
-  generarDiasDeSemana(startDate: string, endDate: string, periodId: string) {
-    const start = moment(startDate);
-    const end = moment(endDate);
-    const dias = [];
 
-    while (start.isSameOrBefore(end)) {
-      const date = start.format('YYYY-MM-DD');
-      const dayData = this.diasSemana.find(dia => dia.day_of_week === date);
-
-      dias.push({
-        date: date,
-        status: dayData && dayData.status ? dayData.status : null,
-        company_id: dayData ? dayData.company_id : this.companyService.selectedCompany.id,
-        period_id: dayData ? dayData.period_id : periodId,
-      });
-
-      start.add(1, 'days');
-    }
-
-    this.diasSemana = dias;
-  }
 
   // Cargar los empleados para un día específico
   async cargarEmpleadosDia(dia: any) {
@@ -204,10 +196,6 @@ export class ConfirmWeekComponent {
     }
   }
 
-  atLeastFiveDaysConfirmed(): boolean {
-    const confirmedDays = this.diasSemana.filter(dia => dia.status === 'confirmed');
-    return confirmedDays.length >= 5;
-  }
 
 
   // Confirmar toda la semana
@@ -240,27 +228,27 @@ export class ConfirmWeekComponent {
       message: 'Confirmando semana...',
     });
     await loading.present();
-  
+
     const companyId = this.companyService.selectedCompany.id;
     const periodId = this.currentPeriodId;
     const periodTypeId = this.periodService.selectedPeriod.id;
     const weekNumber = this.currentSemana;
-  
+
     if (!companyId || !periodId || !periodTypeId || !weekNumber) {
       console.error('Faltan datos para confirmar la semana');
       await loading.dismiss();
       return;
     }
-  
+
     const body = {
       company_id: companyId,
       period_id: periodId,
       period_type_id: periodTypeId,
       week_number: weekNumber,
     };
-  
+
     const url = `https://siinad.mx/php/confirm-week.php`;
-  
+
     try {
       const response: any = await this.http.post(url, body).toPromise();
       if (response && response.success) {
@@ -279,8 +267,8 @@ export class ConfirmWeekComponent {
       await loading.dismiss();
     }
   }
-  
-  
+
+
 
   // Método para mostrar alertas con Nebular Toastr
   async mostrarAlerta(header: string, message: string) {
@@ -360,11 +348,17 @@ export class ConfirmWeekComponent {
 
 
   canConfirmWeek(): boolean {
-    const confirmedDays = this.diasSemana.filter(dia => dia.status === 'confirmed').length;
+    const laborDays = this.diasSemana.filter(dia => !dia.isRestDay);
+    const allLaborDaysConfirmed = laborDays.every(dia => dia.status === 'confirmed');
     const hasEmployeesOrIncidences = this.filteredEmpleadosDia.length > 0 || this.filteredEmpleadosIncidencias.length > 0;
-  
-    // Se puede confirmar si hay al menos 5 días confirmados y hay empleados asignados o incidencias
-    return confirmedDays >= 5 && hasEmployeesOrIncidences && !this.isWeekConfirmed;
+
+    console.log('Días laborales:', laborDays);
+    console.log('Todos los días laborales confirmados:', allLaborDaysConfirmed);
+    console.log('Hay empleados o incidencias:', hasEmployeesOrIncidences);
+    console.log('Semana ya confirmada:', this.isWeekConfirmed);
+
+    return allLaborDaysConfirmed && hasEmployeesOrIncidences && !this.isWeekConfirmed;
   }
-  
+
+
 } 
