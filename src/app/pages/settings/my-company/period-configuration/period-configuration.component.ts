@@ -423,6 +423,7 @@ export class PeriodConfigurationComponent {
   }
 
 
+  
 
   calculateRestDays() {
     // Verifica que haya una fecha de inicio y un número de días definido
