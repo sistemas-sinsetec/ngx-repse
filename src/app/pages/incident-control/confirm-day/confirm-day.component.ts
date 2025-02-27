@@ -6,8 +6,6 @@ import { CompanyService } from '../../../services/company.service';
 import { PeriodService } from '../../../services/period.service';
 import { NbToastrService } from '@nebular/theme';
 import * as moment from 'moment';
-import { ToastrComponent } from '../../modal-overlays/toastr/toastr.component';
-import { DialogComponent } from '../../modal-overlays/dialog/dialog.component';
 import { LoadingController, AlertController, NavController } from '@ionic/angular';
 
 @Component({
@@ -32,6 +30,9 @@ export class ConfirmDayComponent {
   filteredEmpleadosIncidencias: any[] = []; // Lista filtrada de empleados con incidencias
   searchTerm: string = ''; // Término de búsqueda
 
+
+  restDays: string[] = []; // Días de descanso del periodo seleccionado
+
   constructor(
     private authService: AuthService,
     private http: HttpClient,
@@ -43,8 +44,11 @@ export class ConfirmDayComponent {
     private toastrService: NbToastrService,
     private loadingController: LoadingController,
     private alertController: AlertController,
+    
 
-  ) { }
+  ) {
+    this.restDays = this.periodService.getSelectedPeriod()?.rest_days_position || [];
+   }
 
   ngOnInit() {
     this.loadWeekData();
@@ -79,7 +83,14 @@ export class ConfirmDayComponent {
           this.periodEndDate = semanaActual.period_end_date;
           this.currentPeriodId = semanaActual.period_id;
 
-          this.generarDiasDeSemana(this.periodStartDate, this.periodEndDate, this.currentPeriodId);
+          // Usar el servicio para generar los días de la semana
+          this.diasSemana = this.periodService.generarDiasDeSemana(
+            this.periodStartDate,
+            this.periodEndDate,
+            this.currentPeriodId,
+            this.diasSemana, // El arreglo original que obtuviste de la API
+            this.companyService.selectedCompany.id
+          );
 
           this.verificarConfirmacionSemana(companyId, this.currentPeriodId);
         } else {
@@ -108,27 +119,12 @@ export class ConfirmDayComponent {
     );
   }
 
-  generarDiasDeSemana(startDate: string, endDate: string, periodId: string) {
-    const start = moment(startDate);
-    const end = moment(endDate);
-    const dias = [];
 
-    while (start.isSameOrBefore(end)) {
-      const date = start.format('YYYY-MM-DD');
-      const dayData = this.diasSemana.find(dia => dia.day_of_week === date);
 
-      dias.push({
-        date: date,
-        status: dayData && dayData.status ? dayData.status : null, // Usar null si no hay estado
-        company_id: dayData ? dayData.company_id : this.companyService.selectedCompany.id,
-        period_id: dayData ? dayData.period_id : periodId,
-      });
-
-      start.add(1, 'days');
-    }
-
-    this.diasSemana = dias;
-  }
+ 
+  
+  
+  
 
   async cargarEmpleadosDia(dia: any) {
 
@@ -333,10 +329,9 @@ export class ConfirmDayComponent {
   canConfirmDay(): boolean {
     return this.empleadosDia.length > 0 || this.empleadosIncidencias.length > 0;
   }
+
+
+
   
-  
-
-
-
 
 }

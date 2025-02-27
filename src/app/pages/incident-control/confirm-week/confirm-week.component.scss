@@ -1,39 +1,42 @@
 .days-container {
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: flex-start;
-  }
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-start;
+}
 
-  .day-box {
-    width: 40px;
-    height: 40px;
-    margin: 5px;
-    text-align: center;
-    line-height: 40px;
-    border-radius: 5px;
-    cursor: pointer;
-    font-weight: bold;
-    background-color: #e0e0e0;
-    border: 1px solid #ccc;
-  }
+.day-box {
+  width: 40px;
+  height: 40px;
+  margin: 5px;
+  text-align: center;
+  line-height: 40px;
+  border-radius: 5px;
+  cursor: pointer;
+  font-weight: bold;
+  position: relative; /* Para posicionar el ícono de descanso */
+}
 
-  .day-box.confirmed {
-    background-color: #4caf50;
-    color: white;
-  }
-  
-  .day-box.pending {
-    background-color: #ffcc00;
-    /* Color para días pendientes */
-    color: black;
-  }
+.day-box.confirmed {
+  background-color: #4caf50; /* Verde para días confirmados */
+  color: white;
+}
 
+.day-box.pending {
+  background-color: #ff9800; /* Naranja para días pendientes */
+  color: black;
+}
 
-  .day-box:hover {
-    background-color: #81c784;
-  }
+.day-box.rest-day {
+  background-color: #ff3b3b; /* Amarillo para días de descanso */
+  color: black;
+}
 
-  .day-box {
-    background-color: #e0e0e0; /* Fondo gris para días sin estado */
-  }
-  
+.day-box {
+  background-color: #e0e0e0; /* Fondo gris para días sin estado */
+}
+
+.day-box:hover {
+  background-color: #81c784; /* Verde claro al pasar el mouse */
+}
+
+/* Estilo para el ícono de descanso */

@@ -13,14 +13,28 @@
 
         <!-- Lista de Días de la Semana -->
         <h6><strong>Días de la semana:</strong></h6>
-        <div class="days-container mt-3">
-          <div *ngFor="let dia of diasSemana" class="day-box" [ngClass]="{
-                  'confirmed': dia.status === 'confirmed', 
-                  'pending': dia.status === 'pending'
-                }" (click)="mostrarInfoDia(dia)">
-            {{ dia.date | date:'dd' }}
+        <div class="days-container">
+          <div class="day-box-wrapper" *ngFor="let dia of diasSemana">
+            <!-- Letra del día arriba -->
+            <div class="day-letter">
+              {{ dia.dayLetter }}
+            </div>
+        
+            <!-- Caja con el número de día y estados (confirmed, pending...) -->
+            <div 
+              class="day-box"
+              [ngClass]="{
+                'confirmed': dia.status === 'confirmed', 
+                'pending': dia.status === 'pending',
+                'rest-day': dia.isRestDay
+              }"
+              (click)="!dia.isRestDay && mostrarInfoDia(dia)"
+            >
+              {{ dia.date | date:'dd' }}
+            </div>
           </div>
         </div>
+        
       </nb-card-body>
     </nb-card>
   </div>

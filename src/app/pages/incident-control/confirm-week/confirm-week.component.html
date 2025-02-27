@@ -17,9 +17,10 @@
           </div>
           <div class="days-container mt-3">
             <div *ngFor="let dia of diasSemana" class="day-box" [ngClass]="{
-                   'confirmed': dia.status === 'confirmed', 
-                   'pending': dia.status === 'pending'
-                 }" (click)="mostrarInfoDia(dia)">
+              'confirmed': dia.status === 'confirmed', 
+              'pending': dia.status === 'pending',
+              'rest-day': dia.isRestDay
+             }" (click)="!dia.isRestDay && mostrarInfoDia(dia)">
               {{ dia.date | date:'dd' }}
             </div>
           </div>
@@ -93,7 +94,7 @@
             Confirmar Semana
           </button>
         </div>
-        
+
       </nb-card>
     </div>
   </div>

@@ -134,7 +134,7 @@
                   fullWidth 
                   placeholder="Selecciona fechas" 
                   [value]="getSelectedDatesString()"
-                  (click)="toggleCalendar()"
+                  (click)="toggleCalendar($event)" 
                   class="form-control"
                   readonly
                 />
