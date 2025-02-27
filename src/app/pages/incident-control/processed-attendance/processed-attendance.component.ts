@@ -29,6 +29,8 @@ export class ProcessedAttendanceComponent {
   file: File | null = null; // Archivo seleccionado
   isProcessed: boolean = false; // Estado para el botón de procesar
 
+  paymentDay: number = null;
+
   constructor(
     private authService: AuthService,
     private http: HttpClient,
@@ -44,6 +46,32 @@ export class ProcessedAttendanceComponent {
   ngOnInit() {
     moment.locale('es'); // Configurar moment.js para usar el idioma español
     this.loadProcessedWeeks(); // Cargar las semanas procesadas al iniciar la página
+  }
+
+   // Nueva función para cargar el período y extraer el payment_days
+   loadPayrollPeriod() {
+    const companyId = this.companyService.selectedCompany.id;
+    const periodTypeId = this.periodService.selectedPeriod.id;
+    const url = `https://siinad.mx/php/get-payroll-periods.php?company_id=${companyId}&period_type_id=${periodTypeId}`;
+    this.http.get(url).subscribe(
+      (data: any[]) => {
+        // Se asume que el período actual se identifica por el period_id;
+        // se puede obtener de this.selectedWeek.period_id o de this.periodService.selectedPeriod
+        const currentPeriodId = this.selectedWeek && this.selectedWeek.period_id 
+                                  ? this.selectedWeek.period_id 
+                                  : this.periodService.selectedPeriod.id;
+        const period = data.find(item => item.period_type_id == currentPeriodId);
+        if (period) {
+          this.paymentDay = parseInt(period.payment_days, 10);
+        } else {
+          this.paymentDay = null;
+          console.error('No se encontró el período actual en get-payroll-periods.php');
+        }
+      },
+      (error) => {
+        console.error('Error al cargar el período', error);
+      }
+    );
   }
 
   // Cargar las semanas procesadas
@@ -96,11 +124,12 @@ export class ProcessedAttendanceComponent {
   async onWeekChange(week: any) {
     if (week && week.start_date && week.end_date) {
       this.selectedWeek = week;
-      this.isProcessed = false; // Resetea isProcessed al cambiar de semana
-      this.generateWeekDays(week.start_date, week.end_date); // Usar start_date y end_date directamente del objeto week
+      this.isProcessed = false;
+      this.generateWeekDays(week.start_date, week.end_date);
       await this.loadEmployeesForWeek();
+      this.loadPayrollPeriod(); // Aquí se actualiza this.paymentDay
     } else {
-      console.error('La semana seleccionada no contiene información de fechas de inicio y fin');
+      console.error('La semana seleccionada no contiene información de fechas');
     }
   }
 
@@ -201,20 +230,9 @@ export class ProcessedAttendanceComponent {
     const marginLeft = 5;
     const marginRight = 5;
     const tableWidth = pageWidth - (marginLeft + marginRight);
-    let currentY = 5; // margen superior mínimo
+    let currentY = 5;
   
-    // Nueva distribución de columnas:
-    // Código: 6.8%
-    // Empleado: 19.8%
-    // Entrada: 5%
-    // Entrada C: 5%
-    // Salida C: 5%
-    // Entrada 2da C: 5.6%
-    // Salida 2da C: 5.6%
-    // Salida: 5%
-    // Incidencia: 8%
-    // Empresa y Obra: 24.2%
-    // Firma: 10%
+    // Distribución de columnas (según tus ajustes previos)
     const colWidths = [
       tableWidth * 0.068,  // Código (6.8%)
       tableWidth * 0.198,  // Empleado (19.8%)
@@ -233,9 +251,43 @@ export class ProcessedAttendanceComponent {
     for (let i = 0; i < this.diasSemana.length; i++) {
       const dia = this.diasSemana[i];
   
-      // Cabecera en dos filas:
-      // La primera fila muestra el título del día, abarcando las 11 columnas.
-      // La segunda fila, los títulos de cada columna.
+      // Determinar si el día actual es el de pago (y de descanso)
+      // Se asume que paymentDay indica la posición (1-indexado) del día de pago en la semana
+      if (this.paymentDay && moment(dia.date).isoWeekday() === this.paymentDay) {
+        // Es el día de pago (y de descanso)
+        // Imprimir solo la cabecera con "(descanso)"
+        const headerContent = `Lista de Asistencia para ${dia.display} (${dia.date}) (descanso)`;
+        const headers = [
+          [
+            {
+              content: headerContent,
+              colSpan: 11,
+              styles: {
+                halign: 'center',
+                fontSize: 7,
+                fillColor: [220, 220, 220],
+                textColor: 0,
+                cellPadding: 1,
+                overflow: 'ellipsize'
+              }
+            }
+          ]
+        ];
+        
+        autoTable(pdf, {
+          head: headers,
+          body: [],
+          startY: currentY,
+          margin: { left: marginLeft, right: marginRight },
+          styles: { fontSize: 5, cellPadding: 1, textColor: 0, overflow: 'ellipsize' },
+          headStyles: { fillColor: [220, 220, 220], halign: 'center', cellPadding: 1, textColor: 0, overflow: 'ellipsize' },
+          theme: 'grid'
+        });
+        currentY = (pdf as any).lastAutoTable.finalY + 2;
+        continue;
+      }
+  
+      // Para los días que NO sean de pago, se imprime la cabecera y la tabla normal
       const headers = [
         [
           {
@@ -266,7 +318,6 @@ export class ProcessedAttendanceComponent {
         ]
       ];
   
-      // Construir las filas de datos para el día
       const data = this.empleadosSemana.map(emp => {
         const workHours = emp.work_hours[dia.date] || {};
         return [
@@ -284,13 +335,11 @@ export class ProcessedAttendanceComponent {
         ];
       });
   
-      // Si no hay suficiente espacio en la página, se agrega una nueva
       if (currentY + 10 > pdf.internal.pageSize.getHeight()) {
         pdf.addPage();
         currentY = 5;
       }
   
-      // Generar la tabla con autoTable, aplicando los estilos y anchos definidos
       autoTable(pdf, {
         head: headers,
         body: data,
@@ -314,14 +363,13 @@ export class ProcessedAttendanceComponent {
         }
       });
   
-      // Actualizar la posición vertical para la siguiente tabla (con un margen mínimo)
       currentY = (pdf as any).lastAutoTable.finalY + 2;
     }
   
     pdf.save('asistencia-semanal.pdf');
     loading.dismiss();
   }
-  
+
   
   
   
