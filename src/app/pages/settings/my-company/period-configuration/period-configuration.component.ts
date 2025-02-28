@@ -68,6 +68,7 @@ export class PeriodConfigurationComponent {
   }
   // Agrega o elimina una fecha seleccionadaxd
   toggleDate(day: number) {
+   
     const formattedDate = moment.utc()
       .year(this.currentYear)
       .month(this.currentMonth)
