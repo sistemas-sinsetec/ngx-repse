@@ -68,7 +68,7 @@ export class PeriodConfigurationComponent {
     const utcDate = new Date(Date.UTC(this.currentYear, this.currentMonth, day));
     return utcDate.toISOString().split('T')[0]; // Formato YYYY-MM-DD
   }
-  // Agrega o elimina una fecha seleccionada
+  // Agrega o elimina una fecha seleccionadaxd
   toggleDate(day: number) {
 
     const formattedDate = this.getFormattedDate(day);
@@ -82,6 +82,7 @@ export class PeriodConfigurationComponent {
       this.updateRestDays();
 
     }
+    
   }
 
 
@@ -428,6 +429,7 @@ export class PeriodConfigurationComponent {
   }
 
 
+  
 
   calculateRestDays() {
     // Verifica que haya una fecha de inicio y un número de días definido
