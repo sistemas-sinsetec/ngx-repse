@@ -109,7 +109,7 @@
                 <nb-list-item *ngFor="let empleado of filteredEmpleados" (click)="toggleEmpleadoSelection(empleado)"
                   [class.selected]="empleado.selected" [class.disabled]="empleado.isAssigned" style="cursor: pointer;">
                   <span [class.text-muted]="empleado.isAssigned || empleado.selected">
-                    {{ (empleado.first_name + ' ' + empleado.last_name + ' ' + empleado.middle_name).toUpperCase() }} -
+                    {{ ( empleado.last_name + ' ' + empleado.middle_name + ' ' + empleado.first_name).toUpperCase() }} -
                     Fecha de alta: {{ empleado.start_date }}
                   </span>
                 </nb-list-item>

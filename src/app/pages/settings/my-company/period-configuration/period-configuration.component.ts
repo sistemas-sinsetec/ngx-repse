@@ -55,8 +55,10 @@ export class PeriodConfigurationComponent {
     const firstDayOfMonth = new Date(Date.UTC(this.currentYear, this.currentMonth, 1));
     const offset = (firstDayOfMonth.getUTCDay() + 6) % 7; // Ajuste para lunes como primer día
 
+  
     const emptyDays = Array(offset).fill(null);
     const daysInMonth = new Date(Date.UTC(this.currentYear, this.currentMonth + 1, 0)).getUTCDate();
+  
 
     this.daysInMonth = [...emptyDays, ...Array.from({ length: daysInMonth }, (_, i) => i + 1)];
   }
@@ -68,16 +70,17 @@ export class PeriodConfigurationComponent {
   }
   // Agrega o elimina una fecha seleccionadaxd
   toggleDate(day: number) {
-    const formattedDate = moment.utc()
-      .year(this.currentYear)
-      .month(this.currentMonth)
-      .date(day)
-      .format('YYYY-MM-DD'); // Formato crítico
 
+    const formattedDate = this.getFormattedDate(day);
+    
     if (this.isDateSelectable(day)) {
-      this.selectedDates.has(formattedDate)
-        ? this.selectedDates.delete(formattedDate)
-        : this.selectedDates.add(formattedDate);
+      if (this.selectedDates.has(formattedDate)) {
+        this.selectedDates.delete(formattedDate);
+      } else {
+        this.selectedDates.add(formattedDate);
+      }
+      this.updateRestDays();
+
     }
     
   }
@@ -85,14 +88,11 @@ export class PeriodConfigurationComponent {
 
   // Verifica si una fecha está seleccionada
   isSelected(day: number): boolean {
-    const formattedDate = moment.utc()
-      .year(this.currentYear)
-      .month(this.currentMonth)
-      .date(day)
-      .format('YYYY-MM-DD');
 
+    const formattedDate = this.getFormattedDate(day);
     return this.selectedDates.has(formattedDate);
-  }
+}
+  
 
   isDateSelectable(day: number): boolean {
     const formattedDate = this.getFormattedDate(day);
@@ -132,9 +132,11 @@ export class PeriodConfigurationComponent {
   getSelectedDatesString(): string {
     console.log('Fechas seleccionadas:', Array.from(this.selectedDates)); // Verificar las fechas seleccionadas
 
+  
     const days = Array.from(this.selectedDates).map(dateStr => {
       return moment.utc(dateStr).format('DD'); // Mostrar día UTC
     });
+  
 
     console.log('Días formateados:', days); // Verificar los días formateados
     return days.join(', '); // Unir los días con comas
@@ -171,24 +173,27 @@ export class PeriodConfigurationComponent {
   selectPeriod(period: any) {
     this.selectedPeriod = { ...period };
 
-    // 1. Actualiza el mes/año al del periodo seleccionado
-    const [year, month, day] = period.fiscal_year_start.split('-');
-    const utcDate = new Date(Date.UTC(year, month - 1, day));
-    this.currentMonth = utcDate.getUTCMonth();
-    this.currentYear = utcDate.getUTCFullYear();
-    this.generateDays(); // Regenera los días del mes
-
-    // 2. Convierte los días de descanso a fechas completas YYYY-MM-DD
+  
     this.selectedDates = new Set(
-      period.rest_days_position.map(dateStr => {
-        return moment.utc(dateStr, 'DD').set({
-          year: this.currentYear,
-          month: this.currentMonth
-        }).format('YYYY-MM-DD');
+      period.rest_days_position.map(day => {
+        const year = this.currentYear;
+        const month = this.currentMonth;
+        return moment.utc({ year, month, date: parseInt(day) }).format('YYYY-MM-DD');
       })
     );
 
+
+    // Parsear la fecha en UTC
+    const [year, month, day] = this.selectedPeriod.fiscal_year_start.split('-');
+    const utcDate = new Date(Date.UTC(year, month - 1, day)); // Mes 0 = enero
+  
+    this.currentMonth = utcDate.getUTCMonth();
+    this.currentYear = utcDate.getUTCFullYear();
+  
+    this.generateDays();
     this.updateSelectableDates();
+    this.calculateRestDays();
+
   }
   createNewPeriod() {
     // Crear un nuevo objeto vacío para un nuevo periodo
@@ -217,8 +222,6 @@ export class PeriodConfigurationComponent {
   }
 
   async savePeriodConfig() {
-    // Convertir el Set a un Array antes de usar .map()
-
     // Convertir los días seleccionados a un array de strings (ejemplo: ["08", "09"])
     const restDaysArray = Array.from(this.selectedDates).map(date => {
       const dateObj = moment.utc(date); // Interpretar la fecha como UTC
@@ -277,7 +280,7 @@ export class PeriodConfigurationComponent {
           this.toastrService.danger('Error al crear el nuevo periodo', 'Error');
         });
     }
-  }
+}
 
   async createPayrollPeriods(periodTypes: { period_type_name: string, period_type_id: number }[], periodo: any) {
     if (!Array.isArray(periodTypes)) {
@@ -408,8 +411,10 @@ export class PeriodConfigurationComponent {
   updateSelectableDates() {
     if (!this.selectedPeriod.fiscal_year_start) return;
 
+  
     const startDate = new Date(this.selectedPeriod.fiscal_year_start + 'T00:00:00Z');
     this.minDate = startDate.toISOString().split('T')[0];
+  
 
     const endDate = new Date(startDate);
     endDate.setUTCDate(startDate.getUTCDate() + (this.selectedPeriod.period_days - 1));
