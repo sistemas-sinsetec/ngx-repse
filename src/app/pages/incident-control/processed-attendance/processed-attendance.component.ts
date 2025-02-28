@@ -74,6 +74,25 @@ export class ProcessedAttendanceComponent {
     );
   }
 
+   // Método auxiliar que determina si una fecha es de descanso basado en la configuración del periodo
+   isRestDay(date: moment.Moment): boolean {
+    const period = this.periodService.selectedPeriod;
+    // Usamos period.start en lugar de period.fiscal_year_start
+    if (!period || !period.start || !period.rest_days_position) {
+      return false;
+    }
+    const cycleLength = period.cycleLength || 7;
+    // Generamos las fechas base usando period.start y los días indicados en rest_days_position
+    const baseRestDates = period.rest_days_position.map((pos: string) => {
+      const dayOfMonth = parseInt(pos, 10);
+      return moment(period.start, 'YYYY-MM-DD').date(dayOfMonth);
+    });
+    return baseRestDates.some(base => {
+      const diff = date.diff(base, 'days');
+      return diff >= 0 && diff % cycleLength === 0;
+    });
+  }
+
   // Cargar las semanas procesadas
   async loadProcessedWeeks() {
     // Mostrar spinner de Ionic
@@ -121,31 +140,33 @@ export class ProcessedAttendanceComponent {
 
 
   // Cargar los días de la semana y los empleados al seleccionar una semana
-  async onWeekChange(week: any) {
-    if (week && week.start_date && week.end_date) {
-      this.selectedWeek = week;
-      this.isProcessed = false;
-      this.generateWeekDays(week.start_date, week.end_date);
-      await this.loadEmployeesForWeek();
-      this.loadPayrollPeriod(); // Aquí se actualiza this.paymentDay
-    } else {
-      console.error('La semana seleccionada no contiene información de fechas');
-    }
+ // Al seleccionar una semana, se generan los días usando la nueva lógica y se cargan los empleados
+ async onWeekChange(week: any) {
+  if (week && week.start_date && week.end_date) {
+    this.selectedWeek = week;
+    this.isProcessed = false;
+    this.generateWeekDays(week.start_date, week.end_date);
+    await this.loadEmployeesForWeek();
+    this.loadPayrollPeriod(); // Se actualiza paymentDay (aunque para el descanso se usa isRestDay)
+  } else {
+    console.error('La semana seleccionada no contiene información de fechas');
   }
+}
 
   // Generar los días de la semana en un rango de fechas
 
+  // Nueva versión de generateWeekDays: agrega la propiedad isRest para cada día
   generateWeekDays(startDate: string, endDate: string) {
-    const start = moment(startDate);
+    let current = moment(startDate);
     const end = moment(endDate);
     this.diasSemana = [];
-
-    while (start.isSameOrBefore(end)) {
+    while (current.isSameOrBefore(end)) {
       this.diasSemana.push({
-        date: start.format('YYYY-MM-DD'),
-        display: start.format('dddd'),
+        date: current.format('YYYY-MM-DD'),
+        display: current.format('dddd'),
+        isRest: this.isRestDay(current)  // Se determina si es día de descanso
       });
-      start.add(1, 'days');
+      current.add(1, 'days');
     }
   }
 
@@ -232,67 +253,90 @@ export class ProcessedAttendanceComponent {
     const tableWidth = pageWidth - (marginLeft + marginRight);
     let currentY = 5;
   
-    // Distribución de columnas (según tus ajustes previos)
-    const colWidths = [
-      tableWidth * 0.068,  // Código (6.8%)
-      tableWidth * 0.198,  // Empleado (19.8%)
-      tableWidth * 0.05,   // Entrada (5%)
-      tableWidth * 0.05,   // Entrada C (5%)
-      tableWidth * 0.05,   // Salida C (5%)
-      tableWidth * 0.056,  // Entrada 2da C (5.6%)
-      tableWidth * 0.056,  // Salida 2da C (5.6%)
-      tableWidth * 0.05,   // Salida (5%)
-      tableWidth * 0.08,   // Incidencia (8%)
-      tableWidth * 0.242,  // Empresa y Obra (24.2%)
-      tableWidth * 0.10    // Firma (10%)
-    ];
+    console.log("dias", this.diasSemana);
   
     // Recorrer cada día de la semana
     for (let i = 0; i < this.diasSemana.length; i++) {
       const dia = this.diasSemana[i];
   
-      // Determinar si el día actual es el de pago (y de descanso)
-      // Se asume que paymentDay indica la posición (1-indexado) del día de pago en la semana
-      if (this.paymentDay && moment(dia.date).isoWeekday() === this.paymentDay) {
-        // Es el día de pago (y de descanso)
-        // Imprimir solo la cabecera con "(descanso)"
+      // Si es día de descanso, imprimimos solo la cabecera (sin tabla)
+      if (dia.isRest) {
         const headerContent = `Lista de Asistencia para ${dia.display} (${dia.date}) (descanso)`;
-        const headers = [
-          [
-            {
-              content: headerContent,
-              colSpan: 11,
-              styles: {
-                halign: 'center',
-                fontSize: 7,
-                fillColor: [220, 220, 220],
-                textColor: 0,
-                cellPadding: 1,
-                overflow: 'ellipsize'
-              }
-            }
-          ]
-        ];
-        
-        autoTable(pdf, {
-          head: headers,
-          body: [],
-          startY: currentY,
-          margin: { left: marginLeft, right: marginRight },
-          styles: { fontSize: 5, cellPadding: 1, textColor: 0, overflow: 'ellipsize' },
-          headStyles: { fillColor: [220, 220, 220], halign: 'center', cellPadding: 1, textColor: 0, overflow: 'ellipsize' },
-          theme: 'grid'
-        });
-        currentY = (pdf as any).lastAutoTable.finalY + 2;
+        pdf.setFontSize(7);
+        pdf.setTextColor(0);
+        pdf.text(headerContent, marginLeft, currentY + 5);
+        currentY += 10;
         continue;
       }
   
-      // Para los días que NO sean de pago, se imprime la cabecera y la tabla normal
-      const headers = [
+      // Determinar si para este día existe información de segunda comida en al menos un empleado
+      const showSecondMeal = this.empleadosSemana.some(emp => {
+        const workHours = emp.work_hours[dia.date] || {};
+        const secondLunchStart = this.formatHour(workHours.second_lunch_start_time);
+        const secondLunchEnd = this.formatHour(workHours.second_lunch_end_time);
+        // Consideramos que hay info si alguno de ellos tiene valor distinto de null o vacío
+        return secondLunchStart != null || secondLunchEnd != null;
+      });
+  
+      // Construir encabezado dinámico y anchos de columna según showSecondMeal
+      let headerRow: any[] = [
+        { content: 'Código', styles: { fontSize: 6, cellPadding: 1, textColor: 0, overflow: 'ellipsize' } },
+        { content: 'Empleado', styles: { fontSize: 6, cellPadding: 1, textColor: 0, overflow: 'ellipsize' } },
+        { content: 'Entrada', styles: { fontSize: 6, cellPadding: 1, textColor: 0, overflow: 'ellipsize' } },
+        { content: 'Entrada C', styles: { fontSize: 6, cellPadding: 1, textColor: 0, overflow: 'ellipsize' } },
+        { content: 'Salida C', styles: { fontSize: 6, cellPadding: 1, textColor: 0, overflow: 'ellipsize' } },
+      ];
+      if (showSecondMeal) {
+        headerRow.push(
+          { content: 'Entrada 2da C', styles: { fontSize: 6, cellPadding: 1, textColor: 0, overflow: 'ellipsize' } },
+          { content: 'Salida 2da C', styles: { fontSize: 6, cellPadding: 1, textColor: 0, overflow: 'ellipsize' } }
+        );
+      }
+      headerRow.push(
+        { content: 'Salida', styles: { fontSize: 6, cellPadding: 1, textColor: 0, overflow: 'ellipsize' } },
+        { content: 'Incidencia', styles: { fontSize: 6, cellPadding: 1, textColor: 0, overflow: 'ellipsize' } },
+        { content: 'Empresa y Obra', styles: { fontSize: 6, cellPadding: 1, textColor: 0, overflow: 'ellipsize' } },
+        { content: 'Firma', styles: { fontSize: 6, cellPadding: 1, textColor: 0, overflow: 'ellipsize' } }
+      );
+  
+      // Definir los anchos de columna según si se muestran o no las columnas de segunda comida
+      let colWidths: number[];
+      if (showSecondMeal) {
+        // Se usan 11 columnas (como en tu versión original)
+        colWidths = [
+          tableWidth * 0.068,  // Código
+          tableWidth * 0.198,  // Empleado
+          tableWidth * 0.05,   // Entrada
+          tableWidth * 0.05,   // Entrada C
+          tableWidth * 0.05,   // Salida C
+          tableWidth * 0.056,  // Entrada 2da C
+          tableWidth * 0.056,  // Salida 2da C
+          tableWidth * 0.05,   // Salida
+          tableWidth * 0.08,   // Incidencia
+          tableWidth * 0.242,  // Empresa y Obra
+          tableWidth * 0.10    // Firma
+        ];
+      } else {
+        // Se usan 9 columnas
+        colWidths = [
+          tableWidth * 0.068,  // Código
+          tableWidth * 0.198,  // Empleado
+          tableWidth * 0.05,   // Entrada
+          tableWidth * 0.05,   // Entrada C
+          tableWidth * 0.05,   // Salida C
+          tableWidth * 0.05,   // Salida (ajustado)
+          tableWidth * 0.08,   // Incidencia
+          tableWidth * 0.242,  // Empresa y Obra
+          tableWidth * 0.10    // Firma
+        ];
+      }
+  
+      // Armar encabezados de tabla (primera fila: título de la lista)
+      const tableHeader = [
         [
           {
             content: `Lista de Asistencia para ${dia.display} (${dia.date})`,
-            colSpan: 11,
+            colSpan: headerRow.length,
             styles: {
               halign: 'center',
               fontSize: 7,
@@ -303,64 +347,70 @@ export class ProcessedAttendanceComponent {
             }
           }
         ],
-        [
-          { content: 'Código', styles: { fontSize: 6, cellPadding: 1, textColor: 0, overflow: 'ellipsize' } },
-          { content: 'Empleado', styles: { fontSize: 6, cellPadding: 1, textColor: 0, overflow: 'ellipsize' } },
-          { content: 'Entrada', styles: { fontSize: 6, cellPadding: 1, textColor: 0, overflow: 'ellipsize' } },
-          { content: 'Entrada C', styles: { fontSize: 6, cellPadding: 1, textColor: 0, overflow: 'ellipsize' } },
-          { content: 'Salida C', styles: { fontSize: 6, cellPadding: 1, textColor: 0, overflow: 'ellipsize' } },
-          { content: 'Entrada 2da C', styles: { fontSize: 6, cellPadding: 1, textColor: 0, overflow: 'ellipsize' } },
-          { content: 'Salida 2da C', styles: { fontSize: 6, cellPadding: 1, textColor: 0, overflow: 'ellipsize' } },
-          { content: 'Salida', styles: { fontSize: 6, cellPadding: 1, textColor: 0, overflow: 'ellipsize' } },
-          { content: 'Incidencia', styles: { fontSize: 6, cellPadding: 1, textColor: 0, overflow: 'ellipsize' } },
-          { content: 'Empresa y Obra', styles: { fontSize: 6, cellPadding: 1, textColor: 0, overflow: 'ellipsize' } },
-          { content: 'Firma', styles: { fontSize: 6, cellPadding: 1, textColor: 0, overflow: 'ellipsize' } }
-        ]
+        headerRow
       ];
   
+      // Construir los datos por empleado para este día
       const data = this.empleadosSemana.map(emp => {
         const workHours = emp.work_hours[dia.date] || {};
-        return [
+        const entry = this.formatHour(workHours.entry_time) || '--:--';
+        const lunchStart = this.formatHour(workHours.lunch_start_time) || '--:--';
+        const lunchEnd = this.formatHour(workHours.lunch_end_time) || '--:--';
+        // Obtener datos de 2da comida
+        const secondLunchStart = this.formatHour(workHours.second_lunch_start_time) || '--:--';
+        const secondLunchEnd = this.formatHour(workHours.second_lunch_end_time) || '--:--';
+        const exit = this.formatHour(workHours.exit_time) || '--:--';
+  
+        // Si hay incidencia, no se muestran las horas
+        let finalEntry = entry, finalLunchStart = lunchStart, finalLunchEnd = lunchEnd,
+            finalSecondLunchStart = secondLunchStart, finalSecondLunchEnd = secondLunchEnd, finalExit = exit;
+        if (workHours.incident && workHours.incident !== 'Asistencia sin proyecto' && workHours.incident !== 'N/A') {
+          finalEntry = '';
+          finalLunchStart = '';
+          finalLunchEnd = '';
+          finalSecondLunchStart = '';
+          finalSecondLunchEnd = '';
+          finalExit = '';
+        }
+  
+        // Armar la fila según si se muestran las columnas de 2da comida
+        const row: any[] = [
           emp.employee_code?.toString() || '',
           `${emp.first_name} ${emp.middle_name} ${emp.last_name}`,
-          this.formatHour(workHours.entry_time) || '--:--',
-          this.formatHour(workHours.lunch_start_time) || '--:--',
-          this.formatHour(workHours.lunch_end_time) || '--:--',
-          this.formatHour(workHours.second_lunch_start_time) || '--:--',
-          this.formatHour(workHours.second_lunch_end_time) || '--:--',
-          this.formatHour(workHours.exit_time) || '--:--',
+          finalEntry,
+          finalLunchStart,
+          finalLunchEnd
+        ];
+        if (showSecondMeal) {
+          row.push(finalSecondLunchStart, finalSecondLunchEnd);
+        }
+        row.push(
+          finalExit,
           workHours.incident || 'N/A',
           workHours.project_name || 'No Asignado',
           '' // Firma vacía
-        ];
+        );
+        return row;
       });
   
+      // Revisar si hay espacio para la tabla en la página actual
       if (currentY + 10 > pdf.internal.pageSize.getHeight()) {
         pdf.addPage();
         currentY = 5;
       }
   
       autoTable(pdf, {
-        head: headers,
+        head: tableHeader,
         body: data,
         startY: currentY,
         margin: { left: marginLeft, right: marginRight },
         styles: { fontSize: 5, cellPadding: 1, textColor: 0, overflow: 'ellipsize' },
         headStyles: { fillColor: [220, 220, 220], halign: 'center', cellPadding: 1, textColor: 0, overflow: 'ellipsize' },
         theme: 'grid',
-        columnStyles: {
-          0: { cellWidth: colWidths[0] },
-          1: { cellWidth: colWidths[1] },
-          2: { cellWidth: colWidths[2] },
-          3: { cellWidth: colWidths[3] },
-          4: { cellWidth: colWidths[4] },
-          5: { cellWidth: colWidths[5] },
-          6: { cellWidth: colWidths[6] },
-          7: { cellWidth: colWidths[7] },
-          8: { cellWidth: colWidths[8] },
-          9: { cellWidth: colWidths[9] },
-          10: { cellWidth: colWidths[10] }
-        }
+        columnStyles: colWidths.reduce((acc, width, index) => {
+          acc[index] = { cellWidth: width };
+          return acc;
+        }, {} as { [key: number]: { cellWidth: number } })
       });
   
       currentY = (pdf as any).lastAutoTable.finalY + 2;
@@ -369,9 +419,6 @@ export class ProcessedAttendanceComponent {
     pdf.save('asistencia-semanal.pdf');
     loading.dismiss();
   }
-
-  
-  
   
   
   
