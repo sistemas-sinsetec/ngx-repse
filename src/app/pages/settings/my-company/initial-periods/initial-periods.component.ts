@@ -71,6 +71,19 @@ export class InitialPeriodsComponent {
       mensual: this.ejercicioMensual
     });
   }
+
+  private getFirstSunday(startDate: Date): number {
+    // Clonar la fecha para no modificar la original
+    const date = new Date(startDate);
+  
+    // Encontrar el primer domingo
+    while (date.getDay() !== 0) {
+      date.setDate(date.getDate() + 1);
+    }
+  
+    // Devolver el día del mes del primer domingo
+    return date.getDate();
+  }
   
   private showToast(message: string, status: NbComponentStatus) {
     this.toastrService.show(
@@ -110,6 +123,7 @@ export class InitialPeriodsComponent {
     const periodos: Periodo[] = [];
 
     if (this.periodoSemanal) {
+      const firstSunday = this.getFirstSunday(new Date(this.fechaSemanal));
       periodos.push({
         nombretipoperiodo: 'Semanal',
         diasdelperiodo: 7,
@@ -118,17 +132,19 @@ export class InitialPeriodsComponent {
         modificarhistoria: 1,
         ajustarperiodoscalendario: 0,
         numeroseptimos: 1,
-        posicionseptimos: 7,
+        posicionseptimos:  JSON.stringify([firstSunday.toString()]), // Añadir el primer domingo,
         posicionpagonomina: 6,
         fechainicioejercicio: this.fechaSemanal,
         ejercicio: this.ejercicioSemanal,
         ccalculomescalendario: 0,
-        PeriodicidadPago: '02'
+        PeriodicidadPago: '02',
+        
       });
       this.showToast("Periodo semanal guardado correctamente", 'success');
     }
 
     if (this.periodoQuincenal) {
+      const firstSunday = this.getFirstSunday(new Date(this.fechaQuincenal));
       periodos.push({
         nombretipoperiodo: 'Quincenal',
         diasdelperiodo: 15,
@@ -137,7 +153,7 @@ export class InitialPeriodsComponent {
         modificarhistoria: 0,
         ajustarperiodoscalendario: 1,
         numeroseptimos: 0,
-        posicionseptimos: null,
+        posicionseptimos:  JSON.stringify([firstSunday.toString()]), // Añadir el primer domingo,
         posicionpagonomina: 15,
         fechainicioejercicio: this.fechaQuincenal,
         ejercicio: this.ejercicioQuincenal,
@@ -148,6 +164,7 @@ export class InitialPeriodsComponent {
     }
 
     if (this.periodoMensual) {
+      const firstSunday = this.getFirstSunday(new Date(this.fechaMensual));
       periodos.push({
         nombretipoperiodo: 'Mensual',
         diasdelperiodo: 30,
@@ -156,7 +173,7 @@ export class InitialPeriodsComponent {
         modificarhistoria: 0,
         ajustarperiodoscalendario: 1,
         numeroseptimos: 0,
-        posicionseptimos: null,
+        posicionseptimos:  JSON.stringify([firstSunday.toString()]), // Añadir el primer domingo,
         posicionpagonomina: 30,
         fechainicioejercicio: this.fechaMensual,
         ejercicio: this.ejercicioMensual,
@@ -340,7 +357,7 @@ interface Periodo {
   modificarhistoria: number;
   ajustarperiodoscalendario: number;
   numeroseptimos: number | null;
-  posicionseptimos: number | null;
+  posicionseptimos: string;
   posicionpagonomina: number;
   fechainicioejercicio: string;
   ejercicio: number;
