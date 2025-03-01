@@ -215,10 +215,18 @@ export class ConfirmDayComponent {
 
   async mostrarInfoDia(dia: any) {
     this.selectedDia = dia;
-    await this.cargarEmpleadosDia(dia);
-
-    // Verificar si hay empleados asignados o con incidencias
-    if (this.empleadosDia.length === 0 && this.empleadosIncidencias.length === 0) {
+    await this.cargarEmpleadosDia(dia); // Cargar empleados del día
+  
+    // Si es día de descanso pero tiene empleados asignados, permitir confirmar
+    if (dia.isRestDay && (this.empleadosDia.length > 0 || this.empleadosIncidencias.length > 0)) {
+      this.toastrService.show(
+        'Este es un día de descanso, pero hay empleados asignados.',
+        `Información del Día: ${dia.date}`,
+        { status: 'warning', duration: 5000 }
+      );
+    }
+    // Si no hay empleados, mostrar mensaje normal
+    else if (this.empleadosDia.length === 0 && this.empleadosIncidencias.length === 0) {
       this.toastrService.show(
         'No hay empleados asignados ni con incidencias para este día.',
         `Información del Día: ${dia.date}`,
@@ -228,6 +236,14 @@ export class ConfirmDayComponent {
   }
 
   async confirmarDia(dia: any) {
+    if (dia.isRestDay && this.empleadosDia.length === 0 && this.empleadosIncidencias.length === 0) {
+      this.toastrService.show(
+        'No se puede confirmar un día de descanso sin empleados asignados.',
+        'Advertencia',
+        { status: 'warning', duration: 5000 }
+      );
+      return;
+    }
     const loading = await this.loadingController.create({
       message: 'Confirmando día...',
     });
@@ -326,10 +342,10 @@ export class ConfirmDayComponent {
     await alert.present();
   }
 
-  canConfirmDay(): boolean {
-    return this.empleadosDia.length > 0 || this.empleadosIncidencias.length > 0;
-  }
-
+canConfirmDay(dia: any): boolean {
+  // Permitir confirmar si hay empleados, aunque sea día de descanso
+  return (this.empleadosDia.length > 0 || this.empleadosIncidencias.length > 0);
+}
 
 
   

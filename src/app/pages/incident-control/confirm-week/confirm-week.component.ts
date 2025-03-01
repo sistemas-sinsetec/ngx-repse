@@ -45,7 +45,7 @@ export class ConfirmWeekComponent {
     private alertController: AlertController
   ) {
     this.restDays = this.periodService.getSelectedPeriod()?.rest_days_position || [];
-   }
+  }
 
   ngOnInit() {
     this.loadWeekData();
@@ -186,13 +186,27 @@ export class ConfirmWeekComponent {
     }
   }
 
-  // Mostrar información del día seleccionado
+
+
   async mostrarInfoDia(dia: any) {
     this.selectedDia = dia;
-    await this.cargarEmpleadosDia(dia);
+    await this.cargarEmpleadosDia(dia); // Cargar empleados del día
 
-    if (this.empleadosDia.length === 0 && this.empleadosIncidencias.length === 0) {
-      this.toastrService.warning('No hay empleados asignados a este día.', `Información del Día: ${dia.date}`);
+    // Si es día de descanso pero tiene empleados asignados, permitir confirmar
+    if (dia.isRestDay && (this.empleadosDia.length > 0 || this.empleadosIncidencias.length > 0)) {
+      this.toastrService.show(
+        'Este es un día de descanso, pero hay empleados asignados.',
+        `Información del Día: ${dia.date}`,
+        { status: 'warning', duration: 5000 }
+      );
+    }
+    // Si no hay empleados, mostrar mensaje normal
+    else if (this.empleadosDia.length === 0 && this.empleadosIncidencias.length === 0) {
+      this.toastrService.show(
+        'No hay empleados asignados ni con incidencias para este día.',
+        `Información del Día: ${dia.date}`,
+        { status: 'info', duration: 5000 }
+      );
     }
   }
 
@@ -358,6 +372,56 @@ export class ConfirmWeekComponent {
     console.log('Semana ya confirmada:', this.isWeekConfirmed);
 
     return allLaborDaysConfirmed && hasEmployeesOrIncidences && !this.isWeekConfirmed;
+  }
+
+
+  async toggleConfirmacionDia(dia: any) {
+    const newStatus = dia.status === 'confirmed' ? 'pending' : 'confirmed';
+    const loading = await this.loadingController.create({
+      message: newStatus === 'confirmed' ? 'Confirmando día...' : 'Desconfirmando día...',
+    });
+    await loading.present();
+  
+    const body = {
+      company_id: dia.company_id,
+      period_id: dia.period_id,
+      period_type_id: this.periodService.selectedPeriod.id,
+      day_of_week: dia.date,  // Asegúrate de que dia tenga este campo
+      confirmation_date: new Date().toISOString().split('T')[0],
+      week_number: this.currentSemana,
+      status: newStatus
+    };
+  
+    this.http.post('https://siinad.mx/php/confirm-day.php', body).subscribe(
+      (response: any) => {
+        if (response?.success) {
+          dia.status = newStatus; // Actualizar estado en el frontend
+          this.toastrService.success(
+            `Día ${newStatus === 'confirmed' ? 'confirmado' : 'desconfirmado'} correctamente.`,
+            'Éxito'
+          );
+          this.cargarEmpleadosDia(dia); // Recargar datos del día
+        } else {
+          this.toastrService.danger(response?.error || 'Error en el servidor', 'Error');
+        }
+        loading.dismiss();
+      },
+      (error) => {
+        this.toastrService.danger('Error de conexión', 'Error');
+        loading.dismiss();
+      }
+    );
+  }
+  private formatDate(dateString: string): string {
+    return moment(dateString).format('DD/MM/YYYY');
+  }
+
+  private handleError(error: any): void {
+    console.error('Error:', error);
+    this.toastrService.danger(
+      'Ocurrió un error al procesar la solicitud. Intenta nuevamente.',
+      'Error', { duration: 5000 }
+    );
   }
 
 

@@ -19,7 +19,8 @@ import {
   NbAccordionModule,
   NbInputModule,
   NbTagModule,
-  NbUserModule
+  NbUserModule,
+  NbPopoverModule
 } from '@nebular/theme';
 import { ThemeModule } from '../../@theme/theme.module';
 import { IncidentControlRoutingModule } from './incident-control-routing.module';
@@ -77,7 +78,8 @@ import { ProcessedListDialogComponent } from './processed-list-dialog/processed-
     NbInputModule,
     NbTagModule,
     NbUserModule,
-    IonicModule
+    IonicModule,
+    NbPopoverModule,
 
   ]
 })
