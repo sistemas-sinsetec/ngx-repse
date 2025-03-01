@@ -255,30 +255,168 @@ export class ProcessedAttendanceComponent {
   
     console.log("dias", this.diasSemana);
   
-    // Recorrer cada día de la semana
+    // Recorremos cada día de la semana
     for (let i = 0; i < this.diasSemana.length; i++) {
       const dia = this.diasSemana[i];
-  
-      // Si es día de descanso, imprimimos solo la cabecera (sin tabla)
-      if (dia.isRest) {
-        const headerContent = `Lista de Asistencia para ${dia.display} (${dia.date}) (descanso)`;
-        pdf.setFontSize(7);
+        const employeesWithIncidence = this.empleadosSemana.filter(emp => {
+        const workHours = emp.work_hours[dia.date] || {};
+        return workHours.incident &&
+               workHours.incident !== 'Asistencia sin proyecto' &&
+               workHours.incident !== 'N/A';
+        });
+      // Si es día de descanso...
+      if (dia.isRest && employeesWithIncidence.length === 0) {
+        // Imprimir encabezado del día
+        const headerContent = `Día ${dia.display} (${dia.date}) (descanso)`;
+        pdf.setFont("helvetica", "bold");
+        pdf.setFontSize(10);
         pdf.setTextColor(0);
-        pdf.text(headerContent, marginLeft, currentY + 5);
-        currentY += 10;
-        continue;
-      }
+        const centerX = pdf.internal.pageSize.getWidth() / 2;
+        pdf.text(headerContent, centerX, currentY + 5, { align: 'center' });
+        pdf.setFont("helvetica", "normal");
+        currentY += 12; // Espacio luego del encabezado
   
-      // Determinar si para este día existe información de segunda comida en al menos un empleado
+        // Filtrar solo a los empleados que tengan incidencia en este día
+
+  
+        // Si existen incidencias, imprimir tabla solo con esos empleados
+        if (employeesWithIncidence.length > 0) {
+          // Verificar si se requiere mostrar columnas de segunda comida en estos registros
+          const showSecondMeal = employeesWithIncidence.some(emp => {
+            const wh = emp.work_hours[dia.date] || {};
+            const secondLunchStart = this.formatHour(wh.second_lunch_start_time);
+            const secondLunchEnd = this.formatHour(wh.second_lunch_end_time);
+            return secondLunchStart != null || secondLunchEnd != null;
+          });
+  
+          // Armar encabezado de la tabla
+          let headerRow: any[] = [
+            { content: 'Código',    styles: { fontSize: 6, cellPadding: 1, textColor: 0, overflow: 'ellipsize' } },
+            { content: 'Empleado',  styles: { fontSize: 6, cellPadding: 1, textColor: 0, overflow: 'ellipsize' } },
+            { content: 'Entrada',   styles: { fontSize: 6, cellPadding: 1, textColor: 0, overflow: 'ellipsize' } },
+            { content: 'Entrada C', styles: { fontSize: 6, cellPadding: 1, textColor: 0, overflow: 'ellipsize' } },
+            { content: 'Salida C',  styles: { fontSize: 6, cellPadding: 1, textColor: 0, overflow: 'ellipsize' } },
+          ];
+          if (showSecondMeal) {
+            headerRow.push(
+              { content: 'Entrada 2da C', styles: { fontSize: 6, cellPadding: 1, textColor: 0, overflow: 'ellipsize' } },
+              { content: 'Salida 2da C',  styles: { fontSize: 6, cellPadding: 1, textColor: 0, overflow: 'ellipsize' } }
+            );
+          }
+          headerRow.push(
+            { content: 'Salida',     styles: { fontSize: 6, cellPadding: 1, textColor: 0, overflow: 'ellipsize' } },
+            { content: 'Incidencia', styles: { fontSize: 6, cellPadding: 1, textColor: 0, overflow: 'ellipsize' } },
+            { content: 'Empresa y Obra', styles: { fontSize: 6, cellPadding: 1, textColor: 0, overflow: 'ellipsize' } },
+            { content: 'Firma',      styles: { fontSize: 6, cellPadding: 1, textColor: 0, overflow: 'ellipsize' } }
+          );
+  
+          const tableHeader = [
+            [
+              {
+                content: `Incidencias para ${dia.display} (${dia.date})`,
+                colSpan: headerRow.length,
+                styles: {
+                  halign: 'center',
+                  fontSize: 7,
+                  fillColor: [220, 220, 220],
+                  textColor: 0,
+                  cellPadding: 1,
+                  overflow: 'ellipsize'
+                }
+              }
+            ],
+            headerRow
+          ];
+  
+          // Armar las filas: se limpian los horarios para dejar en blanco y se mantiene la incidencia
+          const dataRows = employeesWithIncidence.map(emp => {
+            const wh = emp.work_hours[dia.date] || {};
+            // Se dejan los campos de hora en blanco para evidenciar la incidencia
+            const finalEntry = '';
+            const finalLunchStart = '';
+            const finalLunchEnd = '';
+            const finalSecondLunchStart = '';
+            const finalSecondLunchEnd = '';
+            const finalExit = '';
+            return [
+              emp.employee_code?.toString() || '',
+              `${emp.first_name} ${emp.middle_name} ${emp.last_name}`,
+              finalEntry,
+              finalLunchStart,
+              finalLunchEnd,
+              ...(showSecondMeal ? [finalSecondLunchStart, finalSecondLunchEnd] : []),
+              finalExit,
+              wh.incident || 'N/A',
+              wh.project_name || 'No Asignado',
+              '' // Firma vacía
+            ];
+          });
+  
+          // Definir anchos de columna según si se muestra segunda comida
+          let colWidths: number[];
+          if (showSecondMeal) {
+            colWidths = [
+              tableWidth * 0.068,
+              tableWidth * 0.198,
+              tableWidth * 0.05,
+              tableWidth * 0.05,
+              tableWidth * 0.05,
+              tableWidth * 0.056,
+              tableWidth * 0.056,
+              tableWidth * 0.05,
+              tableWidth * 0.08,
+              tableWidth * 0.242,
+              tableWidth * 0.10
+            ];
+          } else {
+            colWidths = [
+              tableWidth * 0.068,
+              tableWidth * 0.198,
+              tableWidth * 0.05,
+              tableWidth * 0.05,
+              tableWidth * 0.05,
+              tableWidth * 0.05,
+              tableWidth * 0.08,
+              tableWidth * 0.242,
+              tableWidth * 0.10
+            ];
+          }
+    
+          // Revisar si hay espacio para la tabla
+          if (currentY + 10 > pdf.internal.pageSize.getHeight()) {
+            pdf.addPage();
+            currentY = 5;
+          }
+    
+          autoTable(pdf, {
+            head: tableHeader,
+            body: dataRows,
+            startY: currentY,
+            margin: { left: marginLeft, right: marginRight },
+            styles: { fontSize: 5, cellPadding: 1, textColor: 0, overflow: 'ellipsize' },
+            headStyles: { fillColor: [220, 220, 220], halign: 'center', cellPadding: 1, textColor: 0, overflow: 'ellipsize' },
+            theme: 'grid',
+            columnStyles: colWidths.reduce((acc, width, index) => {
+              acc[index] = { cellWidth: width };
+              return acc;
+            }, {} as { [key: number]: { cellWidth: number } })
+          });
+    
+          currentY = (pdf as any).lastAutoTable.finalY + 2;
+        }
+    
+        // En cualquier caso, para el día de descanso ya se imprimió el encabezado (y la tabla de incidencias si las había)
+        continue; // Pasar al siguiente día
+      }
+    
+      // Para días normales (no descanso) se sigue la lógica original
       const showSecondMeal = this.empleadosSemana.some(emp => {
         const workHours = emp.work_hours[dia.date] || {};
         const secondLunchStart = this.formatHour(workHours.second_lunch_start_time);
         const secondLunchEnd = this.formatHour(workHours.second_lunch_end_time);
-        // Consideramos que hay info si alguno de ellos tiene valor distinto de null o vacío
         return secondLunchStart != null || secondLunchEnd != null;
       });
-  
-      // Construir encabezado dinámico y anchos de columna según showSecondMeal
+    
       let headerRow: any[] = [
         { content: 'Código', styles: { fontSize: 6, cellPadding: 1, textColor: 0, overflow: 'ellipsize' } },
         { content: 'Empleado', styles: { fontSize: 6, cellPadding: 1, textColor: 0, overflow: 'ellipsize' } },
@@ -298,40 +436,7 @@ export class ProcessedAttendanceComponent {
         { content: 'Empresa y Obra', styles: { fontSize: 6, cellPadding: 1, textColor: 0, overflow: 'ellipsize' } },
         { content: 'Firma', styles: { fontSize: 6, cellPadding: 1, textColor: 0, overflow: 'ellipsize' } }
       );
-  
-      // Definir los anchos de columna según si se muestran o no las columnas de segunda comida
-      let colWidths: number[];
-      if (showSecondMeal) {
-        // Se usan 11 columnas (como en tu versión original)
-        colWidths = [
-          tableWidth * 0.068,  // Código
-          tableWidth * 0.198,  // Empleado
-          tableWidth * 0.05,   // Entrada
-          tableWidth * 0.05,   // Entrada C
-          tableWidth * 0.05,   // Salida C
-          tableWidth * 0.056,  // Entrada 2da C
-          tableWidth * 0.056,  // Salida 2da C
-          tableWidth * 0.05,   // Salida
-          tableWidth * 0.08,   // Incidencia
-          tableWidth * 0.242,  // Empresa y Obra
-          tableWidth * 0.10    // Firma
-        ];
-      } else {
-        // Se usan 9 columnas
-        colWidths = [
-          tableWidth * 0.068,  // Código
-          tableWidth * 0.198,  // Empleado
-          tableWidth * 0.05,   // Entrada
-          tableWidth * 0.05,   // Entrada C
-          tableWidth * 0.05,   // Salida C
-          tableWidth * 0.05,   // Salida (ajustado)
-          tableWidth * 0.08,   // Incidencia
-          tableWidth * 0.242,  // Empresa y Obra
-          tableWidth * 0.10    // Firma
-        ];
-      }
-  
-      // Armar encabezados de tabla (primera fila: título de la lista)
+    
       const tableHeader = [
         [
           {
@@ -349,19 +454,16 @@ export class ProcessedAttendanceComponent {
         ],
         headerRow
       ];
-  
-      // Construir los datos por empleado para este día
+    
       const data = this.empleadosSemana.map(emp => {
         const workHours = emp.work_hours[dia.date] || {};
         const entry = this.formatHour(workHours.entry_time) || '--:--';
         const lunchStart = this.formatHour(workHours.lunch_start_time) || '--:--';
         const lunchEnd = this.formatHour(workHours.lunch_end_time) || '--:--';
-        // Obtener datos de 2da comida
         const secondLunchStart = this.formatHour(workHours.second_lunch_start_time) || '--:--';
         const secondLunchEnd = this.formatHour(workHours.second_lunch_end_time) || '--:--';
         const exit = this.formatHour(workHours.exit_time) || '--:--';
-  
-        // Si hay incidencia, no se muestran las horas
+    
         let finalEntry = entry, finalLunchStart = lunchStart, finalLunchEnd = lunchEnd,
             finalSecondLunchStart = secondLunchStart, finalSecondLunchEnd = secondLunchEnd, finalExit = exit;
         if (workHours.incident && workHours.incident !== 'Asistencia sin proyecto' && workHours.incident !== 'N/A') {
@@ -372,8 +474,7 @@ export class ProcessedAttendanceComponent {
           finalSecondLunchEnd = '';
           finalExit = '';
         }
-  
-        // Armar la fila según si se muestran las columnas de 2da comida
+    
         const row: any[] = [
           emp.employee_code?.toString() || '',
           `${emp.first_name} ${emp.middle_name} ${emp.last_name}`,
@@ -388,17 +489,45 @@ export class ProcessedAttendanceComponent {
           finalExit,
           workHours.incident || 'N/A',
           workHours.project_name || 'No Asignado',
-          '' // Firma vacía
+          ''
         );
         return row;
       });
-  
-      // Revisar si hay espacio para la tabla en la página actual
+    
+      let colWidths: number[];
+      if (showSecondMeal) {
+        colWidths = [
+          tableWidth * 0.068,
+          tableWidth * 0.198,
+          tableWidth * 0.05,
+          tableWidth * 0.05,
+          tableWidth * 0.05,
+          tableWidth * 0.056,
+          tableWidth * 0.056,
+          tableWidth * 0.05,
+          tableWidth * 0.08,
+          tableWidth * 0.242,
+          tableWidth * 0.10
+        ];
+      } else {
+        colWidths = [
+          tableWidth * 0.068,
+          tableWidth * 0.198,
+          tableWidth * 0.05,
+          tableWidth * 0.05,
+          tableWidth * 0.05,
+          tableWidth * 0.05,
+          tableWidth * 0.08,
+          tableWidth * 0.242,
+          tableWidth * 0.10
+        ];
+      }
+    
       if (currentY + 10 > pdf.internal.pageSize.getHeight()) {
         pdf.addPage();
         currentY = 5;
       }
-  
+    
       autoTable(pdf, {
         head: tableHeader,
         body: data,
@@ -412,13 +541,14 @@ export class ProcessedAttendanceComponent {
           return acc;
         }, {} as { [key: number]: { cellWidth: number } })
       });
-  
+    
       currentY = (pdf as any).lastAutoTable.finalY + 2;
     }
-  
+    
     pdf.save('asistencia-semanal.pdf');
     loading.dismiss();
   }
+  
   
   
   
