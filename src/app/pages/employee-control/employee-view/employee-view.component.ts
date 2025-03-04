@@ -6,6 +6,8 @@ import { EmployeeDetailsComponent } from '../employee-details/employee-details.c
 import { NbDialogService } from '@nebular/theme';
 import { CompanyService } from '../../../services/company.service';
 import { take } from 'rxjs/operators';
+import { NbWindowService } from '@nebular/theme';
+import { RegisterUserComponent } from '../register-user/register-user.component';
 
 interface Empleado {
   employee_id: number;
@@ -19,6 +21,12 @@ interface Empleado {
   email: string;
   phone_number: string;
   start_date: string;
+}
+
+interface User {
+  id: number;
+  name: string;
+  employee_id: number;
 }
 
 interface Turno {
@@ -45,7 +53,7 @@ interface Departamento {
 export class EmployeeViewComponent implements OnInit {
   mostrarBusqueda: boolean = false;
 
-
+  users: User[] = [];
   departamentos: Departamento[] = [];
   puestos: Puesto[] = [];
   turnos: Turno[] = [];
@@ -63,6 +71,7 @@ export class EmployeeViewComponent implements OnInit {
     public authService: AuthService,
     private router: Router,
     private dialogService: NbDialogService,
+    private windowService: NbWindowService,
     private companyService: CompanyService,
   ) { }
 
@@ -70,6 +79,41 @@ export class EmployeeViewComponent implements OnInit {
     this.loadDepartments();
     this.loadPositions();
     this.loadShifts();
+    this.loadUsers();
+  }
+
+   // Método para cargar usuarios desde el backend
+   loadUsers() {
+    this.http.get<User[]>('https://siinad.mx/php/getUsuarios.php')
+      .subscribe(
+        data => {
+          this.users = data;
+        },
+        error => {
+          console.error('Error al cargar usuarios:', error);
+        }
+      );
+  }
+
+  addUser(empleado: any) {
+    this.windowService.open(RegisterUserComponent, {
+      title: 'Registrar Usuario',
+      context: {
+        employee: empleado  // Pasamos el objeto empleado
+      },
+      buttons: { minimize: false, maximize: false },
+      windowClass: 'register-user-window'
+    }).onClose.subscribe(result => {
+      if (result && result.success) {
+        // Por ejemplo, recargar la lista de usuarios para refrescar la interfaz
+        this.loadUsers();
+      }
+    });
+  }
+
+  // Método para verificar si el empleado ya tiene un usuario
+  employeeHasUser(employee_id: number): boolean {
+    return this.users.some(user => user.employee_id === employee_id);
   }
 
    // Cargar departamentos sin dependencia

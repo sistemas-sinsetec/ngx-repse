@@ -87,11 +87,25 @@
                   <td>{{ empleado.first_name }} {{ empleado.middle_name }} {{ empleado.last_name }}</td>
                   <td>{{ empleado.email }}</td>
                   <td>
-                    <button nbButton (click)="viewEmployeeDetails(empleado.employee_id)" outline size="small"
-                      status="primary">
-                      Ver detalles
+                    <button title="Ver detalles"
+                            nbButton
+                            (click)="viewEmployeeDetails(empleado.employee_id)"
+                            outline
+                            size="small"
+                            status="primary">
+                      <nb-icon icon="eye-outline"></nb-icon>
+                    </button>
+                    <button title="Crear usuario"
+                            nbButton
+                            (click)="addUser(empleado)"
+                            outline
+                            size="small"
+                            status="info"
+                            [disabled]="employeeHasUser(empleado.employee_id)">
+                      <nb-icon icon="person-add-outline"></nb-icon>
                     </button>
                   </td>
+                  
                 </tr>
               </tbody>
             </table>

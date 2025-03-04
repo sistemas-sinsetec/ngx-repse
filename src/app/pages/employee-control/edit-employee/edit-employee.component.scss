@@ -2,3 +2,8 @@
     width: 50%;
     margin: 0px auto;
 } 
+
+::ng-deep .cdk-global-scrollblock
+    {
+    position: static !important;
+    }

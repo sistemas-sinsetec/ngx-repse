@@ -97,5 +97,11 @@ nb-layout, nb-layout-column {
   }
 }
 
+::ng-deep .cdk-global-scrollblock
+    {
+    position: static !important;
+    }
+
+
 
   
