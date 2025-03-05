@@ -1,0 +1,102 @@
+<div class="box">
+<nb-flip-card>
+  <nb-card-front>
+    <nb-card class="login-section p-4 rounded shadow">
+      <nb-card-header class="text-center">
+        <h1>Registrar socio comercial (Rol)</h1>
+        <p>Ingresar datos para continuar</p>
+      </nb-card-header>
+      <nb-card-body>
+        <nb-select
+        fullWidth
+        [(selected)]="tipoRFC"
+        (selectedChange)="onChangeTipoRFC()"
+        placeholder="Selecciona tipo RFC"
+      >
+        <nb-option value="fisica">Persona Física</nb-option>
+        <nb-option value="moral">Persona Moral</nb-option>
+      </nb-select>
+      <nb-form-field class="d-flex align-items-center flex-grow-1">
+        <input
+          fullWidth
+          nbInput
+          placeholder="RFC"
+          [(ngModel)]="usuario.rfc"
+          (input)="validateRFC($event)"
+          (keypress)="filterRFCInput($event)"
+          [maxlength]="tipoRFC === 'fisica' ? 13 : 12"
+        />
+      </nb-form-field>
+      <small *ngIf="rfcLengthError" class="text-danger">
+        {{ rfcLengthError }}
+      </small>
+      
+      
+      
+      
+
+        <nb-form-field>
+          <input nbInput fullWidth placeholder="{{ tipoRFC === 'fisica' ? 'Nombre de la persona física' : 'Nombre de la empresa' }}" [(ngModel)]="usuario.nombreEmpresa" (ngModelChange)="showMessage()" (blur)="hideMessage()" (focus)="resetMessage()" />
+        </nb-form-field>
+        <small *ngIf="showMessageFlag" class="text-muted">Escribe el nombre como aparece en la constancia fiscal.</small>
+
+        <nb-form-field>
+          <input nbInput fullWidth placeholder="Alias de usuario" [(ngModel)]="usuario.nombreUsuario" />
+        </nb-form-field>
+
+        <nb-form-field>
+          <input nbInput fullWidth placeholder="Nombre completo del usuario" [(ngModel)]="usuario.nombreCompleto" />
+        </nb-form-field>
+
+        <nb-form-field>
+          <input nbInput fullWidth type="email" placeholder="Correo electrónico" [(ngModel)]="usuario.correo" />
+        </nb-form-field>
+        <small *ngIf="usuario.correo && (!usuario.correo.includes('@'))" class="text-danger">Correo no válido</small>
+
+        <nb-form-field>
+          <input nbInput fullWidth type="text" placeholder="Número de teléfono" [(ngModel)]="usuario.numTelefonico" maxlength="10" />
+        </nb-form-field>
+
+        <nb-form-field>
+          <input nbInput fullWidth type="password" placeholder="Contraseña" [(ngModel)]="usuario.contrasena" />
+        </nb-form-field>
+
+        <nb-form-field>
+          <input nbInput fullWidth type="password" placeholder="Confirmar contraseña" [(ngModel)]="usuario.confirmarContrasena" />
+        </nb-form-field>
+
+        <nb-select [(selected)]="usuario.roleInCompany" placeholder="Selecciona el rol de usuario">
+          <nb-option *ngFor="let rol of rolesDisponibles" [value]="rol.id">{{ rol.roleName }}</nb-option>
+        </nb-select>
+
+        <nb-form-field>
+          <input nbInput fullWidth type="date" placeholder="Fecha de inicio de periodo" [(ngModel)]="usuario.fechaInicio" />
+        </nb-form-field>
+
+        <nb-form-field>
+          <input nbInput fullWidth type="date" placeholder="Fecha de fin de periodo" [(ngModel)]="usuario.fechaFin" />
+        </nb-form-field>
+
+        <button nbButton fullWidth status="primary" size="large" [disabled]="!camposCompletos()" (click)="registrarUsuario()">
+          Registrar
+        </button>
+      </nb-card-body>
+    </nb-card>
+  </nb-card-front>
+
+  <nb-card-back class="text-center">
+    <nb-card class="add-person-card p-4 shadow">
+      <nb-card-header>
+        Agregar socio comercial
+      </nb-card-header>
+      <nb-card-body>
+        <nb-form-field>
+          <input nbInput fullWidth type="text" placeholder="Código del socio comercial" [(ngModel)]="codigoSocioComercial" />
+        </nb-form-field>
+        <h6 class="text-muted">Ingresa el código del socio comercial que deseas registrar. El código consta de caracteres alfanuméricos.</h6>
+        <button nbButton status="primary" (click)="openUserInfoModal()">Agregar</button>
+      </nb-card-body>
+    </nb-card>
+  </nb-card-back>
+</nb-flip-card>
+</div>

@@ -1,0 +1,60 @@
+<!-- buscar-usuarios.component.html -->
+
+<div class="search-user-container">
+    <nb-card class="shadow-lg p-4 mb-4">
+      <nb-card-header class="text-center">
+        <h5>Buscar Usuarios</h5>
+      </nb-card-header>
+      <nb-card-body>
+        <!-- Formulario de Búsqueda -->
+        <div class="form-group mb-4">
+          
+          <input nbInput
+          fullWidth
+          type="text"
+          [(ngModel)]="filtroUsuarios"
+          placeholder="Buscar usuarios por nombre"
+          name="filtroUsuarios"
+        />
+        
+        <nb-select
+          fullWidth
+          placeholder="Selecciona un rol"
+          [(ngModel)]="filtroRol"
+          name="filtroRol"
+        >
+          <nb-option value="">Todos los roles</nb-option>
+          <nb-option value="admin">Administrador</nb-option>
+          <nb-option value="superV">Supervisor</nb-option>
+          <nb-option value="adminU">Administrativo</nb-option>
+        </nb-select>
+          <div class="button-container">
+            <button nbButton status="primary" (click)="buscarUsuarios()">
+              Buscar
+            </button>
+          </div>
+        </div>
+  
+        <!-- Lista de Usuarios -->
+        <nb-list>
+          <nb-list-item *ngFor="let employee of filteredEmployees; let i = index" class="user-item">
+            <div class="user-info">
+              <span>{{ i + 1 }}. {{ employee.username }} - {{ employee.name }} - {{ getRolLegible(employee.role) }}</span>
+            </div>
+            <div class="user-actions">
+              <button
+                *ngIf="employee.id !== authService.userId && employee.role !== 'adminE'"
+                nbButton
+                status="danger"
+                size="small"
+                (click)="eliminarUsuario(employee.id)"
+              >
+                Eliminar
+              </button>
+            </div>
+          </nb-list-item>
+        </nb-list>
+      </nb-card-body>
+    </nb-card>
+  </div>
+  

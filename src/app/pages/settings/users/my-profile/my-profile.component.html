@@ -1,0 +1,92 @@
+
+  
+  <div class="container py-4">
+    <!-- Tarjeta 1: Registro Manual -->
+    <div class="row justify-content-center">
+      <div class="col-md-8 mb-3">
+
+              <!-- Tarjeta Volteable -->
+        <nb-flip-card class="flip-card-container mb-4">
+          <!-- Cara Frontal: Editar Perfil -->
+          <nb-card-front>
+            <nb-card class=" p-4">
+              <nb-card-header class="text-center">
+                <h5>Editar Perfil del Usuario</h5>
+              </nb-card-header>
+              <nb-card-body>  
+                <div class="text-center">
+                <!-- Sección para cambiar la imagen de perfil -->
+                <div class="image-container" (click)="triggerFileInput('photo-input')">
+                    <!-- Utiliza una etiqueta img estilizada para mostrar la imagen del usuario -->
+                    <img class="profile-picture" [src]="avatar || 'assets/img/default-avatar.png'"
+                    alt="Imagen de perfil" class="avatar-image" width="150px" style="border-radius: 50%;">
+               
+                    
+                    <!-- Input para cambiar la imagen de perfil -->
+                    <input type="file" id="photo-input" hidden (change)="changeProfilePicture($event)" #fileInput>
+                    
+                    <!-- Botón para activar el input de archivo -->
+                  </div>
+
+                </div>
+                  
+  
+                <!-- Formulario para los datos del usuario -->
+                <form>
+                  <div class="form-group">
+                    <label for="fullName">Nombre completo</label>
+                    <input nbInput fullWidth id="fullName" name="fullName" type="text" required [(ngModel)]="fullName">
+                  </div>
+  
+                  <div class="form-group">
+                    <label for="userName">Nombre de usuario</label>
+                    <input nbInput fullWidth id="userName" name="userName" type="text" required [(ngModel)]="userName">
+                  </div>
+  
+                  <div class="form-group">
+                    <label for="userEmail">Correo electrónico</label>
+                    <input nbInput fullWidth id="userEmail" name="userEmail" type="email" required [(ngModel)]="userEmail">
+                  </div>
+  
+                  <div class="form-group">
+                    <label for="userPassword">Contraseña</label>
+                    <input nbInput fullWidth id="userPassword" name="userPassword" type="password" [(ngModel)]="userPassword">
+                  </div>
+  
+                  <div class="form-group">
+                    <label for="confirmPassword">Confirmar contraseña</label>
+                    <input nbInput fullWidth id="confirmPassword" name="confirmPassword" type="password" [(ngModel)]="confirmPassword">
+                  </div>
+  
+                  <div class="text-center mt-4">
+                    <button nbButton status="primary" fullWidth (click)="saveSettings()">Guardar Cambios</button>
+                  </div>
+                </form>
+              </nb-card-body>
+            </nb-card>
+          </nb-card-front>
+  
+          <!-- Cara Trasera: Gestionar Código -->
+          <nb-card-back>
+            <nb-card class=" p-4">
+              <nb-card-header class="text-center">
+                <h5>Generar y Compartir Código</h5>
+              </nb-card-header>
+              <nb-card-body>
+                <div class="form-group">
+                  <label for="generatedCode">Código Generado:</label>
+                  <input nbInput fullWidth id="generatedCode" [value]="generatedCode" readonly>
+                </div>
+                <div class="text-center mt-4">
+                  <button nbButton status="info" (click)="shareCode()" *ngIf="generatedCode">Compartir Código</button>
+                </div>
+              </nb-card-body>
+            </nb-card>
+          </nb-card-back>
+        </nb-flip-card>
+
+      </div>
+    </div>
+  </div>
+  
+  

@@ -1,0 +1,58 @@
+/* Para agrupar la letra y la caja del día */
+.day-box-wrapper {
+  display: flex;
+  flex-direction: column; /* Que la letra quede arriba y la caja abajo */
+  align-items: center;    /* Centrado en columna */
+  margin: 5px;            /* Separa cada wrapper entre sí */
+}
+
+/* Para la letra del día (L, M, X, etc.) */
+.day-letter {
+  font-weight: bold;
+  font-size: 14px;
+  margin-bottom: 5px; /* Espacio entre la letra y la caja */
+}
+
+/* Tus estilos existentes */
+.days-container {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-start;
+}
+
+.day-box {
+  width: 40px;
+  height: 40px;
+  margin: 5px;
+  text-align: center;
+  line-height: 40px;
+  border-radius: 5px;
+  cursor: pointer;
+  font-weight: bold;
+  position: relative; /* Por si usas iconos o elementos pos. absoluta */
+  background-color: #e0e0e0; /* Fondo gris por defecto */
+}
+
+/* Día confirmado */
+.day-box.confirmed {
+  background-color: #4caf50; 
+  color: white;
+}
+
+/* Día pendiente */
+.day-box.pending {
+  background-color: #ff9800; 
+  color: black;
+}
+
+/* Día de descanso */
+.day-box.rest-day {
+  background-color: #ff3b3b;
+  color: black;
+  
+}
+
+/* Hover en día */
+.day-box:hover {
+  background-color: #81c784; 
+}

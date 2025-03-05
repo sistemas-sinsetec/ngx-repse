@@ -1,0 +1,64 @@
+.fixed-height {
+    height: 300px;
+    min-height: 300px; /* Asegura que no se reduzca */
+    display: flex; /* Permite centrar contenido */
+    flex-direction: column; /* Mantiene contenido alineado */
+    justify-content: space-between; /* Espaciado uniforme */
+  }
+
+  .dia-txt{
+    margin-top: 15px;
+  }
+
+  
+  .scrollable-container {
+    max-height: 500px; /* Altura máxima del contenedor */
+    overflow-y: auto; /* Habilita el scroll vertical */
+   
+    padding: 8px; /* Espaciado interno */
+  }
+  
+  /* Personalización para navegadores WebKit */
+  html, body::-webkit-scrollbar-track {
+    width: 8px;
+  }
+  
+  html, body::-webkit-scrollbar-track {
+    background-color: #6c757d;
+    border-radius: 4px;
+    border: 2px solid #e9ecef;
+  }
+  
+  html, body::-webkit-scrollbar-track {
+    background-color: #e9ecef;
+    border-radius: 4px;
+  }
+  
+  button{
+    margin-bottom: 10px;
+  }
+  nb-checkbox{
+    margin-right: 10px;
+  }
+
+
+  .button-container {
+  
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: stretch;
+  }
+  
+  @media (max-width: 767.98px) {
+    .button-container {
+      flex-direction: column;
+    }
+    .button-container button {
+      margin-bottom: 10px; /* Espacio entre botones */
+    }
+    .button-container button:last-child {
+      margin-bottom: 0; /* Elimina el margen del último botón */
+    }
+  }
+
+  

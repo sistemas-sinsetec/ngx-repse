@@ -1,0 +1,132 @@
+<div class="container py-4">
+  <!-- Tarjeta 1: Registro Manual -->
+  <div class="row justify-content-center">
+    <div class="col-md-8 mb-3">
+      <nb-card class="shadow-sm border-0 p-4 card-corporate">
+        <nb-card-header class="text-center border-0">
+          <h5 class="fw-bold mb-0">Registrar Usuario</h5>
+          <small class="text-muted">Ingrese datos para continuar</small>
+        </nb-card-header>
+  
+        <nb-card-body>
+          <form>
+            <div class="row">
+              <!-- Columna izquierda -->
+              <div class="col-12 col-md-6">
+                <!-- Alias de usuario -->
+                <div class="form-group mb-3">
+                  <label for="nombreU" class="form-label">Alias de usuario</label>
+                  <input nbInput fullWidth class="form-control" id="nombreU" name="nombreU" type="text" required
+                    [(ngModel)]="usuario.nombreUsuario">
+                </div>
+  
+                <!-- Nombre completo -->
+                <div class="form-group mb-3">
+                  <label for="nombreC" class="form-label">Nombre completo</label>
+                  <input nbInput fullWidth class="form-control" id="nombreC" name="nombreC" type="text" required
+                    [(ngModel)]="usuario.nombreCompleto" pattern="^[a-zA-ZñÑáéíóúÁÉÍÓÚ\s]+$" #nombreC="ngModel">
+                </div>
+  
+                <!-- Correo -->
+                <div class="form-group mb-3">
+                  <label for="correoElectronico" class="form-label">Correo electrónico</label>
+                  <input nbInput fullWidth class="form-control" id="correoElectronico" name="correoElectronico"
+                    type="email" required [(ngModel)]="usuario.correo">
+                </div>
+              </div>
+  
+              <!-- Columna derecha -->
+              <div class="col-12 col-md-6">
+                <!-- Contraseña -->
+                <div class="form-group mb-3">
+                  <label for="contrasena" class="form-label">Contraseña</label>
+                  <input minlength="8" nbInput fullWidth class="form-control" id="contrasena" name="contrasena"
+                    type="password" required [(ngModel)]="usuario.contrasena">
+                </div>
+  
+                <!-- Confirmar contraseña -->
+                <div class="form-group mb-3">
+                  <label for="confirmarContrasena" class="form-label">Confirmar contraseña</label>
+                  <input minlength="8" nbInput fullWidth class="form-control" id="confirmarContrasena"
+                    name="confirmarContrasena" type="password" required [(ngModel)]="usuario.confirmarContrasena">
+                </div>
+  
+                <!-- Tipo de usuario -->
+                <div class="form-group mb-3">
+                  <label for="tipoUsuario" class="form-label">Tipo de usuario</label>
+                  <nb-select fullWidth id="tipoUsuario" name="levelUser" [(ngModel)]="usuario.levelUser" required>
+                    <nb-option value="admin">Administrador</nb-option>
+                    <nb-option value="superV">Supervisor</nb-option>
+                    <nb-option value="adminU">Administrativo</nb-option>
+                  </nb-select>
+                </div>
+              </div>
+            </div>
+  
+            <!-- Botón Registrar -->
+            <div class="text-center mt-3">
+              <button 
+                nbButton 
+                status="primary"
+                [disabled]="!camposCompletos()"
+                (click)="registrarUsuario()">
+                Registrar
+              </button>
+            </div>      
+          </form>
+        </nb-card-body>
+      </nb-card>
+    </div>
+  </div>
+
+  <!-- Tarjeta 2: Registro por Código -->
+  <div class="row justify-content-center">
+    <div class="col-md-8 mb-3">
+      <nb-card class="shadow-sm border-0 p-4 card-corporate">
+        <nb-card-header class="text-center border-0">
+          <h5 class="fw-bold mb-0">Agregar Usuario por Código</h5>
+          <small class="text-muted">Asigna un usuario existente</small>
+        </nb-card-header>
+
+        <nb-card-body>
+          <!-- Código de Usuario -->
+          <div class="form-group mb-3">
+            <label for="codigoUsuario" class="form-label">Código de Usuario</label>
+            <input fullWidth nbInput class="form-control" id="codigoUsuario" [(ngModel)]="userCode"
+              (keydown)="pressEnter($event)">
+          </div>
+
+          <!-- Información del usuario encontrado -->
+          <div *ngIf="selectedUser">
+            <div class="form-group mb-3">
+              <label>Nombre del Usuario:</label><br />
+              <input nbInput [(ngModel)]="selectedUser.name">
+
+            </div>
+
+            <div class="form-group mb-3">
+              <label>Correo Electrónico:</label><br />
+              <input nbInput [(ngModel)]="selectedUser.email">
+            </div>
+
+            <div class="form-group mb-3">
+              <label>Seleccione Nivel de Usuario</label>
+              <nb-select fullWidth [(ngModel)]="selectedLevelUser">
+                <nb-option *ngFor="let level of levelUsers" [value]="level.id">
+                  {{ level.levelUserName }}
+                </nb-option>
+              </nb-select>
+            </div>
+          </div>
+
+          <!-- Botón Asignar -->
+          <div class="text-center mt-4">
+            <button nbButton status="primary" *ngIf="selectedUser && selectedLevelUser" (click)="assignCompanyToUser()">
+              Asignar Empresa Secundaria
+            </button>
+          </div>
+        </nb-card-body>
+      </nb-card>
+    </div>
+  </div>
+</div>

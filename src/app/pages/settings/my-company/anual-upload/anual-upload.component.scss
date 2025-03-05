@@ -1,0 +1,30 @@
+/* styles.css o el archivo de estilos correspondiente */
+.cargado {
+    background-color: #d4edda; /* Verde claro */
+  }
+  
+  .completo {
+    background-color: #cce5ff; /* Azul claro */
+  }
+  
+  .rechazado {
+    background-color: #f8d7da; /* Rojo claro */
+  }
+  
+  .pendiente {
+    background-color: #fff3cd; /* Amarillo claro */
+  }
+
+
+  .spinner-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: rgba(255, 255, 255, 0.3);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+  }

@@ -1,0 +1,78 @@
+
+<nb-card>
+  <nb-card-header>
+    <h2>Kardex de Vacaciones</h2>
+  </nb-card-header>
+  <nb-card-body>
+    <div class="row">
+      <div class="col-md-8">
+        <nb-select placeholder="Selecciona un empleado" [(ngModel)]="empleadoId">
+          <nb-option *ngFor="let emp of empleados" [value]="emp.employee_id">
+            {{ emp.full_name || 'Empleado sin nombre' }}
+          </nb-option>
+        </nb-select>
+        <button nbButton status="primary" (click)="generarReporte()">Generar Reporte</button>
+      </div>
+    </div>
+
+    <div class="row mt-3">
+      <div class="col-md-8">
+        <label for="vacacionesAlta" class="form-label fw-semibold">Vacaciones tomadas antes de la alta:</label>
+        <input nbInput placeholder="Vacaciones antes de la alta" [(ngModel)]="vacacionesAlta" type="number">
+        <button nbButton status="success" (click)="actualizarVacacionesAlta()">Actualizar</button>
+      </div>
+    </div>
+
+    <!-- Tabla personalizada con filas expandibles -->
+    <table class="table table-bordered table-striped">
+      <thead class="table-dark">
+        <tr>
+          <th></th> <!-- Columna para el ícono de expandir/colapsar -->
+          <th>Concepto</th>
+          <th>Fecha Registro</th>
+          <th>Días Vacaciones</th>
+          <th>Tomadas</th>
+          <th>Saldo</th>
+        </tr>
+      </thead>
+      <tbody>
+        <ng-container *ngFor="let vacacion of vacaciones">
+          <!-- Fila principal -->
+          <tr>
+            <td>
+              <button nbButton ghost (click)="toggleDetalle(vacacion)">
+                <nb-icon [icon]="vacacion.expanded ? 'minus-outline' : 'plus-outline'"></nb-icon>
+              </button>
+            </td>
+            <td>{{ vacacion.Concepto }}</td>
+            <td>{{ vacacion.FechaRegistro }}</td>
+            <td>{{ vacacion.DiasVacaciones }}</td>
+            <td>{{ vacacion.Tomadas }}</td>
+            <td>{{ vacacion.Saldo }}</td>
+          </tr>
+          <!-- Fila de detalles (se muestra si está expandida) -->
+          <tr *ngIf="vacacion.expanded && vacacion.DetalleTomados?.length">
+            <td colspan="6">
+              <table class="table table-sm table-bordered">
+                <thead>
+                  <tr>
+                    <th>Fecha Inicio</th>
+                    <th>Fecha Fin</th>
+                    <th>Días Tomados</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr *ngFor="let detalle of vacacion.DetalleTomados">
+                    <td>{{ detalle.FechaInicio }}</td>
+                    <td>{{ detalle.FechaFin }}</td>
+                    <td>{{ detalle.DiasTomados }}</td>
+                  </tr>
+                </tbody>
+              </table>
+            </td>
+          </tr>
+        </ng-container>
+      </tbody>
+    </table>
+  </nb-card-body>
+</nb-card>

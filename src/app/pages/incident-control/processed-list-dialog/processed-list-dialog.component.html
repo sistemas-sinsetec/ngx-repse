@@ -1,0 +1,32 @@
+<nb-card  class="mt-4">
+  <nb-card-header>
+    <div class="d-flex justify-content-between align-items-center">
+      <span>Lista de Archivos Procesados</span>
+      <button nbButton size="small" status="danger" (click)="closeDialog()" [disabled]="false">Cerrar</button>
+    </div>
+  </nb-card-header>
+  <nb-card-body>
+    <div class="container">
+      <table class="table table-bordered table-striped">
+        <thead class="bg-primary text-light">
+          <tr>
+            <th>Semana</th>
+            <th>Periodo</th>
+            <th>Fecha de Procesamiento</th>
+            <th>Archivo</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let file of processedFiles">
+            <td>{{ file.week_number }}</td>
+            <td>{{ file.period_type }}</td>
+            <td>{{ file.uploaded_at | date: 'dd/MM/yyyy' }}</td>
+            <td>
+              <a [href]="file.pdf_url" target="_blank">Ver PDF</a>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </nb-card-body>
+</nb-card>

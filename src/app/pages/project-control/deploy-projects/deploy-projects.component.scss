@@ -1,0 +1,61 @@
+
+  
+  .corporate-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1rem;
+
+    border-top-left-radius: 8px;
+    border-top-right-radius: 8px;
+  
+    .header-content {
+      display: flex;
+      align-items: center;
+  
+      .header-icon {
+        margin-right: 0.75rem;
+        font-size: 1.5rem;
+      }
+  
+      .header-title {
+        margin: 0;
+        font-size: 1.5rem;
+        font-weight: 600;
+        color: #2a2a2a;
+      }
+    }
+  
+    button {
+      font-weight: 600;
+      padding: 0.5rem 1.5rem;
+    }
+  }
+  
+  .corporate-body {
+    padding: 1.5rem;
+  }
+  
+  .corporate-table {
+    border-radius: 6px;
+    overflow: hidden;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  
+    ::ng-deep ng2-smart-table {
+      th,
+      td {
+        padding: 0.75rem;
+        font-size: 0.9rem;
+      }
+  
+      th {
+
+        font-weight: 600;
+        color: #2a2a2a;
+      }
+  
+      tr:hover {
+       
+      }
+    }
+  }

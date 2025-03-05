@@ -1,0 +1,92 @@
+
+<nb-card>
+    <nb-card-header>
+      <div class="d-flex justify-content-between align-items-center">
+        <span>Cambiar Horas</span>
+        <button nbButton ghost status="danger" size="small" (click)="closeModal()">Cerrar</button>
+      </div>
+    </nb-card-header>
+  
+    <nb-card-body>
+      <div class="container">
+  
+        <!-- Hora de Entrada -->
+        <div class="row mb-3 align-items-center">
+          <div class="col-6">
+            <label class="form-label"><strong>Hora de Entrada</strong></label>
+          </div>
+          <div class="col-6 text-end">
+            <input nbInput type="time" [(ngModel)]="entryTime" placeholder="Selecciona hora de entrada">
+          </div>
+        </div>
+  
+        <!-- Hora de Inicio de Comida -->
+        <div class="row mb-3 align-items-center">
+          <div class="col-6">
+            <label class="form-label"><strong>Hora de Inicio de Comida</strong></label>
+          </div>
+          <div class="col-6 text-end">
+            <input nbInput type="time" [(ngModel)]="lunchStart" placeholder="Selecciona inicio de comida">
+          </div>
+        </div>
+  
+        <!-- Hora de Fin de Comida -->
+        <div class="row mb-3 align-items-center">
+          <div class="col-6">
+            <label class="form-label"><strong>Hora de Fin de Comida</strong></label>
+          </div>
+          <div class="col-6 text-end">
+            <input nbInput type="time" [(ngModel)]="lunchEnd" placeholder="Selecciona fin de comida">
+          </div>
+        </div>
+  
+        <!-- Checkbox para habilitar segunda hora de comida -->
+        <div class="row mb-3">
+          <div class="col-12">
+            <nb-checkbox [(ngModel)]="enableSecondLunch">Añadir segunda hora de comida</nb-checkbox>
+          </div>
+        </div>
+  
+        <!-- Segunda Hora de Inicio de Comida (opcional) -->
+        <div *ngIf="enableSecondLunch">
+          <div class="row mb-3 align-items-center">
+            <div class="col-6">
+              <label class="form-label"><strong>Inicio de Segunda Comida</strong></label>
+            </div>
+            <div class="col-6 text-end">
+              <input nbInput type="time" [(ngModel)]="secondLunchStart" placeholder="Selecciona inicio de segunda comida">
+            </div>
+          </div>
+  
+          <!-- Segunda Hora de Fin de Comida (opcional) -->
+          <div class="row mb-3 align-items-center">
+            <div class="col-6">
+              <label class="form-label"><strong>Fin de Segunda Comida</strong></label>
+            </div>
+            <div class="col-6 text-end">
+              <input nbInput type="time" [(ngModel)]="secondLunchEnd" placeholder="Selecciona fin de segunda comida">
+            </div>
+          </div>
+        </div>
+  
+        <!-- Hora de Salida -->
+        <div class="row mb-3 align-items-center">
+          <div class="col-6">
+            <label class="form-label"><strong>Hora de Salida</strong></label>
+          </div>
+          <div class="col-6 text-end">
+            <input nbInput type="time" [(ngModel)]="exitTime" placeholder="Selecciona hora de salida">
+          </div>
+        </div>
+  
+        <!-- Botón Guardar -->
+        <div class="row">
+          <div class="col text-center">
+            <button nbButton status="primary" (click)="saveHours()">Guardar</button>
+          </div>
+        </div>
+  
+      </div>
+    </nb-card-body>
+  </nb-card>
+  

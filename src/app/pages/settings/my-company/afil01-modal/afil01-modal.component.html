@@ -1,0 +1,138 @@
+<!-- afil01-modal.component.html -->
+<div class="scrollable-container">
+<nb-card>
+    <nb-card-header>AFIL01 - Alta Patronal</nb-card-header>
+    <nb-card-body>
+      <form (ngSubmit)="onSubmit()">
+        <!-- Recorre la lista noPatronales -->
+        <div *ngFor="let noPatronal of noPatronales; let i = index">
+          <!-- Cada Registro Patronal envuelto en una tarjeta -->
+          <nb-card class="mb-3">
+            <nb-card-header>Registro Patronal {{ i + 1 }}</nb-card-header>
+            <nb-card-body>
+              <!-- No. Reg. Patronal -->
+              <div class="form-group">
+                <label for="noRegPatronal{{ i }}">No. Reg. Patronal</label>
+                <input
+                  nbInput
+                  fullWidth
+                  type="text"
+                  [(ngModel)]="noPatronal.noRegPatronal"
+                  name="noRegPatronal{{ i }}"
+                  id="noRegPatronal{{ i }}"
+                  required
+                />
+              </div>
+  
+              <!-- División -->
+              <div class="form-group">
+                <label for="division{{ i }}">División</label>
+                <input
+                  nbInput
+                  fullWidth
+                  type="text"
+                  [(ngModel)]="noPatronal.division"
+                  name="division{{ i }}"
+                  id="division{{ i }}"
+                  required
+                />
+              </div>
+  
+              <!-- Grupo -->
+              <div class="form-group">
+                <label for="grupo{{ i }}">Grupo</label>
+                <input
+                  nbInput
+                  fullWidth
+                  type="text"
+                  [(ngModel)]="noPatronal.grupo"
+                  name="grupo{{ i }}"
+                  id="grupo{{ i }}"
+                  required
+                />
+              </div>
+  
+              <!-- Fracción -->
+              <div class="form-group">
+                <label for="fraccion{{ i }}">Fracción</label>
+                <input
+                  nbInput
+                  fullWidth
+                  type="text"
+                  [(ngModel)]="noPatronal.fraccion"
+                  name="fraccion{{ i }}"
+                  id="fraccion{{ i }}"
+                  required
+                />
+              </div>
+  
+              <!-- Clase -->
+              <div class="form-group">
+                <label for="clase{{ i }}">Clase</label>
+                <input
+                  nbInput
+                  fullWidth
+                  type="text"
+                  [(ngModel)]="noPatronal.clase"
+                  name="clase{{ i }}"
+                  id="clase{{ i }}"
+                  required
+                />
+              </div>
+  
+              <!-- Actividad -->
+              <div class="form-group">
+                <label for="actividad{{ i }}">Actividad</label>
+                <input
+                  nbInput
+                  fullWidth
+                  type="text"
+                  [(ngModel)]="noPatronal.actividad"
+                  name="actividad{{ i }}"
+                  id="actividad{{ i }}"
+                  required
+                />
+              </div>
+  
+              <!-- Descripción -->
+              <div class="form-group">
+                <label for="descripcion{{ i }}">Descripción</label>
+                <input
+                  nbInput
+                  fullWidth
+                  type="text"
+                  [(ngModel)]="noPatronal.descripcion"
+                  name="descripcion{{ i }}"
+                  id="descripcion{{ i }}"
+                  required
+                />
+              </div>
+            </nb-card-body>
+            <nb-card-footer class="text-center">
+              <button
+                nbButton
+                status="danger"
+                size="small"
+                (click)="removeNoPatronal(i)"
+                *ngIf="noPatronales.length > 1"
+              >
+                Eliminar No. Patronal
+              </button>
+            </nb-card-footer>
+          </nb-card>
+        </div>
+  
+        <!-- Botones para Agregar / Enviar -->
+        <div class="text-center mt-2">
+          <button nbButton status="info" type="button" (click)="addNoPatronal()">
+            Agregar No. Patronal
+          </button>
+          <button nbButton status="success" type="submit" [disabled]="isSubmitting">
+            Enviar
+          </button>
+        </div>
+      </form>
+    </nb-card-body>
+  </nb-card>
+  </div>
+  

@@ -1,0 +1,304 @@
+<div class="content-container">
+  <div class="row">
+
+    <!-- Departamentos -->
+    <div class="col-md-4">
+      <nb-card class="corporate-card">
+        <nb-card-header>
+          <nb-icon icon="briefcase-outline" pack="eva" class="card-icon"></nb-icon>
+          <span class="card-title">Departamentos</span>
+        </nb-card-header>
+        <nb-card-body>
+          <nb-list>
+            <nb-list-item *ngFor="let department of departments" (click)="selectDepartment(department)"
+              class="list-item">
+              {{ department.department_name }}
+            </nb-list-item>
+          </nb-list>
+          <button nbButton status="info" class="mt-3 full-width" (click)="createNewDepartment()">
+            <nb-icon icon="plus-outline"></nb-icon> Nuevo Departamento
+          </button>
+
+          <div *ngIf="selectedDepartment" class="form-container mt-4">
+            <div class="form-group">
+              <label for="departmentName" class="form-label"><strong>Nombre del Departamento</strong></label>
+              <nb-form-field class="form-field">
+                <nb-icon nbPrefix icon="person-outline"></nb-icon>
+                <input
+                  nbInput fullWidth
+                  id="departmentName"
+                  placeholder="Nombre del Departamento"
+                  [(ngModel)]="selectedDepartment.department_name" />
+              </nb-form-field>
+            </div>
+            <div class="form-group">
+              <label for="departmentDescription" class="form-label"><strong>Descripción</strong></label>
+              <nb-form-field class="form-field">
+                <nb-icon nbPrefix icon="text-outline"></nb-icon>
+                <textarea
+                  nbInput  fullWidth
+                  id="departmentDescription"
+                  placeholder="Descripción"
+                  rows="4"
+                  [(ngModel)]="selectedDepartment.description">
+                </textarea>
+              </nb-form-field>
+            </div>
+            <div class="button-group">
+              <button nbButton status="success" (click)="saveDepartmentConfig()">
+                <nb-icon icon="checkmark-outline"></nb-icon> Guardar
+              </button>
+              <button *ngIf="selectedDepartment?.department_id" nbButton status="danger" (click)="deleteDepartment()">
+                <nb-icon icon="trash-2-outline"></nb-icon> Eliminar
+              </button>
+            </div>
+          </div>
+        </nb-card-body>
+      </nb-card>
+    </div>
+
+    <!-- Puestos -->
+    <div class="col-md-4">
+      <nb-card class="corporate-card">
+        <nb-card-header>
+          <nb-icon icon="cube-outline" pack="eva" class="card-icon"></nb-icon>
+          <span class="card-title">Puestos</span>
+        </nb-card-header>
+        <nb-card-body>
+          <nb-list>
+            <nb-list-item *ngFor="let position of positions" (click)="selectPosition(position)" class="list-item">
+              {{ position.position_name }}
+            </nb-list-item>
+          </nb-list>
+          <button nbButton status="info" class="mt-3 full-width" (click)="startAddPosition()">
+            <nb-icon icon="plus-outline"></nb-icon> Nuevo Puesto
+          </button>
+
+          <div *ngIf="isAddingPosition || selectedPosition" class="form-container mt-4">
+            <!-- Nombre del Puesto -->
+            <div class="form-group">
+              <!-- Nombre del Puesto -->
+              <label for="positionName" class="form-label"><strong>Nombre del Puesto</strong></label>
+              <nb-form-field class="form-field">
+                <nb-icon nbPrefix icon="person-outline"></nb-icon>
+                <input
+                  nbInput fullWidth
+                  id="positionName"
+                  placeholder="Nombre del Puesto"
+                  [(ngModel)]="getCurrentPosition().position_name" />
+              </nb-form-field>
+            </div>
+
+            <!-- Descripción -->
+            <div class="form-group">
+              <label for="positionDescription" class="form-label"><strong>Descripción</strong></label>
+              <nb-form-field class="form-field">
+                <nb-icon nbPrefix icon="text-outline"></nb-icon>
+                <textarea
+                  nbInput fullWidth
+                  id="positionDescription"
+                  placeholder="Descripción"
+                  rows="4"
+                  [(ngModel)]="getCurrentPosition().description">
+                </textarea>
+              </nb-form-field>
+            </div>
+
+            <div class="form-group">
+              <label for="positionRange" class="form-label"><strong>Rango de puesto</strong></label>
+              <nb-form-field class="form-field">
+                <nb-icon nbPrefix icon="arrowhead-up-outline"></nb-icon>
+                <input type="number" max="50" min="1" maxlength="2"
+                  nbInput fullWidth
+                  id="positionRange"
+                  placeholder="Rango del puesto"
+                  [(ngModel)]="getCurrentPosition().position_range"
+                  (ngModelChange)="validatePositionRange()"
+                  (keydown)="restrictInput($event)">
+                  
+                  
+              </nb-form-field>
+            </div>
+
+            <!-- Botones -->
+            <div class="button-group">
+              <button nbButton status="success" (click)="savePositionConfig()">
+                <nb-icon icon="checkmark-outline"></nb-icon> Guardar
+              </button>
+              <button *ngIf="selectedPosition?.position_id" nbButton status="danger" (click)="deletePosition()">
+                <nb-icon icon="trash-2-outline"></nb-icon> Eliminar
+              </button>
+            </div>
+          </div>
+        </nb-card-body>
+      </nb-card>
+    </div>
+
+
+    <!-- Turnos -->
+    <div class="col-md-4">
+      <nb-card class="corporate-card">
+        <nb-card-header>
+          <nb-icon icon="clock-outline" pack="eva" class="card-icon"></nb-icon>
+          <span class="card-title">Turnos</span>
+        </nb-card-header>
+        <nb-card-body>
+          <nb-list>
+            <nb-list-item *ngFor="let shift of shifts" (click)="selectShift(shift)" class="list-item">
+              {{ shift.shift_name }}
+            </nb-list-item>
+          </nb-list>
+          <button nbButton status="info" class="mt-3 full-width" (click)="startAddShift()">
+            <nb-icon icon="plus-outline"></nb-icon> Nuevo Turno
+          </button>
+    
+          <div *ngIf="isAddingShift || selectedShift" class="form-container mt-4">
+            <!-- Nombre del Turno -->
+            <div class="form-group">
+              <label for="shift_name" class="form-label"><strong>Nombre del Turno</strong></label>
+              <nb-form-field class="form-field">
+                <nb-icon nbPrefix icon="person-outline"></nb-icon>
+                <input
+                  nbInput fullWidth
+                  id="shift_name"
+                  placeholder="Nombre del Turno"
+                  [(ngModel)]="getCurrentShift().shift_name" />
+              </nb-form-field>
+            </div>
+    
+            <!-- Descripción -->
+            <div class="form-group">
+              <label for="shift_description" class="form-label"><strong>Descripción</strong></label>
+              <nb-form-field class="form-field">
+                <nb-icon nbPrefix icon="text-outline"></nb-icon>
+                <textarea
+                  nbInput fullWidth
+                  id="shift_description"
+                  placeholder="Descripción"
+                  rows="4"
+                  [(ngModel)]="getCurrentShift().description">
+                </textarea>
+              </nb-form-field>
+            </div>
+    
+            <!-- Hora de Inicio -->
+            <div class="form-group">
+              <label for="start_time" class="form-label"><strong>Hora de Inicio</strong></label>
+              <nb-form-field class="form-field">
+                <input
+                  nbInput fullWidth
+                  id="start_time"
+                  type="time"
+                  [(ngModel)]="getCurrentShift().start_time" />
+              </nb-form-field>
+            </div>
+    
+            <!-- Hora de Fin -->
+            <div class="form-group">
+              <label for="end_time" class="form-label"><strong>Hora de Fin</strong></label>
+              <nb-form-field class="form-field">
+                <input
+                  nbInput fullWidth
+                  id="end_time"
+                  type="time"
+                  [(ngModel)]="getCurrentShift().end_time" />
+              </nb-form-field>
+            </div>
+    
+            <!-- Hora de Inicio de Comida -->
+            <div class="form-group">
+              <label for="lunch_start_time" class="form-label"><strong>Hora de Inicio de Comida</strong></label>
+              <nb-form-field class="form-field">
+                <input
+                  nbInput fullWidth
+                  id="lunch_start_time"
+                  type="time"
+                  [(ngModel)]="getCurrentShift().lunch_start_time" />
+              </nb-form-field>
+            </div>
+    
+            <!-- Hora de Fin de Comida -->
+            <div class="form-group">
+              <label for="lunch_end_time" class="form-label"><strong>Hora de Fin de Comida</strong></label>
+              <nb-form-field class="form-field">
+                <input
+                  nbInput fullWidth
+                  id="lunch_end_time"
+                  type="time"
+                  [(ngModel)]="getCurrentShift().lunch_end_time" />
+              </nb-form-field>
+            </div>
+    
+            <!-- Segunda Hora de Comida -->
+            <nb-checkbox [(ngModel)]="showSecondLunch" class="mt-3">
+              Añadir segunda hora de comida
+            </nb-checkbox>
+    
+            <div *ngIf="showSecondLunch" class="mt-3">
+              <!-- Inicio de Segunda Comida -->
+              <div class="form-group">
+                <label for="second_lunch_start_time" class="form-label"><strong>Inicio de la Segunda Comida</strong></label>
+                <nb-form-field class="form-field">
+                  <input
+                    nbInput fullWidth
+                    id="second_lunch_start_time"
+                    type="time"
+                    [(ngModel)]="getCurrentShift().second_lunch_start_time" />
+                </nb-form-field>
+              </div>
+    
+              <!-- Fin de Segunda Comida -->
+              <div class="form-group">
+                <label for="second_lunch_end_time" class="form-label"><strong>Fin de la Segunda Comida</strong></label>
+                <nb-form-field class="form-field">
+                  <input
+                    nbInput fullWidth
+                    id="second_lunch_end_time"
+                    type="time"
+                    [(ngModel)]="getCurrentShift().second_lunch_end_time" />
+                </nb-form-field>
+              </div>
+            </div>
+    
+            <!-- Días de Descanso
+            <div class="form-group">
+              <label for="rest_days" class="form-label"><strong>Días de Descanso</strong></label>
+              <nb-form-field class="form-field">
+                <nb-select
+                fullWidth
+                id="rest_days"
+                placeholder="Seleccionar días de descanso"
+                [(ngModel)]="getCurrentShift().rest_days"
+                multiple="true">
+                <nb-option value="Lunes">Lunes</nb-option>
+                <nb-option value="Martes">Martes</nb-option>
+                <nb-option value="Miércoles">Miércoles</nb-option>
+                <nb-option value="Jueves">Jueves</nb-option>
+                <nb-option value="Viernes">Viernes</nb-option>
+                <nb-option value="Sábado">Sábado</nb-option>
+                <nb-option value="Domingo">Domingo</nb-option>
+              </nb-select>
+              
+              </nb-form-field>
+            </div>
+
+            -->
+    
+            <!-- Botones -->
+            <div class="button-group mt-3">
+              <button nbButton status="success" (click)="saveShiftConfig()">
+                <nb-icon icon="checkmark-outline"></nb-icon> Guardar
+              </button>
+              <button *ngIf="selectedShift?.shift_id" nbButton status="danger" (click)="deleteShift()">
+                <nb-icon icon="trash-2-outline"></nb-icon> Eliminar
+              </button>
+            </div>
+          </div>
+        </nb-card-body>
+      </nb-card>
+    </div>
+    
+
+
+  </div>
+</div>

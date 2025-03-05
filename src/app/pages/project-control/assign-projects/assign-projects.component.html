@@ -1,0 +1,139 @@
+<div class="row">
+  <!-- Columna izquierda fija con el resumen de selección -->
+  <div class="col-lg-4 col-md-5">
+    <nb-card class="p-3 mb-4">
+      <nb-card-header class="fw-bold text-center">Resumen de Selección</nb-card-header>
+      <nb-card-body>
+        <p><strong>Semana:</strong> {{ selectedSemana?.week_number || 'No seleccionada' }}</p>
+        <p><strong>Día:</strong> {{ selectedDia || 'No seleccionado' }}</p>
+        <p><strong>Obra:</strong> {{ selectedObra?.project_name || 'No seleccionada' }}</p>
+        <p><strong>{{ selectedEmpleados.length }} empleado(s) seleccionado(s)</strong></p>
+      </nb-card-body>
+    </nb-card>
+  </div>
+
+  <!-- Columna derecha con el formulario -->
+  <div class="col-lg-8 col-md-7 ">
+    <nb-card class="p-4 mb-4 ">
+      <nb-card-header class="fw-bold text-center">Asignación de proyectos</nb-card-header>
+      <nb-card-body>
+        <form>
+          <!-- Selector de semana laboral -->
+          <div class="mb-4">
+            <label for="semanaLaboral" class="form-label fw-bold">Selecciona la semana laboral:</label>
+            <nb-select placeholder="Selecciona una semana" fullWidth [(selected)]="selectedSemana"
+              (selectedChange)="onSemanaChange($event)">
+              <nb-option *ngFor="let semana of semanas" [value]="semana">
+                {{ semana.week_number }}
+                <span *ngIf="isCurrentWeek(semana)">(Semana Actual)</span>
+              </nb-option>
+            </nb-select>
+          </div>
+
+          <!-- Período seleccionado -->
+          <div id="periodoSeleccionado" class="my-3">
+
+            <p class="text-muted mb-0">
+              <small>
+                Período seleccionado:
+                {{ formatDate(selectedSemana?.start_date) }} - {{ formatDate(selectedSemana?.end_date) }}
+              </small>
+            </p>
+
+          </div>
+
+          <!-- Selector de día de la semana -->
+          <div class="mb-4">
+            <label for="diaSemana" class="form-label fw-bold">Selecciona el día de la semana:</label>
+            <nb-select placeholder="Selecciona un día" fullWidth [(selected)]="selectedDia"
+              (selectedChange)="onDiaChange($event)">
+              <nb-option value="" disabled>Seleccionar</nb-option>
+              <nb-option *ngFor="let dia of diasSemana" [value]="dia.date">{{ dia.display }} | {{dia.date}} </nb-option>
+            </nb-select>
+          </div>
+
+          <!-- Selector de obra del día -->
+          <div class="mb-4">
+            <label for="obraDia" class="form-label fw-bold">Selecciona la obra:</label>
+            <div class="d-flex align-items-center mb-2">
+              <nb-icon icon="search-outline" pack="eva" class="mr-3"></nb-icon>
+              <input type="text" nbInput fullWidth placeholder="Buscar obra" class="flex-grow-1 ms-2"
+                [(ngModel)]="searchObra" name="searchObra" (input)="filterObras()">
+            </div>
+            <nb-select placeholder="Selecciona una obra" fullWidth [(selected)]="selectedObra"
+              (selectedChange)="onObraChange($event)">
+              <nb-option value="" disabled>Seleccionar</nb-option>
+              <nb-option *ngFor="let obra of filteredObras" [value]="obra">{{ obra.project_name }}</nb-option>
+            </nb-select>
+
+            <!-- Modifica este bloque -->
+            <div *ngIf="selectedObra?.project_id" class="mt-2"> <!-- Verifica por una propiedad existente -->
+              <p class="text-muted mb-0">
+                <small>
+                  Fechas de la obra:
+                  {{ formatDate(selectedObra.start_date) }} -
+                  {{ formatDate(selectedObra.end_date) }}
+                </small>
+              </p>
+            </div>
+          </div>
+
+          <!-- Buscador de empleados -->
+          <div class="mb-4">
+            <label for="buscarEmpleado" class="form-label fw-bold">Seleccionar empleados:</label>
+            <div class="d-flex align-items-center">
+              <nb-icon icon="search-outline" pack="eva" class="mr-3"></nb-icon>
+              <input type="text" nbInput fullWidth placeholder="Buscar empleado" class="flex-grow-1 ms-2"
+                [(ngModel)]="searchEmployee" name="searchEmployee" (input)="onSearchChange()">
+            </div>
+
+            <!-- Lista de empleados -->
+
+            <label for="buscarEmpleado" class="form-label  mt-1 fw-bold">Lista de empleados:</label>
+            <div class="scrollable-container">
+
+              <div *ngIf="filteredEmpleados.length === 0" class="no-employees-message">
+                <div class="message-container">
+                  <nb-icon icon="file-text-outline" pack="eva" class="message-icon"></nb-icon>
+                  <p class="message-text">
+                    {{ selectedObra ? 'No hay empleados disponibles.' : 'Seleccione un día y proyecto para mostrar empleados.'
+                    }}
+                  </p>
+                </div>
+              </div>
+
+              <nb-list>
+                <!-- Mensaje cuando no hay empleados -->
+
+                <!-- Lista de empleados -->
+                <nb-list-item *ngFor="let empleado of filteredEmpleados" (click)="toggleEmpleadoSelection(empleado)"
+                  [class.selected]="empleado.selected" [class.disabled]="empleado.isAssigned" style="cursor: pointer;">
+                  <span [class.text-muted]="empleado.isAssigned || empleado.selected">
+                    {{ ( empleado.last_name + ' ' + empleado.middle_name + ' ' + empleado.first_name).toUpperCase() }} -
+                    Fecha de alta: {{ empleado.start_date }}
+                  </span>
+                </nb-list-item>
+              </nb-list>
+            </div>
+          </div>
+
+
+
+          <!-- Botón para seleccionar todos los empleados -->
+          <div *ngIf="filteredEmpleados.length > 0" class="d-flex justify-content-center mb-3">
+            <button nbButton status="info" appearance="outline" (click)="selectAllUnassignedEmployees()">
+              Marcar Todos No Asignados
+            </button>
+          </div>
+
+          <!-- Botón de asignación -->
+          <div class="d-flex justify-content-center">
+            <button nbButton status="primary" (click)="assignEmployees()" [disabled]="!isFormValid()">
+              Continuar
+            </button>
+          </div>
+        </form>
+      </nb-card-body>
+    </nb-card>
+  </div>
+</div>

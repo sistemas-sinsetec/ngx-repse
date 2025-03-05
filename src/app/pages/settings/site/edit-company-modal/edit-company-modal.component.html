@@ -1,0 +1,40 @@
+<div class="scrollable-container main-card">
+<nb-card>
+    <nb-card-body>
+          <label>Nombre de la Empresa</label>
+          <input nbInput fullWidth [(ngModel)]="company.nameCompany" fullWidth>
+          
+          <label>RFC</label>
+          <input nbInput fullWidth  [(ngModel)]="company.companyRFC" fullWidth>
+
+          <label>Nombre Legal</label>
+          <input nbInput fullWidth [(ngModel)]="company.name" fullWidth>
+          <label>Usuario Propietario</label>
+          <input nbInput fullWidth  [(ngModel)]="company.username" fullWidth>
+
+          <label>Correo Electrónico</label>
+          <input nbInput fullWidth  [(ngModel)]="company.email" fullWidth>
+
+          <label>Número de Teléfono</label>
+          <input nbInput fullWidth  [(ngModel)]="company.phone" fullWidth>
+
+          <label>Tipo de Usuario</label>
+          <input nbInput fullWidth  [(ngModel)]="company.levelUserName" fullWidth>
+
+          <label>Fecha de Inicio del Periodo</label>
+          <input nbInput fullWidth  [(ngModel)]="company.fecha_inicio" fullWidth>
+
+          <label>Fecha de Fin del Periodo</label>
+          <input nbInput fullWidth  [(ngModel)]="company.fecha_fin" fullWidth>
+
+          <label>Premium</label>
+          <input nbInput fullWidth  [(ngModel)]="company.premium" fullWidth>
+
+      <div class="text-center">
+      <button nbButton status="success" (click)="guardarCambios()"> Guardar Cambios</button>
+      <button nbButton status="danger" (click)="cerrarModal()" >Cancelar</button>
+    </div>
+    </nb-card-body>
+  </nb-card>
+</div>
+  

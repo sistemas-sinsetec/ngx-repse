@@ -1,0 +1,162 @@
+<!-- revisa-documentos.component.html -->
+
+      <nb-card>
+        <nb-card-header class="header-title">Revisar documentos anuales</nb-card-header>
+        <nb-card-body>
+          <div class="text-center">
+            <h5>{{ companyService.selectedCompany.name }}</h5>
+          </div>
+  
+          <div class="text-center mb-3">
+            <div class="btn-group">
+              <button nbButton status="basic" (click)="setFilter('cargados')" [class.active]="filter === 'cargados'" class="btn  ms-2">Cargados ({{ cargados }})</button>
+              <button nbButton status="success" (click)="setFilter('aceptados')" [class.active]="filter === 'aceptados'" class="btn ms-2">Aceptados ({{ completos }})</button>
+              <button nbButton status="danger" (click)="setFilter('rechazados')" [class.active]="filter === 'rechazados'" class="btn ms-2">Rechazados ({{ incompletos }})</button>
+              <button nbButton status="warning" class="btn ms-2 text-light font-weight-bold">No cargados ({{ noCargados }})</button>
+
+            </div>
+          </div>
+  
+          <!-- Tabla Cargados -->
+          <div *ngIf="filter === 'cargados'" class="table-responsive">
+            <h3>Cargados</h3>
+            <table class="table">
+              <thead>
+                <tr>
+                  <th>Tarea</th>
+                  <th>Archivo</th>
+                  <th>Fecha de Subida</th>
+                  <th>Subido Por</th>
+                  <th>Estado</th>
+                  <th>Acciones</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr *ngFor="let archivo of archivosCargados">
+                  <td>{{ archivo.tarea_nombre }}</td>
+                  <td class="col-file">
+                    {{ archivo.file_path.split('/').pop() }}
+                  </td>
+                  <td>{{ archivo.upload_date }}</td>
+                  <td>{{ archivo.uploaded_by }}</td>
+                  <td>{{ archivo.estado }}</td>
+                  <td class="acciones">
+                    <!-- Icono para revisar -->
+                    <a title="Revisar" [href]="'https://siinad.mx/php/' + archivo.file_path" target="_blank" nbButton ghost nbTooltip="Revisar">
+                      <nb-icon icon="eye-outline"></nb-icon>
+                    </a>
+                  
+                    <!-- Icono para aceptar -->
+                    <button title="Aceptar" nbButton ghost status="success" (click)="aceptarArchivo(archivo)" nbTooltip="Aceptar">
+                      <nb-icon icon="checkmark-outline"></nb-icon>
+                    </button>
+                  
+                    <!-- Icono para rechazar -->
+                    <button title="Rechazar" nbButton ghost status="danger" (click)="rechazarArchivo(archivo)" nbTooltip="Rechazar">
+                      <nb-icon icon="close-outline"></nb-icon>
+                    </button>
+                  
+                    <!-- Icono para revisar información adicional -->
+                    <button title="Ver informacion" nbButton ghost status="info" (click)="revisarInformacionAdicional(archivo)" nbTooltip="Información Adicional">
+                      <nb-icon icon="info-outline"></nb-icon>
+                    </button>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+      
+          <div *ngIf="filter === 'aceptados'" class="table-responsive">
+            <h3>Aceptados</h3>
+            <table class="table">
+              <thead>
+                <tr>
+                  <th>Tarea</th>
+                  <th>Archivo</th>
+                  <th>Fecha de Subida</th>
+                  <th>Subido Por</th>
+                  <th>Estado</th>
+                  <th>Acciones</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr *ngFor="let archivo of archivosAceptados">
+                  <td>{{ archivo.tarea_nombre }}</td>
+                  <td class="col-file">
+                    {{ archivo.file_path.split('/').pop() }}
+                  </td>
+                  <td>{{ archivo.upload_date }}</td>
+                  <td>{{ archivo.uploaded_by }}</td>
+                  <td>{{ archivo.estado }}</td>
+                  <td class="acciones">
+                    <!-- Icono para revisar -->
+                    <a title="Revisar" [href]="'https://siinad.mx/php/' + archivo.file_path" target="_blank" nbButton ghost nbTooltip="Revisar">
+                      <nb-icon icon="eye-outline"></nb-icon>
+                    </a>
+                  
+                    <!-- Icono para revisar información adicional -->
+                    <button title="Ver Informacion" nbButton ghost status="info" (click)="revisarInformacionAdicional(archivo)" nbTooltip="Información Adicional">
+                      <nb-icon icon="info-outline"></nb-icon>
+                    </button>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+      
+          <div *ngIf="filter === 'rechazados'" class="table-responsive">
+            <h3>Rechazados</h3>
+            <table class="table">
+              <thead>
+                <tr>
+                  <th>Tarea</th>
+                  <th>Archivo</th>
+                  <th>Fecha de Subida</th>
+                  <th>Subido Por</th>
+                  <th>Estado</th>
+                  <th>Acciones</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr *ngFor="let archivo of archivosRechazados">
+                  <td>{{ archivo.tarea_nombre }}</td>
+                  <td class="col-file">
+                    {{ archivo.file_path.split('/').pop() }}
+                  </td>
+                  <td>{{ archivo.upload_date }}</td>
+                  <td>{{ archivo.uploaded_by }}</td>
+                  <td>{{ archivo.estado }}</td>
+                  <td class="acciones">
+                    <!-- Icono para revisar -->
+                    <a title="Revisar" [href]="'https://siinad.mx/php/' + archivo.file_path" target="_blank" nbButton ghost nbTooltip="Revisar">
+                      <nb-icon icon="eye-outline"></nb-icon>
+                    </a>
+                  
+                    <!-- Icono para revisar información adicional -->
+                    <button title="Ver Informacion" nbButton ghost status="info" (click)="revisarInformacionAdicional(archivo)" nbTooltip="Información Adicional">
+                      <nb-icon icon="info-outline"></nb-icon>
+                    </button>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+  
+          <!-- Badges 
+          <div class="d-flex justify-content-center flex-wrap mb-4">
+            <nb-tag class="m-2" status="success" text="Cargados: {{ cargados }}"></nb-tag>
+            <nb-tag class="m-2" status="primary" text="Completos: {{ completos }}"></nb-tag>
+            <nb-tag class="m-2" status="danger" text="Incompletos: {{ incompletos }}"></nb-tag>
+            <nb-tag class="m-2" status="warning" text="No cargados: {{ noCargados }}"></nb-tag>
+          </div>
+
+          -->
+          
+          
+          
+        </nb-card-body>
+      </nb-card>
+
+  
+
+  

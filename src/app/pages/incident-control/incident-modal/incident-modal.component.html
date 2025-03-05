@@ -1,0 +1,57 @@
+<!-- add-incident-dialog.component.html -->
+  <nb-card>
+  <nb-card-header>
+    Agregar Incidencia
+  </nb-card-header>
+
+  <nb-card-body>
+    <form (ngSubmit)="saveIncident()" #incidentForm="ngForm">
+      <!-- Tipo de Incidencia -->
+      <div class="mb-4">
+        <label for="incidentType" class="form-label"><strong>Tipo de Incidencia</strong></label>
+        <nb-select 
+          id="incidentType"
+          fullWidth
+          [(ngModel)]="selectedIncident"
+          name="incidentType"
+          placeholder="Seleccionar"
+          required>
+          <nb-option *ngFor="let option of incidentOptions" [value]="option">
+            {{ option }}
+          </nb-option>
+        </nb-select>
+        <div *ngIf="incidentForm.submitted && !selectedIncident" class="text-danger mt-1">
+          Por favor selecciona un tipo de incidencia.
+        </div>
+      </div>
+
+      <!-- Descripción -->
+      <div class="mb-4">
+        <label for="description" class="form-label"><strong>Descripción</strong></label>
+        <textarea
+          nbInput
+          id="description"
+          rows="4"
+          [(ngModel)]="description"
+          name="description"
+          placeholder="Descripción de la incidencia"
+          class="form-control"
+          maxlength="500">
+        </textarea>
+      </div>
+      <button nbButton status="primary" [disabled]="!incidentForm.form.valid" type="submit">
+        Guardar Incidencia
+      </button>
+    </form>
+  </nb-card-body>
+
+
+  <!-- Botones en el Footer -->
+  <nb-card-footer>
+    <div class="d-flex justify-content-center">
+      <button nbButton status="danger" (click)="close()" style="margin-right: 10px;">Cerrar</button>
+      
+    </div>
+  </nb-card-footer>
+</nb-card>
+

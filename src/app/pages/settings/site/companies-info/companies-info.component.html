@@ -1,0 +1,90 @@
+<div class="container mt-5">
+    <!-- Encabezado Corporativo -->
+    <div class="d-flex align-items-center mb-4 justify-content-center">
+      <h2 class="font-weight-bold">Gestión de Empresas Registradas</h2>
+    </div>
+  
+    <nb-card>
+      <!-- Sección de Búsqueda -->
+      <nb-card-header>
+        <div class="search-section row">
+          <div class="col-md-3 mb-2">
+            <nb-select fullWidth placeholder="Buscar por" [(ngModel)]="searchField" (selectedChange)="updatePlaceholder()">
+              <nb-option value="nameCompany">Nombre de la Empresa</nb-option>
+              <nb-option value="companyRFC">RFC</nb-option>
+              <nb-option value="name">Nombre Legal</nb-option>
+              <nb-option value="username">Usuario Propietario</nb-option>
+              <nb-option value="email">Correo Electrónico</nb-option>
+              <nb-option value="phone">Número de Teléfono</nb-option>
+              <nb-option value="levelUserName">Tipo de Usuario</nb-option>
+              <nb-option value="fecha_inicio">Fecha de Inicio</nb-option>
+              <nb-option value="fecha_fin">Fecha de Fin</nb-option>
+            </nb-select>
+          </div>
+          <div class="col-md-6 mb-2">
+            <input nbInput fullWidth type="text" [(ngModel)]="searchTerm" [placeholder]="searchPlaceholder" (input)="formatDateInput($event)" class="form-control">
+          </div>
+          <div class="col-md-3 mb-2">
+            <button nbButton status="primary" fullWidth (click)="buscarEmpresas()">Buscar</button>
+          </div>
+        </div>
+      </nb-card-header>
+  
+      <!-- Cuerpo del Card: Lista de Empresas -->
+      <nb-card-body>
+        <div class="row">
+          <div class="min-vw-40 mb-4 col-lg-6" *ngFor="let company of filteredCompanies">
+            <nb-card class="company-card h-100 shadow-sm">
+              <nb-card-header class="bg-primary text-white text-center">
+                <strong>{{ company.nameCompany }}</strong>
+              </nb-card-header>
+              <nb-card-body class="company-details">
+                
+                  <nb-list>
+                  <nb-list-item>
+                  <p><strong>RFC: </strong> {{ company.companyRFC }}</p>
+                  </nb-list-item>
+                  <nb-list-item>
+                  <p><strong>Nombre Legal: </strong> {{ company.name }}</p>
+                  </nb-list-item>
+                  <nb-list-item>
+                  <p><strong>Usuario: </strong> {{ company.username }}</p>
+                  </nb-list-item>
+                  <nb-list-item>
+                  <p><strong>Correo: </strong> {{ company.email }}</p>
+                  </nb-list-item>
+                  <nb-list-item>
+                  <p><strong>Teléfono: </strong> {{ company.phone }}</p>
+                  </nb-list-item>
+                  <nb-list-item>
+                  <p><strong>Tipo de Usuario: </strong> {{ company.levelUserName }}</p>
+                  </nb-list-item>
+                  <nb-list-item>
+                  <p><strong>Inicio: </strong> {{ company.fecha_inicio | date:'shortDate' }}</p>
+                  </nb-list-item>
+                  <nb-list-item>
+                  <p><strong>Fin: </strong> {{ company.fecha_fin | date:'shortDate' }}</p>
+                  </nb-list-item>
+                </nb-list>
+              </nb-card-body>
+              <nb-card-footer class="text-center">
+                <button nbButton size="medium" status="success" (click)="editarEmpresa(company)">
+                  <nb-icon icon="edit-2" pack="eva" class="mr-1"></nb-icon> Editar
+                </button>
+              </nb-card-footer>
+            </nb-card>
+          </div>
+        </div>
+      
+        <!-- Mensaje cuando no hay empresas -->
+        <div *ngIf="filteredCompanies.length === 0" class="text-center mt-4">
+          <nb-icon icon="inbox" pack="eva" size="giant" class="mb-2"></nb-icon>
+          <p>No se encontraron empresas con los criterios de búsqueda proporcionados.</p>
+        </div>
+      </nb-card-body>
+      
+  
+      <!-- Paginación (opcional) -->
+      
+    </nb-card>
+  </div>

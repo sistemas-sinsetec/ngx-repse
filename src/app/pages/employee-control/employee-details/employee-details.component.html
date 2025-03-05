@@ -1,0 +1,261 @@
+<nb-card class="p-4 scrollable-container">
+  <nb-card accent="info">
+    <nb-card-header status="success">
+      <h2 *ngIf="employee.request_id" class="folio-text">
+        Folio: {{ employee.request_id }}
+      </h2>
+    </nb-card-header>
+
+    <nb-card-body>
+      <!-- Contenedor del perfil -->
+      <div class="profile-container text-center">
+
+        <!-- Foto de perfil -->
+
+        <div class="image-container" (click)="triggerFileInput('photo-input')">
+          <img [src]="employee.photo || '/assets/images/default-profile.png'" width="150px" alt="Foto de perfil"
+            class="profile-picture">
+          <input type="file" id="photo-input" (change)="onPhotoChange($event)" hidden>
+        </div>
+
+        <!-- <button nbButton status="info" (click)="triggerFileInput('photo-input')">Cambiar Foto</button> -->
+
+        <!-- Nombre del empleado -->
+        <h2 class="employee-name">{{ employee.full_name }}</h2>
+        <p class="employee-code">Código: {{ employee.employee_code }}</p>
+
+        <p *ngIf="employee.folio_number_imss && employee.lot_number_imss">
+          Folio IMSS: {{ employee.folio_number_imss }} <br>
+          Número de Lote IMSS: {{ employee.lot_number_imss }}
+        </p>
+
+        <p *ngIf="employee.request_id && employee.folio_number_imss && employee.lot_number_imss; else notActiveImss"
+          class="imss-status">
+          Activo en el IMSS
+        </p>
+        <ng-template #notActiveImss>
+          <p class="imss-status">No activo en el IMSS</p>
+        </ng-template>
+
+        <button class="btn-download-info" nbButton status="success" (click)="downloadEmployeeData()">Descargar
+          Información del Usuario</button>
+
+      </div>
+    </nb-card-body>
+  </nb-card>
+
+  <!-- Tarjetas de información -->
+  <nb-card class="mb-4">
+    <nb-card-header class="bg-primary text-white">
+      <h5 class="mb-0">Información General</h5>
+    </nb-card-header>
+    <nb-card-body>
+      <nb-form-field>
+        <label>Código de Empleado</label>
+        <input nbInput fullWidth shape="semi-round" [(ngModel)]="employee.employee_code">
+      </nb-form-field>
+      <nb-form-field>
+        <label>Nombre</label>
+        <input nbInput fullWidth shape="semi-round" [(ngModel)]="employee.first_name">
+      </nb-form-field>
+      <nb-form-field>
+        <label>Apellido Paterno</label>
+        <input nbInput fullWidth shape="semi-round" [(ngModel)]="employee.last_name">
+      </nb-form-field>
+      <nb-form-field>
+        <label>Apellido Materno</label>
+        <input nbInput fullWidth shape="semi-round" [(ngModel)]="employee.middle_name">
+      </nb-form-field>
+      <nb-form-field>
+        <label>Fecha de Nacimiento</label>
+        <input nbInput fullWidth shape="semi-round" [(ngModel)]="employee.birth_date" type="date">
+      </nb-form-field>
+      <nb-form-field>
+        <label>Lugar de Nacimiento</label>
+        <input nbInput fullWidth shape="semi-round" [(ngModel)]="employee.birth_place">
+      </nb-form-field>
+      <nb-form-field>
+        <label>CURP</label>
+        <input nbInput fullWidth shape="semi-round" [(ngModel)]="employee.curp">
+      </nb-form-field>
+      <nb-form-field>
+        <label>RFC</label>
+        <input nbInput fullWidth shape="semi-round" [(ngModel)]="employee.rfc">
+      </nb-form-field>
+      <nb-form-field>
+        <label>Teléfono</label>
+        <input nbInput fullWidth shape="semi-round" [(ngModel)]="employee.phone_number" pattern="\d*"
+          oninput="this.value = this.value.replace(/[^0-9]/g, '')">
+      </nb-form-field>
+      <nb-form-field>
+        <label>Correo Electrónico</label>
+        <input nbInput fullWidth shape="semi-round" [(ngModel)]="employee.email" type="email">
+      </nb-form-field>
+      <nb-form-field>
+        <label>Género</label>
+        <nb-select fullWidth shape="semi-round" [(ngModel)]="employee.gender_id">
+          <nb-option *ngFor="let gender of genders" [value]="gender.gender_id">
+            {{ gender.gender_name }}
+          </nb-option>
+        </nb-select>
+      </nb-form-field>
+      <nb-form-field>
+        <label>Estado Civil</label>
+        <nb-select fullWidth shape="semi-round" [(ngModel)]="employee.marital_status_id">
+          <nb-option *ngFor="let status of maritalStatuses" [value]="status.status_id">
+            {{ status.status_name }}
+          </nb-option>
+        </nb-select>
+      </nb-form-field>
+      <div class="text-center">
+        <button nbButton status="primary" (click)="saveGeneralInfo()" class="btn-save-info">Guardar Cambios de
+          Información General</button>
+      </div>
+    </nb-card-body>
+  </nb-card>
+
+  <!-- Tarjetas similares para Información Financiera, Laboral y de Emergencia -->
+  <nb-card class="mb-4">
+    <nb-card-header class="bg-primary text-white">
+      <h5 class="mb-0">Información Financiera y Bancaria</h5>
+    </nb-card-header>
+    <nb-card-body>
+      <nb-form-field>
+        <label>Número de Seguro Social</label>
+        <input fullWidth shape="semi-round" nbInput [(ngModel)]="employee.social_security_number" type="number"
+          pattern="\d*" oninput="this.value = this.value.replace(/[^0-9]/g, '')">
+      </nb-form-field>
+      <nb-form-field>
+        <label>Número de Cuenta Bancaria</label>
+        <input nbInput fullWidth shape="semi-round" [(ngModel)]="employee.bank_account_number" type="number"
+          pattern="\d*" oninput="this.value = this.value.replace(/[^0-9]/g, '')">
+      </nb-form-field>
+      <nb-form-field>
+        <label>Banco</label>
+        <input nbInput fullWidth shape="semi-round" [(ngModel)]="employee.bank_name">
+      </nb-form-field>
+      <nb-form-field>
+        <label>Sucursal</label>
+        <input nbInput fullWidth shape="semi-round" [(ngModel)]="employee.bank_branch">
+      </nb-form-field>
+      <nb-form-field>
+        <label>CLABE Interbancaria</label>
+        <input nbInput fullWidth shape="semi-round" [(ngModel)]="employee.clabe" type="number">
+      </nb-form-field>
+      <div class="text-center">
+        <button nbButton status="primary" (click)="saveFinancialInfo()">Guardar Información Financiera</button>
+      </div>
+    </nb-card-body>
+  </nb-card>
+
+  <!--  Informacion de trabajo-->
+  <nb-card class="mb-4">
+    <nb-card-header class="bg-primary text-white">
+      <h5 class="mb-0">Información De Trabajo</h5>
+    </nb-card-header>
+    <nb-card-body>
+
+      <nb-form-field>
+        <label>Departamento</label>
+        <nb-select fullWidth shape="semi-round" [(ngModel)]="employee.department_id">
+          <nb-option *ngFor="let departament of departamentos" [value]="departament.department_id">
+            {{ departament.department_name }}
+          </nb-option>
+        </nb-select>
+      </nb-form-field>
+
+      <nb-form-field>
+        <label>Puesto</label>
+        <nb-select fullWidth shape="semi-round" [(ngModel)]="employee.position_id">
+          <nb-option *ngFor="let puesto of puestos" [value]="puesto.position_id">
+            {{ puesto.position_name }}
+          </nb-option>
+        </nb-select>
+      </nb-form-field>
+
+      <nb-form-field>
+        <label>Turno</label>
+        <nb-select fullWidth shape="semi-round" placeholder="Seleccionar" [(ngModel)]="employee.shift_id">
+          <nb-option *ngFor="let turno of turnos" [value]="turno.shift_id">
+            {{ turno.shift_name }}
+          </nb-option>
+        </nb-select>
+      </nb-form-field>
+
+      <nb-form-field>
+        <label>Fecha de Inicio*</label>
+        <input fullWidth shape="semi-round" nbInput type="date" [(ngModel)]="employee.start_date" />
+      </nb-form-field>
+
+
+      <!-- Sueldo Neto -->
+      <nb-form-field>
+        <label>Sueldo Neto*</label>
+        <input fullWidth shape="semi-round" nbInput type="number" [(ngModel)]="employee.net_balance" />
+      </nb-form-field>
+
+      <!-- Sueldo Diario -->
+      <nb-form-field>
+        <label>Sueldo Diario*</label>
+        <input fullWidth shape="semi-round" nbInput type="number" [(ngModel)]="employee.daily_salary" />
+      </nb-form-field>
+
+      <div class="text-center">
+        <button nbButton status="primary" (click)="saveWorkInfo()">Guardar Información De Trabajo</button>
+      </div>
+
+    </nb-card-body>
+  </nb-card>
+
+  <!-- Contacto de Emergencia -->
+  <nb-card class="mb-4">
+    <nb-card-header class="bg-primary text-white">
+      <h5 class="mb-0">Contacto De Emergencia</h5>
+    </nb-card-header>
+    <nb-card-body>
+      <nb-form-field>
+        <label>Contacto de Emergencia</label>
+        <input fullWidth shape="semi-round" nbInput type="text" [(ngModel)]="employee.emergency_contact_name" />
+      </nb-form-field>
+
+      <nb-form-field>
+        <label>Número de Emergencia</label>
+        <input nbInput type="tel" maxlength="10" fullWidth shape="semi-round" minlength="10"
+          [(ngModel)]="employee.emergency_contact_number" pattern="\d*"
+          oninput="this.value = this.value.replace(/[^0-9]/g, '')" />
+      </nb-form-field>
+
+      <div class="text-center">
+        <button nbButton status="primary" (click)="saveEmergencyContact()">Guardar Contacto De Emergencia</button>
+      </div>
+
+    </nb-card-body>
+  </nb-card>
+  <!-- Tarjeta de archivos -->
+  <nb-card class="mb-4">
+    <nb-card-header class="bg-primary text-white">
+      <h5 class="mb-0">Archivos del Empleado</h5>
+    </nb-card-header>
+    <nb-card-body>
+      <div *ngFor="let expectedFileType of expectedFileTypes">
+        <label>{{ getLabelForFileType(expectedFileType) }}</label>
+        <div class="d-flex align-items-center">
+          <ng-container *ngIf="getFileByType(expectedFileType) as file; else uploadFile">
+            <button nbButton status="info" (click)="downloadFile(file.file_path)">Descargar</button>
+            <button nbButton status="danger" (click)="deleteFile(file.file_id)">Eliminar</button>
+            <input type="file" id="file-input-{{ file.file_id }}"
+              (change)="onFileChange($event, expectedFileType, file.file_id)" hidden>
+            <button nbButton status="secondary" (click)="triggerFileInput('file-input-' + file.file_id)">Seleccionar
+              Archivo</button>
+          </ng-container>
+          <ng-template #uploadFile>
+            <button fullWidth nbButton status="secondary"
+              (click)="triggerFileInput('file-input-' + expectedFileType)">Subir Archivo</button>
+            <input type="file" id="file-input-{{ expectedFileType }}" (change)="onFileChange($event, expectedFileType)"
+              hidden>
+          </ng-template>
+        </div>
+      </div>
+    </nb-card-body>
+  </nb-card>
+</nb-card>

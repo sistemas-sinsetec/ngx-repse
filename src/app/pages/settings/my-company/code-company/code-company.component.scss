@@ -1,0 +1,59 @@
+.corporate-card {
+    border: 1px solid #e5e5e5;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    padding: 16px;
+    background-color: #ffffff;
+  }
+  
+  .card-title {
+    font-size: 18px;
+    font-weight: bold;
+    text-align: center;
+    color: #333;
+    margin: 0;
+  }
+  
+  .code-container {
+    margin: 16px 0;
+    text-align: center;
+    background-color: #f9f9f9;
+    border: 1px dashed #d3d3d3;
+    border-radius: 4px;
+    padding: 12px;
+  }
+  
+  .code-text {
+    font-size: 16px;
+    color: #555;
+    margin: 0;
+  }
+  
+  .button-container {
+    text-align: center;
+    margin-top: 16px;
+  }
+  
+  button[nbButton] {
+    font-size: 14px;
+    font-weight: bold;
+    padding: 8px 16px;
+    transition: all 0.3s;
+  }
+  
+  button[nbButton]:hover {
+    background-color: #0056b3 !important;
+    color: #ffffff !important;
+  }
+  
+  button[nbButton] .icon {
+    margin-right: 8px;
+  }
+  
+
+
+  nb-alert > p{
+    color: white;
+    font-weight: bold;
+  }
+  

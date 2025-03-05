@@ -1,0 +1,20 @@
+nb-flip-card{
+    width: 60%;
+}
+
+.box{
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+input{
+    margin: 10px;
+}
+
+::ng-deep nb-flip-card a {
+    position: relative;
+    top: 10px;
+  }
+
+  

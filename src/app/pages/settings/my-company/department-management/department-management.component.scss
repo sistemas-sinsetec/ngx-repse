@@ -1,0 +1,46 @@
+.corporate-card {
+  border: 1px solid #e5e5e5;
+  border-radius: 8px;
+  background-color: #ffffff;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  padding: 16px;
+}
+
+.card-title {
+  font-size: 18px;
+  font-weight: bold;
+  color: #333;
+}
+
+.card-icon {
+  margin-right: 8px;
+  color: #007bff;
+}
+
+.list-item {
+  cursor: pointer;
+  padding: 8px;
+  border-radius: 4px;
+  transition: background-color 0.3s ease;
+}
+
+.list-item:hover {
+  background-color: #f8f9fa;
+}
+
+.form-container {
+  margin-top: 16px;
+}
+
+.full-width {
+  width: 100%;
+  margin-bottom: 16px;
+}
+
+button.full-width {
+  width: 100%;
+}
+
+.button-group button {
+  margin-right: 8px;
+}

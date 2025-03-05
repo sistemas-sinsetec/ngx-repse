@@ -1,0 +1,10 @@
+<nb-card>
+    <nb-card-header>{{ title }}</nb-card-header>
+    <nb-card-body>
+      <p>{{ message }}</p>
+    </nb-card-body>
+    <nb-card-footer class="text-right">
+      <button nbButton status="danger" (click)="confirm()">Eliminar</button>
+      <button nbButton status="basic" (click)="cancel()">Cancelar</button>
+    </nb-card-footer>
+  </nb-card>

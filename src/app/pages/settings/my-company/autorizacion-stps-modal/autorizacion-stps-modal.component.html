@@ -1,0 +1,94 @@
+<!-- autorizacion-stps-modal.component.html -->
+<div class="scrollable-container">
+<nb-card>
+    <nb-card-header>Autorización STPS</nb-card-header>
+    <nb-card-body>
+      <form (ngSubmit)="onSubmit()">
+        <!-- Fecha de Autorización -->
+        <div class="form-group">
+          <label for="fechaAutorizacion">Fecha Autorización</label>
+          <input
+            nbInput
+            fullWidth
+            type="date"
+            id="fechaAutorizacion"
+            name="fechaAutorizacion"
+            [(ngModel)]="fechaAutorizacion"
+            required
+          />
+        </div>
+  
+        <!-- Registro de Autorización -->
+        <div class="form-group">
+          <label for="registroAutorizacion">Registro Autorización</label>
+          <input
+            nbInput
+            fullWidth
+            type="text"
+            id="registroAutorizacion"
+            name="registroAutorizacion"
+            [(ngModel)]="registroAutorizacion"
+            required
+          />
+        </div>
+  
+        <!-- Repetición de Actividades -->
+        <div *ngFor="let actividad of actividades; let i = index" class="mb-3">
+          <nb-card class="mb-2">
+            <nb-card-header>Actividad {{ i + 1 }}</nb-card-header>
+            <nb-card-body>
+              <div class="form-group">
+                <label for="actividad{{ i }}">Actividad</label>
+                <input
+                  nbInput
+                  fullWidth
+                  type="text"
+                  [(ngModel)]="actividad.actividad"
+                  name="actividad{{ i }}"
+                  id="actividad{{ i }}"
+                  required
+                />
+              </div>
+  
+              <div class="form-group">
+                <label for="folio{{ i }}">Folio</label>
+                <input
+                  nbInput
+                  fullWidth
+                  type="text"
+                  [(ngModel)]="actividad.folio"
+                  name="folio{{ i }}"
+                  id="folio{{ i }}"
+                  required
+                />
+              </div>
+            </nb-card-body>
+            <nb-card-footer class="text-center">
+              <button
+                nbButton
+                status="danger"
+                size="small"
+                type="button"
+                (click)="removeActividad(i)"
+                *ngIf="actividades.length > 1"
+              >
+                Eliminar Actividad
+              </button>
+            </nb-card-footer>
+          </nb-card>
+        </div>
+  
+        <!-- Botones de acción -->
+        <div class="text-center mt-3">
+          <button nbButton status="info" type="button" (click)="addActividad()">
+            Agregar Actividad
+          </button>
+          <button nbButton status="success" type="submit" [disabled]="isSubmitting">
+            Enviar
+          </button>
+        </div>
+      </form>
+    </nb-card-body>
+  </nb-card>
+  </div>
+  
