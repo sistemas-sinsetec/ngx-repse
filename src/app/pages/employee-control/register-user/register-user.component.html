@@ -1,0 +1,48 @@
+<div class="register-user-container">
+  <form #registerForm="ngForm" (ngSubmit)="register()">
+    <nb-form-field>
+      <label>Nombre Completo</label>
+      <input nbInput name="name" [(ngModel)]="employeeName" placeholder="Nombre completo" disabled>
+    </nb-form-field>
+
+    <nb-form-field>
+      <label>Email</label>
+      <input nbInput name="email" [(ngModel)]="employeeEmail" placeholder="Email" disabled>
+    </nb-form-field>
+
+    <nb-form-field>
+      <label>Username</label>
+      <input nbInput name="username" [(ngModel)]="username" placeholder="Username" required>
+    </nb-form-field>
+
+    <nb-form-field>
+      <label>Password</label>
+      <input nbInput type="password" name="password" [(ngModel)]="password" placeholder="Password" required>
+    </nb-form-field>
+
+    <nb-form-field>
+      <label>Confirmar Password</label>
+      <input nbInput type="password" name="confirmPassword" [(ngModel)]="confirmPassword" placeholder="Confirmar Password" required>
+    </nb-form-field>
+
+    <!-- Nuevo campo: Selección del nivel de usuario -->
+    <nb-form-field>
+        <label>Selecciona Nivel de Usuario</label>
+        <nb-select name="levelUserId" [(ngModel)]="selectedLevelUserId" placeholder="Seleccione un nivel" required>
+          <nb-option *ngFor="let level of levelUsers" [value]="level.id">
+            {{ level.levelUserName }}
+          </nb-option>
+        </nb-select>
+      </nb-form-field>
+      
+
+    <div *ngIf="errorMessage" class="error-message" style="color:red; margin: 1rem 0;">
+      {{ errorMessage }}
+    </div>
+
+    <div class="button-group" style="display:flex; gap: 1rem;">
+      <button nbButton status="primary" type="submit">Registrar</button>
+      <button nbButton status="danger" type="button" (click)="cancel()">Cancelar</button>
+    </div>
+  </form>
+</div>

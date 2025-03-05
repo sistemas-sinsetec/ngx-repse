@@ -120,13 +120,26 @@ export class IncidentViewerComponent implements OnInit {
       this.showToast('Por favor selecciona una semana válida.', 'danger');
       return;
     }
+
+  
+    // Actualizar la semana seleccionada
     this.selectedWeek = week;
-    this.generateDiasSemana(week.start_date, week.end_date); // Generar los días de la semana
+  
+    // Limpiar las listas de empleados al cambiar la semana
+    this.assignedEmployees = [];
+    this.filteredAssignedEmployees = [];
+    this.unassignedEmployees = [];
+    this.filteredUnassignedEmployees = [];
+  
+    // Generar los días de la semana basados en las nuevas fechas
+    this.generateDiasSemana(week.start_date, week.end_date);
+
     this.selectedDia = ''; // Reinicia el día seleccionado
+  
     console.log('Semana seleccionada:', this.selectedWeek);
     console.log('Días generados:', this.diasSemana);
-
   }
+
   generateDiasSemana(startDate: string, endDate: string) {
     console.log('Fechas recibidas para generar días:', startDate, endDate);
 
