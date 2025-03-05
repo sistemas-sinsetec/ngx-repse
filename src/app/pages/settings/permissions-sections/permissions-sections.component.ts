@@ -366,31 +366,40 @@ export class PermissionsSectionsComponent implements OnInit {
   }
 
   async removePermission(section: string, subSection: string) {
-    const loading = await this.showLoading('Eliminando permiso...'); // Mostrar loading
+
+    const loading = await this.showLoading('Eliminando permiso...'); 
+
     const companyId = this.companyService.selectedCompany.id;
     const data = {
       userId: this.selectedUserId,
       section: section,
-      subSection: subSection,
+
+      subSection: subSection, 
       companyId: companyId
-    };
+  };
+
 
     this.http.post('https://siinad.mx/php/removePermission.php', data).subscribe(
       async (response: any) => {
         if (response.success) {
           this.permissions = this.permissions.filter(p => !(p.section === section && p.subSection === subSection));
-          this.groupPermissions(); // Actualiza la agrupación
+
+          this.groupPermissions(); 
+
           this.showToast('Permiso eliminado correctamente.', 'success');
         } else {
           console.error(response.error);
           await this.showToast(response.error, 'danger');
         }
-        await loading.dismiss(); // Ocultar loading
+
+        await loading.dismiss(); 
+
       },
       async (error) => {
         console.error('Error en la solicitud POST:', error);
         await this.showToast('Error al eliminar permiso.', 'danger');
-        await loading.dismiss(); // Ocultar loading
+        await loading.dismiss(); 
+
       }
     );
   }

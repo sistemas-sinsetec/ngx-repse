@@ -14,6 +14,7 @@
             (selectedChange)="onWeekChange($event)">
             <nb-option *ngFor="let week of weeks" [value]="week">
               {{ week.week_number }}
+              <span *ngIf="isCurrentWeek(week)">(Semana Actual)</span>
             </nb-option>
           </nb-select>
           <div *ngIf="selectedWeek" class="mt-3">
@@ -58,10 +59,11 @@
         <nb-card-header>
           <span class="title">Empleados asignados a proyectos</span>
           <input nbInput class="mt-3" fullWidth type="text" name="searchAssigned" placeholder="Buscar empleado asignado"
-          [(ngModel)]="searchAssigned" (input)="filterAssignedEmployees()" />
+            [(ngModel)]="searchAssigned" (input)="filterAssignedEmployees()" />
         </nb-card-header>
         <nb-card-body>
-         
+
+
 
           <nb-list>
             <nb-list-item *ngFor="let employee of filteredAssignedEmployees" class="d-flex align-items-center">
@@ -90,12 +92,13 @@
       <nb-card class="w-100 ms-3">
         <nb-card-header>
           <span class="title">Empleados no asignados a proyectos</span>
-          <input nbInput class="mt-3" fullWidth type="text" name="searchUnassigned" placeholder="Buscar empleado no asignado"
-          [(ngModel)]="searchUnassigned" (input)="filterUnassignedEmployees()">
+          <input nbInput class="mt-3" fullWidth type="text" name="searchUnassigned"
+            placeholder="Buscar empleado no asignado" [(ngModel)]="searchUnassigned"
+            (input)="filterUnassignedEmployees()">
         </nb-card-header>
         <nb-card-body>
-         
-          <nb-list >
+
+          <nb-list>
             <nb-list-item *ngFor="let employee of filteredUnassignedEmployees" class="d-flex align-items-center">
               <nb-checkbox [(ngModel)]="employee.selected" class="me-2"></nb-checkbox>
               <span>{{ employee.last_name }} {{ employee.middle_name }} {{ employee.first_name }}</span>

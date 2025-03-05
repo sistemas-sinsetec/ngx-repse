@@ -365,12 +365,6 @@ export class ConfirmWeekComponent {
     const laborDays = this.diasSemana.filter(dia => !dia.isRestDay);
     const allLaborDaysConfirmed = laborDays.every(dia => dia.status === 'confirmed');
     const hasEmployeesOrIncidences = this.filteredEmpleadosDia.length > 0 || this.filteredEmpleadosIncidencias.length > 0;
-
-    console.log('Días laborales:', laborDays);
-    console.log('Todos los días laborales confirmados:', allLaborDaysConfirmed);
-    console.log('Hay empleados o incidencias:', hasEmployeesOrIncidences);
-    console.log('Semana ya confirmada:', this.isWeekConfirmed);
-
     return allLaborDaysConfirmed && hasEmployeesOrIncidences && !this.isWeekConfirmed;
   }
 

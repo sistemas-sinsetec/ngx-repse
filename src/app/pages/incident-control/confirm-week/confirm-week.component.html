@@ -55,6 +55,19 @@
 
         <div class="row g-3"> <!-- Contenedor flex -->
           <!-- Primera card -->
+
+          <div class="col-12 d-flex justify-content-center mb-3 mt-4">
+            <div class="w-100" >
+              <input type="text" 
+                     class="form-control" 
+                     [(ngModel)]="searchTerm" 
+                     (input)="filterEmployees()"
+                     fullWidth
+                     placeholder="Buscar empleados...">
+            </div>
+          </div>
+          <!-- Por esto: -->
+
           <div class="col-12 col-lg-6">
             <!-- Lista de Empleados Asignados -->
             <nb-card class=" p-4 mb-4 ">

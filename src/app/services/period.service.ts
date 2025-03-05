@@ -64,11 +64,24 @@ export class PeriodService {
   loadSelectedPeriod() {
     const periodString = localStorage.getItem('selectedPeriod');
     if (periodString) {
-      this.selectedPeriod = JSON.parse(periodString);
+      const storedPeriod = JSON.parse(periodString);
+      this.selectedPeriod = storedPeriod;
       console.log('Periodo cargado desde localStorage:', this.selectedPeriod);
 
-      // Emitir el período cargado
+      // Emitir el período cargado inicialmente
       this.periodChangeSubject.next(this.selectedPeriod);
+
+      // Verificar cambios en el servidor usando los datos del período almacenado
+      if (storedPeriod.company_id) {
+        this.refreshSelectedPeriod(storedPeriod.company_id, storedPeriod.period_type_id)
+          .then(() => {
+            console.log('Período actualizado desde el servidor si hubo cambios.');
+          })
+          .catch((error) => {
+            console.error('Error al verificar cambios en el período:', error);
+          });
+      }
+
     }
   }
 
@@ -148,7 +161,9 @@ export class PeriodService {
       start.add(1, 'day');
     }
 
-    return dias; 
+
+    return dias;
+
   }
 
   // Mapeo de índice del día de la semana a letra
@@ -168,10 +183,29 @@ export class PeriodService {
    * @returns Letra del día (D, L, M, M, J, V, S)
    */
   private getDayLetter(date: moment.Moment): string {
-    const dayIndex = date.day(); 
+
+    const dayIndex = date.day();
     return this.dayLetters[dayIndex] || '';
   }
 
-  // Resto de tu servicio...
+  // period.service.ts
+  async refreshSelectedPeriod(companyId: string, periodTypeId?: string): Promise<void> {
+    const params = periodTypeId
+      ? `company_id=${companyId}&period_type_id=${periodTypeId}`
+      : `company_id=${companyId}`;
+
+    try {
+      const response: any = await this.http
+        .get(`https://siinad.mx/php/get_current_period.php?${params}`)
+        .toPromise();
+
+      if (response) {
+        this.setSelectedPeriod(response);
+      }
+    } catch (error) {
+      console.error('Error al actualizar el período:', error);
+    }
+  }
+
 
 }
