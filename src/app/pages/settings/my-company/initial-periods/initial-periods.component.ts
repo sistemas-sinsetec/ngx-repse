@@ -26,6 +26,10 @@ export class InitialPeriodsComponent {
   minDate: string;
   maxDate: string;
 
+  posicionPagoSemanal: number;
+  posicionPagoQuincenal: number;
+  posicionPagoMensual: number;
+
   constructor(
     private http: HttpClient,
     private authService: AuthService,
@@ -133,11 +137,12 @@ export class InitialPeriodsComponent {
         ajustarperiodoscalendario: 0,
         numeroseptimos: 1,
         posicionseptimos:  JSON.stringify([firstSunday.toString()]), // Añadir el primer domingo,
-        posicionpagonomina: 6,
+        posicionpagonomina: this.posicionPagoSemanal || 0, // <-- USAR LA VARIABLE
         fechainicioejercicio: this.fechaSemanal,
         ejercicio: this.ejercicioSemanal,
         ccalculomescalendario: 0,
         PeriodicidadPago: '02',
+        
         
       });
       this.showToast("Periodo semanal guardado correctamente", 'success');
@@ -154,7 +159,7 @@ export class InitialPeriodsComponent {
         ajustarperiodoscalendario: 1,
         numeroseptimos: 0,
         posicionseptimos:  JSON.stringify([firstSunday.toString()]), // Añadir el primer domingo,
-        posicionpagonomina: 15,
+        posicionpagonomina: this.posicionPagoQuincenal || 0,
         fechainicioejercicio: this.fechaQuincenal,
         ejercicio: this.ejercicioQuincenal,
         ccalculomescalendario: 0,
@@ -174,7 +179,7 @@ export class InitialPeriodsComponent {
         ajustarperiodoscalendario: 1,
         numeroseptimos: 0,
         posicionseptimos:  JSON.stringify([firstSunday.toString()]), // Añadir el primer domingo,
-        posicionpagonomina: 30,
+        posicionpagonomina: this.posicionPagoMensual || 0,
         fechainicioejercicio: this.fechaMensual,
         ejercicio: this.ejercicioMensual,
         ccalculomescalendario: 0,
@@ -213,7 +218,17 @@ export class InitialPeriodsComponent {
       });
   }
 
-  async createPayrollPeriods(periodTypes: { period_type_name: string, period_type_id: number }[], periodo: Periodo) {
+  private getBimesterIndex(date: Date): number {
+    // Devuelve 0 para Ene-Feb, 1 para Mar-Abr, 2 para May-Jun,
+    // 3 para Jul-Ago, 4 para Sep-Oct, 5 para Nov-Dic
+    const month = date.getMonth() + 1; // 1..12
+    return Math.floor((month - 1) / 2); 
+  }
+  
+  async createPayrollPeriods(
+    periodTypes: { period_type_name: string, period_type_id: number }[],
+    periodo: Periodo
+  ) {
     if (!Array.isArray(periodTypes)) {
       console.error('periodTypes debe ser un array');
       return;
@@ -225,9 +240,15 @@ export class InitialPeriodsComponent {
     }
   
     const companyId = this.companyService.selectedCompany.id;
+    // Fecha de inicio (la que eligió el usuario)
     const startDate = new Date(periodo.fechainicioejercicio);
-    const allPeriods = [];
   
+    // Arreglo temporal donde guardaremos los períodos generados
+    const tempPeriods: any[] = [];
+  
+    // ==========================================================
+    // 1) PRIMERA FASE: Generar todos los períodos
+    // ==========================================================
     for (const periodTypeData of periodTypes) {
       const periodType = periodTypeData.period_type_name;
       const periodTypeId = periodTypeData.period_type_id;
@@ -237,86 +258,134 @@ export class InitialPeriodsComponent {
         continue;
       }
   
-      const totalPeriods = periodType === 'Semanal' ? 52 :
-        periodType === 'Quincenal' ? 24 : 12;
+      // Cantidad de períodos por año
+      const totalPeriods = (periodType === 'Semanal')   ? 52
+                         : (periodType === 'Quincenal') ? 24
+                         : 12; // Mensual
   
-      const fiscalYear = periodType === 'Semanal' ? this.ejercicioSemanal :
-        periodType === 'Quincenal' ? this.ejercicioQuincenal :
-        this.ejercicioMensual;
+      // Año fiscal
+      const fiscalYear = (periodType === 'Semanal')   ? this.ejercicioSemanal
+                       : (periodType === 'Quincenal') ? this.ejercicioQuincenal
+                       : this.ejercicioMensual;
   
-      let currentStartDate = startDate;
+      let currentStartDate = new Date(startDate);
   
       for (let i = 0; i < totalPeriods; i++) {
-        let periodEndDate = new Date(currentStartDate);
-        let paymentDate: Date | null = null;
-  
-        // Calcular fecha de fin de período
+        // 1) Fecha fin
+        const periodEndDate = new Date(currentStartDate);
         if (periodType === 'Semanal' || periodType === 'Quincenal') {
           periodEndDate.setDate(currentStartDate.getDate() + periodo.diasdelperiodo - 1);
         } else if (periodType === 'Mensual') {
+          // último día del mes
           periodEndDate.setMonth(currentStartDate.getMonth() + 1);
           periodEndDate.setDate(0);
         }
   
-        // Calcular payment_date según el tipo
-        if (periodType === 'Semanal') {
-          paymentDate = new Date(periodEndDate);
-          paymentDate.setDate(paymentDate.getDate() + 3);
-          paymentDate = this.adjustPaymentDate(paymentDate);
-        } else if (periodType === 'Quincenal') {
-          paymentDate = new Date(periodEndDate);
-          paymentDate = this.adjustPaymentDateQuincenal(paymentDate);
-        } else if (periodType === 'Mensual') {
-          paymentDate = new Date(currentStartDate);
-          paymentDate.setDate(15);
-          paymentDate = this.adjustPaymentDateQuincenal(paymentDate);
-        }
+        // (A) Calcular fecha de pago sumando "posicionpagonomina" días al endDate
+        const paymentDate = new Date(periodEndDate);
+        const offsetPago = parseInt(String(periodo.posicionpagonomina), 10) || 0; 
+        paymentDate.setDate(paymentDate.getDate() + offsetPago);
   
-        // Validar fecha de pago
-        if (!paymentDate || isNaN(paymentDate.getTime())) {
-          console.error('Fecha de pago inválida para el período:', periodType);
-          continue;
-        }
-  
-        const payrollPeriod = {
+        // Creamos el objeto con la información del período
+        const payrollPeriod: any = {
           company_id: companyId,
           period_type_id: periodTypeId,
           period_number: i + 1,
           fiscal_year: fiscalYear,
-          month: currentStartDate.getMonth() + 1,
-          payment_days: periodType === 'Mensual' ? periodEndDate.getDate() : periodo.diasdelperiodo,
+          month: currentStartDate.getMonth() + 1, // mes real
+          payment_days: (periodType === 'Mensual')
+            ? periodEndDate.getDate()
+            : periodo.diasdelperiodo,
           rest_days: periodo.numeroseptimos,
           interface_check: 0,
           net_modification: 0,
           calculated: 0,
           affected: 0,
+    
           start_date: currentStartDate.toISOString().split('T')[0],
           end_date: periodEndDate.toISOString().split('T')[0],
-          fiscal_start: i === 0 ? 1 : 0,
-          month_start: currentStartDate.getDate() === 1 ? 1 : 0,
-          month_end: periodEndDate.getDate() === new Date(periodEndDate.getFullYear(), periodEndDate.getMonth() + 1, 0).getDate() ? 1 : 0,
-          fiscal_end: i === totalPeriods - 1 ? 1 : 0,
-          timestamp: new Date().toISOString().split('T')[0],
+          payment_date: paymentDate.toISOString().split('T')[0],
+    
+          // Banderas iniciales
+          month_start: 0,
+          month_end: 0,
           imss_bimonthly_start: 0,
           imss_bimonthly_end: 0,
-          payment_date: paymentDate.toISOString().split('T')[0]
+    
+          // Ejercicio: marcamos el primero y el último
+          fiscal_start: (i === 0) ? 1 : 0,
+          fiscal_end:   (i === totalPeriods - 1) ? 1 : 0,
+    
+          timestamp: new Date().toISOString().split('T')[0],
         };
   
-        allPeriods.push(payrollPeriod);
+        // Agregamos al arreglo temporal
+        tempPeriods.push(payrollPeriod);
   
-        // Preparar siguiente período
-        currentStartDate = new Date(periodEndDate);
-        currentStartDate.setDate(currentStartDate.getDate() + 1);
+        // Avanzar la fecha de inicio al siguiente período
+        const nextStartDate = new Date(periodEndDate);
+        nextStartDate.setDate(nextStartDate.getDate() + 1);
+        currentStartDate = nextStartDate;
       }
     }
   
+    // ==========================================================
+    // 2) SEGUNDA FASE: Asignar banderas de inicio/fin de mes y bimestre
+    // (opcional, si quieres que se marquen como en ContaPAQi)
+    // ==========================================================
+    for (let i = 0; i < tempPeriods.length; i++) {
+      const current = tempPeriods[i];
+    
+      // El primero siempre se marca como inicio de mes y bimestre
+      if (i === 0) {
+        current.month_start = 1;
+        current.imss_bimonthly_start = 1;
+      }
+    
+      if (i > 0) {
+        const previous = tempPeriods[i - 1];
+        const prevEnd = new Date(previous.end_date);
+        const currEnd = new Date(current.end_date);
+    
+        const prevEndMonth = prevEnd.getMonth(); 
+        const currEndMonth = currEnd.getMonth();
+    
+        // Cambio de mes => fin en anterior, inicio en actual
+        if (currEndMonth !== prevEndMonth) {
+          previous.month_end = 1;
+          current.month_start = 1;
+        }
+    
+        // Bimestre
+        const prevBim = this.getBimesterIndex(prevEnd);
+        const currBim = this.getBimesterIndex(currEnd);
+        if (currBim !== prevBim) {
+          previous.imss_bimonthly_end = 1;
+          current.imss_bimonthly_start = 1;
+        }
+      }
+    
+      // Último período => fin de mes y bimestre
+      if (i === tempPeriods.length - 1) {
+        current.month_end = 1;
+        current.imss_bimonthly_end = 1;
+      }
+    }
+  
+    // ==========================================================
+    // 3) Guardar en BD
+    // ==========================================================
     try {
-      await this.http.post('https://siinad.mx/php/create-payroll-period.php', { periods: allPeriods }).toPromise();
+      await this.http.post('https://siinad.mx/php/create-payroll-period.php', { periods: tempPeriods })
+        .toPromise();
       console.log('Periodos creados correctamente');
     } catch (error) {
       console.error('Error al crear periodos:', error);
     }
   }
+  
+  
+  
 
   private adjustPaymentDate(date: Date): Date {
     const dayOfWeek = date.getDay();

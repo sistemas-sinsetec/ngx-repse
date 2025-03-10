@@ -201,12 +201,6 @@ export const MENU_ITEMS: CustomMenuItem[] = [
             permission: { section: 'Configuracion de mi empresa', subSection: 'Departamentos' },
           },
           {
-            title: 'Administrar Rangos',
-            link: '/pages/settings/my-company/department-ranges',
-            hidden: false,
-            permission: { section: 'Configuracion de mi empresa', subSection: 'Departamentos' },
-          },
-          {
             title: 'Tipos de periodos',
             link: '/pages/settings/my-company/period-configuration',
             hidden: false,

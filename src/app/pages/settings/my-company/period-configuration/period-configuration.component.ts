@@ -5,6 +5,7 @@ import { CompanyService } from '../../../../services/company.service';
 import { LoadingController } from '@ionic/angular'; // Importar LoadingController de Ionic
 import { NbToastrService } from '@nebular/theme'; // Importar NbToastrService de Nebular
 import * as moment from 'moment'; // Importar moment.js para manejar fechas y tiempos
+import { PeriodService } from '../../../../services/period.service';
 
 @Component({
   selector: 'ngx-period-configuration',
@@ -32,6 +33,7 @@ export class PeriodConfigurationComponent {
     private loadingController: LoadingController, // Inyectar LoadingController
     private toastrService: NbToastrService, // Inyectar NbToastrService
     private elementRef: ElementRef,
+    private periodService: PeriodService
   ) { this.generateDays(); }
 
   ngOnInit() {
@@ -43,10 +45,10 @@ export class PeriodConfigurationComponent {
   @HostListener('document:click', ['$event'])
   onClickOutside(event: MouseEvent) {
     if (!this.isCalendarOpen) return; // Solo actúa si el calendario está abierto
-    
+
     const calendarContainer = this.elementRef.nativeElement.querySelector('.calendar-container');
     const input = this.elementRef.nativeElement.querySelector('input[type="text"]');
-  
+
     if (!input.contains(event.target) && !calendarContainer.contains(event.target)) {
       this.isCalendarOpen = false;
     }
@@ -79,7 +81,7 @@ export class PeriodConfigurationComponent {
         ? this.selectedDates.delete(formattedDate)
         : this.selectedDates.add(formattedDate);
     }
-    
+
   }
 
 
@@ -253,6 +255,20 @@ export class PeriodConfigurationComponent {
           console.log('Cambios guardados correctamente', response);
           loading.dismiss();
           this.toastrService.success('Cambios guardados correctamente', 'Éxito');
+
+          const formattedPeriod = {
+            id: periodConfig.period_type_id, // Convertir a la clave esperada
+            name: periodConfig.period_type_name,
+            year: periodConfig.fiscal_year,
+            start: periodConfig.fiscal_year_start,
+            rest_days_position: periodConfig.rest_days_position || [], // Asegurar que siempre sea un array
+          };
+          
+          // Guardar en localStorage con el formato correcto
+          localStorage.setItem('selectedPeriod', JSON.stringify(formattedPeriod));
+
+          this.periodService.setSelectedPeriod(formattedPeriod);
+
           this.loadPeriods(); // Recargar los periodos después de guardar
         }, error => {
           console.error('Error al guardar los cambios', error);
@@ -270,6 +286,25 @@ export class PeriodConfigurationComponent {
           await this.createPayrollPeriods(periodData, this.selectedPeriod); // Crear los periodos de nómina de forma secuencial
           loading.dismiss();
           this.toastrService.success('Nuevo periodo creado correctamente', 'Éxito');
+
+          const formattedPeriod = {
+            id: periodConfig.period_type_id, // Convertir a la clave esperada
+            name: periodConfig.period_type_name,
+            year: periodConfig.fiscal_year,
+            start: periodConfig.fiscal_year_start,
+            rest_days_position: periodConfig.rest_days_position || [], // Asegurar que siempre sea un array
+          };
+          
+          // Guardar en localStorage con el formato correcto
+          localStorage.setItem('selectedPeriod', JSON.stringify(formattedPeriod));
+
+          this.periodService.setSelectedPeriod(formattedPeriod);
+
+          
+         
+          
+
+
           this.loadPeriods(); // Recargar los periodos después de crear
         }, error => {
           console.error('Error al crear el nuevo periodo', error);
@@ -279,41 +314,59 @@ export class PeriodConfigurationComponent {
     }
   }
 
+  private getBimesterIndex(date: Date): number {
+    // Devuelve 0 para Ene-Feb, 1 para Mar-Abr, 2 para May-Jun,
+    // 3 para Jul-Ago, 4 para Sep-Oct, 5 para Nov-Dic
+    const month = date.getMonth() + 1; // 1..12
+    return Math.floor((month - 1) / 2);
+  }
+
   async createPayrollPeriods(periodTypes: { period_type_name: string, period_type_id: number }[], periodo: any) {
     if (!Array.isArray(periodTypes)) {
       console.error('periodTypes debe ser un array');
       return;
     }
-
     if (periodTypes.length === 0) {
       console.warn('No se seleccionaron tipos de periodos');
       return;
     }
-
+  
     const companyId = this.companyService.selectedCompany.id;
+    // Fecha de inicio configurada por el usuario
     const startDate = new Date(periodo.fiscal_year_start);
-    startDate.setHours(0, 0, 0, 0); // Aseguramos que la fecha de inicio no cambie por la zona horaria
+    startDate.setHours(0, 0, 0, 0); // Evitar desfases por zona horaria
+  
+    // Año fiscal (puedes ajustarlo si tu ejercicio no siempre coincide con el año calendario)
     const fiscalYear = startDate.getFullYear();
-
-    let currentStartDate = new Date(startDate);
-
+  
+    // Arreglo temporal para almacenar los períodos generados
+    const tempPeriods: any[] = [];
+  
+    // ==========================================================
+    // FASE 1: Generar todos los períodos sin banderas
+    // ==========================================================
     for (const periodTypeData of periodTypes) {
       const periodType = periodTypeData.period_type_name;
       const periodTypeId = periodTypeData.period_type_id;
-
-      // Usar totalPeriods definido por el usuario, o calcularlo automáticamente
+  
+      // ¿Cuántos períodos generamos?
+      // Usar totalPeriods definido por el usuario o calcularlo
       const totalPeriods = periodo.totalPeriods || Math.floor(365 / periodo.period_days);
-
+  
+      // Fecha de inicio para cada período
+      let currentStartDate = new Date(startDate);
+  
       for (let i = 0; i < totalPeriods; i++) {
-        let periodEndDate: Date = new Date(currentStartDate);
-
+        const periodEndDate = new Date(currentStartDate);
+  
+        // Ajustar fecha fin según payment_frequency o reglas personalizadas
         if (periodo.payment_frequency === '02') { // Semanal
           periodEndDate.setDate(currentStartDate.getDate() + periodo.period_days - 1);
         } else if (periodo.payment_frequency === '04') { // Quincenal
           periodEndDate.setDate(currentStartDate.getDate() + 14 - 1);
         } else if (periodo.payment_frequency === '05') { // Mensual
           periodEndDate.setMonth(currentStartDate.getMonth() + 1);
-          periodEndDate.setDate(0); // Establece el último día del mes
+          periodEndDate.setDate(0); // Último día del mes
         } else if (periodo.payment_frequency === '99') { // Personalizado
           if (periodo.custom_period_type === 'días') {
             periodEndDate.setDate(currentStartDate.getDate() + periodo.custom_period_length - 1);
@@ -321,7 +374,7 @@ export class PeriodConfigurationComponent {
             periodEndDate.setDate(currentStartDate.getDate() + (7 * periodo.custom_period_length) - 1);
           } else if (periodo.custom_period_type === 'meses') {
             periodEndDate.setMonth(currentStartDate.getMonth() + periodo.custom_period_length);
-            periodEndDate.setDate(0); // Establece el último día del mes resultante
+            periodEndDate.setDate(0); 
           } else {
             console.warn('No se especificó una longitud válida para el periodo personalizado');
             return;
@@ -330,50 +383,101 @@ export class PeriodConfigurationComponent {
           console.warn('Tipo de periodo desconocido');
           return;
         }
-
-        const month = currentStartDate.getMonth() + 1;
-        const isMonthStart = currentStartDate.getDate() === 1;
-        const isMonthEnd = periodEndDate.getDate() === new Date(periodEndDate.getFullYear(), periodEndDate.getMonth() + 1, 0).getDate();
-        const isFiscalStart = i === 0;
-        const isFiscalEnd = i === totalPeriods - 1;
-
+  
+        // Creas el objeto con banderas en 0
         const payrollPeriod = {
           company_id: companyId,
-          period_type_id: periodTypeId, // Usar el period_type_id recibido en la respuesta
+          period_type_id: periodTypeId,
           period_number: i + 1,
           fiscal_year: fiscalYear,
-          month: month,
-          payment_days: periodo.payment_days,
-          rest_days: periodo.rest_days_position,
+          month: currentStartDate.getMonth() + 1,
+          payment_days: periodo.payment_days,  // Ajusta si quieres que sea distinto
+          rest_days: periodo.rest_days_position, // Tus días de descanso
           interface_check: 0,
           net_modification: 0,
           calculated: 0,
           affected: 0,
+  
           start_date: currentStartDate.toISOString().split('T')[0],
           end_date: periodEndDate.toISOString().split('T')[0],
-          fiscal_start: isFiscalStart ? 1 : 0,
-          month_start: isMonthStart ? 1 : 0,
-          month_end: isMonthEnd ? 1 : 0,
-          fiscal_end: isFiscalEnd ? 1 : 0,
-          timestamp: new Date().toISOString().split('T')[0],
+  
+          // Banderas en 0 (las setearemos en Fase 2)
+          fiscal_start: (i === 0) ? 1 : 0, // primer período => inicio ejercicio
+          fiscal_end:   (i === totalPeriods - 1) ? 1 : 0, // último => fin ejercicio
+          month_start: 0,
+          month_end: 0,
           imss_bimonthly_start: 0,
           imss_bimonthly_end: 0,
-          payment_date: null // Establece la fecha de pago si es necesario
+  
+          timestamp: new Date().toISOString().split('T')[0],
+          payment_date: null // Ajustar si necesitas fecha de pago
         };
-
-        try {
-          // Esperar a que se complete la solicitud HTTP antes de proceder
-          await this.http.post('https://siinad.mx/php/create-payroll-period.php', payrollPeriod).toPromise();
-          console.log(`Periodo de nómina ${i + 1} creado correctamente para ${periodType}`);
-        } catch (error) {
-          console.error(`Error al crear el periodo de nómina ${i + 1} para ${periodType}`, error);
-          this.toastrService.danger(`Error al crear el periodo de nómina ${i + 1}`, 'Error');
-          break; // Si hay un error, detener el proceso para este tipo de periodo
+  
+        // Agregamos al array temporal
+        tempPeriods.push(payrollPeriod);
+  
+        // Avanzar la fecha de inicio para el siguiente período
+        const nextStartDate = new Date(periodEndDate);
+        nextStartDate.setDate(nextStartDate.getDate() + 1);
+        currentStartDate = nextStartDate;
+      }
+    }
+  
+    // ==========================================================
+    // FASE 2: Marcar inicio/fin de mes y bimestre IMSS
+    // (comparando end_date con la del siguiente período)
+    // ==========================================================
+    for (let i = 0; i < tempPeriods.length; i++) {
+      const current = tempPeriods[i];
+  
+      // Si es el primer período, marcamos "inicio de mes" y "inicio de bimestre"
+      if (i === 0) {
+        current.month_start = 1;
+        current.imss_bimonthly_start = 1;
+      }
+  
+      if (i > 0) {
+        const previous = tempPeriods[i - 1];
+        const prevEnd = new Date(previous.end_date);
+        const currEnd = new Date(current.end_date);
+  
+        // Detectar cambio de mes
+        const prevEndMonth = prevEnd.getMonth(); 
+        const currEndMonth = currEnd.getMonth();
+        if (prevEndMonth !== currEndMonth) {
+          // Fin de mes en el anterior, inicio en el actual
+          previous.month_end = 1;
+          current.month_start = 1;
         }
-
-        // Actualiza la fecha de inicio para el siguiente periodo
-        currentStartDate = new Date(periodEndDate);
-        currentStartDate.setDate(currentStartDate.getDate() + 1);
+  
+        // Detectar cambio de bimestre
+        const prevBim = this.getBimesterIndex(prevEnd);
+        const currBim = this.getBimesterIndex(currEnd);
+        if (prevBim !== currBim) {
+          previous.imss_bimonthly_end = 1;
+          current.imss_bimonthly_start = 1;
+        }
+      }
+  
+      // Si es el último, lo marcamos como fin de mes y fin de bimestre
+      if (i === tempPeriods.length - 1) {
+        current.month_end = 1;
+        current.imss_bimonthly_end = 1;
+      }
+    }
+  
+    // ==========================================================
+    // FASE 3: Guardar cada período en la BD
+    // ==========================================================
+    for (let i = 0; i < tempPeriods.length; i++) {
+      const payrollPeriod = tempPeriods[i];
+      try {
+        await this.http.post('https://siinad.mx/php/create-payroll-period.php', payrollPeriod).toPromise();
+        console.log(`Periodo de nómina ${payrollPeriod.period_number} creado correctamente`);
+      } catch (error) {
+        console.error(`Error al crear el periodo de nómina ${payrollPeriod.period_number}`, error);
+        this.toastrService.danger(`Error al crear el periodo #${payrollPeriod.period_number}`, 'Error');
+        // Si quieres, puedes break para no seguir, o continuar creando los siguientes
       }
     }
   }
@@ -424,7 +528,7 @@ export class PeriodConfigurationComponent {
   }
 
 
-  
+
 
   calculateRestDays() {
     // Verifica que haya una fecha de inicio y un número de días definido
