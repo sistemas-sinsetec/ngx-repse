@@ -17,17 +17,22 @@
         <!-- Mostrar info si existe -->
         <div *ngIf="pastAssignmentsInfo && pastAssignmentsInfo.count > 0; else noInfo">
           <p>
-            Se traerán <strong>{{ pastAssignmentsInfo.count }}</strong> empleado(s) de la fecha
-            <strong>{{ pastAssignmentsInfo.date | date: 'dd MMM yyyy' }}</strong>.
+            Se marcarán <strong>{{ pastAssignmentsInfo.count }}</strong> empleado(s) de la fecha 
+            <strong>{{ pastAssignmentsInfo.date | date: 'dd MMM yyyy' }}</strong> en la obra: 
+            <strong>{{ selectedObra?.project_name }}</strong>.
           </p>
+          
         </div>
         <ng-template #noInfo>
           <p class="text-muted">No hay asignaciones pasadas disponibles.</p>
         </ng-template>
         <!-- Botón para recargar la info; siempre habilitado para que el usuario pueda forzar la carga -->
-        <button nbButton status="info" fullWidth (click)="loadLastAssignedEmployees()">
-          Cargar asignaciones
-        </button>
+        <button nbButton status="info" fullWidth 
+        (click)="loadLastAssignedEmployees()"
+        [disabled]="!pastAssignmentsInfo || pastAssignmentsInfo.count === 0 || allLastAssignedAlreadySelected">
+  Cargar asignaciones
+</button>
+
       </nb-card-body>
     </nb-card>
   </div>

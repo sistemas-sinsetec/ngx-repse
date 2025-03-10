@@ -17,6 +17,7 @@ import { LoadingController } from '@ionic/angular';
 export class AssignProjectsComponent implements OnInit {
 
   pastAssignmentsInfo: { count: number; date: string } = null;
+  lastAssignedEmployeeIds: number[] = [];
 
 
   semanas: any[] = [];
@@ -317,52 +318,52 @@ async updatePastAssignmentsInfo(): Promise<void> {
       .filter(obra => obra.project_name.toLowerCase().includes(searchTerm))
       .sort((a, b) => a.project_name.localeCompare(b.project_name, 'es')); // Orden adicional
   }
-async loadLastAssignedEmployees(): Promise<void> {
-  if (!this.selectedObra || !this.selectedDia) {
-    console.error('Debe seleccionarse un día y una obra.');
-    return;
-  }
-
-  const loading = await this.loadingController.create({
-    message: 'Cargando asignaciones...',
-    spinner: 'circles',
-  });
-  await loading.present();
-
-  const companyId = this.companyService.selectedCompany.id;
-  const projectId = this.selectedObra.project_id;
-  const dayOfWeek = this.selectedDia; // Se espera formato "YYYY-MM-DD"
-
-  this.http.get(`https://siinad.mx/php/get_previous_assigned.php?company_id=${companyId}&day_of_week=${dayOfWeek}&project_id=${projectId}`)
-    .subscribe((data: any) => {
-      if (Array.isArray(data)) {
-        // Actualizar la info de asignaciones pasadas
-        this.pastAssignmentsInfo = {
-          count: data.length,
-          date: data.length ? data[0].day_of_week : null
-        };
-
-        // Marcar en la lista a los empleados obtenidos
-        data.forEach(emp => {
-          // Buscar el empleado en la lista de empleados cargada
-          const found = this.empleados.find(e => Number(e.employee_id) === Number(emp.employee_id));
-          if (found && !found.selected && !found.isAssigned) {
-            found.selected = true;
-            this.selectedEmpleados.push(found);
-          }
-        });
-        this.filterEmpleados();
-      } else {
-        this.pastAssignmentsInfo = null;
-      }
-    }, error => {
-      console.error('Error al cargar asignaciones pasadas', error);
-      loading.dismiss();
-    }, () => {
-      loading.dismiss();
+  async loadLastAssignedEmployees(): Promise<void> {
+    if (!this.selectedObra || !this.selectedDia) {
+      console.error('Debe seleccionarse un día y una obra.');
+      return;
+    }
+  
+    const loading = await this.loadingController.create({
+      message: 'Cargando asignaciones...',
+      spinner: 'circles',
     });
-}
-
+    await loading.present();
+  
+    const companyId = this.companyService.selectedCompany.id;
+    const projectId = this.selectedObra.project_id;
+    const dayOfWeek = this.selectedDia;
+  
+    this.http.get(`https://siinad.mx/php/get_previous_assigned.php?company_id=${companyId}&day_of_week=${dayOfWeek}&project_id=${projectId}`)
+      .subscribe((data: any) => {
+        if (Array.isArray(data)) {
+          // Guardamos los IDs de los empleados obtenidos
+          this.lastAssignedEmployeeIds = data.map(emp => Number(emp.employee_id));
+  
+          this.pastAssignmentsInfo = {
+            count: data.length,
+            date: data.length ? data[0].day_of_week : null
+          };
+  
+          data.forEach(emp => {
+            const found = this.empleados.find(e => Number(e.employee_id) === Number(emp.employee_id));
+            if (found && !found.selected && !found.isAssigned) {
+              found.selected = true;
+              this.selectedEmpleados.push(found);
+            }
+          });
+          this.filterEmpleados();
+        } else {
+          this.pastAssignmentsInfo = null;
+        }
+      }, error => {
+        console.error('Error al cargar asignaciones pasadas', error);
+        loading.dismiss();
+      }, () => {
+        loading.dismiss();
+      });
+  }
+  
   
   
 
@@ -373,6 +374,17 @@ async loadLastAssignedEmployees(): Promise<void> {
       return fullName.includes(searchTerm);
     });
   }
+
+  get allLastAssignedAlreadySelected(): boolean {
+    if (!this.lastAssignedEmployeeIds || this.lastAssignedEmployeeIds.length === 0) {
+      return false;
+    }
+    return this.lastAssignedEmployeeIds.every(id => {
+      const emp = this.empleados.find(e => Number(e.employee_id) === id);
+      return emp ? emp.selected : false;
+    });
+  }
+  
 
   toggleUnassignedEmployeesSelection(): void {
     // Filtra los empleados que no están asignados
