@@ -67,7 +67,8 @@
         <nb-card-body>
           <nb-list>
             <nb-list-item *ngFor="let position of positions" (click)="selectPosition(position)" class="list-item">
-              {{ position.position_name }}
+              
+              {{ position.position_range }}<nb-icon icon="arrowhead-up-outline"></nb-icon> {{ position.position_name }}
             </nb-list-item>
           </nb-list>
           <button nbButton status="info" class="mt-3 full-width" (click)="startAddPosition()">

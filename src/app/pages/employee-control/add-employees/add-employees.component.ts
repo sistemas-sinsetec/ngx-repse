@@ -146,6 +146,24 @@ export class AddEmployeesComponent {
       }
     );
   }
+
+  soloLetrasEspacios(event: KeyboardEvent) {
+    const allowedRegex = /^[a-zA-ZáéíóúÁÉÍÓÚñÑ\s]$/;
+    const key = event.key;
+    if (!allowedRegex.test(key)) {
+      event.preventDefault();
+    }
+  }
+
+  soloNumeros(event: KeyboardEvent) {
+    const allowedRegex = /^[0-9]$/;
+    const key = event.key;
+    if (!allowedRegex.test(key)) {
+      event.preventDefault();
+    }
+  }
+  
+  
   
 
 

@@ -67,20 +67,21 @@ export class DepartmentManagementComponent {
 
 
     async fetchPositions() {
-    
       const companyId = this.companyService.selectedCompany.id;
       this.http.get<any[]>(`https://siinad.mx/php/get_positions.php?company_id=${companyId}`).subscribe(
         data => {
-          this.positions = Array.isArray(data) ? data : [];
-         
+          // Ordenar y filtrar, excluyendo puestos cuyo rango sea 0
+          this.positions = Array.isArray(data)
+            ? data.sort((a, b) => a.position_range - b.position_range)
+                  .filter(position => position.position_range !== 0)
+            : [];
         },
         error => {
           console.error('Error al cargar puestos', error);
-      
-         
         }
       );
     }
+    
 
     async fetchShifts() {
       const companyId = this.companyService.selectedCompany.id;

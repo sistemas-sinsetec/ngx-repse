@@ -217,67 +217,76 @@ export class PeriodConfigurationComponent {
   }
 
   async savePeriodConfig() {
-    // Convertir el Set a un Array antes de usar .map()
-
-    // Convertir los días seleccionados a un array de strings (ejemplo: ["08", "09"])
-    const restDaysArray = Array.from(this.selectedDates).map(date => {
-      const dateObj = moment.utc(date); // Interpretar la fecha como UTC
-      return dateObj.format('DD'); // Devuelve el día en dos dígitos (ej: "08")
-    });
-
-    console.log(restDaysArray); // ["08", "09"]
-    // Agregar los días seleccionados al objeto periodConfig
-    const periodConfig = {
-      ...this.selectedPeriod,
-      company_id: this.companyService.selectedCompany.id,
-      rest_days_position: restDaysArray // Enviar solo los días como un array
-    };
-
-    console.log('Period Config:', periodConfig);
-
-    if (!periodConfig.period_type_name || !periodConfig.fiscal_year_start || !periodConfig.period_days || !periodConfig.payment_days) {
-      console.error('Datos insuficientes para crear o actualizar el periodo');
-      this.toastrService.warning('Por favor, complete todos los campos necesarios antes de guardar.', 'Advertencia');
-      return;
-    }
-
-    const loading = await this.loadingController.create({
-      message: 'Guardando configuración del periodo...'
-    });
-    await loading.present();
-
-    if (periodConfig.period_type_id) {
-      // Si existe period_type_id, entonces es una actualización
-      this.http.post('https://siinad.mx/php/update-period.php', periodConfig)
-        .subscribe(response => {
-          console.log('Cambios guardados correctamente', response);
+    try {
+      // Validar los datos antes de procesar
+      if (!this.validateForm()) {
+        return;
+      }
+  
+      // Convertir los días seleccionados a un array de strings (Ejemplo: ["08", "09"])
+      const restDaysArray = Array.from(this.selectedDates).map(date => {
+        return moment.utc(date).format('DD'); // Devuelve el día en dos dígitos (Ej: "08")
+      });
+  
+      // Crear el objeto de configuración del periodo
+      const periodConfig = {
+        ...this.selectedPeriod,
+        company_id: this.companyService.selectedCompany.id,
+        rest_days_position: restDaysArray, // Enviar solo los días como un array
+      };
+  
+      console.log('Period Config:', periodConfig);
+  
+      // Mostrar el loading
+      const loading = await this.loadingController.create({
+        message: 'Guardando configuración del periodo...',
+      });
+      await loading.present();
+  
+      let apiUrl = periodConfig.period_type_id 
+        ? 'https://siinad.mx/php/update-period.php' 
+        : 'https://siinad.mx/php/create-period.php';
+  
+      // Guardar o actualizar el periodo
+      this.http.post(apiUrl, periodConfig).subscribe(
+        async (response: any) => {
+          console.log('Respuesta del servidor:', response);
           loading.dismiss();
-          this.toastrService.success('Cambios guardados correctamente', 'Éxito');
-          this.loadPeriods(); // Recargar los periodos después de guardar
-        }, error => {
-          console.error('Error al guardar los cambios', error);
+  
+          if (periodConfig.period_type_id) {
+            // Actualización de periodo
+            this.toastrService.success('Cambios guardados correctamente', 'Éxito');
+          } else {
+            // Creación de nuevo periodo
+            const periodTypeId = response.period_type_id;
+            const periodTypeName = this.selectedPeriod.period_type_name;
+            const periodData = [{ period_type_name: periodTypeName, period_type_id: periodTypeId }];
+  
+            // Crear los periodos de nómina
+            await this.createPayrollPeriods(periodData, this.selectedPeriod);
+            
+            this.toastrService.success('Nuevo periodo creado correctamente', 'Éxito');
+          }
+  
+          // Recargar los periodos después de guardar
+          this.loadPeriods();
+        },
+        (error) => {
+          console.error('Error en la petición:', error);
           loading.dismiss();
           this.toastrService.danger('Error al guardar los cambios', 'Error');
-        });
-    } else {
-      // Si no existe period_type_id, entonces es una creación de un nuevo periodo
-      this.http.post('https://siinad.mx/php/create-period.php', periodConfig)
-        .subscribe(async (response: any) => {
-          console.log('Nuevo periodo creado correctamente', response);
-          const periodTypeId = response.period_type_id; // Obtener el ID del tipo de periodo creado
-          const periodTypeName = this.selectedPeriod.period_type_name; // Obtener el nombre del tipo de periodo
-          const periodData = [{ period_type_name: periodTypeName, period_type_id: periodTypeId }];
-          await this.createPayrollPeriods(periodData, this.selectedPeriod); // Crear los periodos de nómina de forma secuencial
-          loading.dismiss();
-          this.toastrService.success('Nuevo periodo creado correctamente', 'Éxito');
-          this.loadPeriods(); // Recargar los periodos después de crear
-        }, error => {
-          console.error('Error al crear el nuevo periodo', error);
-          loading.dismiss();
-          this.toastrService.danger('Error al crear el nuevo periodo', 'Error');
-        });
+        }
+      );
+    } catch (error) {
+      console.error('Error inesperado:', error);
+      this.toastrService.danger('Ocurrió un error inesperado', 'Error');
     }
   }
+  
+  isValidPeriodName(): boolean {
+    return /^[a-zA-ZÁÉÍÓÚáéíóúÑñ\s]+$/.test(this.selectedPeriod.period_type_name);
+  }
+  
 
   async createPayrollPeriods(periodTypes: { period_type_name: string, period_type_id: number }[], periodo: any) {
     if (!Array.isArray(periodTypes)) {
@@ -388,6 +397,31 @@ export class PeriodConfigurationComponent {
       }
     }
   }
+
+  validateForm(): boolean {
+    if (!this.selectedPeriod.period_type_name.match(/^[a-zA-ZáéíóúÁÉÍÓÚñÑ\s]+$/)) {
+      this.toastrService.warning('El nombre del periodo solo puede contener letras.', 'Validación');
+      return false;
+    }
+  
+    if (!this.selectedPeriod.period_days || isNaN(this.selectedPeriod.period_days)) {
+      this.toastrService.warning('Los días del periodo deben ser un número válido.', 'Validación');
+      return false;
+    }
+  
+    if (!this.selectedPeriod.payment_frequency) {
+      this.toastrService.warning('Debes seleccionar una periodicidad de pago.', 'Validación');
+      return false;
+    }
+  
+    if (!this.selectedPeriod.fiscal_year_start) {
+      this.toastrService.warning('Debes seleccionar una fecha de inicio.', 'Validación');
+      return false;
+    }
+  
+    return true;
+  }
+  
 
   deletePeriod() {
     const periodTypeId = this.selectedPeriod.period_type_id;

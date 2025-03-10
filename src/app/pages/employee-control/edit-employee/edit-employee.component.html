@@ -45,19 +45,22 @@
               <nb-form-field>
                 <label for="nombre">Nombre</label>
                 <input nbInput id="nombre" placeholder="Nombre" name="nombre" [(ngModel)]="selectedEmployee.first_name"
-                  required />
+                  required  (keypress)="soloLetrasEspacios($event)"
+                  />
               </nb-form-field>
 
               <nb-form-field>
                 <label>Apellido Paterno</label>
                 <input nbInput placeholder="Apellido Paterno" name="apellidoPaterno"
-                  [(ngModel)]="selectedEmployee.last_name" required />
+                  [(ngModel)]="selectedEmployee.last_name" required (keypress)="soloLetrasEspacios($event)"
+                  />
               </nb-form-field>
 
               <nb-form-field>
                 <label>Apellido Materno</label>
                 <input nbInput placeholder="Apellido Materno" name="apellidoMaterno"
-                  [(ngModel)]="selectedEmployee.middle_name" required />
+                  [(ngModel)]="selectedEmployee.middle_name" required (keypress)="soloLetrasEspacios($event)"
+                  />
               </nb-form-field>
 
               <nb-form-field>
@@ -224,14 +227,16 @@
                 *ngIf="!sharedService.hasPermission('Empleados', 'Aceptar solicitudes de empleados') || !sharedService.hasPermission('Empleados', 'Procesar empleados')">
                 <label for="netBalance">Sueldo Neto*</label>
                 <input nbInput type="number" placeholder="Sueldo Neto" name="netBalance"
-                  [(ngModel)]="selectedEmployee.net_balance" (input)="checkAllFieldsCompleted()" />
+                  [(ngModel)]="selectedEmployee.net_balance" (input)="checkAllFieldsCompleted()"
+                  (keypress)="soloNumeros($event)" />
               </nb-form-field>
 
               <!-- Sueldo Diario -->
               <nb-form-field *ngIf="!sharedService.hasPermission('Empleados', 'Procesar empleados')">
                 <label for="dailySalary">Sueldo Diario*</label>
                 <input nbInput type="number" placeholder="Sueldo Diario" name="dailySalary"
-                  [(ngModel)]="selectedEmployee.daily_salary" (input)="checkAllFieldsCompleted()" />
+                  [(ngModel)]="selectedEmployee.daily_salary" (input)="checkAllFieldsCompleted()"
+                  (keypress)="soloNumeros($event)" />
               </nb-form-field>
 
               <!-- Contacto de Emergencia -->
@@ -242,7 +247,8 @@
                     <label for="contactoEmergencia">Contacto de Emergencia</label>
                     <input nbInput type="text" placeholder="Contacto de Emergencia" name="contactoEmergencia"
                       [(ngModel)]="selectedEmployee.emergency_contact_name" (input)="checkAllFieldsCompleted()"
-                      [disabled]="!sharedService.hasPermission('Empleados', 'Procesar empleados')" />
+                      [disabled]="!sharedService.hasPermission('Empleados', 'Procesar empleados')"
+                      (keypress)="soloLetrasEspacios($event)" />
                   </nb-form-field>
 
                   <nb-form-field>

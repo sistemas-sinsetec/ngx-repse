@@ -376,7 +376,21 @@ async extractFolioYLote(file: File) {
 }
 
 
+soloLetrasEspacios(event: KeyboardEvent) {
+  const allowedRegex = /^[a-zA-ZáéíóúÁÉÍÓÚñÑ\s]$/;
+  const key = event.key;
+  if (!allowedRegex.test(key)) {
+    event.preventDefault();
+  }
+}
 
+soloNumeros(event: KeyboardEvent) {
+  const allowedRegex = /^[0-9]$/;
+  const key = event.key;
+  if (!allowedRegex.test(key)) {
+    event.preventDefault();
+  }
+}
 
 
 
@@ -506,14 +520,17 @@ getFileByType(fileType: string): EmployeeFile | null {
 
 // Guardar información general
 async saveGeneralInfo() {
+  if (!this.validateForm()) {
+    this.toastrService.show('Por favor, completa correctamente todos los campos.', 'Error', { status: 'danger' });
+    return;
+  }
+
   const generalInfo = {
     employee_id: this.employee.employee_id,
     employee_code: this.employee.employee_code,
     first_name: this.employee.first_name,
-    middle_name: this.employee.middle_name,
     last_name: this.employee.last_name,
     birth_date: this.employee.birth_date,
-    birth_place: this.employee.birth_place,
     curp: this.employee.curp,
     rfc: this.employee.rfc,
     phone_number: this.employee.phone_number,
@@ -543,6 +560,20 @@ async saveGeneralInfo() {
       console.error('Error al actualizar la información general:', error);
     }
   );
+}
+
+validateForm(): boolean {
+  if (!this.employee.first_name.match(/^[a-zA-ZáéíóúÁÉÍÓÚñÑ\s]+$/)) return false;
+  if (!this.employee.last_name.match(/^[a-zA-ZáéíóúÁÉÍÓÚñÑ\s]+$/)) return false;
+  if (!this.employee.phone_number.match(/^\d{10}$/)) return false;
+  if (!this.employee.email.includes('@')) return false;
+  if (!this.employee.curp.match(/^[A-Z0-9]{18}$/)) return false;
+  if (!this.employee.rfc.match(/^[A-Z0-9]{12,13}$/)) return false;
+  if (!this.employee.social_security_number.match(/^\d{11}$/)) return false;
+  if (this.employee.clabe && !this.employee.clabe.match(/^\d{18}$/)) return false;
+  if (!this.employee.start_date) return false;
+
+  return true;
 }
 
 // Guardar información financiera

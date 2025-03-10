@@ -39,8 +39,7 @@ import { SelectCompanyPeriodDialogComponent } from './select-company-period-dial
 
     AppComponent,
     CustomLoginComponent,
-    SelectCompanyPeriodDialogComponent,
-  ],
+    SelectCompanyPeriodDialogComponent,  ],
   imports: [
     BrowserModule,
     BrowserAnimationsModule,

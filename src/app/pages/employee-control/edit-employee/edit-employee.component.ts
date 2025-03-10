@@ -111,6 +111,8 @@ export class EditEmployeeComponent implements OnInit {
 
   }
 
+  
+
 
 getStatusDescription(status: string): string {
   switch (status.toLowerCase()) {  // Usar toLowerCase() para asegurarnos de que no haya errores por mayúsculas/minúsculas
@@ -124,6 +126,22 @@ getStatusDescription(status: string): string {
       return 'Solicitud finalizada - Empleado dado de alta';
     default:
       return 'Estado desconocido';
+  }
+}
+
+soloLetrasEspacios(event: KeyboardEvent) {
+  const allowedRegex = /^[a-zA-ZáéíóúÁÉÍÓÚñÑ\s]$/;
+  const key = event.key;
+  if (!allowedRegex.test(key)) {
+    event.preventDefault();
+  }
+}
+
+soloNumeros(event: KeyboardEvent) {
+  const allowedRegex = /^[0-9]$/;
+  const key = event.key;
+  if (!allowedRegex.test(key)) {
+    event.preventDefault();
   }
 }
 
