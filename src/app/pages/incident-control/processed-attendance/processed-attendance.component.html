@@ -84,7 +84,9 @@
             (change)="onFileSelected($event)"
             accept="application/pdf"
           />
-          <label class="custom-file-label" for="pdfUpload">Seleccionar archivo PDF</label>
+          <label class="custom-file-label" for="pdfUpload">
+            {{ uploadedFileName ? uploadedFileName : 'Seleccionar archivo PDF' }}
+          </label>
         </div>
       </div>
     
@@ -93,7 +95,7 @@
         <button nbButton (click)="generatePDF()" status="primary" class="px-4">
           <nb-icon icon="printer-outline" class="me-2"></nb-icon> Imprimir
         </button>
-        <button nbButton (click)="uploadPDF()" status="success" class="px-4">
+        <button nbButton (change)="onFileSelected($event)" (click)="uploadPDF()" status="success" class="px-4">
           <nb-icon icon="cloud-upload-outline" class="me-2"></nb-icon> Subir PDF
         </button>
       </div>

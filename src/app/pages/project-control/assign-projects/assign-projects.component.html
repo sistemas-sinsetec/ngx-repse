@@ -1,6 +1,6 @@
 <div class="row">
   <!-- Columna izquierda fija con el resumen de selección -->
-  <div class="col-lg-4 col-md-5">
+  <div class="col-lg-4 col-md-5 izq">
     <nb-card class="p-3 mb-4">
       <nb-card-header class="fw-bold text-center">Resumen de Selección</nb-card-header>
       <nb-card-body>
@@ -8,6 +8,31 @@
         <p><strong>Día:</strong> {{ selectedDia || 'No seleccionado' }}</p>
         <p><strong>Obra:</strong> {{ selectedObra?.project_name || 'No seleccionada' }}</p>
         <p><strong>{{ selectedEmpleados.length }} empleado(s) seleccionado(s)</strong></p>
+      </nb-card-body>
+    </nb-card>
+
+    <nb-card class="p-3 mb-4">
+      <nb-card-header class="fw-bold text-center">Asignaciones Pasadas</nb-card-header>
+      <nb-card-body>
+        <!-- Mostrar info si existe -->
+        <div *ngIf="pastAssignmentsInfo && pastAssignmentsInfo.count > 0; else noInfo">
+          <p>
+            Se marcarán <strong>{{ pastAssignmentsInfo.count }}</strong> empleado(s) de la fecha 
+            <strong>{{ pastAssignmentsInfo.date | date: 'dd MMM yyyy' }}</strong> en la obra: 
+            <strong>{{ selectedObra?.project_name }}</strong>.
+          </p>
+          
+        </div>
+        <ng-template #noInfo>
+          <p class="text-muted">No hay asignaciones pasadas disponibles.</p>
+        </ng-template>
+        <!-- Botón para recargar la info; siempre habilitado para que el usuario pueda forzar la carga -->
+        <button nbButton status="info" fullWidth 
+        (click)="loadLastAssignedEmployees()"
+        [disabled]="!pastAssignmentsInfo || pastAssignmentsInfo.count === 0 || allLastAssignedAlreadySelected">
+  Cargar asignaciones
+</button>
+
       </nb-card-body>
     </nb-card>
   </div>
@@ -121,8 +146,8 @@
 
           <!-- Botón para seleccionar todos los empleados -->
           <div *ngIf="filteredEmpleados.length > 0" class="d-flex justify-content-center mb-3">
-            <button nbButton status="info" appearance="outline" (click)="selectAllUnassignedEmployees()">
-              Marcar Todos No Asignados
+            <button nbButton status="info" appearance="outline" (click)="toggleUnassignedEmployeesSelection()">
+              {{ toggleButtonLabel }}
             </button>
           </div>
 

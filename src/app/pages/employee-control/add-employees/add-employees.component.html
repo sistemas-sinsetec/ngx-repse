@@ -46,7 +46,8 @@
                                                 <div class="form-group">
                                                     <label for="nombre">Nombre*</label>
                                                     <input nbInput fullWidth placeholder="Nombre" name="nombre"
-                                                        [(ngModel)]="empleado.nombre" required />
+                                                        [(ngModel)]="empleado.nombre" required
+                                                        (keypress)="soloLetrasEspacios($event)" />
                                                 </div>
                                             </div>
 
@@ -55,7 +56,7 @@
                                                     <label for="apellidoPaterno">Apellido Paterno*</label>
                                                     <input nbInput fullWidth placeholder="Apellido Paterno"
                                                         name="apellidoPaterno" [(ngModel)]="empleado.apellidoPaterno"
-                                                        required />
+                                                        required (keypress)="soloLetrasEspacios($event)" />
                                                 </div>
                                             </div>
 
@@ -64,7 +65,7 @@
                                                     <label for="apellidoMaterno">Apellido Materno*</label>
                                                     <input nbInput fullWidth placeholder="Apellido Materno"
                                                         name="apellidoMaterno" [(ngModel)]="empleado.apellidoMaterno"
-                                                        required />
+                                                        required (keypress)="soloLetrasEspacios($event)" />
                                                 </div>
                                             </div>
 
@@ -80,7 +81,8 @@
                                                 <div class="form-group">
                                                     <label for="lugarNacimiento">Lugar de Nacimiento</label>
                                                     <input nbInput fullWidth placeholder="Lugar de Nacimiento"
-                                                        name="lugarNacimiento" [(ngModel)]="empleado.lugarNacimiento" />
+                                                        name="lugarNacimiento" [(ngModel)]="empleado.lugarNacimiento"
+                                                        (keypress)="soloLetrasEspacios($event)" />
                                                 </div>
                                             </div>
 
@@ -106,7 +108,8 @@
                                                     <label for="telefono">Número de Teléfono</label>
                                                     <input nbInput fullWidth placeholder="Número de Teléfono"
                                                         name="telefono" [(ngModel)]="empleado.telefono" maxlength="10"
-                                                        minlength="10" />
+                                                        minlength="10"
+                                                        (keypress)="soloNumeros($event)" />
                                                 </div>
                                             </div>
 
@@ -163,7 +166,7 @@
                                                         placeholder="Número de Seguro Social (11 dígitos)"
                                                         name="numeroSeguroSocial"
                                                         [(ngModel)]="empleado.numeroSeguroSocial" maxlength="11"
-                                                        minlength="11" />
+                                                        minlength="11" (keypress)="soloNumeros($event)" />
                                                 </div>
                                             </div>
 
@@ -172,7 +175,7 @@
                                                     <label for="numeroCuenta">Número de Cuenta Bancaria</label>
                                                     <input nbInput fullWidth placeholder="10 a 12 dígitos"
                                                         name="numeroCuenta" [(ngModel)]="empleado.numeroCuenta"
-                                                        maxlength="12" minlength="10" />
+                                                        maxlength="12" minlength="10" (keypress)="soloNumeros($event)" />
                                                 </div>
                                             </div>
 
@@ -198,7 +201,7 @@
                                                     <input nbInput fullWidth placeholder="18 dígitos"
                                                         name="clabeInterbancaria"
                                                         [(ngModel)]="empleado.clabeInterbancaria" maxlength="18"
-                                                        minlength="18" />
+                                                        minlength="18" (keypress)="soloNumeros($event)" />
                                                 </div>
                                             </div>
                                         </div>
@@ -281,7 +284,8 @@
                                                     <label for="contactoEmergencia">Contacto de Emergencia</label>
                                                     <input nbInput fullWidth type="text"
                                                         placeholder="Contacto de Emergencia" name="contactoEmergencia"
-                                                        [(ngModel)]="empleado.contactoEmergencia" />
+                                                        [(ngModel)]="empleado.contactoEmergencia"
+                                                        (keypress)="soloLetrasEspacios($event)" />
                                                 </div>
                                             </div>
 

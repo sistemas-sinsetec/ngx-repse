@@ -21,7 +21,7 @@ import { LoadingController, AlertController } from '@ionic/angular';
   styleUrls: ['./processed-attendance.component.scss']
 })
 export class ProcessedAttendanceComponent {
-
+  uploadedFileName: string | null = null; 
   processedWeeks: any[] = []; // Lista de semanas procesadas
   selectedWeek: any; // Semana procesada seleccionada
   diasSemana: any[] = []; // Días de la semana seleccionada
@@ -529,6 +529,19 @@ export class ProcessedAttendanceComponent {
     pdf.save('asistencia-semanal.pdf');
     loading.dismiss();
   }
+
+
+
+
+
+  onFileSelected(event: any) {
+    const selectedFile = event.target.files[0];
+    if (selectedFile) {
+      this.file = selectedFile;
+      this.uploadedFileName = selectedFile.name; // Se asigna el nombre del archivo
+    }
+  }
+  
   
   
   
@@ -546,7 +559,7 @@ export class ProcessedAttendanceComponent {
       return;
     }
   
-    // Verificar si la semana seleccionada tiene el campo 'period_type_id'
+    // Verificar que la semana seleccionada tenga period_type_id
     if (!this.selectedWeek || !this.selectedWeek.period_type_id) {
       const alert = await this.ionicAlertController.create({
         header: 'Error',
@@ -567,10 +580,9 @@ export class ProcessedAttendanceComponent {
     formData.append('pdf', this.file, this.file.name);
     formData.append('company_id', this.companyService.selectedCompany.id);
     formData.append('week_number', this.selectedWeek.week_number);
-    formData.append('period_type_id', this.selectedWeek.period_type_id); // Usar el period_type_id de la semana seleccionada
-    formData.append('status', 'Subido'); // Define el estado inicial
+    formData.append('period_type_id', this.selectedWeek.period_type_id);
+    formData.append('status', 'Subido');
   
-    // Realizar la solicitud HTTP para subir el archivo
     this.http.post('https://siinad.mx/php/upload-pdf.php', formData).subscribe(
       async (response) => {
         loading.dismiss();
@@ -580,7 +592,9 @@ export class ProcessedAttendanceComponent {
           buttons: ['OK'],
         });
         await alert.present();
-        this.isProcessed = true; // Establecer isProcessed en true después de subir el archivo
+        // Actualiza la variable para mostrar el nombre del archivo
+        this.uploadedFileName = this.file.name;
+        this.file = null; // Opcional: limpia el input de archivo
       },
       async (error) => {
         loading.dismiss();
@@ -594,6 +608,7 @@ export class ProcessedAttendanceComponent {
       }
     );
   }
+  
 
   formatHour(hour: string): string | null {
     if (!hour || hour === '00:00:00') {

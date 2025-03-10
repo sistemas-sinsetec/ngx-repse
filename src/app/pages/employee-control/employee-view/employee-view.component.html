@@ -96,14 +96,15 @@
                       <nb-icon icon="eye-outline"></nb-icon>
                     </button>
                     <button title="Crear usuario"
-                            nbButton
-                            (click)="addUser(empleado)"
-                            outline
-                            size="small"
-                            status="info"
-                            [disabled]="employeeHasUser(empleado.employee_id)">
-                      <nb-icon icon="person-add-outline"></nb-icon>
-                    </button>
+                    nbButton
+                    (click)="addUser(empleado)"
+                    outline
+                    size="small"
+                    status="info"
+                    [disabled]="employeeHasUser(empleado.employee_id) || empleado.employee_status === 'B'">
+              <nb-icon icon="person-add-outline"></nb-icon>
+            </button>
+            
                   </td>
                   
                 </tr>

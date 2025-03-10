@@ -21,6 +21,7 @@ interface Empleado {
   email: string;
   phone_number: string;
   start_date: string;
+  employee_status: string;
 }
 
 interface User {
@@ -206,29 +207,36 @@ export class EmployeeViewComponent implements OnInit {
   }
 
   // Seleccionar y mostrar empleados por turno
-  selectTurno(turno: Turno) {
-    this.turnoSeleccionado = turno;
-    this.departamentoSeleccionado = null; // Limpiar selección de departamento
-    this.puestoSeleccionado = null;  
-    this.mostrarBusqueda = true;      // Limpiar selección de puesto
-    const companyId = this.companyService.selectedCompany.id;
+ // Seleccionar y mostrar empleados por turno
+selectTurno(turno: Turno) {
+  this.turnoSeleccionado = turno;
+  this.departamentoSeleccionado = null; // Limpiar selección de departamento
+  this.puestoSeleccionado = null;  
+  this.mostrarBusqueda = true;         // Mostrar sección de búsqueda
+  const companyId = this.companyService.selectedCompany.id;
 
-    this.http.get<{ success: boolean, employees: Empleado[] }>(
-      `https://siinad.mx/php/get_employees_by_shifts.php?company_id=${companyId}&shift_id=${turno.shift_id}`
-    ).subscribe(
-      response => {
-        if (response.success) {
-          this.empleados = response.employees;
-          this.empleadosFiltrados = this.empleados;
-        } else {
-          console.error('Error al cargar los empleados del turno');
-        }
-      },
-      error => {
-        console.error('Error al cargar los empleados del turno:', error);
+  this.http.get<{ success: boolean, employees: Empleado[] }>(
+    `https://siinad.mx/php/get_employees_by_shifts.php?company_id=${companyId}&shift_id=${turno.shift_id}`
+  ).subscribe(
+    response => {
+      if (response.success && response.employees.length > 0) {
+        this.empleados = response.employees;
+        this.empleadosFiltrados = response.employees;
+      } else {
+        // Si no se reciben empleados, limpiar la lista
+        this.empleados = [];
+        this.empleadosFiltrados = [];
+        console.error('No se encontraron empleados para el turno seleccionado');
       }
-    );
-  }
+    },
+    error => {
+      // En caso de error, también se limpia la lista de empleados
+      this.empleados = [];
+      this.empleadosFiltrados = [];
+      console.error('Error al cargar los empleados del turno:', error);
+    }
+  );
+}
 
 
   // Función para filtrar empleados en la búsqueda
