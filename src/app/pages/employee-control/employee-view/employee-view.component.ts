@@ -53,6 +53,7 @@ interface Departamento {
 
 export class EmployeeViewComponent implements OnInit {
   mostrarBusqueda: boolean = false;
+  activeFilter: string | null = null; // 'A' para activos, 'B' para inactivos
 
   users: User[] = [];
   departamentos: Departamento[] = [];
@@ -77,6 +78,7 @@ export class EmployeeViewComponent implements OnInit {
   ) { }
 
   ngOnInit() {
+    this.loadAllEmployees();
     this.loadDepartments();
     this.loadPositions();
     this.loadShifts();
@@ -95,6 +97,59 @@ export class EmployeeViewComponent implements OnInit {
         }
       );
   }
+
+  
+
+   // Carga todos los empleados sin filtros
+   loadAllEmployees() {
+    const companyId = this.companyService.selectedCompany.id;
+    this.http.get<Empleado[]>(`https://siinad.mx/php/get_empleados.php?companyId=${companyId}`)
+      .subscribe(
+        data => {
+          this.empleados = data;
+          this.empleadosFiltrados = data;
+          this.mostrarBusqueda = true;
+        },
+        error => {
+          console.error('Error al cargar todos los empleados:', error);
+        }
+      );
+  }
+
+  applyFilters() {
+    let filtered = this.empleados;
+    
+    // Filtrar por estado si se ha seleccionado uno
+    if (this.activeFilter) {
+      filtered = filtered.filter(emp => emp.employee_status === this.activeFilter);
+    }
+    
+    // Filtrar por búsqueda (searchQuery)
+    if (this.searchQuery && this.searchQuery.trim() !== "") {
+      const searchLower = this.searchQuery.toLowerCase();
+      filtered = filtered.filter(emp =>
+        emp.first_name.toLowerCase().includes(searchLower) ||
+        (emp.middle_name && emp.middle_name.toLowerCase().includes(searchLower)) ||
+        emp.last_name.toLowerCase().includes(searchLower) ||
+        emp.employee_code.toLowerCase().includes(searchLower)
+      );
+    }
+    
+    this.empleadosFiltrados = filtered;
+  }
+
+   // Método para alternar el filtro de estado
+   toggleActiveFilter(filter: string) {
+    if (this.activeFilter === filter) {
+      this.activeFilter = null; // Se deselecciona si se hace clic dos veces
+    } else {
+      this.activeFilter = filter;
+    }
+    this.applyFilters();
+  }
+
+  
+
 
   addUser(empleado: any) {
     this.windowService.open(RegisterUserComponent, {
@@ -156,21 +211,30 @@ export class EmployeeViewComponent implements OnInit {
     );
   }
 
-  // Seleccionar y mostrar empleados por departamento
-  selectDepartamento(departamento: Departamento) {
+  // Seleccionar y mostrar empleados por departamento (con toggle)
+selectDepartamento(departamento: Departamento) {
+  // Resetear el filtro de estado al cambiar de filtro principal
+  this.activeFilter = null;
+
+  if (this.departamentoSeleccionado &&
+      this.departamentoSeleccionado.department_id === departamento.department_id) {
+    // Si ya estaba seleccionado, se deselecciona y se carga la lista completa
+    this.departamentoSeleccionado = null;
+    this.loadAllEmployees();
+  } else {
     this.departamentoSeleccionado = departamento;
     this.puestoSeleccionado = null;  // Limpiar selección de puesto
     this.turnoSeleccionado = null;   // Limpiar selección de turno
-    this.mostrarBusqueda = true;
     const companyId = this.companyService.selectedCompany.id;
-
     this.http.get<{ success: boolean, employees: Empleado[] }>(
       `https://siinad.mx/php/get_employees_by_department.php?company_id=${companyId}&department_id=${departamento.department_id}`
     ).subscribe(
       response => {
         if (response.success) {
           this.empleados = response.employees;
-          this.empleadosFiltrados = this.empleados;
+          this.empleadosFiltrados = response.employees;
+          // Se aplica también el filtro de búsqueda (si lo hubiera)
+          this.applyFilters();
         } else {
           console.error('Error al cargar los empleados del departamento');
         }
@@ -180,22 +244,30 @@ export class EmployeeViewComponent implements OnInit {
       }
     );
   }
+}
 
-  // Seleccionar y mostrar empleados por puesto
-  selectPuesto(puesto: Puesto) {
+// Seleccionar y mostrar empleados por puesto (con toggle)
+selectPuesto(puesto: Puesto) {
+  // Resetear el filtro de estado
+  this.activeFilter = null;
+
+  if (this.puestoSeleccionado &&
+      this.puestoSeleccionado.position_id === puesto.position_id) {
+    this.puestoSeleccionado = null;
+    this.loadAllEmployees();
+  } else {
     this.puestoSeleccionado = puesto;
     this.departamentoSeleccionado = null;  // Limpiar selección de departamento
     this.turnoSeleccionado = null;
-    this.mostrarBusqueda = true;         // Limpiar selección de turno
     const companyId = this.companyService.selectedCompany.id;
-
     this.http.get<{ success: boolean, employees: Empleado[] }>(
       `https://siinad.mx/php/get_employees_by_position.php?company_id=${companyId}&position_id=${puesto.position_id}`
     ).subscribe(
       response => {
         if (response.success) {
           this.empleados = response.employees;
-          this.empleadosFiltrados = this.empleados;
+          this.empleadosFiltrados = response.employees;
+          this.applyFilters();
         } else {
           console.error('Error al cargar los empleados del puesto');
         }
@@ -205,49 +277,49 @@ export class EmployeeViewComponent implements OnInit {
       }
     );
   }
+}
 
-  // Seleccionar y mostrar empleados por turno
- // Seleccionar y mostrar empleados por turno
+// Seleccionar y mostrar empleados por turno (con toggle)
 selectTurno(turno: Turno) {
-  this.turnoSeleccionado = turno;
-  this.departamentoSeleccionado = null; // Limpiar selección de departamento
-  this.puestoSeleccionado = null;  
-  this.mostrarBusqueda = true;         // Mostrar sección de búsqueda
-  const companyId = this.companyService.selectedCompany.id;
+  // Resetear el filtro de estado
+  this.activeFilter = null;
 
-  this.http.get<{ success: boolean, employees: Empleado[] }>(
-    `https://siinad.mx/php/get_employees_by_shifts.php?company_id=${companyId}&shift_id=${turno.shift_id}`
-  ).subscribe(
-    response => {
-      if (response.success && response.employees.length > 0) {
-        this.empleados = response.employees;
-        this.empleadosFiltrados = response.employees;
-      } else {
-        // Si no se reciben empleados, limpiar la lista
+  if (this.turnoSeleccionado &&
+      this.turnoSeleccionado.shift_id === turno.shift_id) {
+    this.turnoSeleccionado = null;
+    this.loadAllEmployees();
+  } else {
+    this.turnoSeleccionado = turno;
+    this.departamentoSeleccionado = null; // Limpiar selección de departamento
+    this.puestoSeleccionado = null;  
+    const companyId = this.companyService.selectedCompany.id;
+    this.http.get<{ success: boolean, employees: Empleado[] }>(
+      `https://siinad.mx/php/get_employees_by_shifts.php?company_id=${companyId}&shift_id=${turno.shift_id}`
+    ).subscribe(
+      response => {
+        if (response.success && response.employees.length > 0) {
+          this.empleados = response.employees;
+          this.empleadosFiltrados = response.employees;
+          this.applyFilters();
+        } else {
+          this.empleados = [];
+          this.empleadosFiltrados = [];
+          console.error('No se encontraron empleados para el turno seleccionado');
+        }
+      },
+      error => {
         this.empleados = [];
         this.empleadosFiltrados = [];
-        console.error('No se encontraron empleados para el turno seleccionado');
+        console.error('Error al cargar los empleados del turno:', error);
       }
-    },
-    error => {
-      // En caso de error, también se limpia la lista de empleados
-      this.empleados = [];
-      this.empleadosFiltrados = [];
-      console.error('Error al cargar los empleados del turno:', error);
-    }
-  );
+    );
+  }
 }
 
 
   // Función para filtrar empleados en la búsqueda
   buscarEmpleados() {
-    const searchLower = this.searchQuery.toLowerCase();
-    this.empleadosFiltrados = this.empleados.filter(empleado =>
-      empleado.first_name.toLowerCase().includes(searchLower) ||
-      (empleado.middle_name && empleado.middle_name.toLowerCase().includes(searchLower)) ||
-      empleado.last_name.toLowerCase().includes(searchLower) ||
-      empleado.employee_code.toLowerCase().includes(searchLower)
-    );
+this.applyFilters();
   }
   
 // Método para ver detalles del empleado

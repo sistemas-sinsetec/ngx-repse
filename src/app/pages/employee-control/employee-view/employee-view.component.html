@@ -51,6 +51,28 @@
               </nb-card-body>
             </nb-card>
 
+            <!-- Tarjeta de Estado -->
+<nb-card class="mt-3">
+  <nb-card-header class="text-center">
+    <h6>Estado</h6>
+  </nb-card-header>
+  <nb-card-body>
+    <ul class="list-group estado-list">
+      <li class="list-group-item" 
+          [class.selected]="activeFilter === 'A'" 
+          (click)="toggleActiveFilter('A')">
+        Activos
+      </li>
+      <li class="list-group-item" 
+          [class.selected]="activeFilter === 'B'" 
+          (click)="toggleActiveFilter('B')">
+        Inactivos
+      </li>
+    </ul>
+  </nb-card-body>
+</nb-card>
+
+
           </div>
       
     </div>
@@ -83,9 +105,12 @@
               </thead>
               <tbody>
                 <tr *ngFor="let empleado of empleadosFiltrados" class="table-row">
-                  <td>{{ empleado.employee_code }}</td>
-                  <td>{{ empleado.first_name }} {{ empleado.middle_name }} {{ empleado.last_name }}</td>
-                  <td>{{ empleado.email }}</td>
+                  <td [ngClass]="{'baja': empleado.employee_status === 'B'}">{{ empleado.employee_code }}</td>
+                  <td [ngClass]="{'baja': empleado.employee_status === 'B'}">
+                    {{ empleado.first_name }} {{ empleado.middle_name }} {{ empleado.last_name }}
+                  </td>
+                  
+                  <td [ngClass]="{'baja': empleado.employee_status === 'B'}">{{ empleado.email }}</td>
                   <td>
                     <button title="Ver detalles"
                             nbButton

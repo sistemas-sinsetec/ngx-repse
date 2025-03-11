@@ -48,7 +48,7 @@ nb-list-item.selected {
   font-size: 1rem;
   color: #495057; /* Color gris más oscuro */
   margin: 0;
-  line-height: 1.5;
+  line-height: 1.0;
   font-weight: 400; /* Peso de la fuente normal */
 }
 
@@ -62,8 +62,10 @@ nb-list-item.selected {
 .izq{
 position: sticky !important;
 top: 100px;
-height: 400px;
+height: 500px;
+margin-bottom: 80px;
 }
+
 
 
 
