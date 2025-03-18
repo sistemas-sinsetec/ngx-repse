@@ -55,9 +55,15 @@ export class EmployeeViewComponent implements OnInit {
   mostrarBusqueda: boolean = false;
   activeFilter: string | null = null; // 'A' para activos, 'B' para inactivos
 
+
   users: User[] = [];
   departamentos: Departamento[] = [];
   puestos: Puesto[] = [];
+  displayedDepartamentos: Departamento[] = [];
+  displayedPuestos: Puesto[] = [];
+  departamentosPage: number = 1;
+  puestosPage: number = 1;
+  pageSize: number = 5;
   turnos: Turno[] = [];
   empleados: Empleado[] = [];
   empleadosFiltrados: Empleado[] = [];
@@ -178,6 +184,7 @@ export class EmployeeViewComponent implements OnInit {
     this.http.get<Departamento[]>(`https://siinad.mx/php/get_departments.php?company_id=${companyId}`).subscribe(
       data => {
         this.departamentos = data;
+        this.displayedDepartamentos = this.departamentos.slice(0, this.pageSize);
       },
       error => {
         console.error('Error al cargar los departamentos:', error);
@@ -185,18 +192,46 @@ export class EmployeeViewComponent implements OnInit {
     );
   }
 
-  // Cargar puestos sin dependencia del departamento
-  loadPositions() {
-    const companyId = this.companyService.selectedCompany.id;
-    this.http.get<Puesto[]>(`https://siinad.mx/php/get_positions.php?company_id=${companyId}`).subscribe(
-      data => {
-        this.puestos = data;
-      },
-      error => {
-        console.error('Error al cargar los puestos:', error);
-      }
-    );
+    // Método para cargar más departamentos
+    loadMoreDepartments() {
+      this.departamentosPage++;
+      const itemsToShow = this.departamentosPage * this.pageSize;
+      this.displayedDepartamentos = this.departamentos.slice(0, itemsToShow);
+    }
+    // Método para volver a mostrar solo los 5 primeros departamentos
+loadLessDepartments() {
+  this.departamentosPage = 1;
+  this.displayedDepartamentos = this.departamentos.slice(0, this.pageSize);
+}
+
+ // Cargar puestos y preparar la vista inicial
+ loadPositions() {
+  const companyId = this.companyService.selectedCompany.id;
+  this.http.get<Puesto[]>(`https://siinad.mx/php/get_positions.php?company_id=${companyId}`).subscribe(
+    data => {
+      // Filtrar puestos que NO se llamen "Empresa"
+      this.puestos = data.filter(puesto => puesto.position_name !== 'Empresa');
+      this.displayedPuestos = this.puestos.slice(0, this.pageSize);
+    },
+    error => {
+      console.error('Error al cargar los puestos:', error);
+    }
+  );
+}
+
+
+  // Método para cargar más puestos
+  loadMorePositions() {
+    this.puestosPage++;
+    const itemsToShow = this.puestosPage * this.pageSize;
+    this.displayedPuestos = this.puestos.slice(0, itemsToShow);
   }
+
+  // Método para volver a mostrar solo los 5 primeros puestos
+loadLessPositions() {
+  this.puestosPage = 1;
+  this.displayedPuestos = this.puestos.slice(0, this.pageSize);
+}
 
   // Cargar turnos sin dependencia del puesto
   loadShifts() {

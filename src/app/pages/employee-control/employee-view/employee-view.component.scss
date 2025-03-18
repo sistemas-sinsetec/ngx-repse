@@ -106,6 +106,26 @@ nb-layout, nb-layout-column {
       color: #8B4513; /* Color café */
     }
     
+    .load-more {
+      cursor: pointer;
+      background-color: #f8f9fa; /* color de fondo sutil */
+      text-align: center;
+      font-weight: bold;
+      color: #007bff; /* color predeterminado para "Ver más" */
+    }
+    
+    .load-more:hover {
+      background-color: #e2e6ea;
+    }
+    
+    /* Estilos específicos para "Ver menos": color de texto rojo */
+    .ver-menos {
+      color: #d9534f; /* rojo Bootstrap */
+    }
+    .ver-menos:hover {
+      background-color: #f2dede; /* fondo suave para el hover */
+    }
+    
 
 
 

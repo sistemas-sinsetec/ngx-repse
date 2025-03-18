@@ -69,6 +69,7 @@ import { PermissionsBusineesPartnerComponent } from './business-partner/permissi
 import { DeleteModalComponent } from './site/delete-modal/delete-modal.component';
 import { DepartmentRangesComponent } from './my-company/department-ranges/department-ranges.component';
 import { DepartmentRangesDialogComponent } from './my-company/department-ranges-dialog/department-ranges-dialog.component';
+import { MensualUploadComponent } from './my-company/mensual-upload/mensual-upload.component';
 
 
 @NgModule({
@@ -113,6 +114,7 @@ import { DepartmentRangesDialogComponent } from './my-company/department-ranges-
     DeleteModalComponent,
     DepartmentRangesComponent,
     DepartmentRangesDialogComponent,
+    MensualUploadComponent,
     
   ],
   imports: [

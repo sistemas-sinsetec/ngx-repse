@@ -1,0 +1,70 @@
+<nb-card>
+  <nb-card-header>
+    <div class="header-container">
+      <div class="title-and-select">
+        <h2 class="title">Estado de Archivos Mensual</h2>
+        <!-- Selección de mes -->
+        <nb-select placeholder="Selecciona mes" [(selected)]="selectedMonth">
+          <nb-option *ngFor="let mes of meses" [value]="mes">
+            {{ mes | titlecase }}
+          </nb-option>
+        </nb-select>
+      </div>
+      <!-- Botón para refrescar la información -->
+      <button nbButton ghost status="primary" (click)="obtenerEstadoArchivos()" class="refresh-btn">
+        <nb-icon icon="refresh-outline" pack="eva"></nb-icon> Refrescar
+      </button>
+    </div>
+    <!-- Contadores de archivos -->
+    <div class="counters">
+      <nb-badge text="Cargados: {{ cargados }}" status="info"></nb-badge>
+      <nb-badge text="Aceptados: {{ completos }}" status="success"></nb-badge>
+      <nb-badge text="Rechazados: {{ incompletos }}" status="danger"></nb-badge>
+      <nb-badge text="No Cargados: {{ noCargados }}" status="warning"></nb-badge>
+    </div>
+  </nb-card-header>
+
+  <nb-card-body>
+    <!-- Spinner mientras se cargan datos o se sube un archivo -->
+    <nb-spinner *ngIf="cargando" status="primary"></nb-spinner>
+
+    <!-- Tabla solo si no se está cargando -->
+    <table class="table" *ngIf="!cargando">
+      <thead>
+        <tr>
+          <th>Nombre</th>
+          <th>Estado Mes ({{ selectedMonth | titlecase }})</th>
+          <th>Acciones</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let tarea of tareas">
+          <td>{{ tarea.nombre }}</td>
+          <td>
+            <!-- Si existe un documento cuyo month coincida con selectedMonth, muestra palomita -->
+            <ng-container *ngIf="hasDocumentForMonth(tarea, selectedMonth); else noMatch">
+              <nb-icon icon="checkmark-outline" pack="eva" style="color: green;"></nb-icon>
+            </ng-container>
+            <ng-template #noMatch>
+              <nb-icon icon="close-outline" pack="eva" style="color: red;"></nb-icon>
+            </ng-template>
+          </td>
+          <td>
+            <!-- Botón para cargar archivo -->
+            <button nbButton status="primary" size="small" (click)="triggerFileInput(tarea.id)">
+              <nb-icon icon="cloud-upload-outline" pack="eva"></nb-icon> Cargar
+            </button>
+            <!-- Input file oculto -->
+            <input type="file" hidden id="fileInput{{ tarea.id }}" (change)="onFileSelected($event, tarea)" />
+            <!-- Botón para descargar: se muestra solo si existe un documento para el mes seleccionado -->
+            <button nbButton status="info" size="small"
+                    *ngIf="hasDocumentForMonth(tarea, selectedMonth)"
+                    (click)="descargarArchivo(tarea, selectedMonth)">
+              <nb-icon icon="cloud-download-outline" pack="eva"></nb-icon> Descargar
+            </button>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </nb-card-body>
+</nb-card>

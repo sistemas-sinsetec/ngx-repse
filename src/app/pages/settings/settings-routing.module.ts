@@ -26,6 +26,7 @@ import { authGuard } from '../../services/auth-guard';
 import { BusinessPartnerRegisterComponent } from './business-partner/business-partner-register/business-partner-register.component';
 import { PermissionsBusineesPartnerComponent } from './business-partner/permissions-businees-partner/permissions-businees-partner.component';
 import { DepartmentRangesComponent } from './my-company/department-ranges/department-ranges.component';
+import { MensualUploadComponent } from './my-company/mensual-upload/mensual-upload.component';
 
 
 const routes: Routes = [
@@ -90,6 +91,14 @@ const routes: Routes = [
       {
         path: 'my-company/anual-upload',
         component: AnualUploadComponent,
+        canActivate: [authGuard],
+        data: { section: 'Configuracion de mi empresa', subSection: 'Subir expendientes digitales' } 
+      },
+
+      
+      {
+        path: 'my-company/mensual-upload',
+        component: MensualUploadComponent,
         canActivate: [authGuard],
         data: { section: 'Configuracion de mi empresa', subSection: 'Subir expendientes digitales' } 
       },

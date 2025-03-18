@@ -365,15 +365,24 @@ async updatePastAssignmentsInfo(): Promise<void> {
   }
   
   
-  
-
   filterEmpleados() {
     const searchTerm = this.searchEmployee.toLowerCase();
-    this.filteredEmpleados = this.empleados.filter(empleado => {
-      const fullName = `${empleado.last_name} ${empleado.middle_name} ${empleado.first_name}`.toLowerCase();
-      return fullName.includes(searchTerm);
-    });
+    this.filteredEmpleados = this.empleados
+      .filter(empleado => {
+        const fullName = `${empleado.last_name} ${empleado.middle_name} ${empleado.first_name}`.toLowerCase();
+        // Se filtra por el término de búsqueda y se excluyen los empleados confirmados
+        return fullName.includes(searchTerm) && !empleado.isAssigned;
+      })
+      .sort((a, b) => {
+        // Los seleccionados se muestran primero
+        if (a.selected && !b.selected) return -1;
+        if (!a.selected && b.selected) return 1;
+        // Si ambos tienen el mismo estado, se ordena alfabéticamente (por apellido, por ejemplo)
+        return a.last_name.localeCompare(b.last_name, 'es');
+      });
   }
+  
+  
 
   get allLastAssignedAlreadySelected(): boolean {
     if (!this.lastAssignedEmployeeIds || this.lastAssignedEmployeeIds.length === 0) {
@@ -440,7 +449,11 @@ async updatePastAssignmentsInfo(): Promise<void> {
       // Remover empleado de la lista seleccionada
       this.selectedEmpleados.splice(index, 1);
     }
+  
+    // Reordenar la lista para que los seleccionados aparezcan arriba
+    this.filterEmpleados();
   }
+  
   
   
   
@@ -494,13 +507,14 @@ async updatePastAssignmentsInfo(): Promise<void> {
       await this.http.post('https://siinad.mx/php/assign-employees.php', data).toPromise();
       console.log('Empleados asignados correctamente');
   
-      // Marcar empleados como asignados
+      // Marcar empleados como asignados y limpiar la lista de seleccionados
       this.selectedEmpleados.forEach((empleado) => {
         empleado.isAssigned = true;
       });
-  
-      // Limpiar la lista de empleados seleccionados
       this.selectedEmpleados = [];
+  
+      // Recargar la lista de empleados para que ya no aparezcan los confirmados
+      this.loadEmpleados(this.selectedSemana, this.selectedDia, this.selectedObra);
     } catch (error) {
       console.error('Error al asignar empleados', error);
     } finally {
@@ -508,6 +522,7 @@ async updatePastAssignmentsInfo(): Promise<void> {
       loading.dismiss();
     }
   }
+  
   
   
 

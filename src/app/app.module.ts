@@ -33,13 +33,15 @@ import { NbAuthModule } from '@nebular/auth';
 import { CustomLoginComponent } from './custom-login/custom-login.component';
 import { AuthService } from './services/auth.service';
 import { SelectCompanyPeriodDialogComponent } from './select-company-period-dialog/select-company-period-dialog.component';
+import { MiComponenteComponent } from './mi-componente/mi-componente.component';
 
 @NgModule({
   declarations: [
 
     AppComponent,
     CustomLoginComponent,
-    SelectCompanyPeriodDialogComponent,  ],
+    SelectCompanyPeriodDialogComponent,
+    MiComponenteComponent,  ],
   imports: [
     BrowserModule,
     BrowserAnimationsModule,
