@@ -4,6 +4,8 @@ import { AuthService } from '../../../../services/auth.service';
 import { NbDialogService } from '@nebular/theme'; // Importa el servicio de diálogo de Nebular
 import { CompanyService } from '../../../../services/company.service';
 import { ChangeDetectorRef } from '@angular/core';
+import { finalize } from 'rxjs/operators';
+
 
 
 interface Tarea {
@@ -23,7 +25,7 @@ interface Tarea {
   diciembre: boolean;
   estado: string;
   file_path?: string;  // propiedad legacy, se usará "documents" para múltiples registros
-  documents?: Array<{ file_path: string, month: string, estado: string }>;
+  documents?: Array<{ file_path: string; month: string; year: number; estado: string }>;
   [key: string]: any;  // Permite el acceso dinámico a las propiedades
 }
 
@@ -41,7 +43,10 @@ export class MensualUploadComponent implements OnInit {
     'julio', 'agosto', 'septiembre', 'octubre', 'noviembre', 'diciembre'
   ];
 
-  selectedMonth: string = 'enero';
+ years: number[] = [2023, 2024, 2025, 2026, 2027]; 
+
+ selectedMonth: string = this.meses[new Date().getMonth()];
+ selectedYear: number = new Date().getFullYear();
 
   tareas: Tarea[] = [
     { id: 1, nombre: 'Ause ISCOE', enero: false, febrero: false, marzo: false, abril: false, mayo: false, junio: false, julio: false, agosto: false, septiembre: false, octubre: false, noviembre: false, diciembre: false, estado: 'No cargado' },
@@ -113,27 +118,43 @@ export class MensualUploadComponent implements OnInit {
     }
   }
 
+  getIconForDocument(tarea: Tarea, month: string, year: number): string {
+    const doc = tarea.documents?.find(d => d.month === month && d.year === year);
+    if (!doc) return '';
+    const estado = doc.estado.toLowerCase();
+    if (estado === 'aceptado') return 'checkmark-outline';
+    if (estado === 'rechazado') return 'close-outline';
+    if (estado === 'cargado') return 'clock-outline';
+    return 'clock-outline';
+  }
+  
+  
   uploadFile(tarea: Tarea, file: File) {
     const formData: FormData = new FormData();
     formData.append('file', file);
     formData.append('userId', this.authService.userId);
     formData.append('companyId', this.companyservice.selectedCompany.id);
     formData.append('tareaId', tarea.id.toString());
-    // Agregamos el mes seleccionado
     formData.append('month', this.selectedMonth);
+    formData.append('year', this.selectedYear.toString());
   
+    this.cargando = true;
     this.http.post('https://siinad.mx/php/documentUpload.php', formData)
+      .pipe(
+        finalize(() => {
+          this.cargando = false;
+          this.cdRef.detectChanges();
+        })
+      )
       .subscribe(response => {
         console.log('Respuesta del servidor:', response);
         tarea.estado = 'cargado';
-        // Cuando se suba el archivo, se espera que la respuesta o la recarga del estado incluya la propiedad month
         this.updateCounters();
         this.obtenerEstadoArchivos();
       }, error => {
         console.error('Error al subir el archivo:', error);
       });
   }
-  
   
 
   updateCounters() {
@@ -146,52 +167,51 @@ export class MensualUploadComponent implements OnInit {
   }
   
 
-  descargarArchivo(tarea: Tarea, month: string) {
-    if (tarea.documents) {
-      const doc = tarea.documents.find(d => d.month === month);
-      if (doc && doc.file_path) {
-        window.open(`https://siinad.mx/php/${doc.file_path}`, '_blank');
-        return;
-      }
+  descargarArchivo(tarea: Tarea, month: string, year: number) {
+    const doc = tarea.documents?.find(d => d.month === month && d.year === year);
+    if (doc && doc.file_path) {
+      window.open(`https://siinad.mx/php/${doc.file_path}`, '_blank');
+    } else {
+      console.error('No se encontró un archivo para descargar en el mes y año seleccionados.');
     }
-    console.error('No se encontró un archivo para descargar en el mes seleccionado.');
   }
+  
 
-  hasDocumentForMonth(tarea: Tarea, month: string): boolean {
-    return tarea.documents && tarea.documents.some(doc => doc.month === month);
+  hasDocumentForYear(tarea: Tarea, month: string, year: number): boolean {
+    return tarea.documents?.some(d => d.month === month && d.year === year) ?? false;
   }
   
   
 
   obtenerEstadoArchivos() {
     const companyId = this.companyservice.selectedCompany.id;
-  
     if (!companyId) {
       console.error('Company ID is missing.');
       return;
     }
-  
     console.log('Obteniendo estado de archivos para companyId:', companyId);
-  
+    this.cargando = true;
     this.http.get<any[]>(`https://siinad.mx/php/getDocumentStatus.php?companyId=${companyId}`)
+      .pipe(
+        finalize(() => {
+          this.cargando = false;
+          this.cdRef.detectChanges();
+        })
+      )
       .subscribe({
         next: (response) => {
           console.log('Respuesta de la API:', response);
-  
           if (Array.isArray(response)) {
-            // Reinicia el arreglo de documentos para cada tarea
             this.tareas.forEach(t => t.documents = []);
-  
             response.forEach((doc) => {
               const tarea = this.tareas.find(t => t.id === parseInt(doc.tarea_id, 10));
               if (tarea) {
-                // Agrega el documento al arreglo "documents" de la tarea
                 tarea.documents.push({
                   file_path: doc.file_path,
                   month: doc.month ?? '',
-                  estado: doc.estado ?? 'No cargado'
+                  estado: doc.estado ?? 'No cargado',
+                  year: doc.year ?? 0,
                 });
-                // (Opcional) También puedes seguir asignando otros valores si es necesario:
                 this.meses.forEach(mes => {
                   if (doc[mes] !== undefined) {
                     tarea[mes] = doc[mes];

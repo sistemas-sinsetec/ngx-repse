@@ -70,6 +70,7 @@ import { DeleteModalComponent } from './site/delete-modal/delete-modal.component
 import { DepartmentRangesComponent } from './my-company/department-ranges/department-ranges.component';
 import { DepartmentRangesDialogComponent } from './my-company/department-ranges-dialog/department-ranges-dialog.component';
 import { MensualUploadComponent } from './my-company/mensual-upload/mensual-upload.component';
+import { MensualReviewComponent } from './my-company/mensual-review/mensual-review.component';
 
 
 @NgModule({
@@ -115,6 +116,7 @@ import { MensualUploadComponent } from './my-company/mensual-upload/mensual-uplo
     DepartmentRangesComponent,
     DepartmentRangesDialogComponent,
     MensualUploadComponent,
+    MensualReviewComponent,
     
   ],
   imports: [
