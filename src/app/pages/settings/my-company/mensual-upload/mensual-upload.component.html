@@ -14,15 +14,14 @@
             {{ mes | titlecase }}
           </nb-option>
         </nb-select>
-      
       </div>
     </div>
     <!-- Contadores de archivos -->
-    <div class="counters">
-      <nb-badge text="Cargados: {{ cargados }}" status="info"></nb-badge>
-      <nb-badge text="Aceptados: {{ completos }}" status="success"></nb-badge>
-      <nb-badge text="Rechazados: {{ incompletos }}" status="danger"></nb-badge>
-      <nb-badge text="No Cargados: {{ noCargados }}" status="warning"></nb-badge>
+    <div class="d-flex justify-content-center flex-wrap mb-3 count">
+      <nb-tag class="m-2" status="info" appearance="outline" text="Cargados: {{ archivosCargados }}"></nb-tag>
+      <nb-tag class="m-2" status="success" text="Aceptados: {{ archivosAceptados }}"></nb-tag>
+      <nb-tag class="m-2" status="danger" text="Rechazados: {{ archivosRechazados }}"></nb-tag>
+      <nb-tag class="m-2" status="warning" text="No cargados: {{ archivosNoCargados }}"></nb-tag>
     </div>
   </nb-card-header>
 
@@ -36,6 +35,7 @@
         <tr>
           <th style="text-align: center;">Nombre</th>
           <th style="text-align: center;">Estado Mes ({{ selectedMonth | titlecase }})</th>
+          <th style="text-align: center;">Comentario</th> <!-- Nueva columna -->
           <th style="text-align: center;">Acciones</th>
         </tr>
       </thead>
@@ -55,23 +55,26 @@
               <span class="grey-dash">-</span>
             </ng-template>
           </td>
-          
-          
+          <td style="text-align: center;">
+            {{ getComment(tarea, selectedMonth, selectedYear) }}
+          </td>
           <td style="text-align: center;">
             <!-- Botón para cargar archivo -->
-            <button nbButton status="primary" size="small" (click)="triggerFileInput(tarea.id)">
+            <button nbButton status="primary" size="small" (click)="triggerFileInput(tarea.id)"
+                    [disabled]="isUploadDisabled(tarea, selectedMonth, selectedYear)">
               <nb-icon icon="cloud-upload-outline" pack="eva"></nb-icon> Cargar
             </button>
+
             <!-- Input file oculto -->
             <input type="file" hidden id="fileInput{{ tarea.id }}" (change)="onFileSelected($event, tarea)" />
-            <!-- Botón para descargar: se muestra solo si existe un documento para el mes seleccionado -->
+            <!-- Botón de descargar siempre visible, pero deshabilitado si no existe el documento -->
             <button nbButton status="info" size="small"
-            *ngIf="hasDocumentForYear(tarea, selectedMonth, selectedYear)"
-            (click)="descargarArchivo(tarea, selectedMonth, selectedYear)">
-      <nb-icon icon="cloud-download-outline" pack="eva"></nb-icon> Descargar
-    </button>
-    
+                    [disabled]="!hasDocumentForYear(tarea, selectedMonth, selectedYear)"
+                    (click)="descargarArchivo(tarea, selectedMonth, selectedYear)">
+              <nb-icon icon="cloud-download-outline" pack="eva"></nb-icon> Descargar
+            </button>
           </td>
+          
         </tr>
       </tbody>
     </table>

@@ -25,7 +25,7 @@ interface Tarea {
   diciembre: boolean;
   estado: string;
   file_path?: string;  // propiedad legacy, se usará "documents" para múltiples registros
-  documents?: Array<{ file_path: string; month: string; year: number; estado: string }>;
+  documents?: Array<{ file_path: string; month: string; year: number; estado: string; comentario?: string;}>;
   [key: string]: any;  // Permite el acceso dinámico a las propiedades
 }
 
@@ -47,6 +47,8 @@ export class MensualUploadComponent implements OnInit {
 
  selectedMonth: string = this.meses[new Date().getMonth()];
  selectedYear: number = new Date().getFullYear();
+
+ 
 
   tareas: Tarea[] = [
     { id: 1, nombre: 'Ause ISCOE', enero: false, febrero: false, marzo: false, abril: false, mayo: false, junio: false, julio: false, agosto: false, septiembre: false, octubre: false, noviembre: false, diciembre: false, estado: 'No cargado' },
@@ -85,6 +87,12 @@ export class MensualUploadComponent implements OnInit {
     this.obtenerEstadoArchivos();
   }
 
+  getComment(tarea: Tarea, month: string, year: number): string {
+    const doc = tarea.documents?.find(d => d.month === month && d.year === year);
+    return doc && doc.comentario ? doc.comentario : '-';
+  }
+  
+
   getStatus(estado: string): string {
     switch (estado.toLowerCase()) {
       case 'aceptado': return 'success';
@@ -92,6 +100,70 @@ export class MensualUploadComponent implements OnInit {
       case 'cargado': return 'info';
       default: return 'basic';
     }
+  }
+
+  get archivosCargados(): number {
+    let count = 0;
+    this.tareas.forEach(t => {
+      if (t.documents) {
+        t.documents.forEach(doc => {
+          if (
+            doc.month === this.selectedMonth &&
+            doc.year === this.selectedYear &&
+            doc.estado.toLowerCase() === 'cargado'
+          ) {
+            count++;
+          }
+        });
+      }
+    });
+    return count;
+  }
+  
+  get archivosAceptados(): number {
+    let count = 0;
+    this.tareas.forEach(t => {
+      if (t.documents) {
+        t.documents.forEach(doc => {
+          if (
+            doc.month === this.selectedMonth &&
+            doc.year === this.selectedYear &&
+            doc.estado.toLowerCase() === 'aceptado'
+          ) {
+            count++;
+          }
+        });
+      }
+    });
+    return count;
+  }
+  
+  get archivosRechazados(): number {
+    let count = 0;
+    this.tareas.forEach(t => {
+      if (t.documents) {
+        t.documents.forEach(doc => {
+          if (
+            doc.month === this.selectedMonth &&
+            doc.year === this.selectedYear &&
+            doc.estado.toLowerCase() === 'rechazado'
+          ) {
+            count++;
+          }
+        });
+      }
+    });
+    return count;
+  }
+  
+  get archivosNoCargados(): number {
+    let count = 0;
+    this.tareas.forEach(t => {
+      if (!t.documents || !t.documents.some(doc => doc.month === this.selectedMonth && doc.year === this.selectedYear)) {
+        count++;
+      }
+    });
+    return count;
   }
 
   async openModal(tarea: Tarea) {
@@ -211,6 +283,7 @@ export class MensualUploadComponent implements OnInit {
                   month: doc.month ?? '',
                   estado: doc.estado ?? 'No cargado',
                   year: doc.year ?? 0,
+                  comentario: doc.comentario ?? '-',
                 });
                 this.meses.forEach(mes => {
                   if (doc[mes] !== undefined) {
@@ -232,6 +305,16 @@ export class MensualUploadComponent implements OnInit {
         }
       });
   }
+
+  isUploadDisabled(tarea: Tarea, month: string, year: number): boolean {
+    const doc = tarea.documents?.find(d => d.month === month && d.year === year);
+    if (!doc) {
+      return false;
+    }
+    const estado = doc.estado.toLowerCase();
+    return estado === 'cargado' || estado === 'aceptado';
+  }
+  
   
   
   

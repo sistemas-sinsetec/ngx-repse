@@ -230,6 +230,18 @@ export const MENU_ITEMS: CustomMenuItem[] = [
             hidden: false,
             permission: { section: 'Configuracion de mi empresa', subSection: 'Subir expendientes digitales' },
           },
+          {
+            title: 'Expediente Mensual',
+            link: '/pages/settings/my-company/mensual-review',
+            hidden: false,
+            permission: { section: 'Configuracion de mi empresa', subSection: 'Confirmar expendientes digitales' },
+          },
+          {
+            title: 'Subir expediente mensual',
+            link: '/pages/settings/my-company/mensual-upload',
+            hidden: false,
+            permission: { section: 'Configuracion de mi empresa', subSection: 'Subir expendientes digitales' },
+          },
         ],
       },
       {

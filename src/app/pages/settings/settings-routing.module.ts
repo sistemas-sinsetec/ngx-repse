@@ -27,6 +27,7 @@ import { BusinessPartnerRegisterComponent } from './business-partner/business-pa
 import { PermissionsBusineesPartnerComponent } from './business-partner/permissions-businees-partner/permissions-businees-partner.component';
 import { DepartmentRangesComponent } from './my-company/department-ranges/department-ranges.component';
 import { MensualUploadComponent } from './my-company/mensual-upload/mensual-upload.component';
+import { MensualReviewComponent } from './my-company/mensual-review/mensual-review.component';
 
 
 const routes: Routes = [
@@ -94,11 +95,18 @@ const routes: Routes = [
         canActivate: [authGuard],
         data: { section: 'Configuracion de mi empresa', subSection: 'Subir expendientes digitales' } 
       },
+      
 
       
       {
         path: 'my-company/mensual-upload',
         component: MensualUploadComponent,
+        canActivate: [authGuard],
+        data: { section: 'Configuracion de mi empresa', subSection: 'Subir expendientes digitales' } 
+      },
+      {
+        path: 'my-company/mensual-review',
+        component: MensualReviewComponent,
         canActivate: [authGuard],
         data: { section: 'Configuracion de mi empresa', subSection: 'Subir expendientes digitales' } 
       },
