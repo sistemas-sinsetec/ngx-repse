@@ -53,74 +53,78 @@ export class AssignProjectsComponent implements OnInit {
   }
 
   // Nuevo método para solo actualizar la info sin seleccionar empleados
-async updatePastAssignmentsInfo(): Promise<void> {
-  if (!this.selectedObra || !this.selectedDia) {
-    console.error('Debe seleccionarse un día y una obra.');
-    return;
-  }
+  async updatePastAssignmentsInfo(): Promise<void> {
+    if (!this.selectedObra || !this.selectedDia) {
+      console.error('Debe seleccionarse un día y una obra.');
+      return;
+    }
 
-  const loading = await this.loadingController.create({
-    message: 'Actualizando info de asignaciones...',
-    spinner: 'circles',
-  });
-  await loading.present();
-
-  const companyId = this.companyService.selectedCompany.id;
-  const projectId = this.selectedObra.project_id;
-  const dayOfWeek = this.selectedDia;
-
-  this.http.get(`https://siinad.mx/php/get_previous_assigned.php?company_id=${companyId}&day_of_week=${dayOfWeek}&project_id=${projectId}`)
-    .subscribe((data: any) => {
-      if (Array.isArray(data)) {
-        this.pastAssignmentsInfo = {
-          count: data.length,
-          date: data.length ? data[0].day_of_week : null
-        };
-      } else {
-        this.pastAssignmentsInfo = null;
-      }
-    }, error => {
-      console.error('Error al actualizar asignaciones pasadas', error);
-      loading.dismiss();
-    }, () => {
-      loading.dismiss();
+    const loading = await this.loadingController.create({
+      message: 'Actualizando info de asignaciones...',
+      spinner: 'circles',
     });
-}
+    await loading.present();
+
+    const companyId = this.companyService.selectedCompany.id;
+    const projectId = this.selectedObra.project_id;
+    const dayOfWeek = this.selectedDia;
+
+    this.http.get(`https://siinad.mx/php/get_previous_assigned.php?company_id=${companyId}&day_of_week=${dayOfWeek}&project_id=${projectId}`)
+      .subscribe((data: any) => {
+        if (Array.isArray(data)) {
+          this.pastAssignmentsInfo = {
+            count: data.length,
+            date: data.length ? data[0].day_of_week : null
+          };
+        } else {
+          this.pastAssignmentsInfo = null;
+        }
+      }, error => {
+        console.error('Error al actualizar asignaciones pasadas', error);
+        loading.dismiss();
+      }, () => {
+        loading.dismiss();
+      });
+  }
 
 
   async loadWeeks() {
     const companyId = this.companyService.selectedCompany.id;
     const selectedPeriod = this.periodService.selectedPeriod.id;
-  
+
     if (!selectedPeriod) {
       console.error('No se ha seleccionado un tipo de periodo');
       return;
     }
-  
+
     let loading = await this.loadingController.create({
       message: 'Cargando semanas...',
       spinner: 'circles',
     });
-  
+
     try {
       await loading.present();
-  
+
       this.http.get(`https://siinad.mx/php/get_weekly_periods.php?company_id=${companyId}&period_type_id=${selectedPeriod}`)
         .subscribe((data: any) => {
-          this.semanas = data;
-          
+          this.semanas = data || [];
+
+          if (this.semanas.length > 0) {
+
+            const currentWeek = this.semanas.find(week => this.isCurrentWeek(week));
+
+            this.selectedSemana = currentWeek || this.semanas[0];
+
+            this.onSemanaChange(this.selectedSemana);
+
+            if (!currentWeek) {
+
+             console.error('No se encontró la semana actual en los registros.');
+            }
+          }
+
           // Encontrar la semana actual
-          const today = moment();
-          const currentWeek = this.semanas.find(semana => {
-            const start = moment(semana.start_date);
-            const end = moment(semana.end_date);
-            return today.isBetween(start, end, null, '[]'); // [] incluye los extremos
-          });
-  
-          // Establecer la semana seleccionada
-          this.selectedSemana = currentWeek || this.semanas[0];
-          
-          this.onSemanaChange(this.selectedSemana);
+
         }, error => {
           console.error('Error al cargar las semanas', error);
         }, () => {
@@ -136,8 +140,9 @@ async updatePastAssignmentsInfo(): Promise<void> {
 
   isCurrentWeek(semana: any): boolean {
     const today = moment();
-    const start = moment(semana.start_date);
-    const end = moment(semana.end_date);
+    const start = moment(semana.start_date).startOf('day');
+    const end = moment(semana.end_date).endOf('day');
+
     return today.isBetween(start, end, null, '[]');
   }
 
@@ -162,7 +167,7 @@ async updatePastAssignmentsInfo(): Promise<void> {
     this.selectedEmpleados = [];
     this.pastAssignmentsInfo = null;
   }
-  
+
 
   generateDiasSemana(startDate: string, endDate: string) {
     const start = moment(startDate);
@@ -179,21 +184,21 @@ async updatePastAssignmentsInfo(): Promise<void> {
     }
   }
 
-  
+
 
   onDiaChange(dia: string): void {
     this.selectedDia = dia;
-  
+
     // Resetear el contador de empleados seleccionados
     this.selectedEmpleados = [];
     // Desmarcar la selección en la lista de empleados (si ya han sido cargados)
     if (this.empleados && this.empleados.length) {
       this.empleados.forEach(empleado => empleado.selected = false);
     }
-  
+
     // Cargar empleados sin marcar asignaciones automáticas
     this.loadEmpleados(this.selectedSemana, dia, this.selectedObra);
-  
+
     // Actualiza solo la información global de asignaciones pasadas sin seleccionar empleados
     if (this.selectedObra) {
       this.updatePastAssignmentsInfo();
@@ -247,10 +252,10 @@ async updatePastAssignmentsInfo(): Promise<void> {
       message: 'Cargando empleados...',
       spinner: 'circles',
     });
-  
+
     try {
       await loading.present();
-  
+
       if (semana && dia && obra) {
         const companyId = this.companyService.selectedCompany.id;
         const userId = this.authService.userId; // Agregado: Obtener el user_id del usuario autenticado
@@ -258,13 +263,13 @@ async updatePastAssignmentsInfo(): Promise<void> {
         const endDate = this.selectedSemana?.end_date;
         const weekNumber = this.selectedSemana?.week_number;
         const dayOfWeek = this.selectedDia;
-  
+
         // Obtener empleados activos con filtro de department_range
         this.http.get(`https://siinad.mx/php/get_active_employees_by_date.php?start_date=${startDate}&end_date=${endDate}&company_id=${companyId}&user_id=${userId}`)
           .subscribe((data: any) => {
             this.empleados = Array.isArray(data) ? data : [];
             this.filterEmpleados();
-  
+
             // Obtener empleados ya asignados con el filtro de department_range
             this.http.get(`https://siinad.mx/php/get_assigned_employees.php?start_date=${startDate}&end_date=${endDate}&company_id=${companyId}&week_number=${weekNumber}&day_of_week=${dayOfWeek}&user_id=${userId}`)
               .subscribe((assignedData: any) => {
@@ -289,16 +294,16 @@ async updatePastAssignmentsInfo(): Promise<void> {
       }
     }
   }
-  
+
   markAssignedEmployees(assignedEmployees: any) {
 
     const assignedIds = assignedEmployees.map(id => Number(id));
 
     this.empleados.forEach(empleado => {
-    
+
       // Verificar si el ID existe en la lista de asignados
       empleado.isAssigned = assignedIds.includes(empleado.employee_id);
-      
+
       // Si está asignado, quitar selección si existe
       if (empleado.isAssigned && empleado.selected) {
         empleado.selected = false;
@@ -308,7 +313,7 @@ async updatePastAssignmentsInfo(): Promise<void> {
         }
       }
     });
-    
+
     this.filterEmpleados();
   }
 
@@ -323,28 +328,28 @@ async updatePastAssignmentsInfo(): Promise<void> {
       console.error('Debe seleccionarse un día y una obra.');
       return;
     }
-  
+
     const loading = await this.loadingController.create({
       message: 'Cargando asignaciones...',
       spinner: 'circles',
     });
     await loading.present();
-  
+
     const companyId = this.companyService.selectedCompany.id;
     const projectId = this.selectedObra.project_id;
     const dayOfWeek = this.selectedDia;
-  
+
     this.http.get(`https://siinad.mx/php/get_previous_assigned.php?company_id=${companyId}&day_of_week=${dayOfWeek}&project_id=${projectId}`)
       .subscribe((data: any) => {
         if (Array.isArray(data)) {
           // Guardamos los IDs de los empleados obtenidos
           this.lastAssignedEmployeeIds = data.map(emp => Number(emp.employee_id));
-  
+
           this.pastAssignmentsInfo = {
             count: data.length,
             date: data.length ? data[0].day_of_week : null
           };
-  
+
           data.forEach(emp => {
             const found = this.empleados.find(e => Number(e.employee_id) === Number(emp.employee_id));
             if (found && !found.selected && !found.isAssigned) {
@@ -363,8 +368,8 @@ async updatePastAssignmentsInfo(): Promise<void> {
         loading.dismiss();
       });
   }
-  
-  
+
+
   filterEmpleados() {
     const searchTerm = this.searchEmployee.toLowerCase();
     this.filteredEmpleados = this.empleados
@@ -381,8 +386,8 @@ async updatePastAssignmentsInfo(): Promise<void> {
         return a.last_name.localeCompare(b.last_name, 'es');
       });
   }
-  
-  
+
+
 
   get allLastAssignedAlreadySelected(): boolean {
     if (!this.lastAssignedEmployeeIds || this.lastAssignedEmployeeIds.length === 0) {
@@ -393,15 +398,15 @@ async updatePastAssignmentsInfo(): Promise<void> {
       return emp ? emp.selected : false;
     });
   }
-  
+
 
   toggleUnassignedEmployeesSelection(): void {
     // Filtra los empleados que no están asignados
     const unassignedEmployees = this.filteredEmpleados.filter(empleado => !empleado.isAssigned);
-    
+
     // Verifica si todos los empleados no asignados ya están seleccionados
     const areAllSelected = unassignedEmployees.every(empleado => empleado.selected);
-  
+
     if (areAllSelected) {
       // Si están todos seleccionados, se deseleccionan
       unassignedEmployees.forEach(empleado => {
@@ -421,7 +426,7 @@ async updatePastAssignmentsInfo(): Promise<void> {
       });
     }
   }
-  
+
   get toggleButtonLabel(): string {
     const unassignedEmployees = this.filteredEmpleados.filter(empleado => !empleado.isAssigned);
     // Si no hay empleados no asignados, retorna un texto adecuado (opcional)
@@ -433,14 +438,14 @@ async updatePastAssignmentsInfo(): Promise<void> {
       ? 'Desmarcar Todos No Asignados'
       : 'Marcar Todos No Asignados';
   }
-  
+
 
 
   toggleEmpleadoSelection(empleado: any): void {
     if (empleado.isAssigned) return; // No hacer nada si está asignado
-  
+
     empleado.selected = !empleado.selected;
-  
+
     const index = this.selectedEmpleados.indexOf(empleado);
     if (empleado.selected && index === -1) {
       // Agregar empleado a la lista seleccionada
@@ -449,14 +454,14 @@ async updatePastAssignmentsInfo(): Promise<void> {
       // Remover empleado de la lista seleccionada
       this.selectedEmpleados.splice(index, 1);
     }
-  
+
     // Reordenar la lista para que los seleccionados aparezcan arriba
     this.filterEmpleados();
   }
-  
-  
-  
-  
+
+
+
+
 
   async assignEmployees() {
     const dialogRef = this.dialogService.open(AssignmentSummaryComponent, {
@@ -483,10 +488,10 @@ async updatePastAssignmentsInfo(): Promise<void> {
       message: 'Asignando empleados...',
       spinner: 'circles',
     });
-  
+
     // Mostrar el spinner de carga
     await loading.present();
-  
+
     try {
       const data = {
         weekNumber: this.selectedSemana?.week_number,
@@ -502,17 +507,17 @@ async updatePastAssignmentsInfo(): Promise<void> {
         periodNumber: this.selectedSemana?.period_number,
         periodId: this.selectedSemana?.period_id,
       };
-  
+
       // Realizar la solicitud HTTP
       await this.http.post('https://siinad.mx/php/assign-employees.php', data).toPromise();
       console.log('Empleados asignados correctamente');
-  
+
       // Marcar empleados como asignados y limpiar la lista de seleccionados
       this.selectedEmpleados.forEach((empleado) => {
         empleado.isAssigned = true;
       });
       this.selectedEmpleados = [];
-  
+
       // Recargar la lista de empleados para que ya no aparezcan los confirmados
       this.loadEmpleados(this.selectedSemana, this.selectedDia, this.selectedObra);
     } catch (error) {
@@ -522,28 +527,28 @@ async updatePastAssignmentsInfo(): Promise<void> {
       loading.dismiss();
     }
   }
-  
-  
-  
 
-onObraChange(obra: any): void {
-  this.selectedObra = obra;
 
-  // Resetear el contador de empleados seleccionados
-  this.selectedEmpleados = [];
-  // Desmarcar la selección en la lista de empleados
-  if (this.empleados && this.empleados.length) {
-    this.empleados.forEach(empleado => empleado.selected = false);
+
+
+  onObraChange(obra: any): void {
+    this.selectedObra = obra;
+
+    // Resetear el contador de empleados seleccionados
+    this.selectedEmpleados = [];
+    // Desmarcar la selección en la lista de empleados
+    if (this.empleados && this.empleados.length) {
+      this.empleados.forEach(empleado => empleado.selected = false);
+    }
+
+    // Cargar empleados según la obra y el día seleccionados
+    this.loadEmpleados(this.selectedSemana, this.selectedDia, obra);
+
+    // Actualiza la información global de asignaciones pasadas (sin seleccionar empleados) si el día ya ha sido seleccionado
+    if (this.selectedDia) {
+      this.updatePastAssignmentsInfo();
+    }
   }
-
-  // Cargar empleados según la obra y el día seleccionados
-  this.loadEmpleados(this.selectedSemana, this.selectedDia, obra);
-
-  // Actualiza la información global de asignaciones pasadas (sin seleccionar empleados) si el día ya ha sido seleccionado
-  if (this.selectedDia) {
-    this.updatePastAssignmentsInfo();
-  }
-}
 
   onSearchChange() {
     this.filterEmpleados();
@@ -561,5 +566,5 @@ onObraChange(obra: any): void {
       }
     });
   }
-  
+
 }
