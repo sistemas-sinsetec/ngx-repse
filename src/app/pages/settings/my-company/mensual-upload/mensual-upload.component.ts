@@ -96,55 +96,63 @@ export class MensualUploadComponent implements OnInit {
     return doc && doc.comentario ? doc.comentario : '-';
   }
   async processOCR(file: File): Promise<string> {
-    // Función para extraer solo los RFC del texto
-    const extractRFC = (text: string): string => {
-      // La expresión busca "RFC:" (sin importar mayúsculas/minúsculas) seguido de espacios y el patrón del RFC.
-      const rfcRegex = /RFC:\s*([A-ZÑ&]{3,4}\d{6}[A-Z0-9]{3})/gi;
-      const matches: string[] = [];
-      let match;
-      while ((match = rfcRegex.exec(text)) !== null) {
-        matches.push(match[1]);
-      }
-      return matches.join('\n');
+    const normalizeText = (str: string): string => {
+      return str.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
     };
-    
+  
+    const extractFirstRFCAfterSection = (text: string): string | null => {
+      const normalizedText = normalizeText(text);
+      const sectionMarker = "datos generales del patron o sujeto obligado";
+      const sectionIndex = normalizedText.indexOf(sectionMarker);
+  
+      if (sectionIndex === -1) return null;
+  
+      const postSectionText = text.substring(sectionIndex);
+      const rfcRegex = /([A-ZÑ&]{3,4}\d{6}[A-Z0-9]{3})/g;
+      const match = rfcRegex.exec(postSectionText);
+      return match ? match[1] : null;
+    };
   
     const isPDF = file.type === 'application/pdf';
-    
+    let fullText = '';
+  
     if (isPDF) {
       try {
         const arrayBuffer = await file.arrayBuffer();
         const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
-        let fullText = '';
   
-        // Procesa todas las páginas del PDF
         for (let i = 1; i <= pdf.numPages; i++) {
           const page = await pdf.getPage(i);
-          const viewport = page.getViewport({ scale: 4 });
-          
+          const viewport = page.getViewport({ scale: 6});
           const canvas = document.createElement('canvas');
           const context = canvas.getContext('2d');
-          if (!context) {
-            console.error(`No se pudo obtener el contexto del canvas para la página ${i}`);
-            continue;
-          }
+  
+          if (!context) continue;
+  
           canvas.width = viewport.width;
           canvas.height = viewport.height;
-          
-          const renderContext = { canvasContext: context, viewport };
-          await page.render(renderContext).promise;
-          
+  
+          await page.render({ canvasContext: context, viewport }).promise;
+  
           const imageDataUrl = canvas.toDataURL('image/png');
           const result = await Tesseract.recognize(imageDataUrl, 'eng', {
             logger: m => console.log(`Página ${i}:`, m),
           });
-          fullText += result.data.text.trim() + '\n';
+  
+          const pageText = result.data.text.trim();
+          fullText += pageText + '\n';
+  
+          const foundRFC = extractFirstRFCAfterSection(fullText);
+          if (foundRFC) {
+            console.log(`✅ RFC encontrado en la página ${i}:`, foundRFC);
+            return foundRFC;
+          }
         }
-        
-        // Extrae únicamente los RFC del texto completo
-        return extractRFC(fullText);
+  
+        console.warn("⚠️ No se encontró el RFC después de la sección esperada.");
+        return '';
       } catch (error) {
-        console.error('Error al procesar PDF:', error);
+        console.error('❌ Error al procesar PDF:', error);
         return '';
       }
     } else {
@@ -152,14 +160,17 @@ export class MensualUploadComponent implements OnInit {
         const result = await Tesseract.recognize(file, 'eng', {
           logger: m => console.log(m),
         });
-        // Extrae únicamente los RFC del texto obtenido
-        return extractRFC(result.data.text.trim());
+  
+        fullText = result.data.text.trim();
+        return extractFirstRFCAfterSection(fullText) ?? '';
       } catch (error) {
-        console.error('Error al procesar imagen:', error);
+        console.error('❌ Error al procesar imagen:', error);
         return '';
       }
     }
   }
+  
+  
   
   
   
