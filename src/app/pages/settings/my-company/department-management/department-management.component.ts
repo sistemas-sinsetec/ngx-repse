@@ -216,31 +216,40 @@ export class DepartmentManagementComponent {
     
 
     async savePositionConfig() {
-      if (this.getCurrentPosition().position_name) {
-      
-        const positionData = { ...this.getCurrentPosition(), company_id:this.companyService.selectedCompany.id };
-        const url = this.selectedPosition && this.selectedPosition.position_id
-          ? 'https://siinad.mx/php/update_position.php'
-          : 'https://siinad.mx/php/add_position.php';
-  
-          this.http.post(url, JSON.stringify(positionData), { headers: { 'Content-Type': 'application/json' } })
-          .subscribe(
+      const current = this.getCurrentPosition();
+    
+      // Validar que el nombre y el rango estén definidos
+      if (!current.position_name || current.position_range == null) {
+        this.showToast('danger', 'Debe ingresar el nombre y el rango del puesto.', 'Error');
+        return;
+      }
+    
+      // Validar que el rango esté entre 1 y 50
+      if (current.position_range < 1 || current.position_range > 50) {
+        this.showToast('danger', 'El rango debe estar entre 1 y 50.', 'Error');
+        return;
+      }
+    
+      const positionData = { ...current, company_id: this.companyService.selectedCompany.id };
+      const url = this.selectedPosition && this.selectedPosition.position_id
+        ? 'https://siinad.mx/php/update_position.php'
+        : 'https://siinad.mx/php/add_position.php';
+    
+      this.http.post(url, JSON.stringify(positionData), { headers: { 'Content-Type': 'application/json' } })
+        .subscribe(
           () => {
-            
             this.fetchPositions();
             this.isAddingPosition = false;
             this.selectedPosition = null;
             this.showToast('success', '¡Cambios guardados exitosamente!', 'Éxito');
-         
           },
           error => {
             console.error('Error al guardar el puesto', error);
             this.showToast('danger', 'Error al guardar los cambios. Inténtelo de nuevo.', 'Error');
-
           }
         );
-      }
     }
+    
 
     async saveShiftConfig() {
       if (this.getCurrentShift().shift_name) {

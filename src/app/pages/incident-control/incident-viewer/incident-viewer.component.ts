@@ -175,9 +175,6 @@ export class IncidentViewerComponent implements OnInit {
   onDiaChange(dia: string): void {
     this.selectedDia = dia; // Actualizar el día seleccionado
     this.loadEmployees(); // Recargar los empleados asignados y no asignados para el día seleccionado
-
-
-
   }
 
   // Método para obtener la información del turno basado en el shift_id del empleado
@@ -199,40 +196,78 @@ export class IncidentViewerComponent implements OnInit {
       console.error('No se ha seleccionado una semana laboral o día');
       return;
     }
-
+  
     const { start_date, end_date, week_number } = this.selectedWeek;
     const day_of_week = this.selectedDia;
-    const user_id = this.authService.userId
-
+    const user_id = this.authService.userId;
+  
     const loading = await this.loadingController.create({
       message: 'Cargando empleados...',
       spinner: 'circles',
     });
     await loading.present();
-
-    // Cargar empleados asignados con el filtro de department_range
+  
+    // Inicializar las listas en vacío
+    this.assignedEmployees = [];
+    this.filteredAssignedEmployees = [];
+    this.unassignedEmployees = [];
+    this.filteredUnassignedEmployees = [];
+  
+    let requestsFinished = 0;
+  
+    const checkCompletion = () => {
+      requestsFinished++;
+      if (requestsFinished === 2) {
+        if (this.assignedEmployees.length === 0 && this.unassignedEmployees.length === 0) {
+          this.showToast('No se encontraron empleados para la fecha seleccionada.', 'warning');
+        }
+        loading.dismiss();
+      }
+    };
+  
+    // Solicitud para empleados asignados
     this.http.get(`https://siinad.mx/php/get_assigned_employees1.php?start_date=${start_date}&end_date=${end_date}&company_id=${this.companyId}&project_id=0&week_number=${week_number}&day_of_week=${day_of_week}&user_id=${user_id}`)
-      .subscribe((data: any) => {
-        this.assignedEmployees = data;
-        this.filteredAssignedEmployees = [...this.assignedEmployees];
-        loading.dismiss();
-      }, error => {
-        console.error('Error al cargar empleados asignados', error);
-        loading.dismiss();
+      .subscribe({
+        next: (data: any) => {
+          if (Array.isArray(data)) {
+            this.assignedEmployees = data;
+            this.filteredAssignedEmployees = [...data];
+          } else {
+            this.assignedEmployees = [];
+            this.filteredAssignedEmployees = [];
+            console.warn('La respuesta de empleados asignados no es un arreglo:', data);
+          }
+          checkCompletion();
+        },
+        error: (error) => {
+          console.error('Error al cargar empleados asignados', error);
+          checkCompletion();
+        }
       });
-
-    // Cargar empleados no asignados con el filtro de department_range
+  
+    // Solicitud para empleados no asignados
     this.http.get(`https://siinad.mx/php/get_unassigned_employees.php?company_id=${this.companyId}&start_date=${start_date}&end_date=${end_date}&week_number=${week_number}&day_of_week=${day_of_week}&user_id=${user_id}`)
-      .subscribe((data: any) => {
-        this.unassignedEmployees = data;
-        this.filteredUnassignedEmployees = [...this.unassignedEmployees];
-        loading.dismiss();
-      }, error => {
-        console.error('Error al cargar empleados no asignados', error);
-        loading.dismiss();
+      .subscribe({
+        next: (data: any) => {
+          if (Array.isArray(data)) {
+            this.unassignedEmployees = data;
+            this.filteredUnassignedEmployees = [...data];
+          } else {
+            this.unassignedEmployees = [];
+            this.filteredUnassignedEmployees = [];
+            console.warn('La respuesta de empleados no asignados no es un arreglo:', data);
+          }
+          checkCompletion();
+        },
+        error: (error) => {
+          console.error('Error al cargar empleados no asignados', error);
+          checkCompletion();
+        }
       });
   }
-
+  
+  
+  
   filterAssignedEmployees() {
     const searchTerm = this.searchAssigned.toLowerCase();
     this.filteredAssignedEmployees = this.assignedEmployees.filter((emp) =>

@@ -82,12 +82,13 @@ export class RegCompanyComponent {
             ? this.usuario.nombreEmpresa
             : null,
       };
-
+  
       this.http.post('https://siinad.mx/php/registerAdminS.php', data).subscribe(
         async (response: any) => {
           if (response.success) {
             this.toastrService.success(response.message, 'Registro exitoso');
-           
+            // Limpia los campos del formulario
+            this.limpiarCampos();
           } else {
             this.toastrService.danger(response.message, 'Error');
           }
@@ -107,7 +108,7 @@ export class RegCompanyComponent {
       );
     }
   }
-
+  
   buscarEmpresaPorRFC() {
     this.http
       .post('https://siinad.mx/php/searchCompanies.php', {

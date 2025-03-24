@@ -110,14 +110,13 @@
               <nb-form-field class="form-field">
                 <nb-icon nbPrefix icon="arrowhead-up-outline"></nb-icon>
                 <input type="number" max="50" min="1" maxlength="2"
-                  nbInput fullWidth
+                  nbInput fullWidth required
                   id="positionRange"
                   placeholder="Rango del puesto"
                   [(ngModel)]="getCurrentPosition().position_range"
                   (ngModelChange)="validatePositionRange()"
                   (keydown)="restrictInput($event)">
-                  
-                  
+                
               </nb-form-field>
             </div>
 

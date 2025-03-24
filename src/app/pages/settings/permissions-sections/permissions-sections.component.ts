@@ -191,7 +191,7 @@ export class PermissionsSectionsComponent implements OnInit {
     const subSectionsProviderMap: { [key: string]: string[] } = {
       'Sistema REPSE': [''],
       'Control de proyectos': [
-        'Asignacion de proyectos',
+        'Asignacion de proyectosSDASDSAS',
         'Registro de proyectos',
         'Vizualizar proyectos',
         'Seguimiento de proyectos'
@@ -230,7 +230,7 @@ export class PermissionsSectionsComponent implements OnInit {
     const subSectionsClientMap: { [key: string]: string[] } = {
       'Sistema REPSE': [''],
       'Control de proyectos': [
-        'Asignacion de proyectos',
+        'Asignacion de proyectoCXVVXXVCVXCs',
         'Registro de proyectos',
         'Vizualizar proyectos',
         'Seguimiento de proyectos'

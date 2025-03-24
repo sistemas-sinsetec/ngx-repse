@@ -5,8 +5,12 @@ import { NbDialogService } from '@nebular/theme'; // Importa el servicio de diá
 import { CompanyService } from '../../../../services/company.service';
 import { ChangeDetectorRef } from '@angular/core';
 import { finalize } from 'rxjs/operators';
+import * as Tesseract from 'tesseract.js';
+import * as pdfjsLib from 'pdfjs-dist';
+import pdfWorker from 'pdfjs-dist/build/pdf.worker.entry';
 
-
+import { GlobalWorkerOptions } from 'pdfjs-dist/build/pdf';
+GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.worker.min.js';
 
 interface Tarea {
   id: number;
@@ -91,6 +95,73 @@ export class MensualUploadComponent implements OnInit {
     const doc = tarea.documents?.find(d => d.month === month && d.year === year);
     return doc && doc.comentario ? doc.comentario : '-';
   }
+  async processOCR(file: File): Promise<string> {
+    // Función para extraer solo los RFC del texto
+    const extractRFC = (text: string): string => {
+      // La expresión busca "RFC:" (sin importar mayúsculas/minúsculas) seguido de espacios y el patrón del RFC.
+      const rfcRegex = /RFC:\s*([A-ZÑ&]{3,4}\d{6}[A-Z0-9]{3})/gi;
+      const matches: string[] = [];
+      let match;
+      while ((match = rfcRegex.exec(text)) !== null) {
+        matches.push(match[1]);
+      }
+      return matches.join('\n');
+    };
+    
+  
+    const isPDF = file.type === 'application/pdf';
+    
+    if (isPDF) {
+      try {
+        const arrayBuffer = await file.arrayBuffer();
+        const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
+        let fullText = '';
+  
+        // Procesa todas las páginas del PDF
+        for (let i = 1; i <= pdf.numPages; i++) {
+          const page = await pdf.getPage(i);
+          const viewport = page.getViewport({ scale: 4 });
+          
+          const canvas = document.createElement('canvas');
+          const context = canvas.getContext('2d');
+          if (!context) {
+            console.error(`No se pudo obtener el contexto del canvas para la página ${i}`);
+            continue;
+          }
+          canvas.width = viewport.width;
+          canvas.height = viewport.height;
+          
+          const renderContext = { canvasContext: context, viewport };
+          await page.render(renderContext).promise;
+          
+          const imageDataUrl = canvas.toDataURL('image/png');
+          const result = await Tesseract.recognize(imageDataUrl, 'eng', {
+            logger: m => console.log(`Página ${i}:`, m),
+          });
+          fullText += result.data.text.trim() + '\n';
+        }
+        
+        // Extrae únicamente los RFC del texto completo
+        return extractRFC(fullText);
+      } catch (error) {
+        console.error('Error al procesar PDF:', error);
+        return '';
+      }
+    } else {
+      try {
+        const result = await Tesseract.recognize(file, 'eng', {
+          logger: m => console.log(m),
+        });
+        // Extrae únicamente los RFC del texto obtenido
+        return extractRFC(result.data.text.trim());
+      } catch (error) {
+        console.error('Error al procesar imagen:', error);
+        return '';
+      }
+    }
+  }
+  
+  
   
 
   getStatus(estado: string): string {
@@ -201,7 +272,12 @@ export class MensualUploadComponent implements OnInit {
   }
   
   
-  uploadFile(tarea: Tarea, file: File) {
+  async uploadFile(tarea: Tarea, file: File) {
+    this.cargando = true;
+  
+    const comentario = await this.processOCR(file); // 🧠 Extraemos el texto OCR
+    console.log(comentario);
+  
     const formData: FormData = new FormData();
     formData.append('file', file);
     formData.append('userId', this.authService.userId);
@@ -209,8 +285,8 @@ export class MensualUploadComponent implements OnInit {
     formData.append('tareaId', tarea.id.toString());
     formData.append('month', this.selectedMonth);
     formData.append('year', this.selectedYear.toString());
+    formData.append('comentario', comentario); // ✅ Añadimos el texto extraído
   
-    this.cargando = true;
     this.http.post('https://siinad.mx/php/documentUpload.php', formData)
       .pipe(
         finalize(() => {
