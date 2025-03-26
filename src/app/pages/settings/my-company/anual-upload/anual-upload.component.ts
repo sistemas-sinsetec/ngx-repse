@@ -9,10 +9,11 @@ import { AutorizacionStpsModalComponent } from '../autorizacion-stps-modal/autor
 import { EstablecimientosModalComponent } from '../establecimientos-modal/establecimientos-modal.component';
 import { ContratoModalComponent } from '../contrato-modal/contrato-modal.component';
 import { CompanyService } from '../../../../services/company.service';
-import { NbToastrService, NbComponentStatus } from '@nebular/theme';
+import { NbComponentStatus } from '@nebular/theme';
 import * as pdfjsLib from 'pdfjs-dist';
 import { TextItem } from 'pdfjs-dist/types/src/display/api';
 import { map } from 'rxjs/operators';
+import { CustomToastrService } from '../../../../services/custom-toastr.service';
 
 
 interface Tarea {
@@ -60,7 +61,7 @@ export class AnualUploadComponent implements OnInit {
     public authService: AuthService,
     public companyService: CompanyService,
     private nbDialogService: NbDialogService,
-    private toastrService: NbToastrService,
+    private toastrService: CustomToastrService,
   ) {
     pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.10.377/pdf.worker.min.js';
   }
@@ -70,14 +71,6 @@ export class AnualUploadComponent implements OnInit {
     this.configurarTareas();
     this.obtenerEstadoArchivos();
     this.isUploading = false;
-  }
-
-  private showToast(message: string, status: NbComponentStatus) {
-    this.toastrService.show(
-      message,
-      'Información',
-      { status: status, duration: 3000 }
-    );
   }
 
   configurarTareas() {
@@ -178,11 +171,11 @@ export class AnualUploadComponent implements OnInit {
       tarea.estado = 'cargado';
       this.updateCounters();
       this.obtenerEstadoArchivos();
-      this.showToast("Archivo subido y validado correctamente", 'success');
+      this.toastrService.showSuccess("Archivo subido y validado correctamente", 'Exito');
     } catch (error) {
       console.error('Error:', error);
       const errorMessage = error instanceof Error ? error.message : 'Error desconocido';
-      this.showToast(errorMessage, 'danger');
+      this.toastrService.showError(errorMessage, 'Error');
     } finally {
       this.isUploading = false;
     }

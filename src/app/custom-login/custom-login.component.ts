@@ -1,11 +1,12 @@
 import { Component, OnInit } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Router } from '@angular/router';
-import { NbToastrService, NbDialogService } from '@nebular/theme';
+import { NbDialogService } from '@nebular/theme';
 import { AuthService } from '../services/auth.service';
 import { CompanyService } from '../services/company.service';  // <-- Importa tu servicio de empresas
 import { PeriodService } from '../services/period.service'; // si lo necesitas
 import { SelectCompanyPeriodDialogComponent } from '../select-company-period-dialog/select-company-period-dialog.component'; 
+import { CustomToastrService } from '../services/custom-toastr.service';
 
 @Component({
   selector: 'app-custom-login',
@@ -28,7 +29,7 @@ export class CustomLoginComponent implements OnInit {
   constructor(
     private router: Router,
     private http: HttpClient,
-    private toastrService: NbToastrService,
+    private toastrService: CustomToastrService,
     private authService: AuthService,
     private companyService: CompanyService, // <-- Inyecta tu servicio de empresas
     private periodService: PeriodService, // si lo necesitas
@@ -48,7 +49,7 @@ export class CustomLoginComponent implements OnInit {
     this.messages = [];
 
     if (!this.user.username || !this.user.password) {
-      this.presentToast('Por favor, ingresa tu usuario y contraseña', 'warning');
+      this.toastrService.showError('Por favor, ingresa tu usuario y contraseña', 'Error');
       this.submitted = false;
       return;
     }
@@ -107,10 +108,6 @@ export class CustomLoginComponent implements OnInit {
       'forms.validation.password.maxLength': 20,
     };
     return config[key];
-  }
-
-  presentToast(message: string, status: string) {
-    this.toastrService.show(message, 'Mensaje', { status });
   }
 
   openCompanyPeriodDialog() {

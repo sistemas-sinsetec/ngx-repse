@@ -1,12 +1,13 @@
 import { Component, OnInit } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { NbSpinnerService, NbToastrService, NbDialogService } from '@nebular/theme';
+import { NbSpinnerService, NbDialogService } from '@nebular/theme';
 import { AuthService } from '../../../services/auth.service';
 import { CompanyService } from '../../../services/company.service';
 import { PeriodService } from '../../../services/period.service';
 import { DialogComponent } from '../../modal-overlays/dialog/dialog.component';
 import * as moment from 'moment';
 import { LoadingController, AlertController } from '@ionic/angular';
+import { CustomToastrService } from '../../../services/custom-toastr.service';
 
 
 @Component({
@@ -39,7 +40,7 @@ export class ConfirmWeekComponent {
     private periodService: PeriodService,
     private http: HttpClient,
     private spinnerService: NbSpinnerService,
-    private toastrService: NbToastrService,
+    private toastrService: CustomToastrService,
     private dialogService: NbDialogService,
     private loadingController: LoadingController,
     private alertController: AlertController
@@ -93,7 +94,7 @@ export class ConfirmWeekComponent {
           this.verificarConfirmacionSemana(companyId, this.currentPeriodId);
         } else {
           console.error('No se encontraron días confirmados para la semana.');
-          this.toastrService.warning('No se encontraron días confirmados para la semana.', 'Aviso');
+          this.toastrService.showWarning('No se encontraron días confirmados para la semana.', 'Aviso');
         }
         loading.dismiss();
       },
@@ -194,18 +195,16 @@ export class ConfirmWeekComponent {
 
     // Si es día de descanso pero tiene empleados asignados, permitir confirmar
     if (dia.isRestDay && (this.empleadosDia.length > 0 || this.empleadosIncidencias.length > 0)) {
-      this.toastrService.show(
+      this.toastrService.showWarning(
         'Este es un día de descanso, pero hay empleados asignados.',
-        `Información del Día: ${dia.date}`,
-        { status: 'warning', duration: 5000 }
+        `Información del Día: ${dia.date}`
       );
     }
     // Si no hay empleados, mostrar mensaje normal
     else if (this.empleadosDia.length === 0 && this.empleadosIncidencias.length === 0) {
-      this.toastrService.show(
+      this.toastrService.showInfo(
         'No hay empleados asignados ni con incidencias para este día.',
-        `Información del Día: ${dia.date}`,
-        { status: 'info', duration: 5000 }
+        `Información del Día: ${dia.date}`
       );
     }
   }
@@ -268,14 +267,14 @@ export class ConfirmWeekComponent {
       if (response && response.success) {
         console.log('Semana confirmada correctamente');
         this.isWeekConfirmed = true;
-        await this.toastrService.success('La semana se ha confirmado exitosamente.');
+        await this.toastrService.showSuccess('La semana se ha confirmado exitosamente.');
       } else {
         console.error('Error al confirmar la semana:', response.message);
-        await this.toastrService.danger('Hubo un problema al confirmar la semana. Inténtalo de nuevo.');
+        await this.toastrService.showError('Hubo un problema al confirmar la semana. Inténtalo de nuevo.');
       }
     } catch (error) {
       console.error('Error en la solicitud de confirmación de la semana:', error);
-      await this.toastrService.danger('Hubo un problema al conectar con el servidor. Inténtalo de nuevo.');
+      await this.toastrService.showError('Hubo un problema al conectar con el servidor. Inténtalo de nuevo.');
     } finally {
       // Asegúrate de cerrar el loading en cualquier caso
       await loading.dismiss();
@@ -286,7 +285,7 @@ export class ConfirmWeekComponent {
 
   // Método para mostrar alertas con Nebular Toastr
   async mostrarAlerta(header: string, message: string) {
-    this.toastrService.show(message, header, { status: 'danger' });
+    this.toastrService.showError(message, header);
   }
 
   filterEmployees() {
@@ -390,18 +389,18 @@ export class ConfirmWeekComponent {
       (response: any) => {
         if (response?.success) {
           dia.status = newStatus; // Actualizar estado en el frontend
-          this.toastrService.success(
+          this.toastrService.showSuccess(
             `Día ${newStatus === 'confirmed' ? 'confirmado' : 'desconfirmado'} correctamente.`,
             'Éxito'
           );
           this.cargarEmpleadosDia(dia); // Recargar datos del día
         } else {
-          this.toastrService.danger(response?.error || 'Error en el servidor', 'Error');
+          this.toastrService.showError(response?.error || 'Error en el servidor', 'Error');
         }
         loading.dismiss();
       },
       (error) => {
-        this.toastrService.danger('Error de conexión', 'Error');
+        this.toastrService.showError('Error de conexión', 'Error');
         loading.dismiss();
       }
     );
@@ -412,9 +411,9 @@ export class ConfirmWeekComponent {
 
   private handleError(error: any): void {
     console.error('Error:', error);
-    this.toastrService.danger(
+    this.toastrService.showError(
       'Ocurrió un error al procesar la solicitud. Intenta nuevamente.',
-      'Error', { duration: 5000 }
+      'Error'
     );
   }
 

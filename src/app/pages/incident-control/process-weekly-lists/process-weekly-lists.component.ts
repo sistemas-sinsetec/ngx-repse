@@ -1,13 +1,14 @@
 
 import { Component, OnInit } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { NbSpinnerService, NbAlertModule, NbToastrService, NbDialogService } from '@nebular/theme';
+import { NbSpinnerService, NbAlertModule, NbDialogService } from '@nebular/theme';
 import { AuthService } from '../../../services/auth.service';
 import { CompanyService } from '../../../services/company.service';
 import { PeriodService } from '../../../services/period.service';
 import * as moment from 'moment';
 import { ProcessedListDialogComponent } from '../processed-list-dialog/processed-list-dialog.component';
 import { LoadingController, AlertController } from '@ionic/angular';
+import { CustomToastrService } from '../../../services/custom-toastr.service';
 
 @Component({
   selector: 'ngx-process-weekly-lists',
@@ -31,7 +32,7 @@ export class ProcessWeeklyListsComponent {
     private alertModule: NbAlertModule,
     private companyService: CompanyService,
     private periodService: PeriodService,
-    private toastrService: NbToastrService,
+    private toastrService: CustomToastrService,
     private dialogService: NbDialogService,
     private loadingController: LoadingController,
     private alertController: AlertController
@@ -68,7 +69,7 @@ export class ProcessWeeklyListsComponent {
         } else {
           // Si data está vacío o no es un array, muestra el toast
           this.confirmedWeeks = [];
-          this.toastrService.warning('No hay semanas confirmadas por el momento. Inténtalo más tarde.','Aviso');
+          this.toastrService.showWarning('No hay semanas confirmadas por el momento. Inténtalo más tarde.','Aviso');
         }
       },
       (error) => {
@@ -200,18 +201,16 @@ async loadEmployeesForWeek() {
         });
         await alert.present();
   
-        this.toastrService.success(
+        this.toastrService.showSuccess(
           'La semana ha sido procesada exitosamente.',
-          'Éxito',
-          { duration: 3000, status: 'success' }
+          'Éxito'
         );
       },
       async (error) => {
         loading.dismiss();
-        this.toastrService.danger(
+        this.toastrService.showError(
           'Hubo un error al procesar la semana. Por favor, intente nuevamente.',
-          'Error',
-          { duration: 3000, status: 'danger' }
+          'Error'
         );
         console.error('Error al procesar la semana', error);
       }

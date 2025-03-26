@@ -3,9 +3,9 @@ import { HttpClient } from '@angular/common/http';
 import { AuthService } from '../../../../services/auth.service';
 import { CompanyService } from '../../../../services/company.service';
 import { LoadingController } from '@ionic/angular'; // Importar LoadingController de Ionic
-import { NbToastrService } from '@nebular/theme'; // Importar NbToastrService de Nebular
 import * as moment from 'moment'; // Importar moment.js para manejar fechas y tiempos
 import { PeriodService } from '../../../../services/period.service';
+import { CustomToastrService } from '../../../../services/custom-toastr.service';
 
 @Component({
   selector: 'ngx-period-configuration',
@@ -31,7 +31,7 @@ export class PeriodConfigurationComponent {
     private authService: AuthService,
     private companyService: CompanyService,
     private loadingController: LoadingController, // Inyectar LoadingController
-    private toastrService: NbToastrService, // Inyectar NbToastrService
+    private toastrService: CustomToastrService, // Inyectar NbToastrService
     private elementRef: ElementRef,
     private periodService: PeriodService
   ) { this.generateDays(); }
@@ -166,7 +166,7 @@ export class PeriodConfigurationComponent {
       }, error => {
         console.error('Error al cargar los periodos', error);
         loading.dismiss(); // Ocultar el spinner de carga en caso de error
-        this.toastrService.danger('Error al cargar los periodos', 'Error'); // Mostrar un toast de error
+        this.toastrService.showError('Error al cargar los periodos', 'Error'); // Mostrar un toast de error
       });
   }
 
@@ -257,7 +257,7 @@ export class PeriodConfigurationComponent {
   
           if (periodConfig.period_type_id) {
             // Actualización de periodo
-            this.toastrService.success('Cambios guardados correctamente', 'Éxito');
+            this.toastrService.showSuccess('Cambios guardados correctamente', 'Éxito');
           } else {
             // Creación de nuevo periodo
             const periodTypeId = response.period_type_id;
@@ -267,7 +267,7 @@ export class PeriodConfigurationComponent {
             // Crear los periodos de nómina
             await this.createPayrollPeriods(periodData, this.selectedPeriod);
             
-            this.toastrService.success('Nuevo periodo creado correctamente', 'Éxito');
+            this.toastrService.showSuccess('Nuevo periodo creado correctamente', 'Éxito');
           }
   
           // Recargar los periodos después de guardar
@@ -276,12 +276,12 @@ export class PeriodConfigurationComponent {
         (error) => {
           console.error('Error en la petición:', error);
           loading.dismiss();
-          this.toastrService.danger('Error al guardar los cambios', 'Error');
+          this.toastrService.showError('Error al guardar los cambios', 'Error');
         }
       );
     } catch (error) {
       console.error('Error inesperado:', error);
-      this.toastrService.danger('Ocurrió un error inesperado', 'Error');
+      this.toastrService.showError('Ocurrió un error inesperado', 'Error');
     }
   }
   
@@ -452,7 +452,7 @@ export class PeriodConfigurationComponent {
         console.log(`Periodo de nómina ${payrollPeriod.period_number} creado correctamente`);
       } catch (error) {
         console.error(`Error al crear el periodo de nómina ${payrollPeriod.period_number}`, error);
-        this.toastrService.danger(`Error al crear el periodo #${payrollPeriod.period_number}`, 'Error');
+        this.toastrService.showError(`Error al crear el periodo #${payrollPeriod.period_number}`, 'Error');
         // Si quieres, puedes break para no seguir, o continuar creando los siguientes
       }
     }
@@ -471,22 +471,22 @@ export class PeriodConfigurationComponent {
 
   validateForm(): boolean {
     if (!this.selectedPeriod.period_type_name.match(/^[a-zA-ZáéíóúÁÉÍÓÚñÑ\s]+$/)) {
-      this.toastrService.warning('El nombre del periodo solo puede contener letras.', 'Validación');
+      this.toastrService.showWarning('El nombre del periodo solo puede contener letras.', 'Validación');
       return false;
     }
   
     if (!this.selectedPeriod.period_days || isNaN(this.selectedPeriod.period_days)) {
-      this.toastrService.warning('Los días del periodo deben ser un número válido.', 'Validación');
+      this.toastrService.showWarning('Los días del periodo deben ser un número válido.', 'Validación');
       return false;
     }
   
     if (!this.selectedPeriod.payment_frequency) {
-      this.toastrService.warning('Debes seleccionar una periodicidad de pago.', 'Validación');
+      this.toastrService.showWarning('Debes seleccionar una periodicidad de pago.', 'Validación');
       return false;
     }
   
     if (!this.selectedPeriod.fiscal_year_start) {
-      this.toastrService.warning('Debes seleccionar una fecha de inicio.', 'Validación');
+      this.toastrService.showWarning('Debes seleccionar una fecha de inicio.', 'Validación');
       return false;
     }
   
@@ -502,10 +502,10 @@ export class PeriodConfigurationComponent {
           console.log('Periodo eliminado correctamente', response);
           this.loadPeriods();  // Recargar los periodos después de eliminar uno
           this.selectedPeriod = {};  // Limpiar el periodo seleccionado
-          this.toastrService.success('Periodo eliminado correctamente', 'Éxito');
+          this.toastrService.showSuccess('Periodo eliminado correctamente', 'Éxito');
         }, error => {
           console.error('Error al eliminar el periodo', error);
-          this.toastrService.danger('Error al eliminar el periodo', 'Error');
+          this.toastrService.showError('Error al eliminar el periodo', 'Error');
         });
     }
   }

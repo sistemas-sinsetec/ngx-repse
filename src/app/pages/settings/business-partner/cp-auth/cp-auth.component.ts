@@ -2,10 +2,11 @@ import { Component, OnInit } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { AuthService } from '../../../../services/auth.service';
 import { Router } from '@angular/router';
-import { NbDialogService, NbToastrService } from '@nebular/theme';
+import { NbDialogService} from '@nebular/theme';
 import { CompanyService } from '../../../../services/company.service';
 import { CpAuthModalDeleteComponent } from '../cp-auth-modal-delete/cp-auth-modal-delete.component';
 import { CpAuthModalComponent } from '../cp-auth-modal/cp-auth-modal.component';
+import { CustomToastrService } from '../../../../services/custom-toastr.service';
 
 @Component({
   selector: 'ngx-cp-auth',
@@ -32,7 +33,7 @@ export class CpAuthComponent implements OnInit {
     private router: Router,
     private authService: AuthService,
     private http: HttpClient,
-    private toastrService: NbToastrService,
+    private toastrService: CustomToastrService,
     private dialogService: NbDialogService,
     private companyService: CompanyService,
   ) {}
@@ -90,7 +91,7 @@ export class CpAuthComponent implements OnInit {
             }
           });
         } else {
-          this.mostrarToast(response.message, 'danger');
+          this.toastrService.showError(response.message, 'danger');
         }
       }, (error) => {
         console.error('Error al aceptar al socio:', error);
@@ -124,16 +125,12 @@ export class CpAuthComponent implements OnInit {
 
     this.http.post<any>('https://siinad.mx/php/delete_association.php', data)
       .subscribe((response: any) => {
-        this.mostrarToast(response.message, 'success');
+        this.toastrService.showSuccess(response.message, 'success');
         this.socios = this.socios.filter(socio => socio.id !== this.selectedSocio.id);
         this.selectedSocio = null;
       }, (error) => {
         console.error('Error al rechazar al socio:', error);
       });
-  }
-
-  mostrarToast(mensaje: string, status: string) {
-    this.toastrService.show(mensaje, 'Notificación', { status });
   }
 
   getRoleDisplayName(roleName: string): string {

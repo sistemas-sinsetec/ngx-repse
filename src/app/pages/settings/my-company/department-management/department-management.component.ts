@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { CompanyService } from '../../../../services/company.service';
-import { NbToastrService } from '@nebular/theme';
+import { CustomToastrService } from '../../../../services/custom-toastr.service';
 import { NbGlobalPhysicalPosition } from '@nebular/theme';
 @Component({
   selector: 'ngx-department-management',
@@ -39,7 +39,7 @@ export class DepartmentManagementComponent {
     constructor(
       private http: HttpClient,
       private companyService: CompanyService,
-      private toastrService: NbToastrService,
+      private toastrService: CustomToastrService,
     ) { }
 
     ngOnInit() {
@@ -194,24 +194,16 @@ export class DepartmentManagementComponent {
           
             this.fetchDepartments();
             this.createNewDepartment();
-            this.showToast('success', '¡Cambios guardados exitosamente!', 'Éxito');
+            this.toastrService.showSuccess('¡Cambios guardados exitosamente!', 'Éxito');
            
           },
           error => {
             console.error('Error al guardar el departamento', error);
-            this.showToast('danger', 'Error al guardar los cambios. Inténtelo de nuevo.', 'Error');
+            this.toastrService.showError('Error al guardar los cambios. Inténtelo de nuevo.', 'Error');
            
           }
         );
       }
-    }
-
-    showToast(status: string, message: string, title: string) {
-      this.toastrService.show(message, title, {
-        status: status,
-        duration: 3000, // Duración de la alerta en milisegundos
-        position:NbGlobalPhysicalPosition.TOP_RIGHT, // Posición de la alerta
-      });
     }
     
 
@@ -220,13 +212,13 @@ export class DepartmentManagementComponent {
     
       // Validar que el nombre y el rango estén definidos
       if (!current.position_name || current.position_range == null) {
-        this.showToast('danger', 'Debe ingresar el nombre y el rango del puesto.', 'Error');
+        this.toastrService.showError('Debe ingresar el nombre y el rango del puesto.', 'Error');
         return;
       }
     
       // Validar que el rango esté entre 1 y 50
       if (current.position_range < 1 || current.position_range > 50) {
-        this.showToast('danger', 'El rango debe estar entre 1 y 50.', 'Error');
+        this.toastrService.showError('El rango debe estar entre 1 y 50.', 'Error');
         return;
       }
     
@@ -241,11 +233,11 @@ export class DepartmentManagementComponent {
             this.fetchPositions();
             this.isAddingPosition = false;
             this.selectedPosition = null;
-            this.showToast('success', '¡Cambios guardados exitosamente!', 'Éxito');
+            this.toastrService.showSuccess('¡Cambios guardados exitosamente!', 'Éxito');
           },
           error => {
             console.error('Error al guardar el puesto', error);
-            this.showToast('danger', 'Error al guardar los cambios. Inténtelo de nuevo.', 'Error');
+            this.toastrService.showError('Error al guardar los cambios. Inténtelo de nuevo.', 'Error');
           }
         );
     }
@@ -270,12 +262,12 @@ export class DepartmentManagementComponent {
             this.fetchShifts();
             this.isAddingShift = false;
             this.selectedShift = null;
-            this.showToast('success', '¡Cambios guardados exitosamente!', 'Éxito');
+            this.toastrService.showSuccess('¡Cambios guardados exitosamente!', 'Éxito');
            
           },
           error => {
             console.error('Error al guardar el turno', error);
-            this.showToast('danger', 'Error al guardar los cambios. Inténtelo de nuevo.', 'Error');
+            this.toastrService.showError('Error al guardar los cambios. Inténtelo de nuevo.', 'Error');
          
           }
         );
@@ -305,13 +297,13 @@ export class DepartmentManagementComponent {
           () => {
            
             this.fetchDepartments();
-            this.showToast('success', '¡Departamento eliminado correctamente!', 'Éxito');
+            this.toastrService.showSuccess('¡Departamento eliminado correctamente!', 'Éxito');
             
        
           },
           error => {
             console.error('Error al borrar departamento', error);
-            this.showToast('danger', 'No se pudo eliminar el departamento. Inténtelo de nuevo.', 'Error');
+            this.toastrService.showError('No se pudo eliminar el departamento. Inténtelo de nuevo.', 'Error');
            
           }
         );
@@ -328,12 +320,12 @@ export class DepartmentManagementComponent {
         () => {
          
           this.fetchPositions();
-          this.showToast('success', '¡Puesto eliminado correctamente!', 'Éxito');
+          this.toastrService.showSuccess('¡Puesto eliminado correctamente!', 'Éxito');
        
         },
         error => {
           console.error('Error al borrar puesto', error);
-          this.showToast('danger', 'No se pudo eliminar el puesto. Inténtelo de nuevo.', 'Error');
+          this.toastrService.showError('No se pudo eliminar el puesto. Inténtelo de nuevo.', 'Error');
         
         }
       );
@@ -349,12 +341,12 @@ export class DepartmentManagementComponent {
         () => {
         
           this.fetchShifts();
-          this.showToast('success', '¡Turno eliminado correctamente!', 'Éxito');
+          this.toastrService.showSuccess('¡Turno eliminado correctamente!', 'Éxito');
       
         },
         error => {
           console.error('Error al borrar turno', error);
-          this.showToast('success', '¡Turno eliminado correctamente!', 'Éxito');
+          this.toastrService.showSuccess('¡Turno eliminado correctamente!', 'Éxito');
       
         }
       );

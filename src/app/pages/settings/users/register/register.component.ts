@@ -3,8 +3,9 @@ import { HttpClient } from '@angular/common/http';
 import { Router } from '@angular/router';
 import { AuthService } from '../../../../services/auth.service';
 import { CompanyService } from '../../../../services/company.service';
-import { NbToastrService, NbDialogService } from '@nebular/theme';
+import { NbDialogService } from '@nebular/theme';
 import { LoadingController } from '@ionic/angular'; // <-- Importamos LoadingController de Ionic
+import { CustomToastrService } from '../../../../services/custom-toastr.service';
 
 @Component({
   selector: 'ngx-register',
@@ -42,7 +43,7 @@ export class RegisterComponent implements OnInit {
   constructor(
     private router: Router,
     private http: HttpClient,
-    private toastrService: NbToastrService,
+    private toastrService: CustomToastrService,
     public authService: AuthService,
     private dialogService: NbDialogService,
     public companyService: CompanyService,
@@ -89,14 +90,14 @@ export class RegisterComponent implements OnInit {
           this.selectedUser = response.user;
         } else {
           console.error(response.error);
-          await this.showToast(response.error, 'danger');
+          await this.toastrService.showError(response.error, 'Error');
           this.selectedUser = null;
         }
       },
       async (error) => {
         loading.dismiss();
         console.error('Error en la solicitud POST:', error);
-        await this.showToast('Error al cargar usuario.', 'danger');
+        await this.toastrService.showError('Error al cargar usuario.', 'Error');
         this.selectedUser = null;
       }
     );
@@ -119,13 +120,13 @@ export class RegisterComponent implements OnInit {
           this.secondaryCompanies = response;
         } else {
           console.error('Error al cargar empresas secundarias');
-          await this.showToast('Error al cargar empresas secundarias.', 'danger');
+          await this.toastrService.showError('Error al cargar empresas secundarias.', 'Error');
         }
       },
       async (error) => {
         loading.dismiss();
         console.error('Error en la solicitud GET:', error);
-        await this.showToast('Error al cargar empresas secundarias.', 'danger');
+        await this.toastrService.showError('Error al cargar empresas secundarias.', 'error');
       }
     );
   }
@@ -135,7 +136,7 @@ export class RegisterComponent implements OnInit {
    */
   async assignCompanyToUser() {
     if (!this.selectedUser) {
-      await this.showToast('No se ha seleccionado un usuario.', 'warning');
+      await this.toastrService.showWarning('No se ha seleccionado un usuario.', 'Advertencia');
       return;
     }
 
@@ -158,17 +159,17 @@ export class RegisterComponent implements OnInit {
         loading.dismiss();
         if (response.success) {
           console.log('Empresa asignada', response);
-          await this.showToast('Empresa asignada con éxito.', 'success');
+          await this.toastrService.showSuccess('Empresa asignada con éxito.', 'Exito');
           this.closeModal();
         } else {
           console.error(response.error);
-          await this.showToast(response.error, 'danger');
+          await this.toastrService.showError(response.error, 'Error');
         }
       },
       async (error) => {
         loading.dismiss();
         console.error('Error en la solicitud POST:', error);
-        await this.showToast('Error al asignar empresa.', 'danger');
+        await this.toastrService.showError('Error al asignar empresa.', 'danger');
       }
     );
   }
@@ -178,11 +179,6 @@ export class RegisterComponent implements OnInit {
    */
   closeModal() {
     this.isModalOpen = false;
-  }
-
- 
-  async showToast(message: string, status: 'success' | 'danger' | 'warning') {
-    this.toastrService.show(message, 'Notificación', { status });
   }
 
 
@@ -225,7 +221,7 @@ async registrarUsuario() {
 
   const validationMessages = this.getValidationMessages();
   if (validationMessages.length > 0) {
-    validationMessages.forEach(message => this.showToast(message, 'warning'));
+    validationMessages.forEach(message => this.toastrService.showWarning(message, 'Advertencia'));
     return;
   }
     this.usuario.nombreCompleto = this.capitalizarNombreCompleto(this.usuario.nombreCompleto);
@@ -251,16 +247,16 @@ async registrarUsuario() {
       async (response: any) => {
         loading.dismiss();
         if (response.success) {
-          await this.showToast(response.message, 'success');
+          await this.toastrService.showSuccess(response.message, 'Exito');
           this.limpiarCampos();
         } else {
-          await this.showToast(response.message, 'danger');
+          await this.toastrService.showError(response.message, 'Error');
         }
       },
       async (error) => {
         loading.dismiss();
         console.error('Error en la solicitud POST:', error);
-        await this.showToast('Error en la solicitud de registro.', 'danger');
+        await this.toastrService.showError('Error en la solicitud de registro.', 'Error');
       }
     );
   }

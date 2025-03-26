@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { NbDialogService, NbSpinnerService, NbToastrService } from '@nebular/theme'; // Importar los servicios de Nebular
+import { NbDialogService, NbSpinnerService } from '@nebular/theme'; // Importar los servicios de Nebular
 
 import { HttpClient } from '@angular/common/http';
 import { AuthService } from '../../../services/auth.service'; // Importar AuthService
@@ -9,6 +9,7 @@ import { ChangeHoursModalComponent } from '../change-hours-modal/change-hours-mo
 import { CompanyService } from '../../../services/company.service';
 import { PeriodService } from '../../../services/period.service';
 import { LoadingController, AlertController } from '@ionic/angular';
+import { CustomToastrService } from '../../../services/custom-toastr.service';
 
 @Component({
   selector: 'ngx-incident-viewer',
@@ -39,7 +40,7 @@ export class IncidentViewerComponent implements OnInit {
     private authService: AuthService, // AuthService
     private companyService: CompanyService,
     private periodService: PeriodService,
-    private toastrService: NbToastrService,
+    private toastrService: CustomToastrService,
     private loadingController: LoadingController,
     private alertController: AlertController
   ) { }
@@ -67,7 +68,7 @@ export class IncidentViewerComponent implements OnInit {
   
     if (!selectedPeriod) {
       console.error('No se ha seleccionado un tipo de periodo.');
-      this.showToast('Por favor selecciona un periodo antes de continuar.', 'danger');
+      this.toastrService.showError('Por favor selecciona un periodo antes de continuar.', 'danger');
       return;
     }
   
@@ -96,18 +97,18 @@ export class IncidentViewerComponent implements OnInit {
             
             // Verificar si se encontró la semana actual
             if (!currentWeek) {
-              this.showToast('No se encontró la semana actual en los registros.', 'warning');
+              this.toastrService.showWarning('No se encontró la semana actual en los registros.', 'warning');
             }
 
           } else {
             console.error('No se encontraron semanas disponibles.');
-            this.showToast('No hay semanas disponibles para este periodo.', 'danger');
+            this.toastrService.showError('No hay semanas disponibles para este periodo.', 'error');
           }
           loading.dismiss();
         },
         (error) => {
           console.error('Error al cargar las semanas', error);
-          this.showToast('Error al cargar las semanas. Por favor intenta de nuevo.', 'danger');
+          this.toastrService.showError('Error al cargar las semanas. Por favor intenta de nuevo.', 'error');
           loading.dismiss();
         }
       );
@@ -117,7 +118,7 @@ export class IncidentViewerComponent implements OnInit {
   onWeekChange(week: any) {
     if (!week) {
       console.error('No se seleccionó ninguna semana.');
-      this.showToast('Por favor selecciona una semana válida.', 'danger');
+      this.toastrService.showError('Por favor selecciona una semana válida.', 'error');
       return;
     }
 
@@ -219,7 +220,7 @@ export class IncidentViewerComponent implements OnInit {
       requestsFinished++;
       if (requestsFinished === 2) {
         if (this.assignedEmployees.length === 0 && this.unassignedEmployees.length === 0) {
-          this.showToast('No se encontraron empleados para la fecha seleccionada.', 'warning');
+          this.toastrService.showWarning('No se encontraron empleados para la fecha seleccionada.', 'Advertencia');
         }
         loading.dismiss();
       }
@@ -340,10 +341,10 @@ export class IncidentViewerComponent implements OnInit {
       );
 
       // Mostrar solo un mensaje de éxito
-      await this.showToast('Todas las horas fueron asignadas correctamente.', 'success');
+      await this.toastrService.showSuccess('Todas las horas fueron asignadas correctamente.', 'Exito');
     } catch (error) {
       console.error('Error al guardar algunas horas:', error);
-      await this.showToast('Ocurrió un error al asignar las horas.', 'danger');
+      await this.toastrService.showError('Ocurrió un error al asignar las horas.', 'Error');
     }
   }
 
@@ -428,10 +429,10 @@ export class IncidentViewerComponent implements OnInit {
           };
           await this.http.post('https://siinad.mx/php/save_incident.php', incidentData).toPromise();
         }));
-        await this.showToast('Se registraron correctamente las horas y la incidencia de asistencia sin proyecto.', 'success');
+        await this.toastrService.showSuccess('Se registraron correctamente las horas y la incidencia de asistencia sin proyecto.', 'Exito');
       } catch (error) {
         console.error('Error al guardar work hours e incidencia:', error);
-        await this.showToast('Ocurrió un error al guardar los registros de asistencia sin proyecto.', 'danger');
+        await this.toastrService.showError('Ocurrió un error al guardar los registros de asistencia sin proyecto.', 'Error');
       }
     } else {
       // Lógica para otros tipos de incidencias
@@ -452,11 +453,11 @@ export class IncidentViewerComponent implements OnInit {
             this.http.post('https://siinad.mx/php/save_incident.php', incidentData).toPromise()
           )
         );
-        await this.showToast('Todas las incidencias fueron asignadas correctamente.', 'success');
+        await this.toastrService.showSuccess('Todas las incidencias fueron asignadas correctamente.', 'Exito');
         await this.showAlert('Se asignaron las incidencias con éxito.');
       } catch (error) {
         console.error('Error al guardar algunas incidencias:', error);
-        await this.showToast('Ocurrió un error al asignar las incidencias.', 'danger');
+        await this.toastrService.showError('Ocurrió un error al asignar las incidencias.', 'error');
       }
     }
   }
@@ -473,8 +474,7 @@ export class IncidentViewerComponent implements OnInit {
         .subscribe((data: any) => {
           spinner.clear();
           if (data.confirmed) {
-            this.showToast('Este día ya ha sido confirmado. No puedes asignar incidencias ni modificar las horas. Por favor, comunícate con un administrador.', 'danger');
-            resolve(true); // El día está confirmado
+            this.toastrService.showError('Este día ya ha sido confirmado. No puedes asignar incidencias ni modificar las horas. Por favor, comunícate con un administrador.', 'Errorr')
           } else {
             resolve(false); // El día no está confirmado
           }
@@ -484,12 +484,6 @@ export class IncidentViewerComponent implements OnInit {
           reject(error);
         });
     });
-  }
-
-
-  showToast(message: string, status: 'success' | 'danger' | 'warning') {
-
-    this.toastrService.show(message, 'Notificación', { status });
   }
 
   getFormattedDate(date: string): string {

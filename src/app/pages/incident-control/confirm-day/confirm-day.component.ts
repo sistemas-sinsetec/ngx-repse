@@ -4,7 +4,7 @@ import { NbAlertModule, NbSpinnerService, NbDialogService } from '@nebular/theme
 import { AuthService } from '../../../services/auth.service';
 import { CompanyService } from '../../../services/company.service';
 import { PeriodService } from '../../../services/period.service';
-import { NbToastrService } from '@nebular/theme';
+import { CustomToastrService } from '../../../services/custom-toastr.service';
 import * as moment from 'moment';
 import { LoadingController, AlertController, NavController } from '@ionic/angular';
 
@@ -41,7 +41,7 @@ export class ConfirmDayComponent {
     private companyService: CompanyService,
     private periodService: PeriodService,
     private dialogService: NbDialogService,
-    private toastrService: NbToastrService,
+    private toastrService: CustomToastrService,
     private loadingController: LoadingController,
     private alertController: AlertController,
     
@@ -95,7 +95,7 @@ export class ConfirmDayComponent {
           this.verificarConfirmacionSemana(companyId, this.currentPeriodId);
         } else {
           console.error('No se encontraron días confirmados para la semana.');
-          this.toastrService.warning('No se encontraron días confirmados para la semana.', 'Aviso');
+          this.toastrService.showWarning('No se encontraron días confirmados para la semana.', 'Aviso');
         }
         loading.dismiss();
       },
@@ -219,28 +219,25 @@ export class ConfirmDayComponent {
   
     // Si es día de descanso pero tiene empleados asignados, permitir confirmar
     if (dia.isRestDay && (this.empleadosDia.length > 0 || this.empleadosIncidencias.length > 0)) {
-      this.toastrService.show(
+      this.toastrService.showWarning(
         'Este es un día de descanso, pero hay empleados asignados.',
-        `Información del Día: ${dia.date}`,
-        { status: 'warning', duration: 5000 }
+        `Información del Día: ${dia.date}`
       );
     }
     // Si no hay empleados, mostrar mensaje normal
     else if (this.empleadosDia.length === 0 && this.empleadosIncidencias.length === 0) {
-      this.toastrService.show(
+      this.toastrService.showInfo(
         'No hay empleados asignados ni con incidencias para este día.',
-        `Información del Día: ${dia.date}`,
-        { status: 'info', duration: 5000 }
+        `Información del Día: ${dia.date}`
       );
     }
   }
 
   async confirmarDia(dia: any) {
     if (dia.isRestDay && this.empleadosDia.length === 0 && this.empleadosIncidencias.length === 0) {
-      this.toastrService.show(
+      this.toastrService.showWarning(
         'No se puede confirmar un día de descanso sin empleados asignados.',
-        'Advertencia',
-        { status: 'warning', duration: 5000 }
+        'Advertencia'
       );
       return;
     }

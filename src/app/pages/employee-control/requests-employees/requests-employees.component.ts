@@ -4,8 +4,8 @@ import { AuthService } from '../../../services/auth.service';
 import { CompanyService } from '../../../services/company.service';
 import { SharedService } from '../../../services/shared.service';
 import { NavController, ToastController, LoadingController, AlertController } from '@ionic/angular';
-import { NbToastrService } from '@nebular/theme';
 import { NgForm } from '@angular/forms';
+import { CustomToastrService } from '../../../services/custom-toastr.service';
 interface Empleado {
   [key: string]: any;
   employee_id: number;
@@ -73,7 +73,7 @@ export class RequestsEmployeesComponent {
     private companyService: CompanyService,
     private loadingController: LoadingController,
     private alertController: AlertController,
-    private toastrService: NbToastrService
+    private toastrService: CustomToastrService
   ) { }
 
 
@@ -335,25 +335,17 @@ export class RequestsEmployeesComponent {
       const employeeId = this.selectedEmployee.employee_id;
       this.http.post('https://siinad.mx/php/delete_employee_request.php', { employee_id: employeeId }).subscribe(
         async (response: any) => {
-          this.toastrService.success(
+          this.toastrService.showSuccess(
             'Solicitud de empleado eliminada exitosamente.',
-            'Éxito',
-            {
-              duration: 2000, // tiempo en milisegundos
-              status: 'success',
-            }
+            'Éxito'
           );
           this.fetchPendingEmployees();
           this.selectedEmployee = null;
         },
         async error => {
-          this.toastrService.danger(
+          this.toastrService.showError(
             'Error al eliminar solicitud de empleado.',
-            'Error',
-            {
-              duration: 2000,
-              status: 'danger',
-            }
+            'Error'
           );
 
         }
@@ -381,26 +373,18 @@ export class RequestsEmployeesComponent {
         .subscribe(
           (response: any) => {
             // Toast de éxito con Nebular
-            this.toastrService.warning(
+            this.toastrService.showWarning(
               'Solicitud de empleado rechazada exitosamente.',
-              'Solicitud Rechazada',
-              {
-                duration: 2000,
-                status: 'warning',
-              }
+              'Solicitud Rechazada'
             );
             this.fetchPendingEmployees();
             this.selectedEmployee = null;
           },
           (error) => {
             // Toast de error con Nebular
-            this.toastrService.danger(
+            this.toastrService.showError(
               'Error al rechazar la solicitud de empleado.',
-              'Error',
-              {
-                duration: 2000,
-                status: 'danger',
-              }
+              'Error'
             );
             console.error(error);
           }
@@ -529,24 +513,16 @@ export class RequestsEmployeesComponent {
         (response: any) => {
           this.uploadFiles();
           // Toast de éxito con Nebular
-          this.toastrService.success(
+          this.toastrService.showSuccess(
             'Empleado actualizado exitosamente.',
-            'Éxito',
-            {
-              duration: 2000,
-              status: 'success',
-            }
+            'Éxito'
           );
         },
         (error) => {
           // Toast de error con Nebular
-          this.toastrService.danger(
+          this.toastrService.showError(
             'Error al actualizar empleado.',
-            'Error',
-            {
-              duration: 2000,
-              status: 'danger',
-            }
+            'Error'
           );
           console.error(error);
         }
@@ -560,13 +536,9 @@ export class RequestsEmployeesComponent {
   async uploadFiles() {
     if (!this.selectedEmployee || Object.keys(this.files).length === 0) {
       console.warn('No hay empleado seleccionado o archivos para subir.');
-      this.toastrService.warning(
+      this.toastrService.showWarning(
         'Debe seleccionar un empleado y archivos antes de continuar.',
-        'Advertencia',
-        {
-          duration: 2000,
-          status: 'warning',
-        }
+        'Advertencia'
       );
       return;
     }
@@ -590,26 +562,18 @@ export class RequestsEmployeesComponent {
       const response = await this.http.post('https://siinad.mx/php/update_upload_files.php', formData).toPromise();
 
       // Toast de éxito con Nebular
-      this.toastrService.success(
+      this.toastrService.showSuccess(
         'Archivos actualizados exitosamente.',
-        'Éxito',
-        {
-          duration: 2000,
-          status: 'success',
-        }
+        'Éxito'
       );
 
       this.fetchPendingEmployees();
       this.selectedEmployee = null;
     } catch (error) {
       // Toast de error con Nebular
-      this.toastrService.danger(
+      this.toastrService.showError(
         'Error al actualizar archivos.',
-        'Error',
-        {
-          duration: 2000,
-          status: 'danger',
-        }
+        'Error'
       );
       console.error('Error al subir archivos:', error);
     } finally {
@@ -687,25 +651,17 @@ export class RequestsEmployeesComponent {
             this.selectedEmployee = null;
           } else {
             // Toast de error con Nebular
-            this.toastrService.danger(
+            this.toastrService.showError(
               'Error: No se recibió el folio de la solicitud.',
-              'Error',
-              {
-                duration: 2000,
-                status: 'danger',
-              }
+              'Error'
             );
           }
 
           async (error) => {
             // Toast de error con Nebular
-            this.toastrService.danger(
+            this.toastrService.showError(
               'Error al actualizar el estado de la solicitud.',
-              'Error',
-              {
-                duration: 2000,
-                status: 'danger',
-              }
+              'Error'
             );
             console.error(error);
           };

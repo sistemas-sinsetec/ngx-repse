@@ -25,7 +25,6 @@ import { EditRolesComponent } from './business-partner/edit-roles/edit-roles.com
 import { authGuard } from '../../services/auth-guard';
 import { BusinessPartnerRegisterComponent } from './business-partner/business-partner-register/business-partner-register.component';
 import { PermissionsBusineesPartnerComponent } from './business-partner/permissions-businees-partner/permissions-businees-partner.component';
-import { DepartmentRangesComponent } from './my-company/department-ranges/department-ranges.component';
 import { MensualUploadComponent } from './my-company/mensual-upload/mensual-upload.component';
 import { MensualReviewComponent } from './my-company/mensual-review/mensual-review.component';
 
@@ -53,12 +52,7 @@ const routes: Routes = [
         canActivate: [authGuard],
         data: { section: 'Configuracion de mi empresa', subSection: 'Departamentos' } 
       },
-      {
-        path: 'my-company/department-ranges',
-        component: DepartmentRangesComponent,
-        canActivate: [authGuard],
-        data: { section: 'Configuracion de mi empresa', subSection: 'Departamentos' } 
-      },
+
       {
         path: 'my-company/initial-periods',
         component: InitialPeriodsComponent,

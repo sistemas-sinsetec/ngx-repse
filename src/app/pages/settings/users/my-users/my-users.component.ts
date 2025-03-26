@@ -1,8 +1,9 @@
 import { Component, OnInit } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { AuthService } from '../../../../services/auth.service';
-import { NbToastrService, NbDialogService, NbDialogRef } from '@nebular/theme';
+import { NbDialogService, NbDialogRef } from '@nebular/theme';
 import { CompanyService } from '../../../../services/company.service';
+import { CustomToastrService } from '../../../../services/custom-toastr.service';
 @Component({
   selector: 'ngx-my-users',
   templateUrl: './my-users.component.html',
@@ -19,7 +20,7 @@ export class MyUsersComponent {
   constructor(
     private http: HttpClient,
     private authService: AuthService,
-    private toastrService: NbToastrService,
+    private toastrService: CustomToastrService,
     private companyService: CompanyService
   ) {}
 
@@ -40,12 +41,12 @@ export class MyUsersComponent {
           this.filteredEmployees = this.employees; 
           console.log('Datos de empleados obtenidos:', this.employees);
         } else {
-          await this.showToast('Error en la solicitud', 'danger');
+          await this.toastrService.showError('Error en la solicitud', 'error');
         }
       },
       async (error) => {
         console.error('Error al realizar la solicitud:', error);
-        this.showToast('Error al realizar la solicitud', 'danger');
+        this.toastrService.showError('Error al realizar la solicitud', 'error');
       }
     );
   }
@@ -78,15 +79,15 @@ export class MyUsersComponent {
       this.http.delete(`https://siinad.mx/php/deleteUser.php?id=${id}`).subscribe(
         async (response: any) => {
           if (response.success) {
-            await this.showToast('Usuario eliminado exitosamente', 'success');
+            await this.toastrService.showSuccess('Usuario eliminado exitosamente', 'Exito');
           } else {
-            await this.showToast('Error al eliminar usuario: ' + response.message, 'danger');
+            await this.toastrService.showError('Error al eliminar usuario: ' + response.message, 'Error');
           }
           this.getEmployees();
         },
         async (error) => {
           console.error('Error en la solicitud DELETE:', error);
-          await this.showToast('Error al eliminar usuario.', 'danger');
+          await this.toastrService.showError('Error al eliminar usuario.', 'Error');
           this.getEmployees();
         }
       );
@@ -114,11 +115,4 @@ export class MyUsersComponent {
     }
   }
 
-  
-
-
-
-  showToast(message: string, status: 'success' | 'danger') {
-    this.toastrService.show(message, 'Notificación', { status });
-  }
 }

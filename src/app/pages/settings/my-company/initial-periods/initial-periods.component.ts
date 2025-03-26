@@ -2,10 +2,11 @@ import { Component } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { AuthService } from '../../../../services/auth.service';
 import { CompanyService } from '../../../../services/company.service';
-import { NbToastrService, NbComponentStatus, NbDialogService } from '@nebular/theme';
+import { NbComponentStatus, NbDialogService } from '@nebular/theme';
 import { LoadingController } from '@ionic/angular';
 import { SelectCompanyPeriodDialogComponent } from '../../../../select-company-period-dialog/select-company-period-dialog.component';
 import { Router } from '@angular/router';
+import { CustomToastrService } from '../../../../services/custom-toastr.service';
 
 @Component({
   selector: 'ngx-initial-periods',
@@ -33,7 +34,7 @@ export class InitialPeriodsComponent {
     private http: HttpClient,
     private authService: AuthService,
     private companyService: CompanyService,
-    private toastrService: NbToastrService,
+    private toastrService: CustomToastrService,
     private loadingController: LoadingController,
     private dialogService: NbDialogService,
     private router: Router
@@ -75,21 +76,10 @@ export class InitialPeriodsComponent {
     return date.getDate();
   }
 
-  private showToast(message: string, status: NbComponentStatus) {
-    this.toastrService.show(
-      message,
-      'Información',
-      {
-        status: status,
-        duration: 3000,
-      }
-    );
-  }
-
   async guardarConfiguracion() {
     // Validar que se haya seleccionado al menos un período
     if (!this.periodoSemanal && !this.periodoQuincenal && !this.periodoMensual) {
-      this.showToast("Debes seleccionar al menos un período", 'danger');
+      this.toastrService.showError("Debes seleccionar al menos un período", 'danger');
       return;
     }
 
@@ -99,7 +89,7 @@ export class InitialPeriodsComponent {
       (this.periodoQuincenal && !this.fechaQuincenal) ||
       (this.periodoMensual && !this.fechaMensual)
     ) {
-      this.showToast("Debes seleccionar una fecha para el período habilitado", 'danger');
+      this.toastrService.showError("Debes seleccionar una fecha para el período habilitado", 'danger');
       return;
     }
 
@@ -129,7 +119,7 @@ export class InitialPeriodsComponent {
         ccalculomescalendario: 0,
         PeriodicidadPago: '02',
       });
-      this.showToast("Periodo semanal guardado correctamente", 'success');
+      this.toastrService.showSuccess("Periodo semanal guardado correctamente", 'success');
     }
 
     if (this.periodoQuincenal) {
@@ -149,7 +139,7 @@ export class InitialPeriodsComponent {
         ccalculomescalendario: 0,
         PeriodicidadPago: '04'
       });
-      this.showToast("Periodo quincenal guardado correctamente", 'success');
+      this.toastrService.showSuccess("Periodo quincenal guardado correctamente", 'success');
     }
 
     if (this.periodoMensual) {
@@ -169,7 +159,7 @@ export class InitialPeriodsComponent {
         ccalculomescalendario: 0,
         PeriodicidadPago: '05'
       });
-      this.showToast("Periodo mensual guardado correctamente", 'success');
+      this.toastrService.showSuccess("Periodo mensual guardado correctamente", 'success');
     }
 
     const configuracion = {

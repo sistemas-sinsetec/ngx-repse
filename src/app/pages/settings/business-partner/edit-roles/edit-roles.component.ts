@@ -1,9 +1,9 @@
 import { Component, OnInit } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { NbToastrService } from '@nebular/theme';
 import { AuthService } from '../../../../services/auth.service';
 import { CompanyService } from '../../../../services/company.service';
 import { Router } from '@angular/router';
+import { CustomToastrService } from '../../../../services/custom-toastr.service';
 
 @Component({
   selector: 'ngx-edit-roles',
@@ -20,7 +20,7 @@ export class EditRolesComponent implements OnInit {
   constructor(
     private router: Router,
     private http: HttpClient,
-    private toastrService: NbToastrService,
+    private toastrService: CustomToastrService,
     public authService: AuthService,
     public companyService: CompanyService,
   ) { }
@@ -46,12 +46,12 @@ export class EditRolesComponent implements OnInit {
         if (response.length > 0) {
           this.sociosComerciales = response;
         } else {
-          this.mostrarToast('No se encontraron socios comerciales', 'warning');
+          this.toastrService.showWarning('No se encontraron socios comerciales', 'warning');
         }
       },
       (error) => {
         console.error('Error al realizar la solicitud:', error);
-        this.mostrarToast('Error al realizar la solicitud', 'danger');
+        this.toastrService.showError('Error al realizar la solicitud', 'danger');
       }
     );
   }
@@ -64,13 +64,9 @@ export class EditRolesComponent implements OnInit {
       },
       (error) => {
         console.error('Error al obtener los roles:', error);
-        this.mostrarToast('Error al obtener los roles', 'danger');
+        this.toastrService.showError('Error al obtener los roles', 'danger');
       }
     );
-  }
-
-  mostrarToast(mensaje: string, status: 'primary' | 'success' | 'warning' | 'danger') {
-    this.toastrService.show(mensaje, 'Notificación', { status });
   }
 
   mostrarDatosSocioComercial() {
@@ -90,14 +86,14 @@ export class EditRolesComponent implements OnInit {
     this.http.post('https://siinad.mx/php/saveUserRoles.php', data).subscribe(
       (response: any) => {
         if (response.success) {
-          this.mostrarToast(response.message, 'success');
+          this.toastrService.showSuccess(response.message, 'success');
         } else {
-          this.mostrarToast(response.error || 'Error al actualizar el rol', 'danger');
+          this.toastrService.showError(response.error || 'Error al actualizar el rol', 'error');
         }
       },
       (error) => {
         console.error('Error al realizar la solicitud:', error);
-        this.mostrarToast('Error al realizar la solicitud', 'danger');
+        this.toastrService.showError('Error al realizar la solicitud', 'error');
       }
     );
   }

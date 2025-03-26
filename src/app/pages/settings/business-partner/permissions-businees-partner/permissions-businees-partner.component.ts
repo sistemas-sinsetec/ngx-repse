@@ -1,8 +1,8 @@
 import { Component, OnInit } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { NbToastrService } from '@nebular/theme';
 import { CompanyService } from '../../../../services/company.service';
 import { Router } from '@angular/router';
+import { CustomToastrService } from '../../../../services/custom-toastr.service';
 
 @Component({
   selector: 'ngx-permissions-businees-partner',
@@ -18,7 +18,7 @@ export class PermissionsBusineesPartnerComponent implements OnInit {
 
   constructor(
     private http: HttpClient,
-    private toastrService: NbToastrService,
+    private toastrService: CustomToastrService,
     private companyService: CompanyService,
     private router: Router
   ) { }
@@ -38,12 +38,12 @@ export class PermissionsBusineesPartnerComponent implements OnInit {
         if (response.length > 0) {
           this.sociosComerciales = response;
         } else {
-          this.mostrarToast('No se encontraron socios comerciales.', 'warning');
+          this.toastrService.showWarning('No se encontraron socios comerciales.', 'warning');
         }
       },
       (error) => {
         console.error('Error al cargar socios comerciales:', error);
-        this.mostrarToast('Error al cargar socios comerciales.', 'danger');
+        this.toastrService.showError('Error al cargar socios comerciales.', 'danger');
       }
     );
   }
@@ -82,12 +82,12 @@ export class PermissionsBusineesPartnerComponent implements OnInit {
         if (response.success) {
           this.permisosActuales = response.sections;
         } else {
-          this.mostrarToast(response.error || 'Error al cargar permisos.', 'danger');
+          this.toastrService.showError(response.error || 'Error al cargar permisos.', 'danger');
         }
       },
       (error) => {
         console.error('Error al cargar permisos:', error);
-        this.mostrarToast('Error al cargar permisos.', 'danger');
+        this.toastrService.showError('Error al cargar permisos.', 'danger');
       }
     );
   }
@@ -102,15 +102,15 @@ export class PermissionsBusineesPartnerComponent implements OnInit {
     this.http.post('https://siinad.mx/php/addBusinessSections.php', data).subscribe(
       (response: any) => {
         if (response.success) {
-          this.mostrarToast('Permisos añadidos correctamente.', 'success');
+          this.toastrService.showSuccess('Permisos añadidos correctamente.', 'success');
           this.cargarPermisos(); // Refresca los permisos actuales
         } else {
-          this.mostrarToast(response.error || 'Error al añadir permisos.', 'danger');
+          this.toastrService.showError(response.error || 'Error al añadir permisos.', 'danger');
         }
       },
       (error) => {
         console.error('Error al añadir permisos:', error);
-        this.mostrarToast('Error al añadir permisos.', 'danger');
+        this.toastrService.showError('Error al añadir permisos.', 'danger');
       }
     );
   }
@@ -124,20 +124,16 @@ export class PermissionsBusineesPartnerComponent implements OnInit {
     this.http.post('https://siinad.mx/php/removeBusinessSections.php', data).subscribe(
       (response: any) => {
         if (response.success) {
-          this.mostrarToast('Permiso eliminado correctamente.', 'success');
+          this.toastrService.showSuccess('Permiso eliminado correctamente.', 'success');
           this.cargarPermisos(); // Refresca los permisos actuales
         } else {
-          this.mostrarToast(response.error || 'Error al eliminar permiso.', 'danger');
+          this.toastrService.showError(response.error || 'Error al eliminar permiso.', 'danger');
         }
       },
       (error) => {
         console.error('Error al eliminar permiso:', error);
-        this.mostrarToast('Error al eliminar permiso.', 'danger');
+        this.toastrService.showError('Error al eliminar permiso.', 'danger');
       }
     );
-  }
-
-  mostrarToast(mensaje: string, status: 'primary' | 'success' | 'warning' | 'danger') {
-    this.toastrService.show(mensaje, 'Notificación', { status });
   }
 }

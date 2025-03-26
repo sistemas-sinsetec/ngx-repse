@@ -1,12 +1,13 @@
 
 import { Component, OnInit } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { NbSpinnerService, NbToastrService, NbAlertModule } from '@nebular/theme';
+import { NbSpinnerService, NbAlertModule } from '@nebular/theme';
 import { AuthService } from '.././/../../services/auth.service';
 import { CompanyService } from '../../../services/company.service';
 import { PeriodService } from '../../../services/period.service';
 import * as moment from 'moment';
 import jsPDF from 'jspdf';
+import { CustomToastrService } from '../../../services/custom-toastr.service';
 
 
 import autoTable from 'jspdf-autotable';
@@ -36,7 +37,7 @@ export class ProcessedAttendanceComponent {
     private http: HttpClient,
     private spinnerService: NbSpinnerService,
     private alertController: NbAlertModule,
-    private toastrService: NbToastrService,
+    private toastrService: CustomToastrService,
     private companyService: CompanyService,
     private periodService: PeriodService,
     private loadingController: LoadingController,
@@ -122,7 +123,7 @@ export class ProcessedAttendanceComponent {
           } else {
             // Si es un array vacío, mostrar Toast
             this.processedWeeks = [];
-            this.toastrService.warning('No hay semanas procesadas por el momento. Inténtalo más tarde.','Aviso');
+            this.toastrService.showWarning('No hay semanas procesadas por el momento. Inténtalo más tarde.','Aviso');
           }
         } else {
           // Si no es array, manejamos el error o avisamos
@@ -131,7 +132,7 @@ export class ProcessedAttendanceComponent {
       },
       (error) => {
         console.error('Error al cargar semanas procesadas', error);
-        this.toastrService.danger('Error al cargar semanas procesadas.', 'Error');
+        this.toastrService.showError('Error al cargar semanas procesadas.', 'Error');
         loading.dismiss();
       }
     );
@@ -178,7 +179,7 @@ export class ProcessedAttendanceComponent {
   
     const companyId = this.companyService.selectedCompany?.id;
     if (!companyId) {
-      this.toastrService.warning(
+      this.toastrService.showWarning(
         'No se pudo obtener el ID de la compañía. Por favor, seleccione una compañía válida.',
         'Advertencia'
       );
@@ -200,7 +201,7 @@ export class ProcessedAttendanceComponent {
       },
       (error) => {
         console.error('Error al cargar datos de empleados', error);
-        this.toastrService.danger('Error al cargar datos de empleados.', 'Error');
+        this.toastrService.showError('Error al cargar datos de empleados.', 'Error');
         loading.dismiss();
       }
     );

@@ -1,7 +1,9 @@
 import { Component, OnInit } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Router } from '@angular/router';
-import { NbToastrService, NbDialogService } from '@nebular/theme';
+import { NbDialogService } from '@nebular/theme';
+import { CustomToastrService } from '../../../../services/custom-toastr.service';
+
 @Component({
   selector: 'ngx-reg-company',
   templateUrl: './reg-company.component.html',
@@ -31,7 +33,7 @@ export class RegCompanyComponent {
   constructor(
     private router: Router,
     private http: HttpClient,
-    private toastrService: NbToastrService,
+    private toastrService: CustomToastrService,
     private dialogService: NbDialogService,
   ) {}
 
@@ -86,23 +88,23 @@ export class RegCompanyComponent {
       this.http.post('https://siinad.mx/php/registerAdminS.php', data).subscribe(
         async (response: any) => {
           if (response.success) {
-            this.toastrService.success(response.message, 'Registro exitoso');
+            this.toastrService.showSuccess(response.message, 'Registro exitoso');
             // Limpia los campos del formulario
             this.limpiarCampos();
           } else {
-            this.toastrService.danger(response.message, 'Error');
+            this.toastrService.showError(response.message, 'Error');
           }
         },
         (error) => {
           console.error('Error en la solicitud POST:', error);
-          this.toastrService.danger(
+          this.toastrService.showError(
             'Error en la solicitud de registro.',
             'Error'
           );
         }
       );
     } else {
-      this.toastrService.warning(
+      this.toastrService.showWarning(
         'Complete todos los campos obligatorios.',
         'Advertencia'
       );
@@ -119,7 +121,7 @@ export class RegCompanyComponent {
           if (response.success) {
             this.usuario.nombreEmpresa = response.nombreEmpresa;
           } else {
-            this.toastrService.danger(response.message, 'Error');
+            this.toastrService.showError(response.message, 'Error');
           }
         },
         (error) => {

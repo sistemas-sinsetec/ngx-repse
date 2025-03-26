@@ -1,11 +1,11 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { NbToastrService } from '@nebular/theme';
 import { CompanyService } from '../../../../services/company.service';
 import { AuthService } from '../../../../services/auth.service';
 import { Router } from '@angular/router';
 import { LoadingController } from '@ionic/angular'; // Importar LoadingController
 import { ChangeDetectorRef } from '@angular/core';
+import { CustomToastrService } from '../../../../services/custom-toastr.service';
 
 @Component({
   selector: 'ngx-my-profile',
@@ -28,7 +28,7 @@ export class MyProfileComponent implements OnInit, OnDestroy {
 
   constructor(
     private http: HttpClient,
-    private toastrService: NbToastrService,
+    private toastrService: CustomToastrService,
     private companyService: CompanyService,
     private authService: AuthService,
     private router: Router,
@@ -58,12 +58,12 @@ export class MyProfileComponent implements OnInit, OnDestroy {
           this.userName = response.data.username;
           this.userEmail = response.data.email;
         } else {
-          this.showAlert('Error', response.message);
+          this.toastrService.showError( response.message,'Error');
         }
         loading.dismiss(); // Ocultar loading
       },
       (error) => {
-        this.showAlert('Error', 'Error al cargar los datos del usuario.');
+        this.toastrService.showError('Error al cargar los datos del usuario.', 'Error');
         loading.dismiss(); // Ocultar loading
       }
     );
@@ -84,12 +84,12 @@ export class MyProfileComponent implements OnInit, OnDestroy {
           this.avatar = response.avatarUrl;
           this.cdr.detectChanges();
         } else {
-          this.showAlert('Error', response.error);
+          this.toastrService.showError(response.error, 'Error');
         }
         loading.dismiss(); // Ocultar loading
       },
       (error) => {
-        this.showAlert('Error', 'Error al cargar el avatar.');
+        this.toastrService.showError('Error al cargar el avatar.', 'Error');
         loading.dismiss(); // Ocultar loading
       }
     );
@@ -119,7 +119,7 @@ export class MyProfileComponent implements OnInit, OnDestroy {
     // Validar tipo de archivo
     const allowedTypes = ['image/jpeg', 'image/png', 'image/jpg', 'image/webp', 'image/tiff', 'image/bmp'];
     if (!allowedTypes.includes(file.type)) {
-      this.showAlert('Error', 'Solo se permiten archivos de imagen.');
+      this.toastrService.showError('Solo se permiten archivos de imagen.', 'Error');
       loading.dismiss();
       return;
     }
@@ -138,20 +138,20 @@ export class MyProfileComponent implements OnInit, OnDestroy {
               this.authService.updateAvatar(response.avatarUrl);
               this.avatar = response.avatarUrl; // Actualizar la variable local
               this.cdr.detectChanges();  // Forzar actualización en la UI
-              this.showAlert('Éxito', 'Avatar actualizado exitosamente.');
+              this.toastrService.showSuccess('Avatar actualizado exitosamente.', 'Éxito');
             } else {
-              this.showAlert('Error', response.error);
+              this.toastrService.showError(response.error, 'Error');
             }
             loading.dismiss();
           },
           (error) => {
-            this.showAlert('Error', 'Error al actualizar el avatar.');
+            this.toastrService.showError('Error al actualizar el avatar.', 'Error');
             loading.dismiss();
           }
         );
       })
       .catch(() => {
-        this.showAlert('Error', 'No se pudo procesar la imagen.');
+        this.toastrService.showError('No se pudo procesar la imagen.', 'Error');
         loading.dismiss();
       });
   }
@@ -239,18 +239,18 @@ export class MyProfileComponent implements OnInit, OnDestroy {
 
   async saveSettings() {
     if (this.userPassword !== this.confirmPassword) {
-      this.showAlert('Error', 'Las contraseñas no coinciden.');
+      this.toastrService.showError('Las contraseñas no coinciden.', 'Error');
       return;
     }
 
     if (this.userPassword == null || this.confirmPassword == null) {
-      this.showAlert('Error', 'Debes colocar la contraseña');
+      this.toastrService.showError('Debes colocar la contraseña', 'Error');
       return;
     }
   
     // Validar correo electrónico
     if (!this.validarCorreo(this.userEmail)) {
-      this.showAlert('Error', 'Por favor ingresa un correo electrónico válido.');
+      this.toastrService.showError('Por favor ingresa un correo electrónico válido.', 'Error');
       return;
     }
   
@@ -266,11 +266,11 @@ export class MyProfileComponent implements OnInit, OnDestroy {
     const url = `https://www.siinad.mx/php/update_user.php`;
     this.http.post(url, data).subscribe(
       (response: any) => {
-        this.showAlert(response.success ? 'Éxito' : 'Error', response.message);
+        this.toastrService.showInfo(response.message, response.success ? 'Éxito' : 'Error');
         loading.dismiss();
       },
       (error) => {
-        this.showAlert('Error', 'Error al guardar la configuración.');
+        this.toastrService.showError('Error al guardar la configuración.', 'Error', );
         loading.dismiss();
       }
     );
@@ -279,17 +279,17 @@ export class MyProfileComponent implements OnInit, OnDestroy {
     if (this.generatedCode) {
       if (navigator.clipboard && navigator.clipboard.writeText) {
         navigator.clipboard.writeText(this.generatedCode).then(() => {
-          this.showAlert('Éxito', 'Código copiado al portapapeles.');
+          this.toastrService.showSuccess('Código copiado al portapapeles.', 'Éxito', );
         }).catch((err) => {
           console.error('Error al copiar el código: ', err);
-          this.showAlert('Error', 'No se pudo copiar el código.');
+          this.toastrService.showError('Error', 'No se pudo copiar el código.');
         });
       } else {
         // Fallback para navegadores que no soportan navigator.clipboard
         this.fallbackCopyTextToClipboard(this.generatedCode);
       }
     } else {
-      this.showAlert('Advertencia', 'No hay código para copiar.');
+      this.toastrService.showError('Advertencia', 'No hay código para copiar.');
     }
   }
 
@@ -317,32 +317,16 @@ export class MyProfileComponent implements OnInit, OnDestroy {
     try {
       const successful = document.execCommand('copy');
       if (successful) {
-        this.showAlert('Éxito', 'Código copiado al portapapeles.');
+        this.toastrService.showSuccess('Código copiado al portapapeles.', 'Éxito', );
       } else {
-        this.showAlert('Error', 'No se pudo copiar el código.');
+        this.toastrService.showError('No se pudo copiar el código.', 'Error');
       }
     } catch (err) {
       console.error('Error al copiar el código: ', err);
-      this.showAlert('Error', 'No se pudo copiar el código.');
+      this.toastrService.showError('No se pudo copiar el código.', 'Error');
     }
 
     document.body.removeChild(textArea);
-  }
-
-  showAlert(header: string, message: string) {
-    let status: 'success' | 'danger' | 'warning' = 'success';
-
-    if (header === 'Error') {
-      status = 'danger';
-    } else if (header === 'Advertencia') {
-      status = 'warning';
-    }
-
-    this.toastrService.show(message, header, {
-      status: status,
-      destroyByClick: true,
-      duration: 5000
-    });
   }
 
   async deleteEmployeeCode() {
@@ -355,13 +339,13 @@ export class MyProfileComponent implements OnInit, OnDestroy {
           console.log('Código eliminado con éxito.');
         } else {
           console.error(response.error);
-          this.showAlert('Error', 'Error al eliminar el código.');
+          this.toastrService.showError('Error al eliminar el código.', 'Error' );
         }
         loading.dismiss(); // Ocultar loading
       },
       (error) => {
         console.error('Error en la solicitud POST:', error);
-        this.showAlert('Error', 'Error al eliminar el código.');
+        this.toastrService.showError('Error al eliminar el código.', 'Error');
         loading.dismiss(); // Ocultar loading
       }
     );

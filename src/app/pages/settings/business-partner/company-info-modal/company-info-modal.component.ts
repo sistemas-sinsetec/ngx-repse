@@ -1,8 +1,9 @@
 import { Component, Input } from '@angular/core';
 import { AuthService } from '../../../../services/auth.service';
 import { HttpClient } from '@angular/common/http';
-import { NbToastrService, NbDialogRef } from '@nebular/theme';
+import { NbDialogRef } from '@nebular/theme';
 import { CompanyService } from '../../../../services/company.service';
+import { CustomToastrService } from '../../../../services/custom-toastr.service';
 
 @Component({
   selector: 'ngx-company-info-modal',
@@ -16,7 +17,7 @@ export class CompanyInfoModalComponent {
   constructor(
     private http: HttpClient,
     private authService: AuthService,
-    private toastrService: NbToastrService,
+    private toastrService: CustomToastrService,
     private dialogRef: NbDialogRef<CompanyInfoModalComponent>,
     private companyService: CompanyService
   ) {}
@@ -38,23 +39,19 @@ export class CompanyInfoModalComponent {
       this.http.post('https://siinad.mx/php/associationCompanies.php', data).subscribe(
         (response: any) => {
           if (response.success) {
-            this.mostrarToast(response.message, 'success');
+            this.toastrService.showSuccess(response.message, 'Exito');
             this.dialogRef.close({ success: true }); // Cierra el modal con un valor de éxito
           } else {
-            this.mostrarToast(response.message, 'danger');
+            this.toastrService.showError(response.message, 'Error');
           }
         },
         (error: any) => {
           console.error('Error al realizar la solicitud:', error);
-          this.mostrarToast('Ocurrió un error al realizar la solicitud.', 'danger');
+          this.toastrService.showError('Ocurrió un error al realizar la solicitud.', 'danger');
         }
       );
     } else {
-      this.mostrarToast('No se encontraron datos de la empresa.', 'danger');
+      this.toastrService.showError('No se encontraron datos de la empresa.', 'danger');
     }
-  }
-
-  mostrarToast(mensaje: string, status: 'success' | 'danger' | 'warning') {
-    this.toastrService.show(mensaje, 'Notificación', { status });
   }
 }

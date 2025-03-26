@@ -4,10 +4,11 @@ import { Component, OnInit, OnDestroy } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Router } from '@angular/router';
 import { EditCompanyModalComponent } from '../edit-company-modal/edit-company-modal.component';
-import { NbToastrService, NbDialogService } from '@nebular/theme';
+import { NbDialogService } from '@nebular/theme';
 import { Subject, Subscription } from 'rxjs';
 import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
 import { CompanyService } from '../../../../services/company.service';
+import { CustomToastrService } from '../../../../services/custom-toastr.service';
 
 @Component({
   selector: 'ngx-companies-info',
@@ -34,7 +35,7 @@ export class CompaniesInfoComponent implements OnInit, OnDestroy {
   constructor(
     private router: Router,
     private http: HttpClient,
-    private toastrService: NbToastrService,
+    private toastrService: CustomToastrService,
     private dialogService: NbDialogService,
     private companyService: CompanyService,
   ) { }
@@ -72,7 +73,7 @@ export class CompaniesInfoComponent implements OnInit, OnDestroy {
         },
         (error) => {
           console.error('Error al obtener los datos de las empresas:', error);
-          this.mostrarToast('Error al obtener los datos de las empresas.', 'danger');
+          this.toastrService.showError('Error al obtener los datos de las empresas.', 'error');
         }
       );
   }
@@ -157,21 +158,6 @@ export class CompaniesInfoComponent implements OnInit, OnDestroy {
    * @param mensaje Mensaje a mostrar
    * @param status Color del toast ('primary' | 'success' | 'info' | 'warning' | 'danger')
    */
-  mostrarToast(mensaje: string, status: 'primary' | 'success' | 'info' | 'warning' | 'danger') {
-    const title = status === 'danger' ? 'Error' :
-                  status === 'success' ? 'Éxito' :
-                  status === 'warning' ? 'Advertencia' : 'Información';
-
-    this.toastrService.show(
-      mensaje,
-      title,
-      {
-        status: status,
-        duration: 3000,
-        hasIcon: true,
-      }
-    );
-  }
 
   /**
    * Abre el modal para editar una empresa.
@@ -189,7 +175,7 @@ export class CompaniesInfoComponent implements OnInit, OnDestroy {
         if (index > -1) {
           this.companies[index] = result.updatedCompany;
           this.filterCompanies(); // Filtrar después de la edición
-          this.mostrarToast('Empresa actualizada exitosamente.', 'success');
+          this.toastrService.showSuccess('Empresa actualizada exitosamente.', 'Exito');
         }
       }
     });

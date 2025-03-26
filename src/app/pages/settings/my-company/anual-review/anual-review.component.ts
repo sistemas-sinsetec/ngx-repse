@@ -2,9 +2,10 @@ import { Component, OnInit } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { AuthService } from '../../../../services/auth.service';
 import { CompanyService } from '../../../../services/company.service';
-import { NbDialogService, NbToastrService } from '@nebular/theme';
+import { NbDialogService } from '@nebular/theme';
 import { RejectionDialogComponent } from '../rejection-dialog/rejection-dialog.component';
 import { ReviewInfoModalComponent } from '../review-info-modal/review-info-modal.component';
+import { CustomToastrService } from '../../../../services/custom-toastr.service';
 
 interface Tarea {
   id: number;
@@ -64,7 +65,7 @@ export class AnualReviewComponent implements OnInit {
     public authService: AuthService,
     public companyService: CompanyService,
     private dialogService: NbDialogService,
-    private toastrService: NbToastrService,
+    private toastrService: CustomToastrService,
   ) { }
 
   ngOnInit() {
@@ -125,10 +126,10 @@ export class AnualReviewComponent implements OnInit {
         .subscribe(response => {
           console.log('Archivo aceptado:', response);
           this.obtenerArchivos(this.selectedCompanyId!);
-          this.toastrService.success('Archivo aceptado correctamente', 'Éxito');
+          this.toastrService.showSuccess('Archivo aceptado correctamente', 'Éxito');
         }, error => {
           console.error('Error al aceptar el archivo:', error);
-          this.toastrService.danger('Error al aceptar el archivo', 'Error');
+          this.toastrService.showError('Error al aceptar el archivo', 'Error');
         });
     }
   }
@@ -150,10 +151,10 @@ export class AnualReviewComponent implements OnInit {
           }).subscribe(response => {
             console.log('Archivo rechazado:', response);
             this.obtenerArchivos(this.selectedCompanyId!);
-            this.toastrService.success('Archivo rechazado correctamente', 'Éxito');
+            this.toastrService.showSuccess('Archivo rechazado correctamente', 'Éxito');
           }, error => {
             console.error('Error al rechazar el archivo:', error);
-            this.toastrService.danger('Error al rechazar el archivo', 'Error');
+            this.toastrService.showError('Error al rechazar el archivo', 'Error');
           });
         }
       }
@@ -164,7 +165,7 @@ export class AnualReviewComponent implements OnInit {
     const tarea = this.tareas.find(t => t.id === archivo.tarea_id);
     if (!tarea) {
       console.error('No se encontró la tarea correspondiente');
-      this.toastrService.danger('No se encontró la tarea correspondiente', 'Error');
+      this.toastrService.showError('No se encontró la tarea correspondiente', 'Error');
       return;
     }
 
@@ -180,7 +181,7 @@ export class AnualReviewComponent implements OnInit {
       }).onClose.subscribe(result => {
         if (result) {
           // Manejar el resultado si es necesario
-          this.toastrService.success('Información adicional revisada correctamente', 'Éxito');
+          this.toastrService.showSuccess('Información adicional revisada correctamente', 'Éxito');
           this.obtenerArchivos(this.selectedCompanyId!);
         }
       });
