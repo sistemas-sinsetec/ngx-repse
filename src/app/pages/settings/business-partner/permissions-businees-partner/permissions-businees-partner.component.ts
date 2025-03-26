@@ -27,10 +27,6 @@ export class PermissionsBusineesPartnerComponent implements OnInit {
     this.obtenerSociosComerciales();
   }
 
-  goBack() {
-    this.router.navigate(['/previous']);
-  }
-
   obtenerSociosComerciales() {
     const data = { association_id: this.companyService.selectedCompany.id };
     this.http.get('https://siinad.mx/php/getBusinessPartner.php', { params: data }).subscribe(

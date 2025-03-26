@@ -323,9 +323,6 @@ export class BusinessPartnerRegisterComponent implements OnInit {
     );
   }
 
-  goBack() {
-    this.router.navigate(['/previous']); // Cambiar ruta según sea necesario
-  }
 
   obtenerRoles() {
     this.http.get('https://siinad.mx/php/getRoles.php').subscribe(

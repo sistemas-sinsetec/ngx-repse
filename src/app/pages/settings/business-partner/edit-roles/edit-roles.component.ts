@@ -31,10 +31,6 @@ export class EditRolesComponent implements OnInit {
     this.obtenerRoles(); // Nueva función para obtener roles desde el backend
   }
 
-  goBack() {
-    this.router.navigate(['/previous']); // Cambiar ruta según sea necesario
-  }
-
   obtenerSociosComerciales() {
     const data = {
       association_id: this.companyService.selectedCompany.id // Cambia el parámetro por association_id

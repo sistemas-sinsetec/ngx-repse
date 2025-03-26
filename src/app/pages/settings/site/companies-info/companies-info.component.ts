@@ -189,13 +189,6 @@ export class CompaniesInfoComponent implements OnInit, OnDestroy {
     this.currentPage = page;
   }
 
-  /**
-   * Navega a la página anterior.
-   */
-  goBack() {
-    this.router.navigate(['/previous-route']); // Actualiza la ruta según sea necesario
-  }
-
   ngOnDestroy() {
     // Limpiar la suscripción al Subject para evitar memory leaks
     if (this.searchSubscription) {

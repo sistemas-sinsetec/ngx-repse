@@ -4,7 +4,7 @@ import { HttpClient } from '@angular/common/http';
 import { NavController, ToastController, AlertController, LoadingController } from '@ionic/angular';
 import { AuthService } from '../../../services/auth.service';
 import { CompanyService } from '../../../services/company.service';
-import { CustomToastrService } from '../../../services/custom-toastr.service';
+import { NbToastrService } from '@nebular/theme';
 interface Empleado {
   [key: string]: any;
   departamento: string;
@@ -92,7 +92,7 @@ export class AddEmployeesComponent {
     private loadingController: LoadingController,
     private alertController: AlertController,
     private companyService: CompanyService,
-    private toastrService: CustomToastrService,
+    private toastrService: NbToastrService
   ) { }
 
   ngOnInit() {
@@ -281,36 +281,54 @@ export class AddEmployeesComponent {
             await this.uploadFiles(employeeId);
   
             // Mensaje de éxito con Nebular
-            this.toastrService.showSuccess(
+            this.toastrService.success(
               status === 'Pending'
                 ? `Empleado registrado exitosamente. Folio de solicitud: ${requestId}.`
                 : `Información guardada. Tienes 3 días para completar la solicitud. Folio: ${requestId}.`,
-              status === 'Pending' ? 'Solicitud Enviada' : 'Información Guardada'
+              status === 'Pending' ? 'Solicitud Enviada' : 'Información Guardada',
+              {
+                duration: 4000,
+                status: 'success',
+              }
             );
-            
           } else {
             // Toast de error con Nebular
-            this.toastrService.showError('Error al registrar empleado.', 'Error');
-
+            this.toastrService.danger(
+              'Error al registrar empleado.',
+              'Error',
+              {
+                duration: 2000,
+                status: 'danger',
+              }
+            );
           }
           loading.dismiss(); // Oculta el spinner
           this.isSubmitting = false; // Libera el bloqueo
         },
         error => {
           // Toast de error con Nebular
-          this.toastrService.showError('Error al registrar empleado.', 'Error');
-
+          this.toastrService.danger(
+            'Error al registrar empleado.',
+            'Error',
+            {
+              duration: 2000,
+              status: 'danger',
+            }
+          );
           loading.dismiss(); // Oculta el spinner
           this.isSubmitting = false; // Libera el bloqueo
         }
       );
     } else {
       // Toast de validación de formulario con Nebular
-      this.toastrService.showWarning(
+      this.toastrService.warning(
         'Por favor, complete todos los campos obligatorios.',
-        'Validación'
+        'Validación',
+        {
+          duration: 2000,
+          status: 'warning',
+        }
       );
-      
       this.validateAllFormFields(form);
       loading.dismiss(); // Oculta el spinner
       this.isSubmitting = false; // Libera el bloqueo
@@ -358,12 +376,29 @@ export class AddEmployeesComponent {
         // Ocultar el spinner
         loading.dismiss();
   
-
+        // Toast de éxito con Nebular
+        this.toastrService.success(
+          'Archivos del empleado subidos exitosamente.',
+          'Éxito',
+          {
+            duration: 2000,
+            status: 'success',
+          }
+        );
       },
       error => {
         // Ocultar el spinner
         loading.dismiss();
-
+  
+        // Toast de error con Nebular
+        this.toastrService.danger(
+          'Error al subir archivos del empleado.',
+          'Error',
+          {
+            duration: 2000,
+            status: 'danger',
+          }
+        );
         console.error('Error al subir archivos:', error);
       }
     );
@@ -379,6 +414,3 @@ export class AddEmployeesComponent {
   }
 
 }
-
-
-

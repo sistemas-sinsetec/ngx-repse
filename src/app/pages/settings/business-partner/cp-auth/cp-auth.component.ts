@@ -145,7 +145,4 @@ export class CpAuthComponent implements OnInit {
     }
   }
 
-  goBack() {
-    this.router.navigate(['/previous']); // Cambiar navegación según sea necesario
-  }
 }
