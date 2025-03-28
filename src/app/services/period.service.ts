@@ -1,3 +1,6 @@
+/*
+  En este codigo se obtienen datos referentes a la sesion respecto al periodo actual
+*/
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { BehaviorSubject } from 'rxjs';

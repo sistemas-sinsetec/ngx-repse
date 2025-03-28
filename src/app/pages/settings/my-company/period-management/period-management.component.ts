@@ -1,3 +1,7 @@
+/*
+  En este codigo se peuden visualizar cada una de las semanas y hace configuraciones referentes a ellas
+*/
+
 import { Component, OnInit } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { AuthService } from '../../../../services/auth.service';

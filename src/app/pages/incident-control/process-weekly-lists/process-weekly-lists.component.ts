@@ -1,4 +1,9 @@
 
+/*
+  En este codigo se procesan las semanas para mandarlas al siguiente estado de revision, tambien se visualiza
+  una tabla en la que tenemos los datos de la lista de asistencia
+*/
+
 import { Component, OnInit } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { NbSpinnerService, NbAlertModule, NbDialogService } from '@nebular/theme';

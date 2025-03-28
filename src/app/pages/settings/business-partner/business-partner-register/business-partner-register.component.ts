@@ -1,3 +1,7 @@
+/*
+  En esta seccion se registra un socio comercial. Simplemente es un formulario que reune lo necesario
+  para inscribir un socio comercial, con algunas validaciones por ejemplo para evitar los errores en el RFC
+*/
 import { Component, OnInit } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Router } from '@angular/router';
@@ -15,8 +19,6 @@ import { CustomToastrService } from '../../../../services/custom-toastr.service'
   styleUrls: ['./business-partner-register.component.scss'],
 })
 export class BusinessPartnerRegisterComponent implements OnInit {
-
-
 
   usuario = {
     nombreUsuario: '',

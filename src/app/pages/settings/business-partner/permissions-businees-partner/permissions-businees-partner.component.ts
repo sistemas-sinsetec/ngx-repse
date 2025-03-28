@@ -1,3 +1,6 @@
+/*
+  En esta parte se manejan los permisos de tus socios comerciales para ver ciertas secciones 
+*/
 import { Component, OnInit } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { CompanyService } from '../../../../services/company.service';

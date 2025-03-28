@@ -1,3 +1,8 @@
+/*
+  En este codigo se crean empresas, lo que a su vez crea un usuario para la misma, en el backend
+  se crea tambien un empleado, un puesto de empresa con rango 0 y se asigna todo esto para que
+  el usuario pueda hacer uso de las secciones inmediatamente.
+*/
 import { Component, OnInit } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Router } from '@angular/router';

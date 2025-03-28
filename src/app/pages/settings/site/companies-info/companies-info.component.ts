@@ -1,4 +1,6 @@
-// companies-info.component.ts
+/*
+  En este codigo se ve la informacion de las empresas registradas en la pagina
+*/
 
 import { Component, OnInit, OnDestroy } from '@angular/core';
 import { HttpClient } from '@angular/common/http';

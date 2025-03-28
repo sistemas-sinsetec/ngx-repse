@@ -1,3 +1,6 @@
+/*
+  En este codigo se administran las secciones a las que tendra acceso cada empresa.
+*/
 import { Component, OnInit } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { AuthService } from '../../../../services/auth.service';

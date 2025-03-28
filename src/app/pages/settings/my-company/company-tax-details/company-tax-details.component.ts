@@ -1,4 +1,7 @@
-// company-tax-details.component.ts
+/*
+  En este codigo se especifica la carga de la constancia de situacion fiscal y se extraen algunos datos para
+  posteriormente mostrarlos en esta misma vista
+*/
 import { Component, OnInit } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { AuthService } from '../../../../services/auth.service';

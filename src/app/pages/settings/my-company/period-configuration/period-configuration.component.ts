@@ -1,3 +1,8 @@
+/*
+  En este codigo se puede hacer una configuracion un poco mas extensa de cada periodo
+  tambien aqui se hacen los calculos para septimos dias y algunos otros necesarios
+  a la hora de generar las 52 semanas
+*/
 import { Component, OnInit, HostListener, ElementRef } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { AuthService } from '../../../../services/auth.service';

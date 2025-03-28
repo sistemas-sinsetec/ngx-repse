@@ -1,3 +1,6 @@
+/*
+  En este codigo se administra la logica para aplicar permisos a las diferentes rutas
+*/
 import { inject } from '@angular/core';
 import { Router, ActivatedRouteSnapshot, CanActivateFn } from '@angular/router';
 import { AuthService } from '../services/auth.service';

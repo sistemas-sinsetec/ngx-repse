@@ -1,3 +1,7 @@
+/*
+  En este codigo se añaden o quitan los diferentes permisos para cada usuario, es decir las secciones
+  a las que tendra acceso cada usuario ligado a la empresa.
+*/
 import { Component, OnInit } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Router } from '@angular/router';

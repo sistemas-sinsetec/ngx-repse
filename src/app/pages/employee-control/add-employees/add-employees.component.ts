@@ -1,3 +1,8 @@
+/*
+  En este codigo se maneja la logica para agregar un empleado, adicionalmente en una barra lateral se cargan
+  las solicitudes de los ultimos 15 dias
+*/
+
 import { Component, OnInit } from '@angular/core';
 import { NgForm } from '@angular/forms';
 import { HttpClient } from '@angular/common/http';

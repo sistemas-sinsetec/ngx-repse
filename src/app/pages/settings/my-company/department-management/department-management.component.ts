@@ -1,3 +1,6 @@
+/*
+  En este codigo se muestran y crean los departamentos, puestos y horarios de la empresa.
+*/
 import { Component, OnInit } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { CompanyService } from '../../../../services/company.service';

@@ -1,3 +1,7 @@
+/*
+  En esta parte se pueden crear periodos iniciales, es decir con una configuracion muy basica y solo esta disponible
+  desde la seleccion de empresa y periodos 
+*/
 import { Component } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { AuthService } from '../../../../services/auth.service';
@@ -25,7 +29,6 @@ export class InitialPeriodsComponent {
   ejercicioMensual: number;
   minDate: string;
   maxDate: string;
-
   posicionPagoSemanal: number;
   posicionPagoQuincenal: number;
   posicionPagoMensual: number;

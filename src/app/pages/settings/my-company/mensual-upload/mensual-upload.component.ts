@@ -1,3 +1,7 @@
+/*
+  En este codigo suben los documentos mensuales.
+  Nota: Toda la seccion de documentos se estaba reestructurando actualmente
+*/
 import { Component, OnInit } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { AuthService } from '../../../../services/auth.service';

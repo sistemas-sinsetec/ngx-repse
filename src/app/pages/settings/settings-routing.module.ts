@@ -1,3 +1,6 @@
+/*
+  En este codigo se manejan las rutas para todas la seccion de Configuracion y sus subsecciones
+*/
 import { NgModule } from '@angular/core';
 import { RouterModule, Routes } from '@angular/router';
 

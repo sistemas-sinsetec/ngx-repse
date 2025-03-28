@@ -1,3 +1,6 @@
+/*
+  En este codigo se pueden ver y eliminar los diferentes usuarios de la pagina
+*/
 import { Component, OnInit } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { AuthService } from '../../../../services/auth.service';

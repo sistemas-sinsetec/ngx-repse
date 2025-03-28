@@ -1,3 +1,7 @@
+/*
+  En esta parte es donde se genera un codigo para la empresa el cual compartira a un usuario en caso
+  de que quiera registrarse, actualmente se cambia al cerrar la pagina pero se cambiara la logica 
+*/
 import { Component, OnInit } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { AuthService } from '../../../../services/auth.service';

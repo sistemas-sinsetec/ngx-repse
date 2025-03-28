@@ -1,3 +1,6 @@
+/*
+  En este codigo se traen datos referentes a las vacaciones de los empleados
+*/
 import { Component, OnInit } from '@angular/core';
 import { KardexService } from '../../../services/kardex.service';
 import { CompanyService } from '../../../services/company.service';
