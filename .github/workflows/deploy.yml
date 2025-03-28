@@ -21,7 +21,7 @@ jobs:
       - name: Install dependencies and build
         run: |
           npm install -g @angular/cli
-          npm install
+          npm install --force
           ng build --configuration=production
 
       - name: FTP Deploy
