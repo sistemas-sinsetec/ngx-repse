@@ -1,3 +1,7 @@
+/*
+  En este codigo se manejan las diferentes rutas de la pagina principal
+  *Ver el servicio "Auth-guard"*
+*/
 import { RouterModule, Routes } from '@angular/router';
 import { NgModule } from '@angular/core';
 

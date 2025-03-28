@@ -1,3 +1,6 @@
+/* Este componente maneja las diferentes incidencias tanto para los empleado asignados a proyecto
+como para los que no han sido asignados aun, tambien se les puede asignar las horas trabajadas*/
+
 import { Component, OnInit } from '@angular/core';
 import { NbDialogService, NbSpinnerService } from '@nebular/theme'; // Importar los servicios de Nebular
 
@@ -113,7 +116,6 @@ export class IncidentViewerComponent implements OnInit {
         }
       );
   }
- Bugs
 
   onWeekChange(week: any) {
     if (!week) {

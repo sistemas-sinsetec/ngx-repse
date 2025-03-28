@@ -1,3 +1,6 @@
+/*
+  En este codigo se pueden dar de alta nuevos usuarios para la empresa
+*/
 import { Component, OnInit } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Router } from '@angular/router';

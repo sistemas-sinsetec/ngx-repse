@@ -1,3 +1,6 @@
+/*
+  En este codigo se maneja la carga de documentos anuales de la empresa
+*/
 import { Component, OnInit } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { AuthService } from '../../../../services/auth.service';

@@ -1,3 +1,7 @@
+/*
+  En esta sección se imprimen en un pdf los datos capturados tanto en incidencias como en asignación de proyectos
+  Se puede tanto descargar el pdf, como subir el archivo una vez escaneado
+*/
 
 import { Component, OnInit } from '@angular/core';
 import { HttpClient } from '@angular/common/http';

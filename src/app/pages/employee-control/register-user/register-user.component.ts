@@ -1,3 +1,6 @@
+/*
+  No hay ruta
+*/
 import { Component, OnInit } from '@angular/core';
 import { NbWindowRef } from '@nebular/theme';
 import { HttpClient } from '@angular/common/http';

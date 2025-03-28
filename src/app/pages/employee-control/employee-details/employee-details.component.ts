@@ -1,3 +1,9 @@
+
+/*
+  Esta es la ventana que se despliega al presionar en ver detalles de empleado (employee-view)
+  Aqui simplemente se ven los datos del empleado y se pueden editar tambien
+*/
+
 import { Component, Input, OnInit, Inject } from '@angular/core';
 import { LoadingController } from '@ionic/angular';
 import { NbAlertModule, NbDialogService} from '@nebular/theme';

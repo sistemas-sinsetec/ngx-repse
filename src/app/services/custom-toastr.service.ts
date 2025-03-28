@@ -1,4 +1,6 @@
-// shared/services/custom-toastr.service.ts
+/*
+  En este codigo se maneja la logica para usar toast en toda la pagina
+*/
 import { Injectable } from '@angular/core';
 import { NbToastrService } from '@nebular/theme';
 

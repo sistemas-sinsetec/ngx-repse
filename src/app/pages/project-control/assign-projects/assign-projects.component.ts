@@ -1,3 +1,8 @@
+/*
+  En esta parte se asignan los empleados a proyectos dia con dia, tiene un boton para trear asignaciones pasadas y
+  Una lista de donde se van seleccionando los empleados en cierta fecha
+*/
+
 import { Component, OnInit } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { AuthService } from '../../../services/auth.service';

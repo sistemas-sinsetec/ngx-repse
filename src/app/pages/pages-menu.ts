@@ -1,3 +1,8 @@
+/*
+  En esta parte se manejan los accesos a las diferentes secciones desde el menu lateral
+  se especifican las secciones, subsecciones y la ruta a la que llevan 
+*/
+
 import { CustomMenuItem } from './custom-menu-item'; // Asegúrate de usar la ruta correcta
 
 export const MENU_ITEMS: CustomMenuItem[] = [

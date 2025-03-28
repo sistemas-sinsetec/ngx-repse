@@ -1,3 +1,6 @@
+/*
+  En este codigo el usuario puede visualizar sus datos y editarlos 
+*/
 import { Component, OnInit, OnDestroy } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { CompanyService } from '../../../../services/company.service';

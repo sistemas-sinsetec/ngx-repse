@@ -1,3 +1,9 @@
+/*
+  En este codigo se revisan y aceptan o rechazan los documentos previamente cargados en anual-upload
+  Adicionalmente tiene contadores que al mismo tiempo sirven como filtros para visualizar los documentos
+  Nota: Actualmente se estaba trabajando en la reestructuracion de estas secciones (documentos) para cumplir con
+  los requisitos que plantearon
+*/
 import { Component, OnInit } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { AuthService } from '../../../../services/auth.service';

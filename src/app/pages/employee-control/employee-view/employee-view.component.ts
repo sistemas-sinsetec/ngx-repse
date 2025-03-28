@@ -1,3 +1,9 @@
+/*
+  En esta parte se visualizan los empleados registrados en la empresa, tanto los que estan activos como los
+  inactivos, pero esto se puede manejar por medio de un menu lateral, el cual cuenta con varios filtros
+  adicional a eso se pueden ver los detalles del empleado o crear una cuenta de usuario a partir del empleado
+*/
+
 import { Component, OnInit } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { AuthService } from '../../../services/auth.service';

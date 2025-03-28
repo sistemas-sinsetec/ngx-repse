@@ -1,3 +1,7 @@
+/*
+  En este codigo se editan las solicitudes de empleados previamente hechas en add-employees, es simplemente
+  un formulario que precarga los datos ya conocidos y te permite completar mas datos
+*/
 import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { NgForm } from '@angular/forms';
 import { HttpClient } from '@angular/common/http';

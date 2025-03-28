@@ -1,3 +1,6 @@
+/*
+  En este se maneja la logica para los usuarios premium
+*/
 import { Component, OnInit } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { AuthService } from '../../../../services/auth.service';

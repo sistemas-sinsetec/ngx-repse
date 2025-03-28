@@ -1,4 +1,6 @@
-// company.service.ts
+/*
+  En este codigo se administran los datos de la sesion referentes a la empresa actual
+*/
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable, Subject } from 'rxjs';
