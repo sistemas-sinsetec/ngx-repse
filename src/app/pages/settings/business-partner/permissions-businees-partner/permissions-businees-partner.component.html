@@ -1,73 +1,179 @@
+<!-- commercial-partner-sections.component.html -->
+<nb-card>
+  <nb-card-header class="text-center">
+    <h5 class="mb-0"><strong>Gestión de Secciones para Socios Comerciales</strong></h5>
+  </nb-card-header>
 
-    <div class="row justify-content-center">
-      <div class="col-md-6">
-        <div class="text-center pt-4">
-          <h5><strong>Gestión de Permisos de Socios Comerciales</strong></h5>
-        </div>
-        <nb-card class="shadow-lg p-4 rounded-5">
-          <!-- Selector de socio comercial -->
-          <div class="mb-3">
-            <label class="form-label">Selecciona un socio comercial:</label>
-            <nb-select
-              placeholder="Selecciona un socio comercial"
-              [(selected)]="socioComercialSeleccionado"
-              (selectedChange)="mostrarDatosSocioComercial()"
-            >
-              <nb-option *ngFor="let socio of sociosComerciales" [value]="socio">
-                {{ socio.nameCompany }} - {{ socio.roleName }}
-              </nb-option>
-            </nb-select>
-          </div>
+  <nb-card-body>
+    <!-- Filtro de tipo de socio -->
+    <div class="form-group mb-4">
+      <label for="partnerTypeFilter" class="label">Filtrar por tipo de socio:</label>
+      <nb-select
+        id="partnerTypeFilter"
+        [(selected)]="selectedPartnerType"
+        (selectedChange)="onPartnerTypeChange()"
+        fullWidth
+      >
+        <nb-option value="all">Todos los socios</nb-option>
+        <nb-option value="proveedor">Proveedores</nb-option>
+        <nb-option value="cliente">Clientes</nb-option>
+        <nb-option value="cliente-proveedor">Clientes/Proveedores</nb-option>
+      </nb-select>
+    </div>
 
-          <!-- Secciones disponibles -->
-          <div *ngIf="socioComercialSeleccionado">
-            <h6>Rol del socio: <strong>{{ socioComercialSeleccionado.roleName }}</strong></h6>
-            <div class="mb-3">
-              <label class="form-label">Selecciona las secciones:</label>
-              <nb-select
-                multiple
-                placeholder="Selecciona secciones"
-                [(selected)]="permisosSeleccionados"
-              >
-                <nb-option *ngFor="let section of seccionesDisponibles" [value]="section">
-                  {{ section }}
-                </nb-option>
-              </nb-select>
+    <!-- Selección de socio comercial -->
+    <div class="form-group mb-4">
+      <label for="commercialPartnerSelect" class="label">Seleccionar socio comercial:</label>
+      <nb-select
+        id="commercialPartnerSelect"
+        [(selected)]="selectedPartnerId"
+        (selectedChange)="onPartnerSelect()"
+        fullWidth
+        placeholder="Buscar socio..."
+      >
+        <nb-option
+          *ngFor="let partner of filteredPartners"
+          [value]="partner.id"
+          [disabled]="partner.id === companyService.selectedCompany.id"
+        >
+          {{ partner.nameCompany }} ({{ partner.rfc }})
+          <small class="text-muted ml-2">{{ getPartnerType(partner.roles) }}</small>
+        </nb-option>
+      </nb-select>
+    </div>
+
+    <!-- Listado de usuarios del socio -->
+    <div class="mb-4" *ngIf="selectedPartnerUsers.length > 0">
+      <h6 class="section-title">Usuarios asociados:</h6>
+      <nb-list class="user-list">
+        <nb-list-item *ngFor="let user of selectedPartnerUsers" class="list-item">
+          <div class="user-info">
+            <div class="user-name">{{ user.name }}</div>
+            <div class="user-details">
+              <span class="user-email">{{ user.email }}</span>
+              <nb-badge [text]="user.role" [status]="getBadgeStatus(user.role)"></nb-badge>
             </div>
+          </div>
+        </nb-list-item>
+      </nb-list>
+    </div>
 
-            <div class="text-center mt-4">
-              <button
-                nbButton
-                status="primary"
-                fullWidth
-                [disabled]="permisosSeleccionados.length === 0"
-                (click)="agregarPermisos()"
-              >
-                Añadir Permisos
-              </button>
+    <!-- Gestión de secciones -->
+    <div class="section-management">
+      <h6 class="section-title">Asignación de secciones visibles:</h6>
+      
+      <div class="form-group">
+        <label class="label">Secciones disponibles:</label>
+        <nb-select
+          [(selected)]="selectedSection"
+          (selectedChange)="onSectionSelect()"
+          placeholder="Seleccionar sección"
+          fullWidth
+        >
+          <nb-option
+            *ngFor="let section of availableSections"
+            [value]="section"
+          >
+            {{ section.NameSection }}
+          </nb-option>
+        </nb-select>
+      </div>
+
+      <div class="form-group" *ngIf="selectedSection">
+        <label class="label">Subsecciones:</label>
+        <nb-select
+          [(selected)]="selectedSubsections"
+          multiple
+          fullWidth
+          placeholder="Seleccionar subsecciones"
+        >
+          <nb-option
+            *ngFor="let subsection of selectedSection.subsections"
+            [value]="subsection"
+          >
+            {{ subsection.NameSubsection }}
+          </nb-option>
+        </nb-select>
+      </div>
+
+      <div class="action-buttons mt-4">
+        <button
+          nbButton
+          status="primary"
+          (click)="assignSections()"
+          [disabled]="!selectedPartnerId || !selectedSection"
+        >
+          <nb-icon icon="checkmark-outline"></nb-icon>
+          Asignar secciones
+        </button>
+        
+        <button
+          nbButton
+          status="basic"
+          class="ml-2"
+          (click)="clearSelection()"
+        >
+          <nb-icon icon="close-outline"></nb-icon>
+          Limpiar selección
+        </button>
+      </div>
+    </div>
+  </nb-card-body>
+
+  <!-- Secciones asignadas -->
+  <nb-card-footer>
+    <nb-accordion>
+      <nb-accordion-item
+        *ngFor="let assignment of assignedSections"
+        [collapsed]="false"
+      >
+        <nb-accordion-item-header class="assignment-header">
+          <div class="header-content">
+            <div class="partner-info">
+              <div class="partner-name">{{ assignment.partnerName }}</div>
+              <div class="partner-details">
+                <nb-badge
+                  [text]="assignment.partnerType"
+                  [status]="getBadgeStatus(assignment.partnerType)"
+                ></nb-badge>
+                <span class="section-count">{{ assignment.sections.length }} secciones</span>
+              </div>
             </div>
           </div>
-        </nb-card>
+        </nb-accordion-item-header>
 
-        <!-- Lista de permisos actuales -->
-        <nb-card class="shadow-lg p-4 rounded-5 mt-4">
-          <div class="text-center">
-            <h6>Permisos Actuales</h6>
-          </div>
+        <nb-accordion-item-body>
           <nb-list>
-            <nb-list-item *ngFor="let permiso of permisosActuales">
-              {{ permiso.name_section }}
+            <nb-list-item
+              *ngFor="let section of assignment.sections"
+              class="section-item"
+            >
+              <div class="section-info">
+                <div class="section-name">{{ section.sectionName }}</div>
+                <div
+                  class="subsections"
+                  *ngIf="section.subsections.length > 0"
+                >
+                  <nb-badge
+                    *ngFor="let sub of section.subsections"
+                    [text]="sub"
+                    status="basic"
+                    class="subsection-badge"
+                  ></nb-badge>
+                </div>
+              </div>
               <button
                 nbButton
                 status="danger"
                 size="small"
-                outline
-                (click)="eliminarPermiso(permiso.name_section)"
+                (click)="removeSection(assignment.partnerId, section.sectionId)"
               >
-                Quitar
+                <nb-icon icon="trash-outline"></nb-icon>
               </button>
             </nb-list-item>
           </nb-list>
-        </nb-card>
-      </div>
-    </div>
+        </nb-accordion-item-body>
+      </nb-accordion-item>
+    </nb-accordion>
+  </nb-card-footer>
+</nb-card>
