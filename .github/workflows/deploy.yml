@@ -1,0 +1,34 @@
+name: Build and Deploy Angular to FTP
+
+on:
+  push:
+    branches:
+      - main  # Cambia si usas "master" u otra rama
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18.x'  # Usa la versión de Node.js que necesites
+
+      - name: Install dependencies and build
+        run: |
+          npm install -g @angular/cli
+          npm install
+          ng build --configuration=production
+
+      - name: FTP Deploy
+        uses: SamKirkland/FTP-Deploy-Action@v4.3.0
+        with:
+          server: ftp.siinad.mx
+          username: practicas@siinad.mx
+          password: ${{ secrets.FTP_PASSWORD }}
+          local-dir: ./dist/NGX-ADMIN-MASTER  # ¡Cambia "my-app" por el nombre de tu proyecto en angular.json!
+          server-dir: / # Ajusta según tu servidor
