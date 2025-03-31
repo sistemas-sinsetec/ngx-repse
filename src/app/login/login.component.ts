@@ -9,11 +9,11 @@ import { SelectCompanyPeriodDialogComponent } from '../select-company-period-dia
 import { CustomToastrService } from '../services/custom-toastr.service';
 
 @Component({
-  selector: 'app-custom-login',
-  templateUrl: './custom-login.component.html',
-  styleUrls: ['./custom-login.component.scss'],
+  selector: 'app-login',
+  templateUrl: './login.component.html',
+  styleUrls: ['./login.component.scss'],
 })
-export class CustomLoginComponent implements OnInit {
+export class LoginComponent implements OnInit {
   user = {
     username: '',
     password: '',
