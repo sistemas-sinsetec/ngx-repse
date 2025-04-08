@@ -27,8 +27,8 @@ jobs:
       - name: FTP Deploy
         uses: SamKirkland/FTP-Deploy-Action@v4.3.0
         with:
-          server: ftp.siinad.mx
-          username: practicas@siinad.mx
+          server: ftp.sinsetec.com.mx
+          username: practicas@sinsetec.com.mx
           password: ${{ secrets.FTP_PASSWORD }}
           local-dir: dist/
           server-dir: public_html/ # Ajusta según tu servidor
