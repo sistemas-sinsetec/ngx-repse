@@ -1,4 +1,5 @@
-<!-- commercial-partner-sections.component.html -->
+<!-- permissions-businees-partner.component.html -->
+>>>>>>> bugsFix
 <nb-card>
   <nb-card-header class="text-center">
     <h5 class="mb-0"><strong>Gestión de Secciones para Socios Comerciales</strong></h5>
@@ -10,14 +11,14 @@
       <label for="partnerTypeFilter" class="label">Filtrar por tipo de socio:</label>
       <nb-select
         id="partnerTypeFilter"
-        [(selected)]="selectedPartnerType"
-        (selectedChange)="onPartnerTypeChange()"
+
+        [(selected)]="selectedUserType"
+        (selectedChange)="onUserTypeChange($event)"
         fullWidth
       >
         <nb-option value="all">Todos los socios</nb-option>
         <nb-option value="proveedor">Proveedores</nb-option>
         <nb-option value="cliente">Clientes</nb-option>
-        <nb-option value="cliente-proveedor">Clientes/Proveedores</nb-option>
       </nb-select>
     </div>
 
@@ -27,26 +28,34 @@
       <nb-select
         id="commercialPartnerSelect"
         [(selected)]="selectedPartnerId"
-        (selectedChange)="onPartnerSelect()"
+        (selectedChange)="onPartnerSelected($event)"
         fullWidth
         placeholder="Buscar socio..."
       >
         <nb-option
-          *ngFor="let partner of filteredPartners"
+
+          *ngFor="let partner of commercialPartners"
           [value]="partner.id"
-          [disabled]="partner.id === companyService.selectedCompany.id"
         >
           {{ partner.nameCompany }} ({{ partner.rfc }})
-          <small class="text-muted ml-2">{{ getPartnerType(partner.roles) }}</small>
+          <span *ngIf="partner.role"> - {{ partner.role | titlecase }}</span>
+
         </nb-option>
       </nb-select>
     </div>
 
     <!-- Listado de usuarios del socio -->
-    <div class="mb-4" *ngIf="selectedPartnerUsers.length > 0">
-      <h6 class="section-title">Usuarios asociados:</h6>
+
+    <div class="mb-4" *ngIf="users.length > 0">
+      <h6 class="section-title">Seleccionar usuario:</h6>
       <nb-list class="user-list">
-        <nb-list-item *ngFor="let user of selectedPartnerUsers" class="list-item">
+        <nb-list-item 
+          *ngFor="let user of filteredUsers" 
+          class="list-item"
+          [class.selected-user]="selectedUserId === user.id"
+          (click)="onUserSelected(user.id)"
+        >
+
           <div class="user-info">
             <div class="user-name">{{ user.name }}</div>
             <div class="user-details">
@@ -54,89 +63,108 @@
               <nb-badge [text]="user.role" [status]="getBadgeStatus(user.role)"></nb-badge>
             </div>
           </div>
+
+          <nb-icon 
+            *ngIf="selectedUserId === user.id" 
+            icon="checkmark-circle-2" 
+            status="success"
+          ></nb-icon>
         </nb-list-item>
       </nb-list>
     </div>
 
     <!-- Gestión de secciones -->
-    <div class="section-management">
+
+    <div class="section-management" *ngIf="selectedPartnerId && selectedUserId">
+
       <h6 class="section-title">Asignación de secciones visibles:</h6>
       
       <div class="form-group">
         <label class="label">Secciones disponibles:</label>
         <nb-select
           [(selected)]="selectedSection"
-          (selectedChange)="onSectionSelect()"
+
+          (selectedChange)="onSectionChange($event)"
+
           placeholder="Seleccionar sección"
           fullWidth
         >
           <nb-option
-            *ngFor="let section of availableSections"
+
+            *ngFor="let section of sections"
             [value]="section"
           >
-            {{ section.NameSection }}
+            {{ section }}
           </nb-option>
         </nb-select>
       </div>
 
-      <div class="form-group" *ngIf="selectedSection">
+
+      <div class="form-group" *ngIf="selectedSection && getCurrentSubsectionsList().length > 0">
         <label class="label">Subsecciones:</label>
         <nb-select
-          [(selected)]="selectedSubsections"
+          [(selected)]="selectedSubSections"
+          (selectedChange)="updateSubsections($event)"
+
           multiple
           fullWidth
           placeholder="Seleccionar subsecciones"
         >
           <nb-option
-            *ngFor="let subsection of selectedSection.subsections"
+
+            *ngFor="let subsection of getSubsectionsForCurrentRole()"
             [value]="subsection"
           >
-            {{ subsection.NameSubsection }}
+            {{ subsection }}
           </nb-option>
         </nb-select>
       </div>
+
+
+      <div class="form-group" *ngIf="selectedSection && getSubsectionsForCurrentRole().length === 0">
+        <nb-alert status="info">Esta sección no tiene subsecciones configuradas</nb-alert>
+      </div>
+
 
       <div class="action-buttons mt-4">
         <button
           nbButton
           status="primary"
-          (click)="assignSections()"
-          [disabled]="!selectedPartnerId || !selectedSection"
+
+          (click)="addPermission()"
+          [disabled]="!selectedSection || (getCurrentSubsectionsList().length > 0 && selectedSubSections.length === 0)"
+
         >
           <nb-icon icon="checkmark-outline"></nb-icon>
           Asignar secciones
         </button>
-        
-        <button
-          nbButton
-          status="basic"
-          class="ml-2"
-          (click)="clearSelection()"
-        >
-          <nb-icon icon="close-outline"></nb-icon>
-          Limpiar selección
-        </button>
+
+
       </div>
     </div>
   </nb-card-body>
 
   <!-- Secciones asignadas -->
-  <nb-card-footer>
+
+  <nb-card-footer *ngIf="groupedPermissions.length > 0">
+    <h6 class="section-title">Secciones asignadas:</h6>
     <nb-accordion>
       <nb-accordion-item
-        *ngFor="let assignment of assignedSections"
+        *ngFor="let group of groupedPermissions"
+
         [collapsed]="false"
       >
         <nb-accordion-item-header class="assignment-header">
           <div class="header-content">
             <div class="partner-info">
-              <div class="partner-name">{{ assignment.partnerName }}</div>
+
+              <div class="section-name">{{ group.section }}</div>
               <div class="partner-details">
                 <nb-badge
-                  [text]="assignment.partnerType"
-                  [status]="getBadgeStatus(assignment.partnerType)"
+                  [text]="group.subSections.length.toString()"
+                  status="info"
                 ></nb-badge>
-                <span class="section-count">{{ assignment.sections.length }} secciones</span>
+
               </div>
             </div>
           </div>
@@ -145,28 +173,20 @@
         <nb-accordion-item-body>
           <nb-list>
             <nb-list-item
-              *ngFor="let section of assignment.sections"
+
+              *ngFor="let sub of group.subSections"
               class="section-item"
             >
               <div class="section-info">
-                <div class="section-name">{{ section.sectionName }}</div>
-                <div
-                  class="subsections"
-                  *ngIf="section.subsections.length > 0"
-                >
-                  <nb-badge
-                    *ngFor="let sub of section.subsections"
-                    [text]="sub"
-                    status="basic"
-                    class="subsection-badge"
-                  ></nb-badge>
-                </div>
+                <div class="subsection-name">{{ sub || 'Sin subsección' }}</div>
+
               </div>
               <button
                 nbButton
                 status="danger"
                 size="small"
-                (click)="removeSection(assignment.partnerId, section.sectionId)"
+
+                (click)="removePermission(group.section, sub)"
               >
                 <nb-icon icon="trash-outline"></nb-icon>
               </button>
