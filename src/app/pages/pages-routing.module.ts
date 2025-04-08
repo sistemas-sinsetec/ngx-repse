@@ -1,10 +1,9 @@
 /*
   En este codigo se manejan las diferentes rutas de la pagina principal
-  *Ver el servicio "Auth-guard"*
+  *Ver el servicio "Auth-guard"* el cual maneja los permisos
 */
 import { RouterModule, Routes } from '@angular/router';
 import { NgModule } from '@angular/core';
-
 import { PagesComponent } from './pages.component';
 import { DashboardComponent } from './dashboard/dashboard.component';
 import { ECommerceComponent } from './e-commerce/e-commerce.component';
@@ -115,4 +114,5 @@ const routes: Routes = [{
   exports: [RouterModule],
 })
 export class PagesRoutingModule {
+
 }

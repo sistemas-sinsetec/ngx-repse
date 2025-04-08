@@ -11,6 +11,7 @@ import { CompanyService } from '../../../services/company.service';
   templateUrl: './register-user.component.html',
   styleUrls: ['./register-user.component.scss']
 })
+
 export class RegisterUserComponent implements OnInit {
   employee: any;
   username: string = '';
