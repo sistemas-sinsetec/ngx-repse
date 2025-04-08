@@ -30,5 +30,5 @@ jobs:
           server: ftp.siinad.mx
           username: practicas@siinad.mx
           password: ${{ secrets.FTP_PASSWORD }}
-          local-dir: /dist/ngx-admin-demo
+          local-dir: /dist/ngx-admin-demo/
           server-dir: /public_html # Ajusta según tu servidor
