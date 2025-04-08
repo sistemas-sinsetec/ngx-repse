@@ -1,11 +1,15 @@
+/*
+  En este se maneja la logica para los usuarios premium
+*/
 import { Component, OnInit } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { AuthService } from '../../../../services/auth.service';
 import { CpAuthDialogComponent } from '../cp-auth-dialog/cp-auth-dialog.component';
 import { CpAuthDeleteDialogComponent } from '../cp-auth-delete-dialog/cp-auth-delete-dialog.component';
 import { Router } from '@angular/router';
-import { NbDialogService, NbToastrService } from '@nebular/theme';
+import { NbDialogService } from '@nebular/theme';
 import { CompanyService } from '../../../../services/company.service';
+import { CustomToastrService } from '../../../../services/custom-toastr.service';
 
 @Component({
   selector: 'ngx-premium-auth',
@@ -22,7 +26,7 @@ export class PremiumAuthComponent {
     private authService: AuthService,
     private http: HttpClient,
     private dialogService: NbDialogService,     // Reemplaza ModalController
-    private toastrService: NbToastrService,     // Reemplaza ToastController
+    private toastrService: CustomToastrService,     // Reemplaza ToastController
     private companyService: CompanyService
   ) 
   { }
@@ -147,9 +151,9 @@ export class PremiumAuthComponent {
 
   mostrarToast(message: string, status: 'success' | 'danger') {
     if (status === 'success') {
-      this.toastrService.success(message, 'Información');
+      this.toastrService.showSuccess(message, 'Información');
     } else {
-      this.toastrService.danger(message, 'Error');
+      this.toastrService.showError(message, 'Error');
     }
   }
 }

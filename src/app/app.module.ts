@@ -30,7 +30,7 @@ import {
 } from '@nebular/theme';
 
 import { NbAuthModule } from '@nebular/auth'; 
-import { CustomLoginComponent } from './custom-login/custom-login.component';
+import { LoginComponent } from './login/login.component';
 import { AuthService } from './services/auth.service';
 import { SelectCompanyPeriodDialogComponent } from './select-company-period-dialog/select-company-period-dialog.component';
 
@@ -38,9 +38,9 @@ import { SelectCompanyPeriodDialogComponent } from './select-company-period-dial
   declarations: [
 
     AppComponent,
-    CustomLoginComponent,
+    LoginComponent,
     SelectCompanyPeriodDialogComponent,
-  ],
+   ],
   imports: [
     BrowserModule,
     BrowserAnimationsModule,

@@ -1,0 +1,127 @@
+<nb-card>
+    <nb-card-header>
+      <div class="header-container">
+        <div class="title-and-select">
+          <h2 class="title">Revisión de Archivos Mensual</h2>
+          <nb-select placeholder="Selecciona año" [(selected)]="selectedYear">
+            <nb-option *ngFor="let year of years" [value]="year">
+              {{ year }}
+            </nb-option>
+          </nb-select>
+          <nb-select placeholder="Selecciona mes" [(selected)]="selectedMonth">
+            <nb-option *ngFor="let mes of meses" [value]="mes">
+              {{ mes | titlecase }}
+            </nb-option>
+          </nb-select>
+        </div>
+      </div>
+      <div class="text-center mb-3">
+        <div class="btn-group">
+          <button nbButton status="basic" (click)="setFilter('cargados')" [class.active]="filter === 'cargados'" class="ms-2">
+            Cargados ({{ archivosCargados }})
+          </button>
+          <button nbButton status="success" (click)="setFilter('aceptados')" [class.active]="filter === 'aceptados'" class="ms-2">
+            Aceptados ({{ archivosAceptados }})
+          </button>
+          <button nbButton status="danger" (click)="setFilter('rechazados')" [class.active]="filter === 'rechazados'" class="ms-2">
+            Rechazados ({{ archivosRechazados }})
+          </button>
+          <button nbButton status="warning" class="ms-2 text-dark font-weight-bold" [disabled]="true">
+            No cargados ({{ archivosNoCargados }})
+          </button>
+        </div>
+      </div>
+    </nb-card-header>
+  
+    <nb-card-body>
+      <nb-spinner *ngIf="cargando" status="primary"></nb-spinner>
+      <div *ngIf="!cargando">
+        <!-- Tabla para estados distintos de rechazados -->
+        <table class="table" *ngIf="filter !== 'rechazados'">
+          <thead>
+            <tr>
+              <th style="text-align: center;">Nombre</th>
+              <th style="text-align: center;">Estado ({{ selectedMonth | titlecase }} - {{ selectedYear }})</th>
+              <th style="text-align: center;">Acciones</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let tarea of filteredTareas">
+              <td>{{ tarea.nombre }}</td>
+              <td style="text-align: center;">
+                <ng-container *ngIf="hasDocumentForYear(tarea, selectedMonth, selectedYear); else noFile">
+                  <nb-icon [icon]="getIconForDocument(tarea, selectedMonth, selectedYear)" pack="eva"
+                    [style.color]="
+                      getIconForDocument(tarea, selectedMonth, selectedYear) === 'checkmark-outline' ? 'green' :
+                      (getIconForDocument(tarea, selectedMonth, selectedYear) === 'close-outline' ? 'red' : 'blue')
+                    ">
+                  </nb-icon>
+                </ng-container>
+                <ng-template #noFile>
+                  <span class="grey-dash">-</span>
+                </ng-template>
+              </td>
+              <td style="text-align: center;">
+                <!-- Botón para ver siempre -->
+                <button nbButton ghost status="info" size="large"
+                  (click)="viewFile(tarea, selectedMonth, selectedYear)">
+                  <nb-icon icon="eye-outline" pack="eva"></nb-icon>
+                </button>
+                <!-- Botones para aprobar y rechazar solo si el estado es "cargado" -->
+                <ng-container *ngIf="getIconForDocument(tarea, selectedMonth, selectedYear) === 'clock-outline'">
+                  <button nbButton ghost status="success" size="small"
+                    (click)="approveDocument(tarea, selectedMonth, selectedYear)">
+                    <nb-icon icon="checkmark-outline" pack="eva"></nb-icon>
+                  </button>
+                  <button nbButton ghost status="danger" size="small"
+                    (click)="rejectDocument(tarea, selectedMonth, selectedYear)">
+                    <nb-icon icon="close-outline" pack="eva"></nb-icon>
+                  </button>
+                </ng-container>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+  
+        <!-- Tabla específica para rechazados, con columna de Comentario -->
+        <table class="table" *ngIf="filter === 'rechazados'">
+          <thead>
+            <tr>
+              <th style="text-align: center;">Nombre</th>
+              <th style="text-align: center;">Estado ({{ selectedMonth | titlecase }} - {{ selectedYear }})</th>
+              <th style="text-align: center;">Comentario</th>
+              <th style="text-align: center;">Acciones</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let tarea of filteredTareas">
+              <td>{{ tarea.nombre }}</td>
+              <td style="text-align: center;">
+                <ng-container *ngIf="hasDocumentForYear(tarea, selectedMonth, selectedYear); else noFile">
+                  <nb-icon [icon]="getIconForDocument(tarea, selectedMonth, selectedYear)" pack="eva"
+                    [style.color]="
+                      getIconForDocument(tarea, selectedMonth, selectedYear) === 'close-outline' ? 'red' : 'blue'
+                    ">
+                  </nb-icon>
+                </ng-container>
+                <ng-template #noFile>
+                  <span class="grey-dash">-</span>
+                </ng-template>
+              </td>
+              <td style="text-align: center;">
+                <span>{{ getRejectionComment(tarea) }}</span>
+              </td>
+              <td style="text-align: center;">
+                <!-- Solo se muestra el botón de Ver -->
+                <button nbButton status="info" size="small"
+                  (click)="viewFile(tarea, selectedMonth, selectedYear)">
+                  <nb-icon icon="eye-outline" pack="eva"></nb-icon> Ver
+                </button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </nb-card-body>
+  </nb-card>
+  

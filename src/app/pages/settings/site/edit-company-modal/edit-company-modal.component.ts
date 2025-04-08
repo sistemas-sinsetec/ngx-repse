@@ -1,6 +1,7 @@
 import { Component, Input } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { NbDialogService, NbToastrService, NbDialogRef } from '@nebular/theme';
+import { NbDialogService, NbDialogRef } from '@nebular/theme';
+import { CustomToastrService } from '../../../../services/custom-toastr.service';
 
 @Component({
   selector: 'ngx-edit-company-modal',
@@ -13,7 +14,7 @@ export class EditCompanyModalComponent {
   constructor(
     private dialogService: NbDialogService,
     private http: HttpClient,
-    private toastrService: NbToastrService,
+    private toastrService: CustomToastrService,
     private dialogRef: NbDialogRef<EditCompanyModalComponent>,
   ) {}
 
@@ -25,14 +26,14 @@ export class EditCompanyModalComponent {
     this.http.post('https://siinad.mx/php/update-company.php', this.company).subscribe(
       async (response: any) => {
         if (response.message) {
-          this.toastrService.success(response.message, 'Éxito', { duration: 3000 });
+          this.toastrService.showSuccess(response.message, 'Éxito');
           this.dialogRef.close({ updatedCompany: this.company });
         } else {
-          this.toastrService.danger(response.error, 'Error', { duration: 3000 });
+          this.toastrService.showError(response.error, 'Error');
         }
       },
       async (error) => {
-        this.toastrService.danger('Error al actualizar los datos', 'Error', { duration: 3000 });
+        this.toastrService.showError('Error al actualizar los datos', 'Error');
       }
     );
   }

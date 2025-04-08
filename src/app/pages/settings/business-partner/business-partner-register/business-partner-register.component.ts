@@ -1,12 +1,17 @@
+/*
+  En esta seccion se registra un socio comercial. Simplemente es un formulario que reune lo necesario
+  para inscribir un socio comercial, con algunas validaciones por ejemplo para evitar los errores en el RFC
+*/
 import { Component, OnInit } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Router } from '@angular/router';
-import { NbToastrService, NbDialogService } from '@nebular/theme';
+import { NbDialogService } from '@nebular/theme';
 import { RegistroModalComponentP } from '../registro-modal/registro-modal.component';
 import { AuthService } from '../../../../services/auth.service';
 import { PhoneNumberUtil } from 'google-libphonenumber';
 import { CompanyInfoModalComponent } from '../company-info-modal/company-info-modal.component';
 import { CompanyService } from '../../../../services/company.service';
+import { CustomToastrService } from '../../../../services/custom-toastr.service';
 
 @Component({
   selector: 'ngx-business-partner-register',
@@ -14,8 +19,6 @@ import { CompanyService } from '../../../../services/company.service';
   styleUrls: ['./business-partner-register.component.scss'],
 })
 export class BusinessPartnerRegisterComponent implements OnInit {
-
-
 
   usuario = {
     nombreUsuario: '',
@@ -46,7 +49,7 @@ export class BusinessPartnerRegisterComponent implements OnInit {
   constructor(
     private router: Router,
     private http: HttpClient,
-    private toastrService: NbToastrService,
+    private toastrService: CustomToastrService,
     private dialogService: NbDialogService,
     private authService: AuthService,
     private companyService: CompanyService
@@ -88,7 +91,7 @@ export class BusinessPartnerRegisterComponent implements OnInit {
         if (response.success) {
           this.usuario.nombreEmpresa = response.nombreEmpresa;
         } else {
-          await this.mostrarToast(response.message, 'danger');
+          await this.toastrService.showError(response.message, 'danger');
         }
       },
       error => {
@@ -226,11 +229,6 @@ export class BusinessPartnerRegisterComponent implements OnInit {
     }
   }
   
-  
-
-  mostrarToast(mensaje: string, status: 'success' | 'danger' | 'warning') {
-    this.toastrService.show(mensaje, 'Notificación', { status });
-  }
 
   async registrarUsuario() {
     if (await this.camposCompletos()) {
@@ -257,7 +255,7 @@ export class BusinessPartnerRegisterComponent implements OnInit {
       this.http.post('https://siinad.mx/php/registrar.php', data).subscribe(
         async (response: any) => {
           if (response.success) {
-            this.mostrarToast(response.message, 'success');
+            this.toastrService.showSuccess(response.message, 'success');
 
             const dialogRef = this.dialogService.open(RegistroModalComponentP, {
               context: { continuarRegistro: false },
@@ -271,16 +269,16 @@ export class BusinessPartnerRegisterComponent implements OnInit {
               }
             });
           } else {
-            this.mostrarToast(response.message, 'danger');
+            this.toastrService.showError(response.message, 'danger');
           }
         },
         async (error) => {
           console.error('Error en la solicitud POST:', error);
-          this.mostrarToast('Error en la solicitud de registro.', 'danger');
+          this.toastrService.showError('Error en la solicitud de registro.', 'danger');
         }
       );
     } else {
-      this.mostrarToast(
+      this.toastrService.showWarning(
         'Por favor complete todos los campos obligatorios y verifique el correo electrónico y la contraseña.',
         'warning'
       );
@@ -289,7 +287,7 @@ export class BusinessPartnerRegisterComponent implements OnInit {
 
   async openUserInfoModal() {
     if (!this.codigoSocioComercial || this.codigoSocioComercial.trim() === '') {
-      this.mostrarToast(
+      this.toastrService.showWarning(
         'Código de socio comercial no proporcionado.',
         'warning'
       );
@@ -301,12 +299,12 @@ export class BusinessPartnerRegisterComponent implements OnInit {
     this.http.get(url).subscribe(
       (response: any) => {
         if (response.error) {
-          this.mostrarToast(response.error, 'danger');
+          this.toastrService.showError(response.error, 'danger');
           return;
         }
 
         if (!response || response.length === 0) {
-          this.mostrarToast(
+          this.toastrService.showWarning(
             'No se encontraron datos de asociación.',
             'warning'
           );
@@ -319,7 +317,7 @@ export class BusinessPartnerRegisterComponent implements OnInit {
       },
       (error) => {
         console.error('Error al cargar la asociación:', error);
-        this.mostrarToast(
+        this.toastrService.showError(
           'Error al cargar la asociación. Inténtalo de nuevo más tarde.',
           'danger'
         );
@@ -327,9 +325,6 @@ export class BusinessPartnerRegisterComponent implements OnInit {
     );
   }
 
-  goBack() {
-    this.router.navigate(['/previous']); // Cambiar ruta según sea necesario
-  }
 
   obtenerRoles() {
     this.http.get('https://siinad.mx/php/getRoles.php').subscribe(
@@ -338,7 +333,7 @@ export class BusinessPartnerRegisterComponent implements OnInit {
       },
       (error) => {
         console.error('Error al obtener los roles:', error);
-        this.mostrarToast('Error al obtener los roles', 'danger');
+        this.toastrService.showError('Error al obtener los roles', 'danger');
       }
     );
   }

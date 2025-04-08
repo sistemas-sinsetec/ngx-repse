@@ -1,7 +1,10 @@
+/*
+  En este codigo se traen datos referentes a las vacaciones de los empleados
+*/
 import { Component, OnInit } from '@angular/core';
 import { KardexService } from '../../../services/kardex.service';
 import { CompanyService } from '../../../services/company.service';
-import { NbToastrService } from '@nebular/theme';
+import { CustomToastrService } from '../../../services/custom-toastr.service';
 
 interface Vacacion {
   Concepto: string;
@@ -33,7 +36,7 @@ export class VacationsKardexComponent implements OnInit {
   constructor(
     private kardexService: KardexService,
     private companyService: CompanyService,
-    private toastrService: NbToastrService
+    private toastrService: CustomToastrService
   ) {}
 
   ngOnInit(): void {
@@ -50,14 +53,14 @@ export class VacationsKardexComponent implements OnInit {
         }));
       },
       (error) => {
-        this.toastrService.danger('Error al cargar empleados', 'Error');
+        this.toastrService.showError('Error al cargar empleados', 'Error');
       }
     );
   }
 
   generarReporte(): void {
     if (!this.empleadoId) {
-      this.toastrService.warning('Selecciona un empleado', 'Atención');
+      this.toastrService.showWarning('Selecciona un empleado', 'Atención');
       return;
     }
 
@@ -76,7 +79,7 @@ export class VacationsKardexComponent implements OnInit {
         this.vacacionesAlta = vacacionesAlta ? vacacionesAlta.Tomadas : 0;
       },
       (error) => {
-        this.toastrService.danger('Error al generar el reporte', 'Error');
+        this.toastrService.showError('Error al generar el reporte', 'Error');
       }
     );
   }
@@ -87,17 +90,17 @@ export class VacationsKardexComponent implements OnInit {
 
   actualizarVacacionesAlta(): void {
     if (!this.empleadoId) {
-      this.toastrService.warning('Selecciona un empleado', 'Atención');
+      this.toastrService.showWarning('Selecciona un empleado', 'Atención');
       return;
     }
 
     this.kardexService.actualizarVacaciones(this.empleadoId, this.vacacionesAlta).subscribe(
       (data) => {
-        this.toastrService.success('Vacaciones actualizadas', 'Éxito');
+        this.toastrService.showSuccess('Vacaciones actualizadas', 'Éxito');
         this.generarReporte();
       },
       (error) => {
-        this.toastrService.danger('Error al actualizar vacaciones', 'Error');
+        this.toastrService.showError('Error al actualizar vacaciones', 'Error');
       }
     );
   }

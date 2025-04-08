@@ -1,3 +1,6 @@
+/*
+  En este servicio se administran los datos de inicio de sesion del usuario
+*/
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Subject } from 'rxjs';

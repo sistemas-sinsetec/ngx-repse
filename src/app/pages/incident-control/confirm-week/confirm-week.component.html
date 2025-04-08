@@ -45,8 +45,6 @@
         <nb-card-header>
           <div class="d-flex justify-content-between align-items-center">
             <span>Confirmar semana</span>
-            <!-- Cambiar esto: -->
-
             <button *ngIf="selectedDia" nbButton [status]="selectedDia.status === 'confirmed' ? 'danger' : 'success'"
               size="small" (click)="toggleConfirmacionDia(selectedDia)" [disabled]="isWeekConfirmed">
               {{ selectedDia.status === 'confirmed' ? 'Deshacer Confirmación' : 'Confirmar Día' }}
@@ -57,6 +55,7 @@
 
         <div class="row g-3"> <!-- Contenedor flex -->
           <!-- Primera card -->
+
           <div class="col-12 d-flex justify-content-center mb-3 mt-4">
             <div class="w-100" >
               <input type="text" 
@@ -68,7 +67,7 @@
             </div>
           </div>
           <!-- Por esto: -->
-    
+
           <div class="col-12 col-lg-6">
             <!-- Lista de Empleados Asignados -->
             <nb-card class=" p-4 mb-4 ">

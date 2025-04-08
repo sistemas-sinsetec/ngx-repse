@@ -8,7 +8,7 @@ import {
   NbRequestPasswordComponent,
   NbResetPasswordComponent,
 } from '@nebular/auth';
-import { CustomLoginComponent } from './custom-login/custom-login.component';
+import { LoginComponent } from './login/login.component';
 
 export const routes: Routes = [
   {
@@ -22,11 +22,11 @@ export const routes: Routes = [
     children: [
       {
         path: '',
-        component: CustomLoginComponent, // Usar el componente personalizado
+        component: LoginComponent, // Usar el componente personalizado
       },
       {
         path: 'login',
-        component: CustomLoginComponent, // Usar el componente personalizado
+        component: LoginComponent, // Usar el componente personalizado
       },
       {
         path: 'register',

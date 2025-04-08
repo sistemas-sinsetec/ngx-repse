@@ -1,6 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { NbDialogRef, NbToastrService } from '@nebular/theme';
+import { NbDialogRef } from '@nebular/theme';
+import { CustomToastrService } from '../../../../services/custom-toastr.service';
 
 @Component({
   selector: 'ngx-review-info-modal',
@@ -25,7 +26,7 @@ export class ReviewInfoModalComponent implements OnInit {
   constructor(
     private http: HttpClient,
     protected dialogRef: NbDialogRef<ReviewInfoModalComponent>,
-    private toastrService: NbToastrService
+    private toastrService: CustomToastrService
   ) { }
 
   ngOnInit() {
@@ -114,12 +115,12 @@ export class ReviewInfoModalComponent implements OnInit {
       .subscribe(response => {
         this.isSubmitting = false;
         console.log('Datos actualizados:', response);
-        this.toastrService.success('Datos actualizados correctamente', 'Éxito');
+        this.toastrService.showSuccess('Datos actualizados correctamente', 'Éxito');
         this.dismiss();
       }, error => {
         this.isSubmitting = false;
         console.error('Error al actualizar los datos:', error);
-        this.toastrService.danger('Error al actualizar los datos', 'Error');
+        this.toastrService.showError('Error al actualizar los datos', 'Error');
       });
   }
 

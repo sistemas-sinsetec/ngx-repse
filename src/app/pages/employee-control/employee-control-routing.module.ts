@@ -1,3 +1,6 @@
+/*
+  En este codigo se manejan las rutas para la seccion de "Gestion de empleados"
+*/
 import { NgModule } from '@angular/core';
 import { RouterModule, Routes } from '@angular/router';
 import { employeeControlComponent } from './employee-control.component';

@@ -12,17 +12,24 @@
           <nb-checkbox [(ngModel)]="periodoSemanal">Habilitar Semanal</nb-checkbox>
           <div *ngIf="periodoSemanal" class="mt-3">
             <label>Fecha de inicio</label>
-            <input required nbInput fullWidth placeholder="Seleccione la fecha de inicio"
+            <input class="mb-2" required nbInput fullWidth placeholder="Seleccione la fecha de inicio"
               [nbDatepicker]="datepickerSemanal" [(ngModel)]="fechaSemanal"
               (ngModelChange)="onDateChange($event, 'semanal')">
-            <nb-datepicker #datepickerSemanal [min]="minDate" [max]="maxDate"></nb-datepicker>
+            <nb-datepicker #datepickerSemanal></nb-datepicker>
 
             <label>Año Fiscal</label>
             <input nbInput fullWidth type="number" [(ngModel)]="ejercicioSemanal" [disabled]="!periodoSemanal">
-            <!-- Comentario informativo -->
             <small class="text-info">
               El año fiscal se calcula automáticamente, pero puedes modificarlo manualmente si lo deseas.
             </small>
+            <br>
+            <!-- NUEVO: campo para "posicionpagonomina" -->
+            <label class="mt-2">Días de pago</label>
+            <input nbInput fullWidth type="number" placeholder="Ej: 6" [(ngModel)]="posicionPagoSemanal">
+            <small class="text-info">
+              Indica cuántos días después del fin del período se pagará (ej: 6 para semanal).
+            </small>
+
           </div>
         </nb-card-body>
       </nb-card>
@@ -36,17 +43,24 @@
           <nb-checkbox [(ngModel)]="periodoQuincenal">Habilitar Quincenal</nb-checkbox>
           <div *ngIf="periodoQuincenal" class="mt-3">
             <label>Fecha de inicio</label>
-            <input required nbInput fullWidth placeholder="Seleccione la fecha de inicio"
+            <input class="mb-2" required nbInput fullWidth placeholder="Seleccione la fecha de inicio"
               [nbDatepicker]="datepickerQuincenal" [(ngModel)]="fechaQuincenal"
               (ngModelChange)="onDateChange($event, 'quincenal')">
-            <nb-datepicker #datepickerQuincenal [min]="minDate" [max]="maxDate"></nb-datepicker>
-
+            <nb-datepicker #datepickerQuincenal></nb-datepicker>
+     
             <label>Año Fiscal</label>
             <input nbInput fullWidth type="number" [(ngModel)]="ejercicioQuincenal" [disabled]="!periodoQuincenal">
-            <!-- Comentario informativo -->
             <small class="text-info">
-              El año fiscal se calcula automáticamente, pero puedes modificarlo manualmente si lo deseas.
+              El año fiscal se calcula automáticamente, pero puedes modificarlo manualmente si lo desees.
             </small>
+            <br>
+            <!-- NUEVO: campo para "posicionpagonomina" -->
+            <label class="mt-2">Días de pago</label>
+            <input nbInput fullWidth type="number" placeholder="Ej: 15" [(ngModel)]="posicionPagoQuincenal">
+            <small class="text-info">
+              Indica cuántos días después del fin del período se pagará (ej: 15 para quincenal).
+            </small>
+
           </div>
         </nb-card-body>
       </nb-card>
@@ -60,17 +74,24 @@
           <nb-checkbox [(ngModel)]="periodoMensual">Habilitar Mensual</nb-checkbox>
           <div *ngIf="periodoMensual" class="mt-3">
             <label>Fecha de inicio</label>
-            <input required nbInput fullWidth placeholder="Seleccione la fecha de inicio"
+            <input class="mb-2" required nbInput fullWidth placeholder="Seleccione la fecha de inicio"
               [nbDatepicker]="datepickerMensual" [(ngModel)]="fechaMensual"
               (ngModelChange)="onDateChange($event, 'mensual')">
-            <nb-datepicker #datepickerMensual [min]="minDate" [max]="maxDate"></nb-datepicker>
+            <nb-datepicker #datepickerMensual></nb-datepicker>
 
             <label>Año Fiscal</label>
             <input nbInput fullWidth type="number" [(ngModel)]="ejercicioMensual" [disabled]="!periodoMensual">
-            <!-- Comentario informativo -->
             <small class="text-info">
               El año fiscal se calcula automáticamente, pero puedes modificarlo manualmente si lo deseas.
             </small>
+            <br>
+            <!-- NUEVO: campo para "posicionpagonomina" -->
+            <label class="mt-3">Días de pago</label>
+            <input nbInput fullWidth type="number" placeholder="Ej: 30" [(ngModel)]="posicionPagoMensual">
+            <small class="text-info">
+              Indica cuántos días después del fin del período se pagará (ej: 30 para mensual).
+            </small>
+
           </div>
         </nb-card-body>
       </nb-card>

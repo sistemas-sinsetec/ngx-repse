@@ -29,10 +29,20 @@ export class ChangeHoursModalComponent {
 
   saveHours() {
     // Formatear los tiempos a 'HH:mm:ss'
-    const formattedEntryTime = moment(this.entryTime).format('HH:mm:ss');
-    const formattedLunchStart = moment(this.lunchStart).format('HH:mm:ss');
-    const formattedLunchEnd = moment(this.lunchEnd).format('HH:mm:ss');
-    const formattedExitTime = moment(this.exitTime).format('HH:mm:ss');
+    const formattedEntryTime = this.entryTime 
+    ? moment(this.entryTime, 'HH:mm').format('HH:mm:ss') 
+    : null;
+  const formattedLunchStart = this.lunchStart 
+    ? moment(this.lunchStart, 'HH:mm').format('HH:mm:ss') 
+    : null;
+  const formattedLunchEnd = this.lunchEnd 
+    ? moment(this.lunchEnd, 'HH:mm').format('HH:mm:ss') 
+    : null;
+  const formattedExitTime = this.exitTime 
+    ? moment(this.exitTime, 'HH:mm').format('HH:mm:ss') 
+    : null;
+  
+    
 
     // Formatear la segunda hora de comida solo si está habilitada
     const formattedSecondLunchStart = this.enableSecondLunch && this.secondLunchStart 

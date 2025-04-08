@@ -1,9 +1,13 @@
+/*
+  En este codigo simplemente se maneja la carga y visualizacion del logotipo de la empresa
+*/
 import { Component, OnInit } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { AuthService } from '../../../../services/auth.service';
 import { CompanyService } from '../../../../services/company.service';
-import { NbToastrService, NbGlobalPhysicalPosition, NbComponentStatus } from '@nebular/theme';
+import { NbGlobalPhysicalPosition, NbComponentStatus } from '@nebular/theme';
 import { LoadingController } from '@ionic/angular';
+import { CustomToastrService } from '../../../../services/custom-toastr.service';
 
 @Component({
   selector: 'ngx-upload-logo',
@@ -20,7 +24,7 @@ export class UploadLogoComponent implements OnInit {
     private http: HttpClient,
     public authService: AuthService,
     public companyService: CompanyService,
-    private toastrService: NbToastrService,
+    private toastrService: CustomToastrService,
     private loadingController: LoadingController
   ) { }
 
@@ -43,7 +47,7 @@ export class UploadLogoComponent implements OnInit {
       (error) => {
         console.error('Error al cargar el logo actual:', error);
         loading.dismiss();
-        this.showToast('Error al cargar el logo actual.', 'danger');
+        this.toastrService.showError('Error al cargar el logo actual.', 'danger');
       }
     );
   }
@@ -54,7 +58,7 @@ export class UploadLogoComponent implements OnInit {
       // Validar el tipo de archivo
       const validImageTypes = ['image/jpeg', 'image/png', 'image/webp', 'image/gif'];
       if (!validImageTypes.includes(file.type)) {
-        this.showToast('Solo se permiten archivos de imagen compatibles (JPEG, PNG, WebP, GIF).', 'danger');
+        this.toastrService.showError('Solo se permiten archivos de imagen compatibles (JPEG, PNG, WebP, GIF).', 'danger');
         return;
       }
 
@@ -116,7 +120,7 @@ export class UploadLogoComponent implements OnInit {
     const companyId = this.companyService.selectedCompany.id;
   
     if (!companyId || !this.selectedFile) {
-      this.showToast('Seleccione un archivo para subir.', 'danger');
+      this.toastrService.showError('Seleccione un archivo para subir.', 'danger');
       return;
     }
   
@@ -140,32 +144,20 @@ export class UploadLogoComponent implements OnInit {
           this.currentLogo = response.logoUrl;
   
           // Mostrar mensaje de éxito
-          this.showToast(response.message, 'success');
+          this.toastrService.showSuccess(response.message, 'Exito');
   
           // Limpiar la vista previa y el archivo seleccionado
           this.previewLogo = null;
           this.selectedFile = null;
         } else {
-          this.showToast(response.error, 'danger');
+          this.toastrService.showError(response.error, 'error');
         }
         loading.dismiss();
       },
       (error) => {
         loading.dismiss();
         console.error('Error en la solicitud POST:', error);
-        this.showToast('Error al subir el logo.', 'danger');
-      }
-    );
-  }
-
-  showToast(message: string, status: NbComponentStatus) {
-    this.toastrService.show(
-      message,
-      '',
-      {
-        status: status,
-        position: NbGlobalPhysicalPosition.TOP_RIGHT,
-        duration: 5000,
+        this.toastrService.showError('Error al subir el logo.', 'error');
       }
     );
   }

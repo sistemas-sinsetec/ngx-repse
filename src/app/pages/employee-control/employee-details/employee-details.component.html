@@ -56,15 +56,30 @@
       </nb-form-field>
       <nb-form-field>
         <label>Nombre</label>
-        <input nbInput fullWidth shape="semi-round" [(ngModel)]="employee.first_name">
+        <input nbInput fullWidth shape="semi-round" [(ngModel)]="employee.first_name" #firstName="ngModel"
+          required (keypress)="soloLetrasEspacios($event)" />
+        <small class="text-danger" *ngIf="firstName.invalid && firstName.touched">
+          El nombre es requerido y solo debe contener letras.
+        </small>
       </nb-form-field>
+    <!-- Apellido Paterno -->
       <nb-form-field>
         <label>Apellido Paterno</label>
-        <input nbInput fullWidth shape="semi-round" [(ngModel)]="employee.last_name">
+        <input nbInput fullWidth shape="semi-round" [(ngModel)]="employee.last_name" #lastName="ngModel"
+          required (keypress)="soloLetrasEspacios($event)" />
+        <small class="text-danger" *ngIf="lastName.invalid && lastName.touched">
+          El apellido paterno es requerido y solo debe contener letras.
+        </small>
       </nb-form-field>
+      <!-- Teléfono -->
       <nb-form-field>
-        <label>Apellido Materno</label>
-        <input nbInput fullWidth shape="semi-round" [(ngModel)]="employee.middle_name">
+        <label>Teléfono</label>
+        <input nbInput fullWidth shape="semi-round" [(ngModel)]="employee.phone_number" #phoneNumber="ngModel"
+          required pattern="^\d{10}$" maxlength="10"
+          oninput="this.value = this.value.replace(/[^0-9]/g, '')" />
+        <small class="text-danger" *ngIf="phoneNumber.invalid && phoneNumber.touched">
+          El teléfono debe contener exactamente 10 dígitos numéricos.
+        </small>
       </nb-form-field>
       <nb-form-field>
         <label>Fecha de Nacimiento</label>
@@ -72,24 +87,38 @@
       </nb-form-field>
       <nb-form-field>
         <label>Lugar de Nacimiento</label>
-        <input nbInput fullWidth shape="semi-round" [(ngModel)]="employee.birth_place">
+        <input nbInput fullWidth shape="semi-round" [(ngModel)]="employee.birth_place" (keypress)="soloLetrasEspacios($event)">
       </nb-form-field>
       <nb-form-field>
         <label>CURP</label>
-        <input nbInput fullWidth shape="semi-round" [(ngModel)]="employee.curp">
+        <input nbInput fullWidth shape="semi-round" [(ngModel)]="employee.curp" #curp="ngModel"
+          required pattern="^[A-Z0-9]{18}$" />
+        <small class="text-danger" *ngIf="curp.invalid && curp.touched">
+          La CURP debe contener exactamente 18 caracteres alfanuméricos en mayúsculas.
+        </small>
       </nb-form-field>
+     <!-- RFC -->
       <nb-form-field>
         <label>RFC</label>
-        <input nbInput fullWidth shape="semi-round" [(ngModel)]="employee.rfc">
+        <input nbInput fullWidth shape="semi-round" [(ngModel)]="employee.rfc" #rfc="ngModel"
+          required pattern="^[A-Z0-9]{12,13}$" />
+        <small class="text-danger" *ngIf="rfc.invalid && rfc.touched">
+          El RFC debe contener entre 12 y 13 caracteres alfanuméricos en mayúsculas.
+        </small>
       </nb-form-field>
       <nb-form-field>
         <label>Teléfono</label>
         <input nbInput fullWidth shape="semi-round" [(ngModel)]="employee.phone_number" pattern="\d*"
           oninput="this.value = this.value.replace(/[^0-9]/g, '')">
       </nb-form-field>
+     <!-- Correo Electrónico -->
       <nb-form-field>
         <label>Correo Electrónico</label>
-        <input nbInput fullWidth shape="semi-round" [(ngModel)]="employee.email" type="email">
+        <input nbInput fullWidth shape="semi-round" [(ngModel)]="employee.email" #email="ngModel"
+          required email />
+        <small class="text-danger" *ngIf="email.invalid && email.touched">
+          Ingrese un correo válido.
+        </small>
       </nb-form-field>
       <nb-form-field>
         <label>Género</label>
@@ -122,8 +151,12 @@
     <nb-card-body>
       <nb-form-field>
         <label>Número de Seguro Social</label>
-        <input fullWidth shape="semi-round" nbInput [(ngModel)]="employee.social_security_number" type="number"
-          pattern="\d*" oninput="this.value = this.value.replace(/[^0-9]/g, '')">
+        <input nbInput fullWidth shape="semi-round" [(ngModel)]="employee.social_security_number" #nss="ngModel"
+          required pattern="^\d{11}$" maxlength="11"
+          oninput="this.value = this.value.replace(/[^0-9]/g, '')" />
+        <small class="text-danger" *ngIf="nss.invalid && nss.touched">
+          El NSS debe contener exactamente 11 dígitos numéricos.
+        </small>
       </nb-form-field>
       <nb-form-field>
         <label>Número de Cuenta Bancaria</label>
@@ -140,7 +173,12 @@
       </nb-form-field>
       <nb-form-field>
         <label>CLABE Interbancaria</label>
-        <input nbInput fullWidth shape="semi-round" [(ngModel)]="employee.clabe" type="number">
+        <input nbInput fullWidth shape="semi-round" [(ngModel)]="employee.clabe" #clabe="ngModel"
+          pattern="^\d{18}$" maxlength="18"
+          oninput="this.value = this.value.replace(/[^0-9]/g, '')" />
+        <small class="text-danger" *ngIf="clabe.invalid && clabe.touched">
+          La CLABE debe contener exactamente 18 dígitos numéricos.
+        </small>
       </nb-form-field>
       <div class="text-center">
         <button nbButton status="primary" (click)="saveFinancialInfo()">Guardar Información Financiera</button>
@@ -181,23 +219,31 @@
           </nb-option>
         </nb-select>
       </nb-form-field>
-
-      <nb-form-field>
-        <label>Fecha de Inicio*</label>
-        <input fullWidth shape="semi-round" nbInput type="date" [(ngModel)]="employee.start_date" />
-      </nb-form-field>
+<!-- Fecha de Inicio -->
+<nb-form-field>
+  <label>Fecha de Inicio</label>
+  <input nbInput fullWidth shape="semi-round" [(ngModel)]="employee.start_date" #startDate="ngModel"
+    required type="date" />
+  <small class="text-danger" *ngIf="startDate.invalid && startDate.touched">
+    La fecha de inicio es obligatoria.
+  </small>
+</nb-form-field>
 
 
       <!-- Sueldo Neto -->
       <nb-form-field>
         <label>Sueldo Neto*</label>
-        <input fullWidth shape="semi-round" nbInput type="number" [(ngModel)]="employee.net_balance" />
+        <input fullWidth shape="semi-round" nbInput type="number" [(ngModel)]="employee.net_balance"
+        (keypress)="soloNumeros($event)"
+ />
       </nb-form-field>
 
       <!-- Sueldo Diario -->
       <nb-form-field>
         <label>Sueldo Diario*</label>
-        <input fullWidth shape="semi-round" nbInput type="number" [(ngModel)]="employee.daily_salary" />
+        <input fullWidth shape="semi-round" nbInput type="number" [(ngModel)]="employee.daily_salary"
+        (keypress)="soloNumeros($event)"
+/>
       </nb-form-field>
 
       <div class="text-center">
@@ -215,7 +261,8 @@
     <nb-card-body>
       <nb-form-field>
         <label>Contacto de Emergencia</label>
-        <input fullWidth shape="semi-round" nbInput type="text" [(ngModel)]="employee.emergency_contact_name" />
+        <input fullWidth shape="semi-round" nbInput type="text" [(ngModel)]="employee.emergency_contact_name" 
+        (keypress)="soloLetrasEspacios($event)" />
       </nb-form-field>
 
       <nb-form-field>

@@ -1,10 +1,13 @@
+/*
+  En este codigo se administran las secciones a las que tendra acceso cada empresa.
+*/
 import { Component, OnInit } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { AuthService } from '../../../../services/auth.service';
-import { NbToastrService } from '@nebular/theme';
 import { LoadingController } from '@ionic/angular';
 import { NbDialogService } from '@nebular/theme';
 import { DeleteModalComponent } from '../delete-modal/delete-modal.component';
+import { CustomToastrService } from '../../../../services/custom-toastr.service';
 @Component({
   selector: 'ngx-company-permissions-sections',
   templateUrl: './company-permissions-sections.component.html',
@@ -31,7 +34,7 @@ export class CompanyPermissionsSectionsComponent implements OnInit {
   constructor(
     private http: HttpClient,
     public authService: AuthService,
-    private toastrService: NbToastrService,
+    private toastrService: CustomToastrService,
     private loadingController: LoadingController, // Inyectamos LoadingController
     private dialogService: NbDialogService,
   ) {}
@@ -60,13 +63,13 @@ export class CompanyPermissionsSectionsComponent implements OnInit {
           this.companies = response;
         } else {
           console.error(response.error);
-          this.mostrarToast(response.error, 'danger');
+          this.toastrService.showError(response.error, 'error');
         }
       },
       (error) => {
         loading.dismiss(); // Cerramos el loader si hay error
         console.error('Error en la solicitud GET:', error);
-        this.mostrarToast('Error al cargar empresas.', 'danger');
+        this.toastrService.showError('Error al cargar empresas.', 'danger');
       }
     );
   }
@@ -93,13 +96,13 @@ export class CompanyPermissionsSectionsComponent implements OnInit {
           this.permissions = response.permissions;
         } else {
           console.error(response.error);
-          this.mostrarToast(response.error, 'danger');
+          this.toastrService.showError(response.error, 'error');
         }
       },
       (error) => {
         loading.dismiss();
         console.error('Error en la solicitud POST:', error);
-        this.mostrarToast('Error al cargar permisos.', 'danger');
+        this.toastrService.showError('Error al cargar permisos.', 'error');
       }
     );
   }
@@ -121,16 +124,16 @@ export class CompanyPermissionsSectionsComponent implements OnInit {
             this.permissions.push({ NameSection: section });
           });
           // Podrías mostrar un toast de éxito aquí
-          this.mostrarToast('Permisos añadidos correctamente.', 'success');
+          this.toastrService.showSuccess('Permisos añadidos correctamente.', 'Exito');
         } else {
           console.error(response.error);
-          this.mostrarToast(response.error, 'danger');
+          this.toastrService.showError(response.error, 'Error');
         }
       },
       (error) => {
         loading.dismiss();
         console.error('Error en la solicitud POST:', error);
-        this.mostrarToast('Error al añadir permiso.', 'danger');
+        this.toastrService.showError('Error al añadir permiso.', 'Error');
       }
     );
   }
@@ -157,28 +160,19 @@ export class CompanyPermissionsSectionsComponent implements OnInit {
             loading.dismiss();
             if (response.success) {
               this.permissions = this.permissions.filter(p => p.NameSection !== NameSection);
-              this.mostrarToast('Permiso eliminado correctamente.', 'success');
+              this.toastrService.showSuccess('Permiso eliminado correctamente.', 'success');
             } else {
-              this.mostrarToast(response.error, 'danger');
+              this.toastrService.showError(response.error, 'danger');
             }
           },
           (error) => {
             loading.dismiss();
-            this.mostrarToast('Error al eliminar permiso.', 'danger');
+            this.toastrService.showError('Error al eliminar permiso.', 'danger');
           }
         );
       }
     });
 
-  }
-
-  // Reemplaza la lógica de IonToast por NbToastrService
-  mostrarToast(message: string, status: 'success' | 'danger') {
-    if (status === 'success') {
-      this.toastrService.success(message, 'Información');
-    } else if (status === 'danger') {
-      this.toastrService.danger(message, 'Error');
-    }
   }
 
 }

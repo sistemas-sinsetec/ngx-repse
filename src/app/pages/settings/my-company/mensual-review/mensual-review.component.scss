@@ -1,0 +1,65 @@
+.header-container {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+  }
+  
+  .title-and-select {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+  
+    .title {
+      margin: 0;
+    }
+  }
+  
+  .refresh-btn {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+  
+  .counters {
+    display: flex;
+    gap: 1rem;
+    margin-top: 1rem;
+    flex-wrap: wrap;
+  }
+  
+  .table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 1rem;
+  
+    thead {
+      background-color: #f7f9fc;
+    }
+  
+    th {
+      font-weight: 600;
+      padding: 0.75rem;
+      text-align: left;
+      border-bottom: 1px solid #e0e0e0;
+    }
+  
+    td {
+      padding: 0.75rem;
+      border-bottom: 1px solid #e0e0e0;
+      vertical-align: middle;
+    }
+  
+    tr:hover {
+      background-color: #fafafa;
+    }
+  }
+
+  button{
+    margin-left: 10px;
+  }
+
+  .btn-group{
+    margin-top: 30px !important;
+  }
+  

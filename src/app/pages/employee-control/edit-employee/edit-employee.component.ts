@@ -1,12 +1,16 @@
+/*
+  En este codigo se editan las solicitudes de empleados previamente hechas en add-employees, es simplemente
+  un formulario que precarga los datos ya conocidos y te permite completar mas datos
+*/
 import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { NgForm } from '@angular/forms';
 import { HttpClient } from '@angular/common/http';
 import { LoadingController } from '@ionic/angular';
-import { NbToastrService, NbAlertModule } from '@nebular/theme';
+import { NbAlertModule } from '@nebular/theme';
 import { AuthService } from '../../../services/auth.service';
 import { SharedService } from '../../../services/shared.service';
 import { CompanyService } from '../../../services/company.service';
-
+import { CustomToastrService } from '../../../services/custom-toastr.service';
 interface Empleado {
   [key: string]: any;
   employee_id: number;
@@ -62,7 +66,7 @@ export class EditEmployeeComponent implements OnInit {
 
   constructor(
     private http: HttpClient,
-    private toastrService: NbToastrService,
+    private toastrService: CustomToastrService,
     private authService: AuthService,
     public sharedService: SharedService, // Inyectar SharedService para manejar permisos
     private cdr: ChangeDetectorRef,
@@ -111,6 +115,8 @@ export class EditEmployeeComponent implements OnInit {
 
   }
 
+  
+
 
 getStatusDescription(status: string): string {
   switch (status.toLowerCase()) {  // Usar toLowerCase() para asegurarnos de que no haya errores por mayúsculas/minúsculas
@@ -124,6 +130,22 @@ getStatusDescription(status: string): string {
       return 'Solicitud finalizada - Empleado dado de alta';
     default:
       return 'Estado desconocido';
+  }
+}
+
+soloLetrasEspacios(event: KeyboardEvent) {
+  const allowedRegex = /^[a-zA-ZáéíóúÁÉÍÓÚñÑ\s]$/;
+  const key = event.key;
+  if (!allowedRegex.test(key)) {
+    event.preventDefault();
+  }
+}
+
+soloNumeros(event: KeyboardEvent) {
+  const allowedRegex = /^[0-9]$/;
+  const key = event.key;
+  if (!allowedRegex.test(key)) {
+    event.preventDefault();
   }
 }
 
@@ -323,20 +345,13 @@ getStatusDescription(status: string): string {
       const employeeId = this.selectedEmployee.employee_id;
       this.http.post('https://siinad.mx/php/delete_employee_request.php', { employee_id: employeeId }).subscribe(
         (response: any) => {
-          this.toastrService.show(
-            'Solicitud de empleado eliminada exitosamente.',
-            'Éxito',
-            { status: 'success', duration: 2000 }
-          );
+          this.toastrService.showSuccess("Solicitud de empleado eliminada exitosamente.", "Exito");
           this.fetchPendingEmployees();
           this.selectedEmployee = null;
         },
         (error) => {
-          this.toastrService.show(
-            'Error al eliminar solicitud de empleado.',
-            'Error',
-            { status: 'danger', duration: 2000 }
-          );
+          this.toastrService.showError("Error al eliminar solicitud de empleado.", "Error");
+          
         }
       ).add(() => {
         loading.dismiss();
@@ -362,19 +377,12 @@ getStatusDescription(status: string): string {
   
       this.http.post('https://siinad.mx/php/update_employee_status.php', data).subscribe(
         (response: any) => {
-          this.toastrService.show(
-            'Solicitud de empleado rechazada exitosamente.',
-            'Rechazada',
-            { status: 'warning', duration: 2000 }
-          );
-          this.fetchPendingEmployees();
-          this.selectedEmployee = null;
+          this.toastrService.showWarning('Solicitud de empleado rechazada exitosamente.', 'Rechazada');
         },
         (error) => {
-          this.toastrService.show(
+          this.toastrService.showError(
             'Error al rechazar la solicitud de empleado.',
-            'Error',
-            { status: 'danger', duration: 2000 }
+            'Error'
           );
         }
       ).add(() => {
@@ -507,17 +515,15 @@ getStatusDescription(status: string): string {
   
       this.http.post('https://siinad.mx/php/update_employee.php', data).subscribe(
         (response: any) => {
-          this.toastrService.show(
+          this.toastrService.showSuccess(
             'Empleado actualizado exitosamente.',
-            'Éxito',
-            { status: 'success', duration: 2000 }
+            'Éxito'
           );
         },
         (error) => {
-          this.toastrService.show(
+          this.toastrService.showError(
             'Error al actualizar empleado.',
-            'Error',
-            { status: 'danger', duration: 2000 }
+            'Error'
           );
         }
       );
@@ -551,20 +557,18 @@ getStatusDescription(status: string): string {
   
     this.http.post('https://siinad.mx/php/update_upload_files.php', formData).subscribe(
       (response: any) => {
-        this.toastrService.show(
+        this.toastrService.showSuccess(
           'Archivos actualizados exitosamente.',
-          'Éxito',
-          { status: 'success', duration: 2000 }
+          'Éxito'
         );
   
         this.fetchPendingEmployees();
         this.selectedEmployee = null;
       },
       (error) => {
-        this.toastrService.show(
+        this.toastrService.showError(
           'Error al actualizar archivos.',
-          'Error',
-          { status: 'danger', duration: 2000 }
+          'Error'
         );
         console.error('Error al subir archivos:', error);
       },
@@ -616,22 +620,19 @@ getStatusDescription(status: string): string {
   
             // Mostrar mensajes dependiendo del estado
             if (newStatus === 'Pending') {
-              this.toastrService.show(
+              this.toastrService.showInfo(
                 `La solicitud ha sido enviada al administrador para su aprobación. Folio: ${response.folio}`,
-                'Solicitud Enviada',
-                { status: 'info', duration: 5000 }
+                'Solicitud Enviada'
               );
             } else if (newStatus === 'Complete') {
-              this.toastrService.show(
+              this.toastrService.showSuccess(
                 `La solicitud está en espera de procesamiento por un administrativo. Folio: ${response.folio}`,
-                'Solicitud en Proceso',
-                { status: 'success', duration: 5000 }
+                'Solicitud en Proceso'
               );
             } else if (newStatus === 'Finish') {
-              this.toastrService.show(
+              this.toastrService.showSuccess(
                 `El empleado ha sido dado de alta exitosamente. Folio: ${response.folio}`,
-                'Empleado Dado de Alta',
-                { status: 'success', duration: 5000 }
+                'Empleado Dado de Alta'
               );
             }
   
@@ -639,18 +640,16 @@ getStatusDescription(status: string): string {
             this.fetchPendingEmployees();
             this.selectedEmployee = null;
           } else {
-            this.toastrService.show(
+            this.toastrService.showError(
               'Error: No se recibió el folio de la solicitud.',
-              'Error',
-              { status: 'danger', duration: 2000 }
+              'Error'
             );
           }
         },
         (error) => {
-          this.toastrService.show(
+          this.toastrService.showError(
             'Error al actualizar el estado de la solicitud.',
-            'Error',
-            { status: 'danger', duration: 2000 }
+            'Error'
           );
         },
         () => {

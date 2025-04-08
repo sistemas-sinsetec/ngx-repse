@@ -1,0 +1,82 @@
+<nb-card>
+  <nb-card-header>
+    <div class="header-container">
+      <div class="title-and-select">
+        <h2 class="title">Estado de Archivos Mensual</h2>
+        <nb-select placeholder="Selecciona año" [(selected)]="selectedYear">
+          <nb-option *ngFor="let year of years" [value]="year">
+            {{ year }}
+          </nb-option>
+        </nb-select>
+        <!-- Selección de mes -->
+        <nb-select placeholder="Selecciona mes" [(selected)]="selectedMonth">
+          <nb-option *ngFor="let mes of meses" [value]="mes">
+            {{ mes | titlecase }}
+          </nb-option>
+        </nb-select>
+      </div>
+    </div>
+    <!-- Contadores de archivos -->
+    <div class="d-flex justify-content-center flex-wrap mb-3 count">
+      <nb-tag class="m-2" status="info" appearance="outline" text="Cargados: {{ archivosCargados }}"></nb-tag>
+      <nb-tag class="m-2" status="success" text="Aceptados: {{ archivosAceptados }}"></nb-tag>
+      <nb-tag class="m-2" status="danger" text="Rechazados: {{ archivosRechazados }}"></nb-tag>
+      <nb-tag class="m-2" status="warning" text="No cargados: {{ archivosNoCargados }}"></nb-tag>
+    </div>
+  </nb-card-header>
+
+  <nb-card-body>
+    <!-- Spinner mientras se cargan datos o se sube un archivo -->
+    <nb-spinner *ngIf="cargando" status="primary"></nb-spinner>
+
+    <!-- Tabla solo si no se está cargando -->
+    <table class="table" *ngIf="!cargando">
+      <thead>
+        <tr>
+          <th style="text-align: center;">Nombre</th>
+          <th style="text-align: center;">Estado Mes ({{ selectedMonth | titlecase }})</th>
+          <th style="text-align: center;">Comentario</th> <!-- Nueva columna -->
+          <th style="text-align: center;">Acciones</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let tarea of tareas">
+          <td>{{ tarea.nombre }}</td>
+          <td style="text-align: center;">
+            <ng-container *ngIf="hasDocumentForYear(tarea, selectedMonth, selectedYear); else noFile">
+              <nb-icon [icon]="getIconForDocument(tarea, selectedMonth, selectedYear)" pack="eva"
+                [style.color]="
+                  getIconForDocument(tarea, selectedMonth, selectedYear) === 'checkmark-outline' ? 'green' :
+                  (getIconForDocument(tarea, selectedMonth, selectedYear) === 'close-outline' ? 'red' : 'blue')
+                ">
+              </nb-icon>
+            </ng-container>
+            <ng-template #noFile>
+              <span class="grey-dash">-</span>
+            </ng-template>
+          </td>
+          <td style="text-align: center;">
+            {{ getComment(tarea, selectedMonth, selectedYear) }}
+          </td>
+          <td style="text-align: center;">
+            <!-- Botón para cargar archivo -->
+            <button nbButton status="primary" size="small" (click)="triggerFileInput(tarea.id)"
+                    [disabled]="isUploadDisabled(tarea, selectedMonth, selectedYear)">
+              <nb-icon icon="cloud-upload-outline" pack="eva"></nb-icon> Cargar
+            </button>
+
+            <!-- Input file oculto -->
+            <input type="file" hidden id="fileInput{{ tarea.id }}" (change)="onFileSelected($event, tarea)" />
+            <!-- Botón de descargar siempre visible, pero deshabilitado si no existe el documento -->
+            <button nbButton status="info" size="small"
+                    [disabled]="!hasDocumentForYear(tarea, selectedMonth, selectedYear)"
+                    (click)="descargarArchivo(tarea, selectedMonth, selectedYear)">
+              <nb-icon icon="cloud-download-outline" pack="eva"></nb-icon> Descargar
+            </button>
+          </td>
+          
+        </tr>
+      </tbody>
+    </table>
+  </nb-card-body>
+</nb-card>

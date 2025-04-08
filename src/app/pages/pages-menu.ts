@@ -1,3 +1,8 @@
+/*
+  En esta parte se manejan los accesos a las diferentes secciones desde el menu lateral
+  se especifican las secciones, subsecciones y la ruta a la que llevan 
+*/
+
 import { CustomMenuItem } from './custom-menu-item'; // Asegúrate de usar la ruta correcta
 
 export const MENU_ITEMS: CustomMenuItem[] = [
@@ -201,12 +206,6 @@ export const MENU_ITEMS: CustomMenuItem[] = [
             permission: { section: 'Configuracion de mi empresa', subSection: 'Departamentos' },
           },
           {
-            title: 'Administrar Rangos',
-            link: '/pages/settings/my-company/department-ranges',
-            hidden: false,
-            permission: { section: 'Configuracion de mi empresa', subSection: 'Departamentos' },
-          },
-          {
             title: 'Tipos de periodos',
             link: '/pages/settings/my-company/period-configuration',
             hidden: false,
@@ -233,6 +232,18 @@ export const MENU_ITEMS: CustomMenuItem[] = [
           {
             title: 'Subir expedientes digitales',
             link: '/pages/settings/my-company/anual-upload',
+            hidden: false,
+            permission: { section: 'Configuracion de mi empresa', subSection: 'Subir expendientes digitales' },
+          },
+          {
+            title: 'Expediente Mensual',
+            link: '/pages/settings/my-company/mensual-review',
+            hidden: false,
+            permission: { section: 'Configuracion de mi empresa', subSection: 'Confirmar expendientes digitales' },
+          },
+          {
+            title: 'Subir expediente mensual',
+            link: '/pages/settings/my-company/mensual-upload',
             hidden: false,
             permission: { section: 'Configuracion de mi empresa', subSection: 'Subir expendientes digitales' },
           },

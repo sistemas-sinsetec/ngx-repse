@@ -1,7 +1,10 @@
+/*
+  En este codigo se muestran y crean los departamentos, puestos y horarios de la empresa.
+*/
 import { Component, OnInit } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { CompanyService } from '../../../../services/company.service';
-import { NbToastrService } from '@nebular/theme';
+import { CustomToastrService } from '../../../../services/custom-toastr.service';
 import { NbGlobalPhysicalPosition } from '@nebular/theme';
 @Component({
   selector: 'ngx-department-management',
@@ -39,7 +42,7 @@ export class DepartmentManagementComponent {
     constructor(
       private http: HttpClient,
       private companyService: CompanyService,
-      private toastrService: NbToastrService,
+      private toastrService: CustomToastrService,
     ) { }
 
     ngOnInit() {
@@ -67,20 +70,21 @@ export class DepartmentManagementComponent {
 
 
     async fetchPositions() {
-    
       const companyId = this.companyService.selectedCompany.id;
       this.http.get<any[]>(`https://siinad.mx/php/get_positions.php?company_id=${companyId}`).subscribe(
         data => {
-          this.positions = Array.isArray(data) ? data : [];
-         
+          // Ordenar y filtrar, excluyendo puestos cuyo rango sea 0
+          this.positions = Array.isArray(data)
+            ? data.sort((a, b) => a.position_range - b.position_range)
+                  .filter(position => position.position_range !== 0)
+            : [];
         },
         error => {
           console.error('Error al cargar puestos', error);
-      
-         
         }
       );
     }
+    
 
     async fetchShifts() {
       const companyId = this.companyService.selectedCompany.id;
@@ -193,53 +197,54 @@ export class DepartmentManagementComponent {
           
             this.fetchDepartments();
             this.createNewDepartment();
-            this.showToast('success', '¡Cambios guardados exitosamente!', 'Éxito');
+            this.toastrService.showSuccess('¡Cambios guardados exitosamente!', 'Éxito');
            
           },
           error => {
             console.error('Error al guardar el departamento', error);
-            this.showToast('danger', 'Error al guardar los cambios. Inténtelo de nuevo.', 'Error');
+            this.toastrService.showError('Error al guardar los cambios. Inténtelo de nuevo.', 'Error');
            
           }
         );
       }
     }
-
-    showToast(status: string, message: string, title: string) {
-      this.toastrService.show(message, title, {
-        status: status,
-        duration: 3000, // Duración de la alerta en milisegundos
-        position:NbGlobalPhysicalPosition.TOP_RIGHT, // Posición de la alerta
-      });
-    }
     
 
     async savePositionConfig() {
-      if (this.getCurrentPosition().position_name) {
-      
-        const positionData = { ...this.getCurrentPosition(), company_id:this.companyService.selectedCompany.id };
-        const url = this.selectedPosition && this.selectedPosition.position_id
-          ? 'https://siinad.mx/php/update_position.php'
-          : 'https://siinad.mx/php/add_position.php';
-  
-          this.http.post(url, JSON.stringify(positionData), { headers: { 'Content-Type': 'application/json' } })
-          .subscribe(
+      const current = this.getCurrentPosition();
+    
+      // Validar que el nombre y el rango estén definidos
+      if (!current.position_name || current.position_range == null) {
+        this.toastrService.showError('Debe ingresar el nombre y el rango del puesto.', 'Error');
+        return;
+      }
+    
+      // Validar que el rango esté entre 1 y 50
+      if (current.position_range < 1 || current.position_range > 50) {
+        this.toastrService.showError('El rango debe estar entre 1 y 50.', 'Error');
+        return;
+      }
+    
+      const positionData = { ...current, company_id: this.companyService.selectedCompany.id };
+      const url = this.selectedPosition && this.selectedPosition.position_id
+        ? 'https://siinad.mx/php/update_position.php'
+        : 'https://siinad.mx/php/add_position.php';
+    
+      this.http.post(url, JSON.stringify(positionData), { headers: { 'Content-Type': 'application/json' } })
+        .subscribe(
           () => {
-            
             this.fetchPositions();
             this.isAddingPosition = false;
             this.selectedPosition = null;
-            this.showToast('success', '¡Cambios guardados exitosamente!', 'Éxito');
-         
+            this.toastrService.showSuccess('¡Cambios guardados exitosamente!', 'Éxito');
           },
           error => {
             console.error('Error al guardar el puesto', error);
-            this.showToast('danger', 'Error al guardar los cambios. Inténtelo de nuevo.', 'Error');
-
+            this.toastrService.showError('Error al guardar los cambios. Inténtelo de nuevo.', 'Error');
           }
         );
-      }
     }
+    
 
     async saveShiftConfig() {
       if (this.getCurrentShift().shift_name) {
@@ -260,12 +265,12 @@ export class DepartmentManagementComponent {
             this.fetchShifts();
             this.isAddingShift = false;
             this.selectedShift = null;
-            this.showToast('success', '¡Cambios guardados exitosamente!', 'Éxito');
+            this.toastrService.showSuccess('¡Cambios guardados exitosamente!', 'Éxito');
            
           },
           error => {
             console.error('Error al guardar el turno', error);
-            this.showToast('danger', 'Error al guardar los cambios. Inténtelo de nuevo.', 'Error');
+            this.toastrService.showError('Error al guardar los cambios. Inténtelo de nuevo.', 'Error');
          
           }
         );
@@ -295,13 +300,13 @@ export class DepartmentManagementComponent {
           () => {
            
             this.fetchDepartments();
-            this.showToast('success', '¡Departamento eliminado correctamente!', 'Éxito');
+            this.toastrService.showSuccess('¡Departamento eliminado correctamente!', 'Éxito');
             
        
           },
           error => {
             console.error('Error al borrar departamento', error);
-            this.showToast('danger', 'No se pudo eliminar el departamento. Inténtelo de nuevo.', 'Error');
+            this.toastrService.showError('No se pudo eliminar el departamento. Inténtelo de nuevo.', 'Error');
            
           }
         );
@@ -318,12 +323,12 @@ export class DepartmentManagementComponent {
         () => {
          
           this.fetchPositions();
-          this.showToast('success', '¡Puesto eliminado correctamente!', 'Éxito');
+          this.toastrService.showSuccess('¡Puesto eliminado correctamente!', 'Éxito');
        
         },
         error => {
           console.error('Error al borrar puesto', error);
-          this.showToast('danger', 'No se pudo eliminar el puesto. Inténtelo de nuevo.', 'Error');
+          this.toastrService.showError('No se pudo eliminar el puesto. Inténtelo de nuevo.', 'Error');
         
         }
       );
@@ -339,12 +344,12 @@ export class DepartmentManagementComponent {
         () => {
         
           this.fetchShifts();
-          this.showToast('success', '¡Turno eliminado correctamente!', 'Éxito');
+          this.toastrService.showSuccess('¡Turno eliminado correctamente!', 'Éxito');
       
         },
         error => {
           console.error('Error al borrar turno', error);
-          this.showToast('success', '¡Turno eliminado correctamente!', 'Éxito');
+          this.toastrService.showSuccess('¡Turno eliminado correctamente!', 'Éxito');
       
         }
       );

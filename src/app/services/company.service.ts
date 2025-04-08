@@ -1,8 +1,10 @@
-// company.service.ts
+/*
+  En este codigo se administran los datos de la sesion referentes a la empresa actual
+*/
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable, Subject } from 'rxjs';
-import { NbToastrService, NbComponentStatus } from '@nebular/theme';
+import { NbComponentStatus } from '@nebular/theme';
 
 @Injectable({
   providedIn: 'root',
@@ -18,7 +20,7 @@ export class CompanyService {
   // Subject para emitir cambios
   private companyChange$ = new Subject<{ company: any; logoUrl: string }>();
 
-  constructor(private http: HttpClient, private toastrService: NbToastrService) {
+  constructor(private http: HttpClient) {
     // Cargar las empresas principales almacenadas en localStorage
     this.loadMappedPrincipalCompanies();
 
@@ -155,16 +157,6 @@ export class CompanyService {
 
       console.log('Logo actualizado en el servicio y en localStorage:', this.selectedCompany);
     }
-  }
-
-  /**
-   * Mostrar notificaciones
-   */
-  private showToast(message: string, status: NbComponentStatus): void {
-    this.toastrService.show(message, '', {
-      status: status,
-      duration: 5000,
-    });
   }
 
   /**

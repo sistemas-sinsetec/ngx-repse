@@ -1,3 +1,6 @@
+/*
+  En este codigo se administra informacion referente a los permisos
+*/
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { AuthService } from './auth.service';

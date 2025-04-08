@@ -1,10 +1,14 @@
+/*
+  En este codigo se peuden visualizar cada una de las semanas y hace configuraciones referentes a ellas
+*/
+
 import { Component, OnInit } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { AuthService } from '../../../../services/auth.service';
 import { CompanyService } from '../../../../services/company.service';
 import { LoadingController } from '@ionic/angular'; // Importar LoadingController de Ionic
-import { NbToastrService } from '@nebular/theme'; // Importar NbToastrService de Nebular
 import { LocalDataSource } from 'ng2-smart-table'; // Importar LocalDataSource para ng2-smart-table
+import { CustomToastrService } from '../../../../services/custom-toastr.service';
 
 @Component({
   selector: 'ngx-period-management',
@@ -70,7 +74,7 @@ export class PeriodManagementComponent implements OnInit {
     private authService: AuthService,
     private companyService: CompanyService,
     private loadingController: LoadingController, // Inyectar LoadingController
-    private toastrService: NbToastrService // Inyectar NbToastrService
+    private toastrService: CustomToastrService // Inyectar NbToastrService
   ) { }
 
   ngOnInit() {
@@ -117,7 +121,7 @@ export class PeriodManagementComponent implements OnInit {
       }, error => {
         console.error('Error al cargar los periodos', error);
         loading.dismiss(); // Ocultar el spinner de carga en caso de error
-        this.toastrService.danger('Error al cargar los periodos', 'Error'); // Mostrar un toast de error
+        this.toastrService.showError('Error al cargar los periodos', 'Error'); // Mostrar un toast de error
       });
   }
 
@@ -145,7 +149,7 @@ export class PeriodManagementComponent implements OnInit {
         (error) => {
           console.error('Error al cargar las semanas del periodo', error);
           loading.dismiss();
-          this.toastrService.danger('Error al cargar las semanas del periodo', 'Error');
+          this.toastrService.showError('Error al cargar las semanas del periodo', 'Error');
         }
       );
   }
@@ -169,7 +173,7 @@ export class PeriodManagementComponent implements OnInit {
         .subscribe(response => {
           console.log('Periodo actualizado correctamente', response);
           loading.dismiss();
-          this.toastrService.success('Periodo actualizado correctamente', 'Éxito');
+          this.toastrService.showSuccess('Periodo actualizado correctamente', 'Éxito');
   
           // Recargar los períodos y las semanas del período actualizado
           this.loadPeriods(); // Recargar la lista de períodos
@@ -177,7 +181,7 @@ export class PeriodManagementComponent implements OnInit {
         }, error => {
           console.error('Error al actualizar el periodo', error);
           loading.dismiss();
-          this.toastrService.danger('Error al actualizar el periodo', 'Error');
+          this.toastrService.showError('Error al actualizar el periodo', 'Error');
         });
     } 
   }

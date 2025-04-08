@@ -1,10 +1,14 @@
+/*
+  En este codigo se añaden o quitan los diferentes permisos para cada usuario, es decir las secciones
+  a las que tendra acceso cada usuario ligado a la empresa.
+*/
 import { Component, OnInit } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { NbToastrService } from '@nebular/theme';
 import { Router } from '@angular/router';
 import { CompanyService } from '../../../services/company.service';
 import { AuthService } from '../../../services/auth.service';
 import { LoadingController } from '@ionic/angular'; // Importar LoadingController
+import { CustomToastrService } from '../../../services/custom-toastr.service';
 
 @Component({
   selector: 'ngx-permissions-sections',
@@ -37,7 +41,7 @@ export class PermissionsSectionsComponent implements OnInit {
 
   constructor(
     private http: HttpClient,
-    private toastrService: NbToastrService,
+    private toastrService: CustomToastrService,
     public companyService: CompanyService,
     private router: Router,
     public authService: AuthService,
@@ -61,13 +65,13 @@ export class PermissionsSectionsComponent implements OnInit {
           this.users = response.employees;
           this.filteredUsers = this.users;
         } else {
-          this.showToast(response.error, 'danger');
+          this.toastrService.showError(response.error, 'error');
         }
         await loading.dismiss(); // Ocultar loading
       },
       async (error) => {
         console.error('Error en la solicitud GET:', error);
-        this.showToast('Error al cargar usuarios.', 'danger');
+        this.toastrService.showError('Error al cargar usuarios.', 'error');
         await loading.dismiss(); // Ocultar loading
       }
     );
@@ -82,7 +86,7 @@ export class PermissionsSectionsComponent implements OnInit {
       },
       async (error) => {
         console.error('Error en la solicitud GET:', error);
-        this.showToast('Error al cargar los tipos de usuario.', 'danger');
+        this.toastrService.showError('Error al cargar los tipos de usuario.', 'error');
         await loading.dismiss(); // Ocultar loading
       }
     );
@@ -101,13 +105,13 @@ export class PermissionsSectionsComponent implements OnInit {
           this.sections = allSections.filter(section => assignedSections.includes(section));
         } else {
           console.error(response.error);
-          await this.showToast(response.error, 'danger');
+          await this.toastrService.showError(response.error, 'error');
         }
         await loading.dismiss(); // Ocultar loading
       },
       async (error) => {
         console.error('Error en la solicitud POST:', error);
-        await this.showToast('Error al cargar secciones.', 'danger');
+        await this.toastrService.showError('Error al cargar secciones.', 'error');
         await loading.dismiss(); // Ocultar loading
       }
     );
@@ -191,7 +195,7 @@ export class PermissionsSectionsComponent implements OnInit {
     const subSectionsProviderMap: { [key: string]: string[] } = {
       'Sistema REPSE': [''],
       'Control de proyectos': [
-        'Asignacion de proyectos',
+        'Asignacion de proyectosSDASDSAS',
         'Registro de proyectos',
         'Vizualizar proyectos',
         'Seguimiento de proyectos'
@@ -230,7 +234,7 @@ export class PermissionsSectionsComponent implements OnInit {
     const subSectionsClientMap: { [key: string]: string[] } = {
       'Sistema REPSE': [''],
       'Control de proyectos': [
-        'Asignacion de proyectos',
+        'Asignacion de proyectoCXVVXXVCVXCs',
         'Registro de proyectos',
         'Vizualizar proyectos',
         'Seguimiento de proyectos'
@@ -287,13 +291,13 @@ export class PermissionsSectionsComponent implements OnInit {
           this.groupPermissions(); // Agrupa los permisos después de cargarlos
         } else {
           console.error(response.error);
-          await this.showToast(response.error, 'danger');
+          await this.toastrService.showError(response.error, 'error');
         }
         await loading.dismiss(); // Ocultar loading
       },
       async (error) => {
         console.error('Error en la solicitud POST:', error);
-        await this.showToast('Error al cargar permisos.', 'danger');
+        await this.toastrService.showError('Error al cargar permisos.', 'error');
         await loading.dismiss(); // Ocultar loading
       }
     );
@@ -331,7 +335,7 @@ export class PermissionsSectionsComponent implements OnInit {
     // Validar si los permisos ya existen
     const existingPermissions = this.checkExistingPermissions(this.selectedSection, selectedSubSections);
     if (existingPermissions.length > 0) {
-      this.showToast(`Los siguientes permisos ya existen: ${existingPermissions.join(', ')}`, 'danger');
+      this.toastrService.showError(`Los siguientes permisos ya existen: ${existingPermissions.join(', ')}`, 'error');
       await loading.dismiss(); // Ocultar loading
       return; // Detener el proceso si hay permisos duplicados
     }
@@ -350,53 +354,58 @@ export class PermissionsSectionsComponent implements OnInit {
             this.permissions.push({ section: this.selectedSection, subSection: subSection });
           });
           this.groupPermissions(); // Actualiza la agrupación
-          this.showToast('Permisos agregados correctamente.', 'success');
+          this.toastrService.showSuccess('Permisos agregados correctamente.', 'exito');
         } else {
           console.error(response.error);
-          await this.showToast(response.error, 'danger');
+          await this.toastrService.showError(response.error, 'error');
         }
         await loading.dismiss(); // Ocultar loading
       },
       async (error) => {
         console.error('Error en la solicitud POST:', error);
-        await this.showToast('Error al añadir permiso.', 'danger');
+        await this.toastrService.showError('Error al añadir permiso.', 'danger');
         await loading.dismiss(); // Ocultar loading
       }
     );
   }
 
   async removePermission(section: string, subSection: string) {
+
     const loading = await this.showLoading('Eliminando permiso...'); 
+
     const companyId = this.companyService.selectedCompany.id;
     const data = {
       userId: this.selectedUserId,
       section: section,
+
       subSection: subSection, 
       companyId: companyId
   };
+
 
     this.http.post('https://siinad.mx/php/removePermission.php', data).subscribe(
       async (response: any) => {
         if (response.success) {
           this.permissions = this.permissions.filter(p => !(p.section === section && p.subSection === subSection));
+
           this.groupPermissions(); 
-          this.showToast('Permiso eliminado correctamente.', 'success');
+
+          this.toastrService.showSuccess('Permiso eliminado correctamente.', 'Exito');
         } else {
           console.error(response.error);
-          await this.showToast(response.error, 'danger');
+          await this.toastrService.showError(response.error, 'error');
         }
+
         await loading.dismiss(); 
+
       },
       async (error) => {
         console.error('Error en la solicitud POST:', error);
-        await this.showToast('Error al eliminar permiso.', 'danger');
+        await this.toastrService.showError('Error al eliminar permiso.', 'error');
         await loading.dismiss(); 
+
       }
     );
-  }
-
-  showToast(message: string, status: 'success' | 'danger') {
-    this.toastrService.show(message, 'Notificación', { status });
   }
 
   // Función para mostrar el loading

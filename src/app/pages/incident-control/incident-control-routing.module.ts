@@ -1,3 +1,7 @@
+/*
+  En este codigo se manejan las rutas para la seccion de control de incidencias.
+  Se usa canActivate para manejar los permisos
+*/
 import { NgModule } from '@angular/core';
 import { RouterModule, Routes } from '@angular/router';
 import { IncidentControlComponent } from './incident-control.component';

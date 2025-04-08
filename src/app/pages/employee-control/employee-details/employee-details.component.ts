@@ -1,6 +1,12 @@
+
+/*
+  Esta es la ventana que se despliega al presionar en ver detalles de empleado (employee-view)
+  Aqui simplemente se ven los datos del empleado y se pueden editar tambien
+*/
+
 import { Component, Input, OnInit, Inject } from '@angular/core';
 import { LoadingController } from '@ionic/angular';
-import { NbAlertModule, NbDialogService, NbToastrService } from '@nebular/theme';
+import { NbAlertModule, NbDialogService} from '@nebular/theme';
 import { CompanyService } from '../../../services/company.service';
 import { NbDialogRef } from '@nebular/theme';
 import { HttpClient } from '@angular/common/http';
@@ -8,6 +14,7 @@ import { AuthService } from '../../../services/auth.service'; // Asegúrate de t
 import * as JSZip from 'jszip';
 import { saveAs } from 'file-saver';
 import * as pdfjsLib from 'pdfjs-dist';
+import { CustomToastrService } from '../../../services/custom-toastr.service';
 
 interface Empleado {
   employee_id: number;
@@ -216,7 +223,7 @@ export class EmployeeDetailsComponent implements OnInit {
 
   constructor(
     private loadingController: LoadingController,
-    private toastrService: NbToastrService,
+    private toastrService: CustomToastrService,
     private alertModule: NbAlertModule,
     private dialogService: NbDialogService, 
     private http: HttpClient,
@@ -376,7 +383,21 @@ async extractFolioYLote(file: File) {
 }
 
 
+soloLetrasEspacios(event: KeyboardEvent) {
+  const allowedRegex = /^[a-zA-ZáéíóúÁÉÍÓÚñÑ\s]$/;
+  const key = event.key;
+  if (!allowedRegex.test(key)) {
+    event.preventDefault();
+  }
+}
 
+soloNumeros(event: KeyboardEvent) {
+  const allowedRegex = /^[0-9]$/;
+  const key = event.key;
+  if (!allowedRegex.test(key)) {
+    event.preventDefault();
+  }
+}
 
 
 
@@ -406,7 +427,8 @@ async onFileChange(event: any, fileType: string, fileId?: number) {
 
     // Verificar si folio y lote están presentes
     if (!folio || !lote) {
-      await this.showErrorAlert();
+      await this.toastrService.showError(`Se ha subido la alta del IMSS con el folio: ${folio} y lote: ${lote}.`,
+    'Archivo Subido');
       return; // Detener el proceso de subida
     }
 
@@ -422,31 +444,13 @@ async onFileChange(event: any, fileType: string, fileId?: number) {
 
       // Mostrar alerta de confirmación
       if (fileType === 'archivoIMSS') {
-        await this.showAlert(folio, lote);
+        await this.toastrService.showSuccess(`Se ha subido la alta del IMSS con el folio: ${folio} y lote: ${lote}.`,
+    'Archivo Subido');
       }
     }, error => {
       console.error('Error al subir el archivo:', error);
     });
 }
-
-// Mostrar alerta de éxito
-showAlert(folio: string, lote: string) {
-  this.toastrService.show(
-    `Se ha subido la alta del IMSS con el folio: ${folio} y lote: ${lote}.`,
-    'Archivo Subido',
-    { status: 'success', duration: 5000 }
-  );
-}
-
-// Mostrar alerta de error
-async showErrorAlert() {
-  this.toastrService.show(
-    'No se encontró el folio o lote en el archivo. No se subió el archivo.',
-    'Error',
-    { status: 'danger', duration: 5000 }
-  );
-}
-
 // Simular clic en un input de archivo oculto
 triggerFileInput(inputId: string) {
   const fileInput = document.getElementById(inputId) as HTMLElement;
@@ -489,11 +493,11 @@ async uploadPhoto(file: File) {
   this.http.post('https://siinad.mx/php/upload_employee_photo.php', formData).subscribe(
     async () => {
       await loading.dismiss();
-      this.toastrService.show('Foto subida exitosamente', 'Éxito', { status: 'success' });
+      this.toastrService.showSuccess('Foto subida exitosamente', 'Éxito');
     },
     async (error) => {
       await loading.dismiss();
-      this.toastrService.show('Error al subir la foto', 'Error', { status: 'danger' });
+      this.toastrService.showError('Error al subir la foto', 'Error');
       console.error('Error al subir la foto:', error);
     }
   );
@@ -506,14 +510,17 @@ getFileByType(fileType: string): EmployeeFile | null {
 
 // Guardar información general
 async saveGeneralInfo() {
+  if (!this.validateForm()) {
+    this.toastrService.showError('Por favor, completa correctamente todos los campos.', 'Error');
+    return;
+  }
+
   const generalInfo = {
     employee_id: this.employee.employee_id,
     employee_code: this.employee.employee_code,
     first_name: this.employee.first_name,
-    middle_name: this.employee.middle_name,
     last_name: this.employee.last_name,
     birth_date: this.employee.birth_date,
-    birth_place: this.employee.birth_place,
     curp: this.employee.curp,
     rfc: this.employee.rfc,
     phone_number: this.employee.phone_number,
@@ -532,17 +539,31 @@ async saveGeneralInfo() {
     async (response: any) => {
       await loading.dismiss();
       if (response.success) {
-        this.toastrService.show('Información general actualizada con éxito', 'Éxito', { status: 'success' });
+        this.toastrService.showSuccess('Información general actualizada con éxito', 'Éxito');
       } else {
-        this.toastrService.show(response.message, 'Error', { status: 'danger' });
+        this.toastrService.showError(response.message, 'Error');
       }
     },
     async (error) => {
       await loading.dismiss();
-      this.toastrService.show('Error al actualizar la información general', 'Error', { status: 'danger' });
+      this.toastrService.showError('Error al actualizar la información general', 'Error');
       console.error('Error al actualizar la información general:', error);
     }
   );
+}
+
+validateForm(): boolean {
+  if (!this.employee.first_name.match(/^[a-zA-ZáéíóúÁÉÍÓÚñÑ\s]+$/)) return false;
+  if (!this.employee.last_name.match(/^[a-zA-ZáéíóúÁÉÍÓÚñÑ\s]+$/)) return false;
+  if (!this.employee.phone_number.match(/^\d{10}$/)) return false;
+  if (!this.employee.email.includes('@')) return false;
+  if (!this.employee.curp.match(/^[A-Z0-9]{18}$/)) return false;
+  if (!this.employee.rfc.match(/^[A-Z0-9]{12,13}$/)) return false;
+  if (!this.employee.social_security_number.match(/^\d{11}$/)) return false;
+  if (this.employee.clabe && !this.employee.clabe.match(/^\d{18}$/)) return false;
+  if (!this.employee.start_date) return false;
+
+  return true;
 }
 
 // Guardar información financiera
@@ -564,11 +585,11 @@ async saveFinancialInfo() {
   this.http.post('https://www.siinad.mx/php/update_financial_info.php', financialInfo).subscribe(
     async () => {
       await loading.dismiss();
-      this.toastrService.show('Información financiera actualizada con éxito', 'Éxito', { status: 'success' });
+      this.toastrService.showSuccess('Información financiera actualizada con éxito', 'Éxito');
     },
     async (error) => {
       await loading.dismiss();
-      this.toastrService.show('Error al actualizar la información financiera', 'Error', { status: 'danger' });
+      this.toastrService.showError('Error al actualizar la información financiera', 'Error');
       console.error('Error al actualizar la información financiera:', error);
     }
   );
@@ -595,11 +616,11 @@ async saveWorkInfo() {
   this.http.post('https://www.siinad.mx/php/update_work_info.php', workInfo).subscribe(
     async () => {
       await loading.dismiss();
-      this.toastrService.show('Información laboral actualizada con éxito', 'Éxito', { status: 'success' });
+      this.toastrService.showSuccess('Información laboral actualizada con éxito', 'Éxito');
     },
     async (error) => {
       await loading.dismiss();
-      this.toastrService.show('Error al actualizar la información laboral', 'Error', { status: 'danger' });
+      this.toastrService.showError('Error al actualizar la información laboral', 'Error');
       console.error('Error al actualizar la información laboral:', error);
     }
   );
@@ -621,11 +642,11 @@ async saveEmergencyContact() {
   this.http.post('https://www.siinad.mx/php/update_emergency_contact.php', emergencyContactInfo).subscribe(
     async () => {
       await loading.dismiss();
-      this.toastrService.show('Contacto de emergencia actualizado con éxito', 'Éxito', { status: 'success' });
+      this.toastrService.showSuccess('Contacto de emergencia actualizado con éxito', 'Éxito');
     },
     async (error) => {
       await loading.dismiss();
-      this.toastrService.show('Error al actualizar el contacto de emergencia', 'Error', { status: 'danger' });
+      this.toastrService.showError('Error al actualizar el contacto de emergencia', 'Error');
       console.error('Error al actualizar el contacto de emergencia:', error);
     }
   );
