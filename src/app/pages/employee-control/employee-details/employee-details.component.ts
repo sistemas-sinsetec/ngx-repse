@@ -666,7 +666,7 @@ async saveEmergencyContact() {
 
   // Método para obtener los estados civiles desde el backend
   getMaritalStatuses() {
-    this.http.get<any[]>(`${environment.apiBaseUrl}/php/get_marital_statuses.php`)
+    this.http.get<any[]>(`${environment.apiBaseUrl}/get_marital_statuses.php`)
       .subscribe(response => {
         this.maritalStatuses = response;  // Asignar la lista de estados civiles al array
         console.log(this.maritalStatuses);  // Verificar en la consola que se recibieron los datos
