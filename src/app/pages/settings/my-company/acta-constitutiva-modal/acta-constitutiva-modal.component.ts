@@ -1,6 +1,7 @@
 import { Component, Input, OnInit } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { NbDialogRef } from '@nebular/theme';
+import { environment } from '../../../../../environments/environment';
 
 @Component({
   selector: 'ngx-acta-constitutiva-modal',
@@ -35,7 +36,7 @@ export class ActaConstitutivaModalComponent implements OnInit {
 
   cargarInformacion() {
     this.http
-      .get<any[]>(`https://siinad.mx/php/getActasConstitutivas.php?companyId=${this.companyId}`)
+      .get<any[]>(`${environment.apiBaseUrl}/getActasConstitutivas.php?companyId=${this.companyId}`)
       .subscribe(
         (response) => {
           if (response && response.length > 0) {
@@ -64,7 +65,7 @@ export class ActaConstitutivaModalComponent implements OnInit {
     };
 
     this.http
-      .post('https://siinad.mx/php/saveActaConstitutiva.php', formData)
+      .post(`${environment.apiBaseUrl}/saveActaConstitutiva.php`, formData)
       .subscribe(
         (response) => {
           console.log('Respuesta del servidor:', response);

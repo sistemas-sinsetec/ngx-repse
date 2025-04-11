@@ -8,6 +8,7 @@ import { HttpClient } from '@angular/common/http';
 import { Router } from '@angular/router';
 import { NbDialogService } from '@nebular/theme';
 import { CustomToastrService } from '../../../../services/custom-toastr.service';
+import { environment } from '../../../../../environments/environment';
 
 @Component({
   selector: 'ngx-reg-company',
@@ -90,7 +91,7 @@ export class RegCompanyComponent {
             : null,
       };
   
-      this.http.post('https://siinad.mx/php/registerAdminS.php', data).subscribe(
+      this.http.post(`${environment.apiBaseUrl}/registerAdminS.php`, data).subscribe(
         async (response: any) => {
           if (response.success) {
             this.toastrService.showSuccess(response.message, 'Registro exitoso');
@@ -118,7 +119,7 @@ export class RegCompanyComponent {
   
   buscarEmpresaPorRFC() {
     this.http
-      .post('https://siinad.mx/php/searchCompanies.php', {
+      .post(`${environment.apiBaseUrl}/searchCompanies.php`, {
         rfc: this.usuario.rfc,
       })
       .subscribe(

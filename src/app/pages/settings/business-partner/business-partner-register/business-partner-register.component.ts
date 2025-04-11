@@ -12,6 +12,7 @@ import { PhoneNumberUtil } from 'google-libphonenumber';
 import { CompanyInfoModalComponent } from '../company-info-modal/company-info-modal.component';
 import { CompanyService } from '../../../../services/company.service';
 import { CustomToastrService } from '../../../../services/custom-toastr.service';
+import { environment } from '../../../../../environments/environment';
 
 @Component({
   selector: 'ngx-business-partner-register',
@@ -86,7 +87,7 @@ export class BusinessPartnerRegisterComponent implements OnInit {
   
 
   buscarEmpresaPorRFC() {
-    this.http.post('https://siinad.mx/php/searchCompanies.php', { rfc: this.usuario.rfc }).subscribe(
+    this.http.post(`${environment.apiBaseUrl}/searchCompanies.php`, { rfc: this.usuario.rfc }).subscribe(
       async (response: any) => {
         if (response.success) {
           this.usuario.nombreEmpresa = response.nombreEmpresa;
@@ -252,7 +253,7 @@ export class BusinessPartnerRegisterComponent implements OnInit {
         empresaLigada: this.companyService.selectedCompany.name,
       };
 
-      this.http.post('https://siinad.mx/php/registrar.php', data).subscribe(
+      this.http.post(`${environment.apiBaseUrl}/registrar.php`, data).subscribe(
         async (response: any) => {
           if (response.success) {
             this.toastrService.showSuccess(response.message, 'success');
@@ -294,7 +295,7 @@ export class BusinessPartnerRegisterComponent implements OnInit {
       return;
     }
 
-    const url = `https://siinad.mx/php/load_company_association.php?codigoEmpresa=${this.codigoSocioComercial}`;
+    const url = `${environment.apiBaseUrl}/load_company_association.php?codigoEmpresa=${this.codigoSocioComercial}`;
 
     this.http.get(url).subscribe(
       (response: any) => {
@@ -327,7 +328,7 @@ export class BusinessPartnerRegisterComponent implements OnInit {
 
 
   obtenerRoles() {
-    this.http.get('https://siinad.mx/php/getRoles.php').subscribe(
+    this.http.get(`${environment.apiBaseUrl}/getRoles.php`).subscribe(
       (response: any) => {
         this.rolesDisponibles = response;
       },

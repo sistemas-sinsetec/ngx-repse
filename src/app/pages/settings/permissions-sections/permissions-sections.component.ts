@@ -9,6 +9,7 @@ import { CompanyService } from '../../../services/company.service';
 import { AuthService } from '../../../services/auth.service';
 import { LoadingController } from '@ionic/angular'; // Importar LoadingController
 import { CustomToastrService } from '../../../services/custom-toastr.service';
+import { environment } from '../../../../environments/environment';
 
 @Component({
   selector: 'ngx-permissions-sections',
@@ -59,7 +60,7 @@ export class PermissionsSectionsComponent implements OnInit {
     const companyId = this.companyService.selectedCompany.id;
     const data = { companyId: companyId };
 
-    this.http.post('https://siinad.mx/php/searchUsers.php', data).subscribe(
+    this.http.post(`${environment.apiBaseUrl}/searchUsers.php`, data).subscribe(
       async (response: any) => {
         if (response.success) {
           this.users = response.employees;
@@ -79,7 +80,7 @@ export class PermissionsSectionsComponent implements OnInit {
 
   async loadUserTypes() {
     const loading = await this.showLoading('Cargando tipos de usuario...'); // Mostrar loading
-    this.http.get('https://siinad.mx/php/get-level-users.php').subscribe(
+    this.http.get(`${environment.apiBaseUrl}/get-level-users.php`).subscribe(
       async (response: any) => {
         this.userTypes = response;
         await loading.dismiss(); // Ocultar loading
@@ -97,7 +98,7 @@ export class PermissionsSectionsComponent implements OnInit {
     const companyId = this.companyService.selectedCompany.id;
     const data = { companyId: companyId };
 
-    this.http.post('https://siinad.mx/php/loadCompanySections.php', data).subscribe(
+    this.http.post(`${environment.apiBaseUrl}/loadCompanySections.php`, data).subscribe(
       async (response: any) => {
         if (response.success) {
           const allSections = ['Sistema REPSE', 'Control de proyectos', 'Empleados', 'Incidencias', 'Costos', 'Ventas', 'Configuracion de mi empresa', 'Configuracion de perfiles', 'Configuracion de socios comerciales', 'Configuracion de sitio', 'Configuracion de usuarios'];
@@ -284,7 +285,7 @@ export class PermissionsSectionsComponent implements OnInit {
     const companyId = this.companyService.selectedCompany.id;
     const data = { userId: this.selectedUserId, companyId: companyId };
 
-    this.http.post('https://siinad.mx/php/loadPermissions.php', data).subscribe(
+    this.http.post(`${environment.apiBaseUrl}/loadPermissions.php`, data).subscribe(
       async (response: any) => {
         if (response.success) {
           this.permissions = response.permissions;
@@ -347,7 +348,7 @@ export class PermissionsSectionsComponent implements OnInit {
       companyId: companyId
     };
 
-    this.http.post('https://siinad.mx/php/addPermission.php', data).subscribe(
+    this.http.post(`${environment.apiBaseUrl}/addPermission.php`, data).subscribe(
       async (response: any) => {
         if (response.success) {
           selectedSubSections.forEach((subSection: string) => {
@@ -383,7 +384,7 @@ export class PermissionsSectionsComponent implements OnInit {
   };
 
 
-    this.http.post('https://siinad.mx/php/removePermission.php', data).subscribe(
+    this.http.post(`${environment.apiBaseUrl}/removePermission.php`, data).subscribe(
       async (response: any) => {
         if (response.success) {
           this.permissions = this.permissions.filter(p => !(p.section === section && p.subSection === subSection));

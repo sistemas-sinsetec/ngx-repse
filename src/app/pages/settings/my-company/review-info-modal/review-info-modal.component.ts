@@ -2,6 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { NbDialogRef } from '@nebular/theme';
 import { CustomToastrService } from '../../../../services/custom-toastr.service';
+import { environment } from '../../../../../environments/environment';
 
 @Component({
   selector: 'ngx-review-info-modal',
@@ -56,7 +57,7 @@ export class ReviewInfoModalComponent implements OnInit {
   }
 
   obtenerActasConstitutivas() {
-    this.http.get<any[]>(`https://siinad.mx/php/getActasConstitutivas.php?companyId=${this.companyId}`)
+    this.http.get<any[]>(`${environment.apiBaseUrl}/getActasConstitutivas.php?companyId=${this.companyId}`)
       .subscribe(response => {
         this.actasConstitutivas = response;
       }, error => {
@@ -65,7 +66,7 @@ export class ReviewInfoModalComponent implements OnInit {
   }
 
   obtenerAfil01() {
-    this.http.get<any[]>(`https://siinad.mx/php/getAfil01.php?companyId=${this.companyId}`)
+    this.http.get<any[]>(`${environment.apiBaseUrl}/getAfil01.php?companyId=${this.companyId}`)
       .subscribe(response => {
         this.afil01 = response;
       }, error => {
@@ -74,7 +75,7 @@ export class ReviewInfoModalComponent implements OnInit {
   }
 
   obtenerRfc() {
-    this.http.get<any[]>(`https://siinad.mx/php/getRfc.php?companyId=${this.companyId}`)
+    this.http.get<any[]>(`${environment.apiBaseUrl}/getRfc.php?companyId=${this.companyId}`)
       .subscribe(response => {
         this.rfc = response;
       }, error => {
@@ -83,7 +84,7 @@ export class ReviewInfoModalComponent implements OnInit {
   }
 
   obtenerAutorizacion() {
-    this.http.get<any[]>(`https://siinad.mx/php/getAutorizacion.php?companyId=${this.companyId}`)
+    this.http.get<any[]>(`${environment.apiBaseUrl}/getAutorizacion.php?companyId=${this.companyId}`)
       .subscribe(response => {
         this.autorizacion = response;
       }, error => {
@@ -92,7 +93,7 @@ export class ReviewInfoModalComponent implements OnInit {
   }
 
   obtenerEstablecimientos(){
-    this.http.get<any[]>(`https://siinad.mx/php/getEstablecimientos.php?companyId=${this.companyId}`)
+    this.http.get<any[]>(`${environment.apiBaseUrl}/getEstablecimientos.php?companyId=${this.companyId}`)
       .subscribe(response => {
         this.establecimientos = response;
       }, error => {
@@ -111,7 +112,7 @@ export class ReviewInfoModalComponent implements OnInit {
       establecimientos: this.establecimientos,
     };
 
-    this.http.post('https://siinad.mx/php/updateAdditionalInfo.php', data)
+    this.http.post(`${environment.apiBaseUrl}/updateAdditionalInfo.php`, data)
       .subscribe(response => {
         this.isSubmitting = false;
         console.log('Datos actualizados:', response);

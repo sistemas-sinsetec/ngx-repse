@@ -4,6 +4,7 @@ import { HttpClient } from '@angular/common/http';
 import { NbDialogRef } from '@nebular/theme';
 import { CompanyService } from '../../../../services/company.service';
 import { CustomToastrService } from '../../../../services/custom-toastr.service';
+import { environment } from '../../../../../environments/environment';
 
 @Component({
   selector: 'ngx-company-info-modal',
@@ -36,7 +37,7 @@ export class CompanyInfoModalComponent {
         role: this.selectedRole, // Rol seleccionado para la asociación
       };
 
-      this.http.post('https://siinad.mx/php/associationCompanies.php', data).subscribe(
+      this.http.post(`${environment.apiBaseUrl}/associationCompanies.php`, data).subscribe(
         (response: any) => {
           if (response.success) {
             this.toastrService.showSuccess(response.message, 'Exito');

@@ -13,6 +13,7 @@ import { CompanyService } from '../../../services/company.service';
 import { PeriodService } from '../../../services/period.service';
 import { LoadingController, AlertController } from '@ionic/angular';
 import { CustomToastrService } from '../../../services/custom-toastr.service';
+import { environment } from '../../../../environments/environment';
 
 @Component({
   selector: 'ngx-incident-viewer',
@@ -83,7 +84,7 @@ export class IncidentViewerComponent implements OnInit {
   
     this.http
       .get(
-        `https://siinad.mx/php/get_weekly_periods.php?company_id=${this.companyId}&period_type_id=${selectedPeriod}`
+        `${environment.apiBaseUrl}/get_weekly_periods.php?company_id=${this.companyId}&period_type_id=${selectedPeriod}`
       )
       .subscribe(
         (data: any) => {
@@ -182,7 +183,7 @@ export class IncidentViewerComponent implements OnInit {
 
   // Método para obtener la información del turno basado en el shift_id del empleado
   getShiftInfo(shift_id: number): Promise<any> {
-    return this.http.get(`https://siinad.mx/php/get_shifts.php?company_id=${this.companyId}`)
+    return this.http.get(`${environment.apiBaseUrl}/get_shifts.php?company_id=${this.companyId}`)
       .toPromise()
       .then((shifts: any[]) => {
         // Ajusta la propiedad 'shift_id' según la respuesta real del endpoint
@@ -229,7 +230,7 @@ export class IncidentViewerComponent implements OnInit {
     };
   
     // Solicitud para empleados asignados
-    this.http.get(`https://siinad.mx/php/get_assigned_employees1.php?start_date=${start_date}&end_date=${end_date}&company_id=${this.companyId}&project_id=0&week_number=${week_number}&day_of_week=${day_of_week}&user_id=${user_id}`)
+    this.http.get(`${environment.apiBaseUrl}/get_assigned_employees1.php?start_date=${start_date}&end_date=${end_date}&company_id=${this.companyId}&project_id=0&week_number=${week_number}&day_of_week=${day_of_week}&user_id=${user_id}`)
       .subscribe({
         next: (data: any) => {
           if (Array.isArray(data)) {
@@ -249,7 +250,7 @@ export class IncidentViewerComponent implements OnInit {
       });
   
     // Solicitud para empleados no asignados
-    this.http.get(`https://siinad.mx/php/get_unassigned_employees.php?company_id=${this.companyId}&start_date=${start_date}&end_date=${end_date}&week_number=${week_number}&day_of_week=${day_of_week}&user_id=${user_id}`)
+    this.http.get(`${environment.apiBaseUrl}/get_unassigned_employees.php?company_id=${this.companyId}&start_date=${start_date}&end_date=${end_date}&week_number=${week_number}&day_of_week=${day_of_week}&user_id=${user_id}`)
       .subscribe({
         next: (data: any) => {
           if (Array.isArray(data)) {
@@ -338,7 +339,7 @@ export class IncidentViewerComponent implements OnInit {
       // Realizar múltiples solicitudes en paralelo
       await Promise.all(
         hoursDataList.map(workHoursData =>
-          this.http.post('https://siinad.mx/php/save_work_hours.php', workHoursData).toPromise()
+          this.http.post(`${environment.apiBaseUrl}/save_work_hours.php`, workHoursData).toPromise()
         )
       );
 
@@ -416,7 +417,7 @@ export class IncidentViewerComponent implements OnInit {
             exit_time: shiftInfo.end_time
             // Agrega second_lunch_start_time y second_lunch_end_time si aplican
           };
-          await this.http.post('https://siinad.mx/php/save_work_hours.php', workHoursData).toPromise();
+          await this.http.post(`${environment.apiBaseUrl}/save_work_hours.php`, workHoursData).toPromise();
 
           // Además, guardar la incidencia correspondiente
           const incidentData = {
@@ -429,7 +430,7 @@ export class IncidentViewerComponent implements OnInit {
             incident_type: data.incident,
             description: data.description || null
           };
-          await this.http.post('https://siinad.mx/php/save_incident.php', incidentData).toPromise();
+          await this.http.post(`${environment.apiBaseUrl}/save_incident.php`, incidentData).toPromise();
         }));
         await this.toastrService.showSuccess('Se registraron correctamente las horas y la incidencia de asistencia sin proyecto.', 'Exito');
       } catch (error) {
@@ -452,7 +453,7 @@ export class IncidentViewerComponent implements OnInit {
       try {
         await Promise.all(
           incidentDataList.map(incidentData =>
-            this.http.post('https://siinad.mx/php/save_incident.php', incidentData).toPromise()
+            this.http.post(`${environment.apiBaseUrl}/save_incident.php`, incidentData).toPromise()
           )
         );
         await this.toastrService.showSuccess('Todas las incidencias fueron asignadas correctamente.', 'Exito');
@@ -472,7 +473,7 @@ export class IncidentViewerComponent implements OnInit {
 
 
     return new Promise((resolve, reject) => {
-      this.http.get(`https://siinad.mx/php/check_day_confirmed.php?company_id=${this.companyId}&start_date=${start_date}&end_date=${end_date}&week_number=${week_number}&day_of_week=${day_of_week}`)
+      this.http.get(`${environment.apiBaseUrl}/check_day_confirmed.php?company_id=${this.companyId}&start_date=${start_date}&end_date=${end_date}&week_number=${week_number}&day_of_week=${day_of_week}`)
         .subscribe((data: any) => {
           spinner.clear();
           if (data.confirmed) {

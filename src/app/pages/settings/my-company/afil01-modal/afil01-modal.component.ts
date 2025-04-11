@@ -1,6 +1,7 @@
 import { Component, Input, OnInit } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { NbDialogRef } from '@nebular/theme';
+import { environment } from '../../../../../environments/environment';
 
 @Component({
   selector: 'app-afil01-modal',
@@ -28,7 +29,7 @@ export class Afil01ModalComponent implements OnInit {
 
   cargarInformacion() {
     this.http
-      .get<any[]>(`https://siinad.mx/php/getAfil01.php?companyId=${this.companyId}`)
+      .get<any[]>(`${environment.apiBaseUrl}/getAfil01.php?companyId=${this.companyId}`)
       .subscribe(
         (response) => {
           if (response && response.length > 0) {
@@ -79,7 +80,7 @@ export class Afil01ModalComponent implements OnInit {
 
     console.log('Enviando datos:', JSON.stringify(formData, null, 2));
 
-    this.http.post('https://siinad.mx/php/saveAfil01.php', formData).subscribe(
+    this.http.post(`${environment.apiBaseUrl}/saveAfil01.php`, formData).subscribe(
       (response) => {
         console.log('Respuesta del servidor:', response);
         this.isSubmitting = false;

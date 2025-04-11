@@ -11,6 +11,7 @@ import { LoadingController } from '@ionic/angular'; // Importar LoadingControlle
 import * as moment from 'moment'; // Importar moment.js para manejar fechas y tiempos
 import { PeriodService } from '../../../../services/period.service';
 import { CustomToastrService } from '../../../../services/custom-toastr.service';
+import { environment } from '../../../../../environments/environment';
 
 @Component({
   selector: 'ngx-period-configuration',
@@ -160,7 +161,7 @@ export class PeriodConfigurationComponent {
     await loading.present();
 
     const companyId = this.companyService.selectedCompany.id;
-    this.http.get(`https://siinad.mx/php/get-periods.php?company_id=${companyId}`)
+    this.http.get(`${environment.apiBaseUrl}/get-periods.php?company_id=${companyId}`)
       .subscribe((response: any) => {
         this.periods = response.map((period: any) => ({
           ...period,
@@ -251,8 +252,8 @@ export class PeriodConfigurationComponent {
       await loading.present();
   
       let apiUrl = periodConfig.period_type_id 
-        ? 'https://siinad.mx/php/update-period.php' 
-        : 'https://siinad.mx/php/create-period.php';
+        ? `${environment.apiBaseUrl}/update-period.php` 
+        : `${environment.apiBaseUrl}/create-period.php`;
   
       // Guardar o actualizar el periodo
       this.http.post(apiUrl, periodConfig).subscribe(
@@ -453,7 +454,7 @@ export class PeriodConfigurationComponent {
     for (let i = 0; i < tempPeriods.length; i++) {
       const payrollPeriod = tempPeriods[i];
       try {
-        await this.http.post('https://siinad.mx/php/create-payroll-period.php', payrollPeriod).toPromise();
+        await this.http.post(`${environment.apiBaseUrl}/create-payroll-period.php`, payrollPeriod).toPromise();
         console.log(`Periodo de nómina ${payrollPeriod.period_number} creado correctamente`);
       } catch (error) {
         console.error(`Error al crear el periodo de nómina ${payrollPeriod.period_number}`, error);
@@ -502,7 +503,7 @@ export class PeriodConfigurationComponent {
   deletePeriod() {
     const periodTypeId = this.selectedPeriod.period_type_id;
     if (periodTypeId) {
-      this.http.post('https://siinad.mx/php/delete-period.php', { period_type_id: periodTypeId })
+      this.http.post(`${environment.apiBaseUrl}/delete-period.php`, { period_type_id: periodTypeId })
         .subscribe(response => {
           console.log('Periodo eliminado correctamente', response);
           this.loadPeriods();  // Recargar los periodos después de eliminar uno

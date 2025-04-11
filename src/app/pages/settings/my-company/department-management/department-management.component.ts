@@ -6,6 +6,7 @@ import { HttpClient } from '@angular/common/http';
 import { CompanyService } from '../../../../services/company.service';
 import { CustomToastrService } from '../../../../services/custom-toastr.service';
 import { NbGlobalPhysicalPosition } from '@nebular/theme';
+import { environment } from '../../../../../environments/environment';
 @Component({
   selector: 'ngx-department-management',
   templateUrl: './department-management.component.html',
@@ -55,7 +56,7 @@ export class DepartmentManagementComponent {
     async fetchDepartments() {
   
       const companyId = this.companyService.selectedCompany.id;
-      this.http.get<any[]>(`https://siinad.mx/php/get_departments.php?company_id=${companyId}`).subscribe(
+      this.http.get<any[]>(`${environment.apiBaseUrl}/get_departments.php?company_id=${companyId}`).subscribe(
         data => {
           this.departments = Array.isArray(data) ? data : [];
        
@@ -71,7 +72,7 @@ export class DepartmentManagementComponent {
 
     async fetchPositions() {
       const companyId = this.companyService.selectedCompany.id;
-      this.http.get<any[]>(`https://siinad.mx/php/get_positions.php?company_id=${companyId}`).subscribe(
+      this.http.get<any[]>(`${environment.apiBaseUrl}/get_positions.php?company_id=${companyId}`).subscribe(
         data => {
           // Ordenar y filtrar, excluyendo puestos cuyo rango sea 0
           this.positions = Array.isArray(data)
@@ -88,7 +89,7 @@ export class DepartmentManagementComponent {
 
     async fetchShifts() {
       const companyId = this.companyService.selectedCompany.id;
-      this.http.get<any[]>(`https://siinad.mx/php/get_shifts.php?company_id=${companyId}`)
+      this.http.get<any[]>(`${environment.apiBaseUrl}/get_shifts.php?company_id=${companyId}`)
         .subscribe(
           data => {
             // Mapear cada turno para convertir la cadena JSON de 'rest_days' en array
@@ -189,8 +190,8 @@ export class DepartmentManagementComponent {
       
         this.selectedDepartment.company_id =  this.companyService.selectedCompany.id;
         const url = this.selectedDepartment.department_id
-          ? 'https://siinad.mx/php/edit_department.php'
-          : 'https://siinad.mx/php/add_department.php';
+          ? `${environment.apiBaseUrl}/edit_department.php`
+          : `${environment.apiBaseUrl}/add_department.php`;
   
         this.http.post(url, this.selectedDepartment).subscribe(
           () => {
@@ -227,8 +228,8 @@ export class DepartmentManagementComponent {
     
       const positionData = { ...current, company_id: this.companyService.selectedCompany.id };
       const url = this.selectedPosition && this.selectedPosition.position_id
-        ? 'https://siinad.mx/php/update_position.php'
-        : 'https://siinad.mx/php/add_position.php';
+        ? `${environment.apiBaseUrl}/update_position.php`
+        : `${environment.apiBaseUrl}/add_position.php`;
     
       this.http.post(url, JSON.stringify(positionData), { headers: { 'Content-Type': 'application/json' } })
         .subscribe(
@@ -256,8 +257,8 @@ export class DepartmentManagementComponent {
         };
     
         const url = this.selectedShift && this.selectedShift.shift_id
-          ? 'https://siinad.mx/php/update_shift.php'
-          : 'https://siinad.mx/php/add_shift.php';
+          ? `${environment.apiBaseUrl}/update_shift.php`
+          : `${environment.apiBaseUrl}/add_shift.php`;
     
         this.http.post(url, shiftData).subscribe(
           () => {
@@ -296,7 +297,7 @@ export class DepartmentManagementComponent {
       if (this.selectedDepartment?.department_id) {
         
         const companyId = this.companyService.selectedCompany.id;
-        this.http.post('https://siinad.mx/php/delete_department.php', { department_id: this.selectedDepartment.department_id, company_id: companyId }).subscribe(
+        this.http.post(`${environment.apiBaseUrl}/delete_department.php`, { department_id: this.selectedDepartment.department_id, company_id: companyId }).subscribe(
           () => {
            
             this.fetchDepartments();
@@ -319,7 +320,7 @@ export class DepartmentManagementComponent {
     if (this.selectedPosition?.position_id) {
       
       const companyId = this.companyService.selectedCompany.id;
-      this.http.post('https://siinad.mx/php/delete_position.php', { position_id: this.selectedPosition.position_id, company_id: companyId }).subscribe(
+      this.http.post(`${environment.apiBaseUrl}/delete_position.php`, { position_id: this.selectedPosition.position_id, company_id: companyId }).subscribe(
         () => {
          
           this.fetchPositions();
@@ -340,7 +341,7 @@ export class DepartmentManagementComponent {
     if (this.selectedShift?.shift_id) {
     
       const companyId = this.companyService.selectedCompany.id;
-      this.http.post('https://siinad.mx/php/delete_shift.php', { shift_id: this.selectedShift.shift_id, company_id: companyId }).subscribe(
+      this.http.post(`${environment.apiBaseUrl}/delete_shift.php`, { shift_id: this.selectedShift.shift_id, company_id: companyId }).subscribe(
         () => {
         
           this.fetchShifts();

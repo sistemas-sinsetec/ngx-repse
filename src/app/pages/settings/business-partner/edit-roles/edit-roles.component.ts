@@ -4,6 +4,7 @@ import { AuthService } from '../../../../services/auth.service';
 import { CompanyService } from '../../../../services/company.service';
 import { Router } from '@angular/router';
 import { CustomToastrService } from '../../../../services/custom-toastr.service';
+import { environment } from '../../../../../environments/environment';
 
 @Component({
   selector: 'ngx-edit-roles',
@@ -37,7 +38,7 @@ export class EditRolesComponent implements OnInit {
     };
 
     // Realiza la solicitud GET al archivo PHP con el parámetro association_id
-    this.http.get('https://siinad.mx/php/getBusinessPartner.php', { params: data }).subscribe(
+    this.http.get(`${environment.apiBaseUrl}/getBusinessPartner.php`, { params: data }).subscribe(
       (response: any) => {
         if (response.length > 0) {
           this.sociosComerciales = response;
@@ -54,7 +55,7 @@ export class EditRolesComponent implements OnInit {
 
   obtenerRoles() {
     // Realiza la solicitud GET para obtener los roles desde el backend
-    this.http.get('https://siinad.mx/php/getRoles.php').subscribe(
+    this.http.get(`${environment.apiBaseUrl}/getRoles.php`).subscribe(
       (response: any) => {
         this.rolesDisponibles = response; // Asigna los roles obtenidos desde el backend
       },
@@ -79,7 +80,7 @@ export class EditRolesComponent implements OnInit {
     };
 
     // Realiza la solicitud POST al archivo PHP para actualizar el rol
-    this.http.post('https://siinad.mx/php/saveUserRoles.php', data).subscribe(
+    this.http.post(`${environment.apiBaseUrl}/saveUserRoles.php`, data).subscribe(
       (response: any) => {
         if (response.success) {
           this.toastrService.showSuccess(response.message, 'success');

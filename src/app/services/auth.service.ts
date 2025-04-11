@@ -4,6 +4,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Subject } from 'rxjs';
+import { environment } from '../../environments/environment';
 
 @Injectable({
   providedIn: 'root'
@@ -99,7 +100,7 @@ export class AuthService {
    */
   loadCurrentAvatar(userId: string): Promise<string> {
     return this.http
-      .get(`https://siinad.mx/php/getUserAvatar.php?userId=${userId}`)
+      .get(`${environment.apiBaseUrl}/getUserAvatar.php?userId=${userId}`)
       .toPromise()
       .then((response: any) => {
         if (response && response.avatarUrl) {

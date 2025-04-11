@@ -10,6 +10,7 @@ import { Router } from '@angular/router';
 import { NbDialogService } from '@nebular/theme';
 import { CompanyService } from '../../../../services/company.service';
 import { CustomToastrService } from '../../../../services/custom-toastr.service';
+import { environment } from '../../../../../environments/environment';
 
 @Component({
   selector: 'ngx-premium-auth',
@@ -37,7 +38,7 @@ export class PremiumAuthComponent {
 
 
   obtenerEmpleadosNoConfirmados() {
-    this.http.get<any[]>('https://siinad.mx/php/get_infoSocioComercial.php')
+    this.http.get<any[]>(`${environment.apiBaseUrl}/get_infoSocioComercial.php`)
       .subscribe((data: any) => {
         // Verificamos si la respuesta es un array
         if (Array.isArray(data)) {
@@ -75,7 +76,7 @@ export class PremiumAuthComponent {
       folioSolicitud: this.selectedEmployee.requestFolio,
     };
   
-    this.http.post<any>('https://siinad.mx/php/sucess_socioComercial.php', data)
+    this.http.post<any>(`${environment.apiBaseUrl}/sucess_socioComercial.php`, data)
       .subscribe(
         async (response: any) => {
           console.log('Socio aceptado con éxito', response);
@@ -139,7 +140,7 @@ export class PremiumAuthComponent {
     };
 
     try {
-      const response: any = await this.http.post('https://siinad.mx/php/deleteSolicitud.php', data).toPromise();
+      const response: any = await this.http.post(`${environment.apiBaseUrl}/deleteSolicitud.php`, data).toPromise();
       this.mostrarToast(response.message, 'success');
       this.empleados = this.empleados.filter(e => e.id !== this.selectedEmployee.id);
       this.selectedEmployee = null;

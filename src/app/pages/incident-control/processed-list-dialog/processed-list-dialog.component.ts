@@ -3,6 +3,7 @@ import { NbDialogRef } from '@nebular/theme'; // Para manejar el cierre del diá
 import { HttpClient } from '@angular/common/http';
 import { AuthService } from '../../../services/auth.service';
 import { CompanyService } from '../../../services/company.service';
+import { environment } from '../../../../environments/environment';
 
 @Component({
   selector: 'ngx-processed-list-dialog',
@@ -27,7 +28,7 @@ export class ProcessedListDialogComponent {
   // Cargar los archivos procesados
   async loadProcessedFiles() {
     const companyId = this.companyService.selectedCompany.id;
-    const url = `https://siinad.mx/php/get_processed_files.php?company_id=${companyId}`;
+    const url = `${environment.apiBaseUrl}/get_processed_files.php?company_id=${companyId}`;
     
     this.http.get(url).subscribe((data: any) => {
       this.processedFiles = data; // Guardar los archivos procesados en la lista

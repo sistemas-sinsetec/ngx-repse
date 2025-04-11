@@ -14,6 +14,7 @@ import { CompanyService } from '../../../services/company.service';
 import { take } from 'rxjs/operators';
 import { NbWindowService } from '@nebular/theme';
 import { RegisterUserComponent } from '../register-user/register-user.component';
+import { environment } from '../../../../environments/environment';
 
 interface Empleado {
   employee_id: number;
@@ -99,7 +100,7 @@ export class EmployeeViewComponent implements OnInit {
 
    // Método para cargar usuarios desde el backend
    loadUsers() {
-    this.http.get<User[]>('https://siinad.mx/php/getUsuarios.php')
+    this.http.get<User[]>(`${environment.apiBaseUrl}/getUsuarios.php`)
       .subscribe(
         data => {
           this.users = data;
@@ -115,7 +116,7 @@ export class EmployeeViewComponent implements OnInit {
    // Carga todos los empleados sin filtros
    loadAllEmployees() {
     const companyId = this.companyService.selectedCompany.id;
-    this.http.get<Empleado[]>(`https://siinad.mx/php/get_empleados.php?companyId=${companyId}`)
+    this.http.get<Empleado[]>(`${environment.apiBaseUrl}/get_empleados.php?companyId=${companyId}`)
       .subscribe(
         data => {
           this.empleados = data;
@@ -187,7 +188,7 @@ export class EmployeeViewComponent implements OnInit {
    // Cargar departamentos sin dependencia
    loadDepartments() {
     const companyId = this.companyService.selectedCompany.id;
-    this.http.get<Departamento[]>(`https://siinad.mx/php/get_departments.php?company_id=${companyId}`).subscribe(
+    this.http.get<Departamento[]>(`${environment.apiBaseUrl}/get_departments.php?company_id=${companyId}`).subscribe(
       data => {
         this.departamentos = data;
         this.displayedDepartamentos = this.departamentos.slice(0, this.pageSize);
@@ -213,7 +214,7 @@ loadLessDepartments() {
  // Cargar puestos y preparar la vista inicial
  loadPositions() {
   const companyId = this.companyService.selectedCompany.id;
-  this.http.get<Puesto[]>(`https://siinad.mx/php/get_positions.php?company_id=${companyId}`).subscribe(
+  this.http.get<Puesto[]>(`${environment.apiBaseUrl}/get_positions.php?company_id=${companyId}`).subscribe(
     data => {
       // Filtrar puestos que NO se llamen "Empresa"
       this.puestos = data.filter(puesto => puesto.position_name !== 'Empresa');
@@ -242,7 +243,7 @@ loadLessPositions() {
   // Cargar turnos sin dependencia del puesto
   loadShifts() {
     const companyId = this.companyService.selectedCompany.id;
-    this.http.get<Turno[]>(`https://siinad.mx/php/get_shifts.php?company_id=${companyId}`).subscribe(
+    this.http.get<Turno[]>(`${environment.apiBaseUrl}/get_shifts.php?company_id=${companyId}`).subscribe(
       data => {
         this.turnos = data;
       },
@@ -268,7 +269,7 @@ selectDepartamento(departamento: Departamento) {
     this.turnoSeleccionado = null;   // Limpiar selección de turno
     const companyId = this.companyService.selectedCompany.id;
     this.http.get<{ success: boolean, employees: Empleado[] }>(
-      `https://siinad.mx/php/get_employees_by_department.php?company_id=${companyId}&department_id=${departamento.department_id}`
+      `${environment.apiBaseUrl}/get_employees_by_department.php?company_id=${companyId}&department_id=${departamento.department_id}`
     ).subscribe(
       response => {
         if (response.success) {
@@ -302,7 +303,7 @@ selectPuesto(puesto: Puesto) {
     this.turnoSeleccionado = null;
     const companyId = this.companyService.selectedCompany.id;
     this.http.get<{ success: boolean, employees: Empleado[] }>(
-      `https://siinad.mx/php/get_employees_by_position.php?company_id=${companyId}&position_id=${puesto.position_id}`
+      `${environment.apiBaseUrl}/get_employees_by_position.php?company_id=${companyId}&position_id=${puesto.position_id}`
     ).subscribe(
       response => {
         if (response.success) {
@@ -335,7 +336,7 @@ selectTurno(turno: Turno) {
     this.puestoSeleccionado = null;  
     const companyId = this.companyService.selectedCompany.id;
     this.http.get<{ success: boolean, employees: Empleado[] }>(
-      `https://siinad.mx/php/get_employees_by_shifts.php?company_id=${companyId}&shift_id=${turno.shift_id}`
+      `${environment.apiBaseUrl}/get_employees_by_shifts.php?company_id=${companyId}&shift_id=${turno.shift_id}`
     ).subscribe(
       response => {
         if (response.success && response.employees.length > 0) {

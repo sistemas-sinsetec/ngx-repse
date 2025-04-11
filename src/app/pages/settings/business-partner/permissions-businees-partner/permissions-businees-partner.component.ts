@@ -8,6 +8,7 @@ import { Router } from '@angular/router';
 import { CustomToastrService } from '../../../../services/custom-toastr.service';
 import { AuthService } from '../../../../services/auth.service';
 import { LoadingController } from '@ionic/angular'; // Importar LoadingController
+import { environment } from '../../../../../environments/environment';
 
 @Component({
   selector: 'ngx-permissions-businees-partner',
@@ -77,7 +78,7 @@ export class PermissionsBusineesPartnerComponent implements OnInit {
     const loading = await this.showLoading('Cargando socios comerciales...');
     const companyId = this.companyService.selectedCompany.id;
 
-    this.http.post('https://siinad.mx/php/getCommercialPartners.php', { companyId })
+    this.http.post(`${environment.apiBaseUrl}/getCommercialPartners.php`, { companyId })
       .subscribe(
         async (response: any) => {
           if (response.success) {
@@ -110,7 +111,7 @@ export class PermissionsBusineesPartnerComponent implements OnInit {
       };
 
       const response: any = await this.http.post(
-        'https://siinad.mx/php/searchUsers.php',
+        `${environment.apiBaseUrl}/searchUsers.php`,
         data
       ).toPromise();
 
@@ -130,7 +131,7 @@ export class PermissionsBusineesPartnerComponent implements OnInit {
 
   async loadUserTypes() {
     const loading = await this.showLoading('Cargando tipos de usuario...'); // Mostrar loading
-    this.http.get('https://siinad.mx/php/get-level-users.php').subscribe(
+    this.http.get(`${environment.apiBaseUrl}/get-level-users.php`).subscribe(
       async (response: any) => {
         this.userTypes = response;
         await loading.dismiss(); // Ocultar loading
@@ -149,7 +150,7 @@ export class PermissionsBusineesPartnerComponent implements OnInit {
       const data = { companyId: partnerId }; // Usar el nombre que espera el backend
 
       const response: any = await this.http.post(
-        'https://siinad.mx/php/loadCompanySections.php',
+        `${environment.apiBaseUrl}/loadCompanySections.php`,
         data
       ).toPromise();
 
@@ -201,7 +202,7 @@ export class PermissionsBusineesPartnerComponent implements OnInit {
 
   async loadPartnerUsers(partnerId: string) {
     const loading = await this.showLoading('Cargando usuarios...');
-    this.http.post('https://siinad.mx/php/getPartnerUsers.php', { partnerId })
+    this.http.post(`${environment.apiBaseUrl}/getPartnerUsers.php`, { partnerId })
       .subscribe(
         async (response: any) => {
           if (response.success) {
@@ -403,7 +404,7 @@ export class PermissionsBusineesPartnerComponent implements OnInit {
       companyId: this.selectedPartnerId
     };
 
-    this.http.post('https://siinad.mx/php/loadPermissions.php', data).subscribe(
+    this.http.post(`${environment.apiBaseUrl}/loadPermissions.php`, data).subscribe(
       async (response: any) => {
         if (response.success) {
           this.permissions = response.permissions;
@@ -450,7 +451,7 @@ export class PermissionsBusineesPartnerComponent implements OnInit {
       };
 
       const response: any = await this.http.post(
-        'https://siinad.mx/php/addPermission.php',
+        `${environment.apiBaseUrl}/addPermission.php`,
         data
       ).toPromise();
 
@@ -487,7 +488,7 @@ export class PermissionsBusineesPartnerComponent implements OnInit {
         section: section,
         subSection: subSection
       };
-      const response: any = await this.http.post('https://siinad.mx/php/removePermission.php', data).toPromise();
+      const response: any = await this.http.post(`${environment.apiBaseUrl}/removePermission.php`, data).toPromise();
       if (response.success) {
         this.permissions = this.permissions.filter(p => !(p.section === section && p.subSection === subSection));
         this.groupPermissions();

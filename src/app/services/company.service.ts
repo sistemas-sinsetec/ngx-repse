@@ -5,6 +5,7 @@ import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable, Subject } from 'rxjs';
 import { NbComponentStatus } from '@nebular/theme';
+import { environment } from '../../environments/environment';
 
 @Injectable({
   providedIn: 'root',
@@ -79,7 +80,7 @@ export class CompanyService {
    */
   loadNonPrincipalCompanies(companyId: string): Observable<any> {
     const data = { company_id: companyId };
-    return this.http.post('https://siinad.mx/php/loadCompanies.php', data);
+    return this.http.post(`${environment.apiBaseUrl}/loadCompanies.php`, data);
   }
 
   /**
@@ -103,7 +104,7 @@ export class CompanyService {
    */
   loadCompanyLogo(companyId: string): Promise<string> {
     return this.http
-      .get(`https://siinad.mx/php/getCompanyLogo.php?companyId=${companyId}`)
+      .get(`${environment.apiBaseUrl}/getCompanyLogo.php?companyId=${companyId}`)
       .toPromise()
       .then((response: any) => {
         if (response && response.logoUrl) {

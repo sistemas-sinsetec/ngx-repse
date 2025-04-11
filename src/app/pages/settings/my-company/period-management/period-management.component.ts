@@ -9,6 +9,7 @@ import { CompanyService } from '../../../../services/company.service';
 import { LoadingController } from '@ionic/angular'; // Importar LoadingController de Ionic
 import { LocalDataSource } from 'ng2-smart-table'; // Importar LocalDataSource para ng2-smart-table
 import { CustomToastrService } from '../../../../services/custom-toastr.service';
+import { environment } from '../../../../../environments/environment';
 
 @Component({
   selector: 'ngx-period-management',
@@ -114,7 +115,7 @@ export class PeriodManagementComponent implements OnInit {
     await loading.present();
 
     const companyId = this.companyService.selectedCompany.id;
-    this.http.get(`https://siinad.mx/php/get-periods.php?company_id=${companyId}`)
+    this.http.get(`${environment.apiBaseUrl}/get-periods.php?company_id=${companyId}`)
       .subscribe((response: any) => {
         this.periods = response;
         loading.dismiss(); // Ocultar el spinner de carga
@@ -140,7 +141,7 @@ export class PeriodManagementComponent implements OnInit {
 
     const companyId = this.companyService.selectedCompany.id;
     this.http
-      .get(`https://siinad.mx/php/get-payroll-periods.php?company_id=${companyId}&period_type_id=${periodTypeId}`)
+      .get(`${environment.apiBaseUrl}/get-payroll-periods.php?company_id=${companyId}&period_type_id=${periodTypeId}`)
       .subscribe(
         (response: any) => {
           this.tableSource.load(response); // Cargar los datos en la tabla
@@ -169,7 +170,7 @@ export class PeriodManagementComponent implements OnInit {
     console.log('Datos enviados al backend:', periodData); // Verifica los datos
   
     if (this.selectedPeriod.period_id) {
-      this.http.post('https://siinad.mx/php/update-payroll-period.php', periodData)
+      this.http.post(`${environment.apiBaseUrl}/update-payroll-period.php`, periodData)
         .subscribe(response => {
           console.log('Periodo actualizado correctamente', response);
           loading.dismiss();

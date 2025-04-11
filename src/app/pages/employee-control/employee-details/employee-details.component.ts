@@ -15,6 +15,7 @@ import * as JSZip from 'jszip';
 import { saveAs } from 'file-saver';
 import * as pdfjsLib from 'pdfjs-dist';
 import { CustomToastrService } from '../../../services/custom-toastr.service';
+import { environment } from '../../../../environments/environment';
 
 interface Empleado {
   employee_id: number;
@@ -249,7 +250,7 @@ export class EmployeeDetailsComponent implements OnInit {
 
  // Obtener los detalles del empleado desde el servidor
   getEmployeeDetails(employeeId: number) {
-    this.http.get<{ success: boolean, employee: Empleado, files: EmployeeFile[] }>(`https://siinad.mx/php/get_employee_details.php?employee_id=${employeeId}`)
+    this.http.get<{ success: boolean, employee: Empleado, files: EmployeeFile[] }>(`${environment.apiBaseUrl}/get_employee_details.php?employee_id=${employeeId}`)
       .subscribe(response => {
         if (response.success) {
           this.employee = response.employee;
@@ -277,14 +278,14 @@ export class EmployeeDetailsComponent implements OnInit {
 
 
   downloadFile(filePath: string) {
-    const fullUrl = `https://www.siinad.mx/php/${filePath}`; // URL completa del archivo
+    const fullUrl = `${environment.apiBaseUrl}/${filePath}`; // URL completa del archivo
     window.open(fullUrl, '_blank'); // Abrir el archivo en una nueva pestaña o iniciar la descarga
   }
 
   deleteFile(fileId: number) {
     if (confirm('¿Estás seguro de que deseas eliminar este archivo?')) {
       // Petición HTTP al backend para eliminar el archivo
-      this.http.post<ApiResponse>('https://www.siinad.mx/php/delete_employee_file.php', { file_id: fileId })
+      this.http.post<ApiResponse>(`${environment.apiBaseUrl}/delete_employee_file.php`, { file_id: fileId })
         .subscribe(
           (response: ApiResponse) => {
             if (response.success) {
@@ -437,7 +438,7 @@ async onFileChange(event: any, fileType: string, fileId?: number) {
   }
 
   // Enviar el archivo al servidor
-  this.http.post('https://www.siinad.mx/php/update_upload_files.php', formData)
+  this.http.post(`${environment.apiBaseUrl}/update_upload_files.php`, formData)
     .subscribe(async response => {
       console.log('Respuesta del servidor:', response);
       this.getEmployeeDetails(this.employee.employee_id); // Refresca los detalles del empleado
@@ -490,7 +491,7 @@ async uploadPhoto(file: File) {
   });
   await loading.present();
 
-  this.http.post('https://siinad.mx/php/upload_employee_photo.php', formData).subscribe(
+  this.http.post(`${environment.apiBaseUrl}/upload_employee_photo.php`, formData).subscribe(
     async () => {
       await loading.dismiss();
       this.toastrService.showSuccess('Foto subida exitosamente', 'Éxito');
@@ -535,7 +536,7 @@ async saveGeneralInfo() {
   });
   await loading.present();
 
-  this.http.post('https://www.siinad.mx/php/update_general_info.php', generalInfo).subscribe(
+  this.http.post(`${environment.apiBaseUrl}/update_general_info.php`, generalInfo).subscribe(
     async (response: any) => {
       await loading.dismiss();
       if (response.success) {
@@ -582,7 +583,7 @@ async saveFinancialInfo() {
   });
   await loading.present();
 
-  this.http.post('https://www.siinad.mx/php/update_financial_info.php', financialInfo).subscribe(
+  this.http.post(`${environment.apiBaseUrl}/update_financial_info.php`, financialInfo).subscribe(
     async () => {
       await loading.dismiss();
       this.toastrService.showSuccess('Información financiera actualizada con éxito', 'Éxito');
@@ -613,7 +614,7 @@ async saveWorkInfo() {
   });
   await loading.present();
 
-  this.http.post('https://www.siinad.mx/php/update_work_info.php', workInfo).subscribe(
+  this.http.post(`${environment.apiBaseUrl}/update_work_info.php`, workInfo).subscribe(
     async () => {
       await loading.dismiss();
       this.toastrService.showSuccess('Información laboral actualizada con éxito', 'Éxito');
@@ -639,7 +640,7 @@ async saveEmergencyContact() {
   });
   await loading.present();
 
-  this.http.post('https://www.siinad.mx/php/update_emergency_contact.php', emergencyContactInfo).subscribe(
+  this.http.post(`${environment.apiBaseUrl}/update_emergency_contact.php`, emergencyContactInfo).subscribe(
     async () => {
       await loading.dismiss();
       this.toastrService.showSuccess('Contacto de emergencia actualizado con éxito', 'Éxito');
@@ -654,7 +655,7 @@ async saveEmergencyContact() {
 
 
   getGenders() {
-    this.http.get<any[]>('https://www.siinad.mx/php/get_genders.php')
+    this.http.get<any[]>(`${environment.apiBaseUrl}/get_genders.php`)
       .subscribe(response => {
         this.genders = response;  // Asignar la lista de géneros al array
         console.log(this.genders);  // Verificar en la consola que se recibieron los datos
@@ -665,7 +666,7 @@ async saveEmergencyContact() {
 
   // Método para obtener los estados civiles desde el backend
   getMaritalStatuses() {
-    this.http.get<any[]>('https://www.siinad.mx/php/get_marital_statuses.php')
+    this.http.get<any[]>(`${environment.apiBaseUrl}/php/get_marital_statuses.php`)
       .subscribe(response => {
         this.maritalStatuses = response;  // Asignar la lista de estados civiles al array
         console.log(this.maritalStatuses);  // Verificar en la consola que se recibieron los datos
@@ -678,7 +679,7 @@ async saveEmergencyContact() {
   // Obtener la lista de departamentos
   getDepartamentos() {
     const companyId = this.companyService.selectedCompany.id; // Obtener el ID de la empresa desde AuthService
-    this.http.get<any[]>(`https://siinad.mx/php/get_departments.php?company_id=${companyId}`)
+    this.http.get<any[]>(`${environment.apiBaseUrl}/get_departments.php?company_id=${companyId}`)
       .subscribe(response => {
         this.departamentos = response.map(departamento => ({
           ...departamento,
@@ -692,7 +693,7 @@ async saveEmergencyContact() {
 
   getPuestos() {
     const companyId = this.companyService.selectedCompany.id; // Obtener el ID de la empresa desde AuthService
-    this.http.get<any[]>(`https://siinad.mx/php/get_positions.php?company_id=${companyId}`)
+    this.http.get<any[]>(`${environment.apiBaseUrl}/get_positions.php?company_id=${companyId}`)
       .subscribe(response => {
         this.puestos = response.map(puesto => ({
           ...puesto,
@@ -705,7 +706,7 @@ async saveEmergencyContact() {
 
   getTurnos() {
     const companyId = this.companyService.selectedCompany.id; // Obtener el ID de la empresa desde AuthService
-    this.http.get<any[]>(`https://siinad.mx/php/get_shifts.php?company_id=${companyId}`)
+    this.http.get<any[]>(`${environment.apiBaseUrl}/get_shifts.php?company_id=${companyId}`)
       .subscribe(response => {
         this.turnos = response.map(turno => ({
           ...turno,
@@ -814,7 +815,7 @@ async saveEmergencyContact() {
       const encodedFilePath = encodeURIComponent(filePath);
 
       // Llama a `download.php` pasando la ruta del archivo
-      const response = await fetch(`https://siinad.mx/php/download.php?file_path=${encodedFilePath}`);
+      const response = await fetch(`${environment.apiBaseUrl}/download.php?file_path=${encodedFilePath}`);
 
       if (!response.ok) {
         throw new Error(`Error al obtener el archivo: ${response.statusText}`);

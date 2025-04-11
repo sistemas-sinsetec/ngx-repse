@@ -14,7 +14,7 @@ import * as moment from 'moment';
 import { ProcessedListDialogComponent } from '../processed-list-dialog/processed-list-dialog.component';
 import { LoadingController, AlertController } from '@ionic/angular';
 import { CustomToastrService } from '../../../services/custom-toastr.service';
-
+import { environment } from '../../../../environments/environment';
 @Component({
   selector: 'ngx-process-weekly-lists',
   templateUrl: './process-weekly-lists.component.html',
@@ -64,7 +64,7 @@ export class ProcessWeeklyListsComponent {
       return;
     }
 
-    const url = `https://siinad.mx/php/get-confirmations-week.php?company_id=${companyId}&period_type_id=${periodTypeId}`;
+    const url = `${environment.apiBaseUrl}/get-confirmations-week.php?company_id=${companyId}&period_type_id=${periodTypeId}`;
 
     this.http.get(url).subscribe(
       (data: any) => {
@@ -125,7 +125,7 @@ async loadEmployeesForWeek() {
   const companyId = this.companyService.selectedCompany.id;
 
   // Incluir el ID de la compañía como parámetro en la URL
-  const url = `https://siinad.mx/php/get-employees-weekly-data.php?week_number=${this.selectedWeek.week_number}&company_id=${companyId}`;
+  const url = `${environment.apiBaseUrl}/get-employees-weekly-data.php?week_number=${this.selectedWeek.week_number}&company_id=${companyId}`;
 
   this.http.get(url).subscribe(
     (data: any) => {
@@ -186,7 +186,7 @@ async loadEmployeesForWeek() {
     const startDate = this.selectedWeek.payroll_period?.start_date;
     const endDate = this.selectedWeek.payroll_period?.end_date;
   
-    const url = 'https://siinad.mx/php/process-week.php';
+    const url = `${environment.apiBaseUrl}/process-week.php`;
     const data = {
       week_number: this.selectedWeek.week_number,
       company_id: companyId,
@@ -238,6 +238,67 @@ async loadEmployeesForWeek() {
     });
     
   }
+
+
+  async deshacerConfirmacionSemanal() {
+    if (!this.selectedWeek) {
+      this.toastrService.showWarning('Debes seleccionar una semana para deshacer la confirmación.', 'Aviso');
+      return;
+    }
+  
+    const alert = await this.alertController.create({
+      header: 'Confirmación',
+      message: '¿Estás seguro que deseas deshacer la confirmación de esta semana?',
+      buttons: [
+        {
+          text: 'Cancelar',
+          role: 'cancel',
+        },
+        {
+          text: 'Aceptar',
+          handler: async () => {
+            const loading = await this.loadingController.create({
+              message: 'Deshaciendo confirmación de la semana...',
+            });
+            await loading.present();
+  
+            const companyId = this.companyService.selectedCompany.id;
+            const periodTypeId = this.periodService.selectedPeriod.id;
+            const startDate = this.selectedWeek.payroll_period?.start_date;
+            const endDate = this.selectedWeek.payroll_period?.end_date;
+  
+            const url = `${environment.apiBaseUrl}/unconfirm-week.php`; // Asegúrate que este endpoint exista
+            const data = {
+              week_number: this.selectedWeek.week_number,
+              company_id: companyId,
+              period_type_id: periodTypeId,
+              start_date: startDate,
+              end_date: endDate,
+            };
+  
+            this.http.post(url, data).subscribe(
+              async (response: any) => {
+                loading.dismiss();
+                this.toastrService.showSuccess('Se ha deshecho la confirmación de la semana.', 'Éxito');
+                this.loadConfirmedWeeks(); // Refrescar las semanas
+                this.selectedWeek = null;
+                this.diasSemana = [];
+                this.empleadosSemana = [];
+              },
+              async (error) => {
+                loading.dismiss();
+                this.toastrService.showError('Error al deshacer la confirmación de la semana.', 'Error');
+                console.error('Error al deshacer confirmación:', error);
+              }
+            );
+          },
+        },
+      ],
+    });
+  
+    await alert.present();
+  }
+  
 
 
 }
