@@ -20,7 +20,7 @@ export class EmployeeService {
 
   // Obtener los departamentos
   fetchDepartamentos(companyId: number): Observable<any[]> {
-    return this.http.get<any[]>(`${environment.apiBaseUrl}}/get_departments.php`, {
+    return this.http.get<any[]>(`${environment.apiBaseUrl}/get_departments.php`, {
       params: new HttpParams().set('company_id', companyId.toString()),
     });
   }
