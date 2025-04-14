@@ -16,6 +16,7 @@ interface SolicitudesResponse {
 export class EmployeeService {
  
 
+  
   constructor(private http: HttpClient) {}
 
   // Obtener los departamentos
