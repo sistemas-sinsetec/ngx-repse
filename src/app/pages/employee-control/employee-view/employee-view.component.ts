@@ -4,16 +4,16 @@
   adicional a eso se pueden ver los detalles del empleado o crear una cuenta de usuario a partir del empleado
 */
 
-import { Component, OnInit } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
-import { AuthService } from '../../../services/auth.service';
-import { Router } from '@angular/router';
-import { EmployeeDetailsComponent } from '../employee-details/employee-details.component';
-import { NbDialogService } from '@nebular/theme';
-import { CompanyService } from '../../../services/company.service';
-import { take } from 'rxjs/operators';
-import { NbWindowService } from '@nebular/theme';
-import { RegisterUserComponent } from '../register-user/register-user.component';
+import { Component, OnInit } from "@angular/core";
+import { HttpClient } from "@angular/common/http";
+import { AuthService } from "../../../services/auth.service";
+import { Router } from "@angular/router";
+import { EmployeeDetailsComponent } from "../employee-details/employee-details.component";
+import { NbDialogService } from "@nebular/theme";
+import { CompanyService } from "../../../services/company.service";
+import { take } from "rxjs/operators";
+import { NbWindowService } from "@nebular/theme";
+import { RegisterUserComponent } from "../register-user/register-user.component";
 
 interface Empleado {
   employee_id: number;
@@ -52,15 +52,13 @@ interface Departamento {
 }
 
 @Component({
-  selector: 'ngx-employee-view',
-  templateUrl: './employee-view.component.html',
-  styleUrls: ['./employee-view.component.scss']
+  selector: "ngx-employee-view",
+  templateUrl: "./employee-view.component.html",
+  styleUrls: ["./employee-view.component.scss"],
 })
-
 export class EmployeeViewComponent implements OnInit {
   mostrarBusqueda: boolean = false;
   activeFilter: string | null = null; // 'A' para activos, 'B' para inactivos
-
 
   users: User[] = [];
   departamentos: Departamento[] = [];
@@ -73,7 +71,7 @@ export class EmployeeViewComponent implements OnInit {
   turnos: Turno[] = [];
   empleados: Empleado[] = [];
   empleadosFiltrados: Empleado[] = [];
-  searchQuery: string = '';
+  searchQuery: string = "";
 
   // Variables para las selecciones
   departamentoSeleccionado: Departamento | null = null;
@@ -86,8 +84,8 @@ export class EmployeeViewComponent implements OnInit {
     private router: Router,
     private dialogService: NbDialogService,
     private windowService: NbWindowService,
-    private companyService: CompanyService,
-  ) { }
+    private companyService: CompanyService
+  ) {}
 
   ngOnInit() {
     this.loadAllEmployees();
@@ -97,61 +95,65 @@ export class EmployeeViewComponent implements OnInit {
     this.loadUsers();
   }
 
-   // Método para cargar usuarios desde el backend
-   loadUsers() {
-    this.http.get<User[]>('https://siinad.mx/php/getUsuarios.php')
-      .subscribe(
-        data => {
-          this.users = data;
-        },
-        error => {
-          console.error('Error al cargar usuarios:', error);
-        }
-      );
+  // Método para cargar usuarios desde el backend
+  loadUsers() {
+    this.http.get<User[]>("https://siinad.mx/php/getUsuarios.php").subscribe(
+      (data) => {
+        this.users = data;
+      },
+      (error) => {
+        console.error("Error al cargar usuarios:", error);
+      }
+    );
   }
 
-  
-
-   // Carga todos los empleados sin filtros
-   loadAllEmployees() {
+  // Carga todos los empleados sin filtros
+  loadAllEmployees() {
     const companyId = this.companyService.selectedCompany.id;
-    this.http.get<Empleado[]>(`https://siinad.mx/php/get_empleados.php?companyId=${companyId}`)
+    this.http
+      .get<Empleado[]>(
+        `https://siinad.mx/php/get_empleados.php?companyId=${companyId}`
+      )
       .subscribe(
-        data => {
+        (data) => {
           this.empleados = data;
           this.empleadosFiltrados = data;
           this.mostrarBusqueda = true;
         },
-        error => {
-          console.error('Error al cargar todos los empleados:', error);
+        (error) => {
+          console.error("Error al cargar todos los empleados:", error);
         }
       );
   }
 
   applyFilters() {
     let filtered = this.empleados;
-    
+
     // Filtrar por estado si se ha seleccionado uno
     if (this.activeFilter) {
-      filtered = filtered.filter(emp => emp.employee_status === this.activeFilter);
+      filtered = filtered.filter(
+        (emp) => emp.employee_status === this.activeFilter
+      );
     }
-    
+
     // Filtrar por búsqueda (searchQuery)
     if (this.searchQuery && this.searchQuery.trim() !== "") {
       const searchLower = this.searchQuery.toLowerCase();
-      filtered = filtered.filter(emp =>
-        emp.first_name.toLowerCase().includes(searchLower) ||
-        (emp.middle_name && emp.middle_name.toLowerCase().includes(searchLower)) ||
-        emp.last_name.toLowerCase().includes(searchLower) ||
-        emp.employee_code.toLowerCase().includes(searchLower)
+      filtered = filtered.filter(
+        (emp) =>
+          emp.first_name.toLowerCase().includes(searchLower) ||
+          (emp.middle_name &&
+            emp.middle_name.toLowerCase().includes(searchLower)) ||
+          emp.last_name.toLowerCase().includes(searchLower) ||
+          emp.employee_code.toLowerCase().includes(searchLower)
       );
     }
-    
+
     this.empleadosFiltrados = filtered;
   }
 
-   // Método para alternar el filtro de estado
-   toggleActiveFilter(filter: string) {
+  // Método para alternar el filtro de estado
+  toggleActiveFilter(filter: string) {
     if (this.activeFilter === filter) {
       this.activeFilter = null; // Se deselecciona si se hace clic dos veces
     } else {
@@ -160,71 +162,82 @@ export class EmployeeViewComponent implements OnInit {
     this.applyFilters();
   }
 
-  
-
-
   addUser(empleado: any) {
-    this.windowService.open(RegisterUserComponent, {
-      title: 'Registrar Usuario',
-      context: {
-        employee: empleado  // Pasamos el objeto empleado
-      },
-      buttons: { minimize: false, maximize: false },
-      windowClass: 'register-user-window'
-    }).onClose.subscribe(result => {
-      if (result && result.success) {
-        // Por ejemplo, recargar la lista de usuarios para refrescar la interfaz
-        this.loadUsers();
-      }
-    });
+    this.windowService
+      .open(RegisterUserComponent, {
+        title: "Registrar Usuario",
+        context: {
+          employee: empleado, // Pasamos el objeto empleado
+        },
+        buttons: { minimize: false, maximize: false },
+        windowClass: "register-user-window",
+      })
+      .onClose.subscribe((result) => {
+        if (result && result.success) {
+          // Por ejemplo, recargar la lista de usuarios para refrescar la interfaz
+          this.loadUsers();
+        }
+      });
   }
 
   // Método para verificar si el empleado ya tiene un usuario
   employeeHasUser(employee_id: number): boolean {
-    return this.users.some(user => user.employee_id === employee_id);
+    return this.users.some((user) => user.employee_id === employee_id);
   }
 
-   // Cargar departamentos sin dependencia
-   loadDepartments() {
+  // Cargar departamentos sin dependencia
+  loadDepartments() {
     const companyId = this.companyService.selectedCompany.id;
-    this.http.get<Departamento[]>(`https://siinad.mx/php/get_departments.php?company_id=${companyId}`).subscribe(
-      data => {
-        this.departamentos = data;
-        this.displayedDepartamentos = this.departamentos.slice(0, this.pageSize);
-      },
-      error => {
-        console.error('Error al cargar los departamentos:', error);
-      }
-    );
+    this.http
+      .get<Departamento[]>(
+        `https://siinad.mx/php/get_departments.php?company_id=${companyId}`
+      )
+      .subscribe(
+        (data) => {
+          this.departamentos = data;
+          this.displayedDepartamentos = this.departamentos.slice(
+            0,
+            this.pageSize
+          );
+        },
+        (error) => {
+          console.error("Error al cargar los departamentos:", error);
+        }
+      );
   }
 
-    // Método para cargar más departamentos
-    loadMoreDepartments() {
-      this.departamentosPage++;
-      const itemsToShow = this.departamentosPage * this.pageSize;
-      this.displayedDepartamentos = this.departamentos.slice(0, itemsToShow);
-    }
-    // Método para volver a mostrar solo los 5 primeros departamentos
-loadLessDepartments() {
-  this.departamentosPage = 1;
-  this.displayedDepartamentos = this.departamentos.slice(0, this.pageSize);
-}
+  // Método para cargar más departamentos
+  loadMoreDepartments() {
+    this.departamentosPage++;
+    const itemsToShow = this.departamentosPage * this.pageSize;
+    this.displayedDepartamentos = this.departamentos.slice(0, itemsToShow);
+  }
+  // Método para volver a mostrar solo los 5 primeros departamentos
+  loadLessDepartments() {
+    this.departamentosPage = 1;
+    this.displayedDepartamentos = this.departamentos.slice(0, this.pageSize);
+  }
 
- // Cargar puestos y preparar la vista inicial
- loadPositions() {
-  const companyId = this.companyService.selectedCompany.id;
-  this.http.get<Puesto[]>(`https://siinad.mx/php/get_positions.php?company_id=${companyId}`).subscribe(
-    data => {
-      // Filtrar puestos que NO se llamen "Empresa"
-      this.puestos = data.filter(puesto => puesto.position_name !== 'Empresa');
-      this.displayedPuestos = this.puestos.slice(0, this.pageSize);
-    },
-    error => {
-      console.error('Error al cargar los puestos:', error);
-    }
-  );
-}
-
+  // Cargar puestos y preparar la vista inicial
+  loadPositions() {
+    const companyId = this.companyService.selectedCompany.id;
+    this.http
+      .get<Puesto[]>(
+        `https://siinad.mx/php/get_positions.php?company_id=${companyId}`
+      )
+      .subscribe(
+        (data) => {
+          // Filtrar puestos que NO se llamen "Empresa"
+          this.puestos = data.filter(
+            (puesto) => puesto.position_name !== "Empresa"
+          );
+          this.displayedPuestos = this.puestos.slice(0, this.pageSize);
+        },
+        (error) => {
+          console.error("Error al cargar los puestos:", error);
+        }
+      );
+  }
 
   // Método para cargar más puestos
   loadMorePositions() {
@@ -234,154 +247,171 @@ loadLessDepartments() {
   }
 
   // Método para volver a mostrar solo los 5 primeros puestos
-loadLessPositions() {
-  this.puestosPage = 1;
-  this.displayedPuestos = this.puestos.slice(0, this.pageSize);
-}
+  loadLessPositions() {
+    this.puestosPage = 1;
+    this.displayedPuestos = this.puestos.slice(0, this.pageSize);
+  }
 
   // Cargar turnos sin dependencia del puesto
   loadShifts() {
     const companyId = this.companyService.selectedCompany.id;
-    this.http.get<Turno[]>(`https://siinad.mx/php/get_shifts.php?company_id=${companyId}`).subscribe(
-      data => {
-        this.turnos = data;
-      },
-      error => {
-        console.error('Error al cargar los turnos:', error);
-      }
-    );
+    this.http
+      .get<Turno[]>(
+        `https://siinad.mx/php/get_shifts.php?company_id=${companyId}`
+      )
+      .subscribe(
+        (data) => {
+          this.turnos = data;
+        },
+        (error) => {
+          console.error("Error al cargar los turnos:", error);
+        }
+      );
   }
 
   // Seleccionar y mostrar empleados por departamento (con toggle)
-selectDepartamento(departamento: Departamento) {
-  // Resetear el filtro de estado al cambiar de filtro principal
-  this.activeFilter = null;
+  selectDepartamento(departamento: Departamento) {
+    // Resetear el filtro de estado al cambiar de filtro principal
+    this.activeFilter = null;
 
-  if (this.departamentoSeleccionado &&
-      this.departamentoSeleccionado.department_id === departamento.department_id) {
-    // Si ya estaba seleccionado, se deselecciona y se carga la lista completa
-    this.departamentoSeleccionado = null;
-    this.loadAllEmployees();
-  } else {
-    this.departamentoSeleccionado = departamento;
-    this.puestoSeleccionado = null;  // Limpiar selección de puesto
-    this.turnoSeleccionado = null;   // Limpiar selección de turno
-    const companyId = this.companyService.selectedCompany.id;
-    this.http.get<{ success: boolean, employees: Empleado[] }>(
-      `https://siinad.mx/php/get_employees_by_department.php?company_id=${companyId}&department_id=${departamento.department_id}`
-    ).subscribe(
-      response => {
-        if (response.success) {
-          this.empleados = response.employees;
-          this.empleadosFiltrados = response.employees;
-          // Se aplica también el filtro de búsqueda (si lo hubiera)
-          this.applyFilters();
-        } else {
-          console.error('Error al cargar los empleados del departamento');
-        }
-      },
-      error => {
-        console.error('Error al cargar los empleados del departamento:', error);
-      }
-    );
+    if (
+      this.departamentoSeleccionado &&
+      this.departamentoSeleccionado.department_id === departamento.department_id
+    ) {
+      // Si ya estaba seleccionado, se deselecciona y se carga la lista completa
+      this.departamentoSeleccionado = null;
+      this.loadAllEmployees();
+    } else {
+      this.departamentoSeleccionado = departamento;
+      this.puestoSeleccionado = null; // Limpiar selección de puesto
+      this.turnoSeleccionado = null; // Limpiar selección de turno
+      const companyId = this.companyService.selectedCompany.id;
+      this.http
+        .get<{ success: boolean; employees: Empleado[] }>(
+          `https://siinad.mx/php/get_employees_by_department.php?company_id=${companyId}&department_id=${departamento.department_id}`
+        )
+        .subscribe(
+          (response) => {
+            if (response.success) {
+              this.empleados = response.employees;
+              this.empleadosFiltrados = response.employees;
+              // Se aplica también el filtro de búsqueda (si lo hubiera)
+              this.applyFilters();
+            } else {
+              console.error("Error al cargar los empleados del departamento");
+            }
+          },
+          (error) => {
+            console.error(
+              "Error al cargar los empleados del departamento:",
+              error
+            );
+          }
+        );
+    }
   }
-}
 
-// Seleccionar y mostrar empleados por puesto (con toggle)
-selectPuesto(puesto: Puesto) {
-  // Resetear el filtro de estado
-  this.activeFilter = null;
+  // Seleccionar y mostrar empleados por puesto (con toggle)
+  selectPuesto(puesto: Puesto) {
+    // Resetear el filtro de estado
+    this.activeFilter = null;
 
-  if (this.puestoSeleccionado &&
-      this.puestoSeleccionado.position_id === puesto.position_id) {
-    this.puestoSeleccionado = null;
-    this.loadAllEmployees();
-  } else {
-    this.puestoSeleccionado = puesto;
-    this.departamentoSeleccionado = null;  // Limpiar selección de departamento
-    this.turnoSeleccionado = null;
-    const companyId = this.companyService.selectedCompany.id;
-    this.http.get<{ success: boolean, employees: Empleado[] }>(
-      `https://siinad.mx/php/get_employees_by_position.php?company_id=${companyId}&position_id=${puesto.position_id}`
-    ).subscribe(
-      response => {
-        if (response.success) {
-          this.empleados = response.employees;
-          this.empleadosFiltrados = response.employees;
-          this.applyFilters();
-        } else {
-          console.error('Error al cargar los empleados del puesto');
-        }
-      },
-      error => {
-        console.error('Error al cargar los empleados del puesto:', error);
-      }
-    );
+    if (
+      this.puestoSeleccionado &&
+      this.puestoSeleccionado.position_id === puesto.position_id
+    ) {
+      this.puestoSeleccionado = null;
+      this.loadAllEmployees();
+    } else {
+      this.puestoSeleccionado = puesto;
+      this.departamentoSeleccionado = null; // Limpiar selección de departamento
+      this.turnoSeleccionado = null;
+      const companyId = this.companyService.selectedCompany.id;
+      this.http
+        .get<{ success: boolean; employees: Empleado[] }>(
+          `https://siinad.mx/php/get_employees_by_position.php?company_id=${companyId}&position_id=${puesto.position_id}`
+        )
+        .subscribe(
+          (response) => {
+            if (response.success) {
+              this.empleados = response.employees;
+              this.empleadosFiltrados = response.employees;
+              this.applyFilters();
+            } else {
+              console.error("Error al cargar los empleados del puesto");
+            }
+          },
+          (error) => {
+            console.error("Error al cargar los empleados del puesto:", error);
+          }
+        );
+    }
   }
-}
 
-// Seleccionar y mostrar empleados por turno (con toggle)
-selectTurno(turno: Turno) {
-  // Resetear el filtro de estado
-  this.activeFilter = null;
+  // Seleccionar y mostrar empleados por turno (con toggle)
+  selectTurno(turno: Turno) {
+    // Resetear el filtro de estado
+    this.activeFilter = null;
 
-  if (this.turnoSeleccionado &&
-      this.turnoSeleccionado.shift_id === turno.shift_id) {
-    this.turnoSeleccionado = null;
-    this.loadAllEmployees();
-  } else {
-    this.turnoSeleccionado = turno;
-    this.departamentoSeleccionado = null; // Limpiar selección de departamento
-    this.puestoSeleccionado = null;  
-    const companyId = this.companyService.selectedCompany.id;
-    this.http.get<{ success: boolean, employees: Empleado[] }>(
-      `https://siinad.mx/php/get_employees_by_shifts.php?company_id=${companyId}&shift_id=${turno.shift_id}`
-    ).subscribe(
-      response => {
-        if (response.success && response.employees.length > 0) {
-          this.empleados = response.employees;
-          this.empleadosFiltrados = response.employees;
-          this.applyFilters();
-        } else {
-          this.empleados = [];
-          this.empleadosFiltrados = [];
-          console.error('No se encontraron empleados para el turno seleccionado');
-        }
-      },
-      error => {
-        this.empleados = [];
-        this.empleadosFiltrados = [];
-        console.error('Error al cargar los empleados del turno:', error);
-      }
-    );
+    if (
+      this.turnoSeleccionado &&
+      this.turnoSeleccionado.shift_id === turno.shift_id
+    ) {
+      this.turnoSeleccionado = null;
+      this.loadAllEmployees();
+    } else {
+      this.turnoSeleccionado = turno;
+      this.departamentoSeleccionado = null; // Limpiar selección de departamento
+      this.puestoSeleccionado = null;
+      const companyId = this.companyService.selectedCompany.id;
+      this.http
+        .get<{ success: boolean; employees: Empleado[] }>(
+          `https://siinad.mx/php/get_employees_by_shifts.php?company_id=${companyId}&shift_id=${turno.shift_id}`
+        )
+        .subscribe(
+          (response) => {
+            if (response.success && response.employees.length > 0) {
+              this.empleados = response.employees;
+              this.empleadosFiltrados = response.employees;
+              this.applyFilters();
+            } else {
+              this.empleados = [];
+              this.empleadosFiltrados = [];
+              console.error(
+                "No se encontraron empleados para el turno seleccionado"
+              );
+            }
+          },
+          (error) => {
+            this.empleados = [];
+            this.empleadosFiltrados = [];
+            console.error("Error al cargar los empleados del turno:", error);
+          }
+        );
+    }
   }
-}
-
 
   // Función para filtrar empleados en la búsqueda
   buscarEmpleados() {
-this.applyFilters();
+    this.applyFilters();
   }
-  
-// Método para ver detalles del empleado
-async viewEmployeeDetails(employeeId: number) {
-  this.dialogService.open(EmployeeDetailsComponent, {
-    context: { employeeId }, // Pasa datos al diálogo
-    dialogClass: 'custom-dialog-scroll', // Asigna una clase personalizada
-    // Puedes agregar otras configuraciones si es necesario
-  })
-  .onClose.subscribe(result => {
-    if (result) {
-      // Realiza acciones si el diálogo devuelve un resultado
-      console.log('Resultado recibido del diálogo:', result);
-    } else {
-      // El usuario cerró el diálogo sin devolver ningún resultado
-      console.log('El diálogo fue cerrado sin resultado.');
-    }
-  });
+
+  // Método para ver detalles del empleado
+  async viewEmployeeDetails(employeeId: number) {
+    this.dialogService
+      .open(EmployeeDetailsComponent, {
+        context: { employeeId }, // Pasa datos al diálogo
+        dialogClass: "custom-dialog-scroll", // Asigna una clase personalizada
+        // Puedes agregar otras configuraciones si es necesario
+      })
+      .onClose.subscribe((result) => {
+        if (result) {
+          // Realiza acciones si el diálogo devuelve un resultado
+          console.log("Resultado recibido del diálogo:", result);
+        } else {
+          // El usuario cerró el diálogo sin devolver ningún resultado
+          console.log("El diálogo fue cerrado sin resultado.");
+        }
+      });
+  }
 }
-
-
-
-}
-
