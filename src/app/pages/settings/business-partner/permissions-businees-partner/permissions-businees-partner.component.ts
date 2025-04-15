@@ -72,8 +72,6 @@ export class PermissionsBusineesPartnerComponent implements OnInit {
 
   }
 
-
-
   async loadCommercialPartners() {
     const loading = await this.showLoading('Cargando socios comerciales...');
     const companyId = this.companyService.selectedCompany.id;
@@ -95,7 +93,6 @@ export class PermissionsBusineesPartnerComponent implements OnInit {
         }
       );
   }
-
   async loadUsers() {
     if (!this.selectedPartnerId) {
       this.users = [];
