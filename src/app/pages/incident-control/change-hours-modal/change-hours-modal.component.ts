@@ -1,11 +1,11 @@
-import { Component, Input } from '@angular/core';
-import { NbDialogRef } from '@nebular/theme';
-import * as moment from 'moment'; // Importar moment.js para manejar fechas y tiempos
+import { Component, Input } from "@angular/core";
+import { NbDialogRef } from "@nebular/theme";
+import * as moment from "moment"; // Importar moment.js para manejar fechas y tiempos
 
 @Component({
-  selector: 'ngx-change-hours-modal',
-  templateUrl: './change-hours-modal.component.html',
-  styleUrls: ['./change-hours-modal.component.scss']
+  selector: "ngx-change-hours-modal",
+  templateUrl: "./change-hours-modal.component.html",
+  styleUrls: ["./change-hours-modal.component.scss"],
 })
 export class ChangeHoursModalComponent {
   @Input() employees: any[] = []; // Array de empleados seleccionados
@@ -29,29 +29,29 @@ export class ChangeHoursModalComponent {
 
   saveHours() {
     // Formatear los tiempos a 'HH:mm:ss'
-    const formattedEntryTime = this.entryTime 
-    ? moment(this.entryTime, 'HH:mm').format('HH:mm:ss') 
-    : null;
-  const formattedLunchStart = this.lunchStart 
-    ? moment(this.lunchStart, 'HH:mm').format('HH:mm:ss') 
-    : null;
-  const formattedLunchEnd = this.lunchEnd 
-    ? moment(this.lunchEnd, 'HH:mm').format('HH:mm:ss') 
-    : null;
-  const formattedExitTime = this.exitTime 
-    ? moment(this.exitTime, 'HH:mm').format('HH:mm:ss') 
-    : null;
-  
-    
+    const formattedEntryTime = this.entryTime
+      ? moment(this.entryTime, "HH:mm").format("HH:mm:ss")
+      : null;
+    const formattedLunchStart = this.lunchStart
+      ? moment(this.lunchStart, "HH:mm").format("HH:mm:ss")
+      : null;
+    const formattedLunchEnd = this.lunchEnd
+      ? moment(this.lunchEnd, "HH:mm").format("HH:mm:ss")
+      : null;
+    const formattedExitTime = this.exitTime
+      ? moment(this.exitTime, "HH:mm").format("HH:mm:ss")
+      : null;
 
     // Formatear la segunda hora de comida solo si está habilitada
-    const formattedSecondLunchStart = this.enableSecondLunch && this.secondLunchStart 
-      ? moment(this.secondLunchStart).format('HH:mm:ss') 
-      : null;
+    const formattedSecondLunchStart =
+      this.enableSecondLunch && this.secondLunchStart
+        ? moment(this.secondLunchStart).format("HH:mm:ss")
+        : null;
 
-    const formattedSecondLunchEnd = this.enableSecondLunch && this.secondLunchEnd 
-      ? moment(this.secondLunchEnd).format('HH:mm:ss') 
-      : null;
+    const formattedSecondLunchEnd =
+      this.enableSecondLunch && this.secondLunchEnd
+        ? moment(this.secondLunchEnd).format("HH:mm:ss")
+        : null;
 
     // Envía los datos al componente que abre el modal junto con la lista de empleados
     this.dialogRef.close({
