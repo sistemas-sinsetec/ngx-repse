@@ -8,7 +8,7 @@ import * as moment from "moment"; // Importar moment.js para manejar fechas y ti
   styleUrls: ["./change-hours-modal.component.scss"],
 })
 export class ChangeHoursModalComponent {
-  @Input() employees: any[] = []; // Array de empleados seleccionados
+  @Input() employees: any[] = []; // Array de empleados seleccionado
 
   entryTime: string;
   lunchStart: string;
