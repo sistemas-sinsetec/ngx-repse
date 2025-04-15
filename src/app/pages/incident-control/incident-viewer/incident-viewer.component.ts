@@ -272,6 +272,7 @@ export class IncidentViewerComponent implements OnInit {
   
   
   
+  //xd
   filterAssignedEmployees() {
     const searchTerm = this.searchAssigned.toLowerCase();
     this.filteredAssignedEmployees = this.assignedEmployees.filter((emp) =>
@@ -318,6 +319,38 @@ export class IncidentViewerComponent implements OnInit {
         }
       });
   }
+
+// Métodos para empleados asignados
+allAssignedSelected(): boolean {
+  return this.assignedEmployees.length > 0 && 
+         this.assignedEmployees.every(emp => emp.selected);
+}
+
+someAssignedSelected(): boolean {
+  return this.assignedEmployees.some(emp => emp.selected) && 
+         !this.allAssignedSelected();
+}
+
+toggleSelectAllAssigned(checked: boolean): void {
+  this.assignedEmployees.forEach(emp => emp.selected = checked);
+  this.filterAssignedEmployees();
+}
+
+// Métodos para empleados no asignados
+allUnassignedSelected(): boolean {
+  return this.unassignedEmployees.length > 0 && 
+         this.unassignedEmployees.every(emp => emp.selected);
+}
+
+someUnassignedSelected(): boolean {
+  return this.unassignedEmployees.some(emp => emp.selected) && 
+         !this.allUnassignedSelected();
+}
+
+toggleSelectAllUnassigned(checked: boolean): void {
+  this.unassignedEmployees.forEach(emp => emp.selected = checked);
+  this.filterUnassignedEmployees();
+}
 
   async saveHours(employees: any[], data: any) {
     const hoursDataList = employees.map(employee => ({
