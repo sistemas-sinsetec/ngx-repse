@@ -26,11 +26,11 @@
           <div *ngIf="selectedWeek" class="mt-3">
             <p>
               <strong>Inicio del Periodo:</strong>
-              {{ selectedWeek.start_date || "No disponible" }}
+              {{ formattedWeekStartDate }}
             </p>
             <p>
               <strong>Fin del Periodo:</strong>
-              {{ selectedWeek.end_date || "No disponible" }}
+              {{ formattedWeekEndDate }}
             </p>
           </div>
         </nb-card-body>
