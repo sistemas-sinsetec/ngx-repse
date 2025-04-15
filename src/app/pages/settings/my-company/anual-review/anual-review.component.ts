@@ -12,7 +12,7 @@ import { NbDialogService } from '@nebular/theme';
 import { RejectionDialogComponent } from '../rejection-dialog/rejection-dialog.component';
 import { ReviewInfoModalComponent } from '../review-info-modal/review-info-modal.component';
 import { CustomToastrService } from '../../../../services/custom-toastr.service';
-
+import { environment } from '../../../../../environments/environment';
 interface Tarea {
   id: number;
   nombre: string;
@@ -40,6 +40,7 @@ interface Archivo {
   styleUrls: ['./anual-review.component.scss']
 })
 export class AnualReviewComponent implements OnInit {
+  environment = environment;
 
   archivos: Archivo[] = [];
   archivosCargados: Archivo[] = [];
@@ -82,7 +83,7 @@ export class AnualReviewComponent implements OnInit {
   }
 
   obtenerArchivos(idCompany: number) {
-    this.http.get<Archivo[]>(`https://siinad.mx/php/getDocumentStatus.php?companyId=${idCompany}`)
+    this.http.get<Archivo[]>(`${environment.apiBaseUrl}/getDocumentStatus.php?companyId=${idCompany}`)
       .subscribe(response => {
         console.log('Document status response:', response); // Verificar la respuesta
 
@@ -128,7 +129,7 @@ export class AnualReviewComponent implements OnInit {
   aceptarArchivo(archivo: Archivo) {
     archivo.estado = 'aceptado';
     if (this.selectedCompanyId !== null) {
-      this.http.post('https://siinad.mx/php/updateArchivoStatus.php', { id: archivo.id, estado: archivo.estado })
+      this.http.post(`${environment.apiBaseUrl}/updateArchivoStatus.php`, { id: archivo.id, estado: archivo.estado })
         .subscribe(response => {
           console.log('Archivo aceptado:', response);
           this.obtenerArchivos(this.selectedCompanyId!);
@@ -150,7 +151,7 @@ export class AnualReviewComponent implements OnInit {
         archivo.estado = 'rechazado';
         archivo.comentario = result.comentario;
         if (this.selectedCompanyId !== null) {
-          this.http.post('https://siinad.mx/php/updateArchivoStatus.php', {
+          this.http.post(`${environment.apiBaseUrl}/updateArchivoStatus.php`, {
             id: archivo.id,
             estado: archivo.estado,
             comentario: archivo.comentario

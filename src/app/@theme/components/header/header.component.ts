@@ -213,8 +213,8 @@ export class HeaderComponent implements OnInit, OnDestroy {
     }
   }
   logout() {
+    this.router.navigate(['/auth/login']); // ✅ Angular maneja la navegación
     this.authService.logout();
-    window.location.href = '/auth/login';
   }
 
   /**

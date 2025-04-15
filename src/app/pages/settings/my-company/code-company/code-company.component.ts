@@ -8,6 +8,7 @@ import { AuthService } from '../../../../services/auth.service';
 import { CompanyService } from '../../../../services/company.service';
 import { NbComponentStatus } from '@nebular/theme';
 import { CustomToastrService } from '../../../../services/custom-toastr.service';
+import { environment } from '../../../../../environments/environment';
 
 @Component({
   selector: 'ngx-code-company',
@@ -49,7 +50,7 @@ export class CodeCompanyComponent implements OnInit {
       const data = { companyId: companyId };
 
       // Enviar solicitud HTTP para obtener el código
-      this.http.post('https://siinad.mx/php/loadCompanyCode.php', data).subscribe(
+      this.http.post(`${environment.apiBaseUrl}/loadCompanyCode.php`, data).subscribe(
         (response: any) => {
     
 

@@ -42,7 +42,7 @@
                   <td>{{ archivo.estado }}</td>
                   <td class="acciones">
                     <!-- Icono para revisar -->
-                    <a title="Revisar" [href]="'https://siinad.mx/php/' + archivo.file_path" target="_blank" nbButton ghost nbTooltip="Revisar">
+                    <a title="Revisar" [href]="environment.apiBaseUrl + '/' + archivo.file_path" target="_blank" nbButton ghost nbTooltip="Revisar">
                       <nb-icon icon="eye-outline"></nb-icon>
                     </a>
                   
@@ -90,7 +90,7 @@
                   <td>{{ archivo.estado }}</td>
                   <td class="acciones">
                     <!-- Icono para revisar -->
-                    <a title="Revisar" [href]="'https://siinad.mx/php/' + archivo.file_path" target="_blank" nbButton ghost nbTooltip="Revisar">
+                    <a title="Revisar" [href]="environment.apiBaseUrl + '/' + archivo.file_path" target="_blank" nbButton ghost nbTooltip="Revisar">
                       <nb-icon icon="eye-outline"></nb-icon>
                     </a>
                   
@@ -128,7 +128,7 @@
                   <td>{{ archivo.estado }}</td>
                   <td class="acciones">
                     <!-- Icono para revisar -->
-                    <a title="Revisar" [href]="'https://siinad.mx/php/' + archivo.file_path" target="_blank" nbButton ghost nbTooltip="Revisar">
+                    <a title="Revisar"[href]="environment.apiBaseUrl + '/' + archivo.file_path" target="_blank" nbButton ghost nbTooltip="Revisar">
                       <nb-icon icon="eye-outline"></nb-icon>
                     </a>
                   

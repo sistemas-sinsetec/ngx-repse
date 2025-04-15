@@ -8,6 +8,7 @@ import { LoadingController } from '@ionic/angular';
 import { NbDialogService } from '@nebular/theme';
 import { DeleteModalComponent } from '../delete-modal/delete-modal.component';
 import { CustomToastrService } from '../../../../services/custom-toastr.service';
+import { environment } from '../../../../../environments/environment';
 @Component({
   selector: 'ngx-company-permissions-sections',
   templateUrl: './company-permissions-sections.component.html',
@@ -28,6 +29,7 @@ export class CompanyPermissionsSectionsComponent implements OnInit {
     'Configuracion de mi empresa',
     'Configuracion de socios comerciales',
     'Configuracion de usuarios',
+    'Configuracion de sitio'
   ];
   permissions: any[] = [];
 
@@ -56,7 +58,7 @@ export class CompanyPermissionsSectionsComponent implements OnInit {
     // Mostramos el loader
     const loading = await this.presentLoading('Cargando empresas...');
 
-    this.http.get('https://siinad.mx/php/get-companies.php').subscribe(
+    this.http.get(`${environment.apiBaseUrl}/get-companies.php`).subscribe(
       (response: any) => {
         loading.dismiss(); // Cerramos el loader al recibir respuesta
         if (response) {
@@ -89,7 +91,7 @@ export class CompanyPermissionsSectionsComponent implements OnInit {
     // Mostramos el loader
     const loading = await this.presentLoading('Cargando permisos...');
 
-    this.http.post('https://siinad.mx/php/loadCompanyPermissions.php', data).subscribe(
+    this.http.post(`${environment.apiBaseUrl}/loadCompanyPermissions.php`, data).subscribe(
       (response: any) => {
         loading.dismiss();
         if (response.success) {
@@ -115,7 +117,7 @@ export class CompanyPermissionsSectionsComponent implements OnInit {
 
     const loading = await this.presentLoading('Añadiendo permisos...');
 
-    this.http.post('https://siinad.mx/php/addCompanyPermission.php', data).subscribe(
+    this.http.post(`${environment.apiBaseUrl}/addCompanyPermission.php`, data).subscribe(
       (response: any) => {
         loading.dismiss();
         if (response.success) {
@@ -155,7 +157,7 @@ export class CompanyPermissionsSectionsComponent implements OnInit {
   
         const loading = await this.presentLoading('Eliminando permiso...');
   
-        this.http.post('https://siinad.mx/php/removeCompanyPermission.php', data).subscribe(
+        this.http.post(`${environment.apiBaseUrl}/removeCompanyPermission.php`, data).subscribe(
           (response: any) => {
             loading.dismiss();
             if (response.success) {

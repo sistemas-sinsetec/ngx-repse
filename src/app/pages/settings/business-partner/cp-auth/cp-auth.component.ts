@@ -7,6 +7,7 @@ import { CompanyService } from '../../../../services/company.service';
 import { CpAuthModalDeleteComponent } from '../cp-auth-modal-delete/cp-auth-modal-delete.component';
 import { CpAuthModalComponent } from '../cp-auth-modal/cp-auth-modal.component';
 import { CustomToastrService } from '../../../../services/custom-toastr.service';
+import { environment } from '../../../../../environments/environment';
 
 @Component({
   selector: 'ngx-cp-auth',
@@ -48,7 +49,7 @@ export class CpAuthComponent implements OnInit {
     const userId = this.authService.userId; // Obtener el userId del usuario actual del servicio AuthService
   
     if (selectedCompanyId && userId) {
-      this.http.get<any>(`https://siinad.mx/php/get_cp_auth.php?id=${selectedCompanyId}&user_id=${userId}`)
+      this.http.get<any>(`${environment.apiBaseUrl}/get_cp_auth.php?id=${selectedCompanyId}&user_id=${userId}`)
         .subscribe((data: any) => {
           if (Array.isArray(data)) {
             this.socios = data; // Si `data` es un array, lo asignamos directamente
@@ -73,7 +74,7 @@ export class CpAuthComponent implements OnInit {
       associationId: this.selectedSocio.id
     };
   
-    this.http.post<any>('https://siinad.mx/php/update_verified.php', data)
+    this.http.post<any>(`${environment.apiBaseUrl}/update_verified.php`, data)
       .subscribe(async (response: any) => {
         if (response.success) {
           console.log('Socio aceptado con éxito');
@@ -123,7 +124,7 @@ export class CpAuthComponent implements OnInit {
       motivo: motivo
     };
 
-    this.http.post<any>('https://siinad.mx/php/delete_association.php', data)
+    this.http.post<any>(`${environment.apiBaseUrl}/delete_association.php`, data)
       .subscribe((response: any) => {
         this.toastrService.showSuccess(response.message, 'success');
         this.socios = this.socios.filter(socio => socio.id !== this.selectedSocio.id);

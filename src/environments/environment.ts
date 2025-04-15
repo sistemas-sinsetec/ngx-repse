@@ -10,4 +10,5 @@
 
 export const environment = {
   production: false,
+  apiBaseUrl: 'https://siinad.mx/php',
 };

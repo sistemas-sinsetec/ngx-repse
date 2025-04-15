@@ -9,6 +9,7 @@ import { CompanyService } from '../../../../services/company.service';
 import { NbDialogService } from '@nebular/theme';
 import { LoadingController } from '@ionic/angular'; // <-- Importamos LoadingController de Ionic
 import { CustomToastrService } from '../../../../services/custom-toastr.service';
+import { environment } from '../../../../../environments/environment';
 
 @Component({
   selector: 'ngx-register',
@@ -86,7 +87,7 @@ export class RegisterComponent implements OnInit {
     await loading.present();
 
     const data = { userCode: this.userCode };
-    this.http.post('https://siinad.mx/php/get-user-by-code.php', data).subscribe(
+    this.http.post(`${environment.apiBaseUrl}/get-user-by-code.php`, data).subscribe(
       async (response: any) => {
         loading.dismiss();
         if (response.success) {
@@ -116,7 +117,7 @@ export class RegisterComponent implements OnInit {
     });
     await loading.present();
 
-    this.http.get('https://siinad.mx/php/get-companies.php').subscribe(
+    this.http.get(`${environment.apiBaseUrl}/get-companies.php`).subscribe(
       async (response: any) => {
         loading.dismiss();
         if (response) {
@@ -157,7 +158,7 @@ export class RegisterComponent implements OnInit {
       status: 2,
     };
   
-    this.http.post('https://siinad.mx/php/assign-company.php', data).subscribe(
+    this.http.post(`${environment.apiBaseUrl}/assign-company.php`, data).subscribe(
       async (response: any) => {
         loading.dismiss();
         if (response.success) {
@@ -246,7 +247,7 @@ async registrarUsuario() {
       levelUser: this.usuario.levelUser,
     };
   
-    this.http.post('https://siinad.mx/php/registerAdminCompany.php', data).subscribe(
+    this.http.post(`${environment.apiBaseUrl}/registerAdminCompany.php`, data).subscribe(
       async (response: any) => {
         loading.dismiss();
         if (response.success) {

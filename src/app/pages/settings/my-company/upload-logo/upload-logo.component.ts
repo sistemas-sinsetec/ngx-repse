@@ -8,6 +8,7 @@ import { CompanyService } from '../../../../services/company.service';
 import { NbGlobalPhysicalPosition, NbComponentStatus } from '@nebular/theme';
 import { LoadingController } from '@ionic/angular';
 import { CustomToastrService } from '../../../../services/custom-toastr.service';
+import { environment } from '../../../../../environments/environment';
 
 @Component({
   selector: 'ngx-upload-logo',
@@ -39,7 +40,7 @@ export class UploadLogoComponent implements OnInit {
     await loading.present();
 
     const companyId = this.companyService.selectedCompany.id;
-    this.http.get(`https://siinad.mx/php/getCompanyLogo.php?companyId=${companyId}`).subscribe(
+    this.http.get(`${environment.apiBaseUrl}/getCompanyLogo.php?companyId=${companyId}`).subscribe(
       (response: any) => {
         this.currentLogo = response.logoUrl; // Ajusta según la estructura de tu respuesta
         loading.dismiss();
@@ -134,7 +135,7 @@ export class UploadLogoComponent implements OnInit {
     formData.append('logo', this.selectedFile);
     formData.append('currentLogo', this.currentLogo); // Enviar el logo actual al backend
   
-    this.http.post('https://siinad.mx/php/uploadLogo.php', formData).subscribe(
+    this.http.post(`${environment.apiBaseUrl}/uploadLogo.php`, formData).subscribe(
       (response: any) => {
         if (response.success) {
           // Actualizar el logo en el servicio y en el almacenamiento local

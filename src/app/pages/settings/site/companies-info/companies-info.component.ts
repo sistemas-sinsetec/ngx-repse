@@ -11,6 +11,7 @@ import { Subject, Subscription } from 'rxjs';
 import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
 import { CompanyService } from '../../../../services/company.service';
 import { CustomToastrService } from '../../../../services/custom-toastr.service';
+import { environment } from '../../../../../environments/environment';
 
 @Component({
   selector: 'ngx-companies-info',
@@ -63,7 +64,7 @@ export class CompaniesInfoComponent implements OnInit, OnDestroy {
    * Obtiene la lista de empresas desde el backend.
    */
   obtenerEmpresas() {
-    this.http.get<any[]>('https://siinad.mx/php/companies-info.php')
+    this.http.get<any[]>(`${environment.apiBaseUrl}/companies-info.php`)
       .subscribe(
         (data: any[]) => {
           // Filtrar empresas según el nivel de usuario

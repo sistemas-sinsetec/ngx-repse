@@ -3,6 +3,7 @@ import { Component, OnInit } from '@angular/core';
 import { LoadingController } from '@ionic/angular'; // Importar LoadingController
 import { CompanyService } from '../../../services/company.service';
 import * as XLSX from 'xlsx'; // Importar la librería xlsx
+import { environment } from '../../../../environments/environment';
 
 @Component({
   selector: 'ngx-deploy-projects',
@@ -80,7 +81,7 @@ export class DeployProjectsComponent implements OnInit {
       const data = { company_id: companyId }; // Obtener el company_id desde el servicio
 
       // Realizar la solicitud HTTP POST
-      this.http.post<any>('https://siinad.mx/php/get_projects.php', data).subscribe(
+      this.http.post<any>(`${environment.apiBaseUrl}/get_projects.php`, data).subscribe(
         (response) => {
           // Asignar los datos a la fuente de la tabla
           this.source = response.data;

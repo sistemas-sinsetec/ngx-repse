@@ -5,6 +5,7 @@ import { Component, OnInit } from '@angular/core';
 import { NbWindowRef } from '@nebular/theme';
 import { HttpClient } from '@angular/common/http';
 import { CompanyService } from '../../../services/company.service';
+import { environment } from '../../../../environments/environment';
 
 @Component({
   selector: 'ngx-register-user',
@@ -45,7 +46,7 @@ export class RegisterUserComponent implements OnInit {
     this.companyId = this.companyService.selectedCompany.id;
 
     // Obtener la lista de niveles de usuario desde get-level-users.php
-    this.http.get<any>('https://siinad.mx/php/get-level-users.php')
+    this.http.get<any>(`${environment.apiBaseUrl}/get-level-users.php`)
       .subscribe(
         data => {
           this.levelUsers = data; // Se asume que se retorna un arreglo de objetos { id, levelUserName, ... }
@@ -80,7 +81,7 @@ export class RegisterUserComponent implements OnInit {
     formData.append('company_id', this.companyId);
     formData.append('levelUserId', this.selectedLevelUserId);
 
-    this.http.post<any>('https://siinad.mx/php/postUser.php', formData)
+    this.http.post<any>(`${environment.apiBaseUrl}/postUser.php`, formData)
       .subscribe(
         response => {
           if (response.success) {

@@ -12,6 +12,7 @@ import { finalize } from 'rxjs/operators';
 import * as Tesseract from 'tesseract.js';
 import * as pdfjsLib from 'pdfjs-dist';
 import pdfWorker from 'pdfjs-dist/build/pdf.worker.entry';
+import { environment } from '../../../../../environments/environment';
 
 import { GlobalWorkerOptions } from 'pdfjs-dist/build/pdf';
 GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.worker.min.js';
@@ -302,7 +303,7 @@ export class MensualUploadComponent implements OnInit {
     formData.append('year', this.selectedYear.toString());
     formData.append('comentario', comentario); // ✅ Añadimos el texto extraído
   
-    this.http.post('https://siinad.mx/php/documentUpload.php', formData)
+    this.http.post(`${environment.apiBaseUrl}/documentUpload.php`, formData)
       .pipe(
         finalize(() => {
           this.cargando = false;
@@ -333,7 +334,7 @@ export class MensualUploadComponent implements OnInit {
   descargarArchivo(tarea: Tarea, month: string, year: number) {
     const doc = tarea.documents?.find(d => d.month === month && d.year === year);
     if (doc && doc.file_path) {
-      window.open(`https://siinad.mx/php/${doc.file_path}`, '_blank');
+      window.open(`${environment.apiBaseUrl}/${doc.file_path}`, '_blank');
     } else {
       console.error('No se encontró un archivo para descargar en el mes y año seleccionados.');
     }
@@ -354,7 +355,7 @@ export class MensualUploadComponent implements OnInit {
     }
     console.log('Obteniendo estado de archivos para companyId:', companyId);
     this.cargando = true;
-    this.http.get<any[]>(`https://siinad.mx/php/getDocumentStatus.php?companyId=${companyId}`)
+    this.http.get<any[]>(`${environment.apiBaseUrl}/getDocumentStatus.php?companyId=${companyId}`)
       .pipe(
         finalize(() => {
           this.cargando = false;

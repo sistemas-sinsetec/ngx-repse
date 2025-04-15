@@ -13,6 +13,7 @@ import { Router } from '@angular/router';
 import { CompanyService } from '../../../services/company.service';
 import { PeriodService } from '../../../services/period.service';
 import { LoadingController } from '@ionic/angular';
+import { environment } from '../../../../environments/environment';
 
 @Component({
   selector: 'ngx-assign-projects',
@@ -74,7 +75,7 @@ export class AssignProjectsComponent implements OnInit {
     const projectId = this.selectedObra.project_id;
     const dayOfWeek = this.selectedDia;
 
-    this.http.get(`https://siinad.mx/php/get_previous_assigned.php?company_id=${companyId}&day_of_week=${dayOfWeek}&project_id=${projectId}`)
+    this.http.get(`${environment.apiBaseUrl}/get_previous_assigned.php?company_id=${companyId}&day_of_week=${dayOfWeek}&project_id=${projectId}`)
       .subscribe((data: any) => {
         if (Array.isArray(data)) {
           this.pastAssignmentsInfo = {
@@ -110,7 +111,7 @@ export class AssignProjectsComponent implements OnInit {
     try {
       await loading.present();
 
-      this.http.get(`https://siinad.mx/php/get_weekly_periods.php?company_id=${companyId}&period_type_id=${selectedPeriod}`)
+      this.http.get(`${environment.apiBaseUrl}/get_weekly_periods.php?company_id=${companyId}&period_type_id=${selectedPeriod}`)
         .subscribe((data: any) => {
           this.semanas = data || [];
 
@@ -221,7 +222,7 @@ export class AssignProjectsComponent implements OnInit {
 
       const companyId = this.companyService.selectedCompany.id; // Obtener el companyId desde AuthService
 
-      this.http.get(`https://siinad.mx/php/get_projects_by_date.php?start_date=${startDate}&end_date=${endDate}&company_id=${companyId}`)
+      this.http.get(`${environment.apiBaseUrl}/get_projects_by_date.php?start_date=${startDate}&end_date=${endDate}&company_id=${companyId}`)
         .subscribe((data: any) => {
           this.obras = data.sort((a, b) => a.project_name.localeCompare(b.project_name, 'es'));
           this.filterObrasByDate(startDate, endDate);
@@ -270,13 +271,13 @@ export class AssignProjectsComponent implements OnInit {
         const dayOfWeek = this.selectedDia;
 
         // Obtener empleados activos con filtro de department_range
-        this.http.get(`https://siinad.mx/php/get_active_employees_by_date.php?start_date=${startDate}&end_date=${endDate}&company_id=${companyId}&user_id=${userId}`)
+        this.http.get(`${environment.apiBaseUrl}/get_active_employees_by_date.php?start_date=${startDate}&end_date=${endDate}&company_id=${companyId}&user_id=${userId}`)
           .subscribe((data: any) => {
             this.empleados = Array.isArray(data) ? data : [];
             this.filterEmpleados();
 
             // Obtener empleados ya asignados con el filtro de department_range
-            this.http.get(`https://siinad.mx/php/get_assigned_employees.php?start_date=${startDate}&end_date=${endDate}&company_id=${companyId}&week_number=${weekNumber}&day_of_week=${dayOfWeek}&user_id=${userId}`)
+            this.http.get(`${environment.apiBaseUrl}/get_assigned_employees.php?start_date=${startDate}&end_date=${endDate}&company_id=${companyId}&week_number=${weekNumber}&day_of_week=${dayOfWeek}&user_id=${userId}`)
               .subscribe((assignedData: any) => {
                 this.markAssignedEmployees(assignedData);
               }, error => {
@@ -344,7 +345,7 @@ export class AssignProjectsComponent implements OnInit {
     const projectId = this.selectedObra.project_id;
     const dayOfWeek = this.selectedDia;
 
-    this.http.get(`https://siinad.mx/php/get_previous_assigned.php?company_id=${companyId}&day_of_week=${dayOfWeek}&project_id=${projectId}`)
+    this.http.get(`${environment.apiBaseUrl}/get_previous_assigned.php?company_id=${companyId}&day_of_week=${dayOfWeek}&project_id=${projectId}`)
       .subscribe((data: any) => {
         if (Array.isArray(data)) {
           // Guardamos los IDs de los empleados obtenidos
@@ -514,7 +515,7 @@ export class AssignProjectsComponent implements OnInit {
       };
 
       // Realizar la solicitud HTTP
-      await this.http.post('https://siinad.mx/php/assign-employees.php', data).toPromise();
+      await this.http.post(`${environment.apiBaseUrl}/assign-employees.php`, data).toPromise();
       console.log('Empleados asignados correctamente');
 
       // Marcar empleados como asignados y limpiar la lista de seleccionados

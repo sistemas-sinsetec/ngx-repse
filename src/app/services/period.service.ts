@@ -5,6 +5,7 @@ import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { BehaviorSubject } from 'rxjs';
 import * as moment from 'moment';
+import { environment } from '../../environments/environment';
 
 @Injectable({
   providedIn: 'root',
@@ -28,7 +29,7 @@ export class PeriodService {
    */
   loadPeriodTypes(companyId: string): Promise<any[]> {
     return this.http
-      .get(`https://siinad.mx/php/get_period_types.php?company_id=${companyId}`)
+      .get(`${environment.apiBaseUrl}/get_period_types.php?company_id=${companyId}`)
       .toPromise()
       .then((data: any) => {
         const mapped = data.map((d: any) => ({

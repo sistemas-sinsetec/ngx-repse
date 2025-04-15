@@ -7,6 +7,7 @@ import { AuthService } from '../../../../services/auth.service';
 import { NbDialogService, NbDialogRef } from '@nebular/theme';
 import { CompanyService } from '../../../../services/company.service';
 import { CustomToastrService } from '../../../../services/custom-toastr.service';
+import { environment } from '../../../../../environments/environment';
 @Component({
   selector: 'ngx-my-users',
   templateUrl: './my-users.component.html',
@@ -37,7 +38,7 @@ export class MyUsersComponent {
       companyId: this.companyService.selectedCompany.id
     };
 
-    this.http.post('https://siinad.mx/php/searchUsers.php', data).subscribe(
+    this.http.post(`${environment.apiBaseUrl}/searchUsers.php`, data).subscribe(
       async (response: any) => {
         if (response.success) {
           this.employees = response.employees;
@@ -79,7 +80,7 @@ export class MyUsersComponent {
 
   eliminarUsuario(id: number) {
     if (confirm("¿Estás seguro de que quieres eliminar este usuario?")) {
-      this.http.delete(`https://siinad.mx/php/deleteUser.php?id=${id}`).subscribe(
+      this.http.delete(`${environment.apiBaseUrl}/deleteUser.php?id=${id}`).subscribe(
         async (response: any) => {
           if (response.success) {
             await this.toastrService.showSuccess('Usuario eliminado exitosamente', 'Exito');

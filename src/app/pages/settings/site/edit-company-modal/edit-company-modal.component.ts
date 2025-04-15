@@ -2,6 +2,7 @@ import { Component, Input } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { NbDialogService, NbDialogRef } from '@nebular/theme';
 import { CustomToastrService } from '../../../../services/custom-toastr.service';
+import { environment } from '../../../../../environments/environment';
 
 @Component({
   selector: 'ngx-edit-company-modal',
@@ -23,7 +24,7 @@ export class EditCompanyModalComponent {
   }
 
   async guardarCambios() {
-    this.http.post('https://siinad.mx/php/update-company.php', this.company).subscribe(
+    this.http.post(`${environment.apiBaseUrl}/update-company.php`, this.company).subscribe(
       async (response: any) => {
         if (response.message) {
           this.toastrService.showSuccess(response.message, 'Éxito');

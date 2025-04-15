@@ -11,6 +11,7 @@ import * as pdfjsLib from 'pdfjs-dist';
 import { LocalDataSource } from 'ng2-smart-table';
 import { CompanyTaxDetailsModalComponent } from '../company-tax-details-modal/company-tax-details-modal.component';
 import { NbDialogService } from '@nebular/theme';
+import { environment } from '../../../../../environments/environment';
 
 interface Period {
   period_number: number;
@@ -66,7 +67,7 @@ export class CompanyTaxDetailsComponent implements OnInit {
 
   cargarRegistrosEmpresa() {
     const companyId = this.companyService.selectedCompany.id;
-    const endpoint = `https://siinad.mx/php/get-data-company-s.php?company_id=${companyId}`;
+    const endpoint = `${environment.apiBaseUrl}/get-data-company-s.php?company_id=${companyId}`;
   
     this.http.get<any>(endpoint).subscribe(
       (data) => {
@@ -96,7 +97,7 @@ export class CompanyTaxDetailsComponent implements OnInit {
 
   obtenerDatosPorSellos(digitalSeal: string, originalChainSeal: string) {
     // URL del endpoint para obtener los datos
-    const endpoint = `https://siinad.mx/php/get-data-by-seals.php?digital_seal=${encodeURIComponent(digitalSeal)}&original_chain_seal=${encodeURIComponent(originalChainSeal)}`;
+    const endpoint = `${environment.apiBaseUrl}/get-data-by-seals.php?digital_seal=${encodeURIComponent(digitalSeal)}&original_chain_seal=${encodeURIComponent(originalChainSeal)}`;
 
     this.http.get<any>(endpoint).subscribe(
       (data) => {
@@ -341,7 +342,7 @@ export class CompanyTaxDetailsComponent implements OnInit {
       ...this.extractedData, // Datos extraídos del PDF
     };
 
-    const endpoint = `https://siinad.mx/php/update-data-company.php`;
+    const endpoint = `${environment.apiBaseUrl}/update-data-company.php`;
 
     this.http.post<any>(endpoint, payload).subscribe(
       (response) => {

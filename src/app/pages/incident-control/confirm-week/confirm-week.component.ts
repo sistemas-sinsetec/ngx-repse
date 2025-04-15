@@ -6,9 +6,9 @@ import { CompanyService } from "../../../services/company.service";
 import { PeriodService } from "../../../services/period.service";
 import { DialogComponent } from "../../modal-overlays/dialog/dialog.component";
 import * as moment from "moment";
-import "moment/locale/es-mx";
 import { LoadingController, AlertController } from "@ionic/angular";
 import { CustomToastrService } from "../../../services/custom-toastr.service";
+import { environment } from "../../../../environments/environment";
 
 @Component({
   selector: "ngx-confirm-week",
@@ -69,7 +69,7 @@ export class ConfirmWeekComponent {
       return;
     }
 
-    const url = `https://siinad.mx/php/get-week-data.php?company_id=${companyId}&period_type_id=${periodTypeId}`;
+    const url = `${environment.apiBaseUrl}/get-week-data.php?company_id=${companyId}&period_type_id=${periodTypeId}`;
 
     this.http.get(url).subscribe(
       (data: any) => {
@@ -111,7 +111,7 @@ export class ConfirmWeekComponent {
 
   // Verificar si la semana está confirmada
   verificarConfirmacionSemana(companyId: string, periodId: string) {
-    const confirmUrl = `https://siinad.mx/php/get-week-confirmations.php?company_id=${companyId}&period_id=${periodId}`;
+    const confirmUrl = `${environment.apiBaseUrl}/get-week-confirmations.php?company_id=${companyId}&period_id=${periodId}`;
 
     this.http.get(confirmUrl).subscribe(
       (response: any) => {
@@ -138,7 +138,7 @@ export class ConfirmWeekComponent {
     const periodId = dia.period_id;
     const date = dia.date;
 
-    const url = `https://siinad.mx/php/get-employee-assignments-days.php?company_id=${companyId}&period_id=${periodId}&date=${date}`;
+    const url = `${environment.apiBaseUrl}/get-employee-assignments-days.php?company_id=${companyId}&period_id=${periodId}&date=${date}`;
 
     try {
       const data: any = await this.http.get(url).toPromise();
@@ -277,7 +277,7 @@ export class ConfirmWeekComponent {
       week_number: weekNumber,
     };
 
-    const url = `https://siinad.mx/php/confirm-week.php`;
+    const url = `${environment.apiBaseUrl}/confirm-week.php`;
 
     try {
       const response: any = await this.http.post(url, body).toPromise();
@@ -353,13 +353,11 @@ export class ConfirmWeekComponent {
               message: "Eliminando empleado asignado...",
             });
             await loading.present();
-
-            const url = `https://siinad.mx/php/delete-employee-assignment-incident.php`;
+            const url = `${environment.apiBaseUrl}/delete-employee-assignment-incident.php`;
             const body = {
               employee_id: employeeId,
               date: this.selectedDia.date,
             };
-
             this.http.post(url, body).subscribe(
               async (response: any) => {
                 if (response && response.success) {
@@ -448,8 +446,7 @@ export class ConfirmWeekComponent {
       week_number: this.currentSemana,
       status: newStatus,
     };
-
-    this.http.post("https://siinad.mx/php/confirm-day.php", body).subscribe(
+    this.http.post(`${environment.apiBaseUrl}/confirm-day.php`, body).subscribe(
       (response: any) => {
         if (response?.success) {
           dia.status = newStatus; // Actualizar estado en el frontend

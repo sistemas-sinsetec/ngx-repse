@@ -9,6 +9,7 @@ import { NbDialogService } from '@nebular/theme';
 import { CompanyService } from '../../../../services/company.service';
 import { ChangeDetectorRef } from '@angular/core';
 import { finalize } from 'rxjs/operators';
+import { environment } from '../../../../../environments/environment';
 
 interface Tarea {
   id: number;
@@ -189,7 +190,7 @@ export class MensualReviewComponent implements OnInit {
   viewFile(tarea: Tarea, month: string, year: number) {
     const doc = tarea.documents?.find(d => d.month === month && d.year === year);
     if (doc && doc.file_path) {
-      window.open(`https://siinad.mx/php/${doc.file_path}`, '_blank');
+      window.open(`${environment.apiBaseUrl}/${doc.file_path}`, '_blank');
     } else {
       console.error('No se encontró el archivo para visualizar.');
     }
@@ -211,7 +212,7 @@ export class MensualReviewComponent implements OnInit {
   };
 
   this.cargando = true;
-  this.http.post('https://siinad.mx/php/updateArchivoStatus.php', payload)
+  this.http.post(`${environment.apiBaseUrl}/updateArchivoStatus.php`, payload)
     .pipe(
       finalize(() => {
         this.cargando = false;
@@ -290,7 +291,7 @@ rejectDocument(tarea: Tarea, month: string, year: number) {
   }
   console.log('Obteniendo estado de archivos para companyId:', companyId);
   this.cargando = true;
-  this.http.get<any[]>(`https://siinad.mx/php/getDocumentStatus.php?companyId=${companyId}`)
+  this.http.get<any[]>(`${environment.apiBaseUrl}/getDocumentStatus.php?companyId=${companyId}`)
     .pipe(
       finalize(() => {
         this.cargando = false;

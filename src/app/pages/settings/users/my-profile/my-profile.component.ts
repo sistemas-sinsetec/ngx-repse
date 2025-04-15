@@ -9,6 +9,7 @@ import { Router } from '@angular/router';
 import { LoadingController } from '@ionic/angular'; // Importar LoadingController
 import { ChangeDetectorRef } from '@angular/core';
 import { CustomToastrService } from '../../../../services/custom-toastr.service';
+import { environment } from '../../../../../environments/environment';
 
 @Component({
   selector: 'ngx-my-profile',
@@ -53,7 +54,7 @@ export class MyProfileComponent implements OnInit, OnDestroy {
 
   async getUserData() {
     const loading = await this.showLoading('Cargando datos del usuario...'); // Mostrar loading
-    const url = `https://www.siinad.mx/php/get_user.php?idUser=${this.idUser}`;
+    const url = `${environment.apiBaseUrl}/get_user.php?idUser=${this.idUser}`;
     this.http.get(url).subscribe(
       (response: any) => {
         if (response.success) {
@@ -80,7 +81,7 @@ export class MyProfileComponent implements OnInit, OnDestroy {
   
   async getUserAvatar() {
     const loading = await this.showLoading('Cargando avatar...'); // Mostrar loading
-    const url = `https://www.siinad.mx/php/getUserAvatar.php?userId=${this.idUser}`;
+    const url =`${environment.apiBaseUrl}/getUserAvatar.php?userId=${this.idUser}`;
     this.http.get(url).subscribe(
       (response: any) => {
         if (response.avatarUrl) {
@@ -134,7 +135,7 @@ export class MyProfileComponent implements OnInit, OnDestroy {
         formData.append('avatar', webpFile);
         formData.append('userId', this.idUser);
   
-        const url = `https://www.siinad.mx/php/upload_avatar.php`;
+        const url = `${environment.apiBaseUrl}/upload_avatar.php`;
         this.http.post(url, formData).subscribe(
           (response: any) => {
             if (response.success) {
@@ -223,7 +224,7 @@ export class MyProfileComponent implements OnInit, OnDestroy {
       code: this.generatedCode
     };
 
-    const url = `https://www.siinad.mx/php/save_user_code.php`;
+    const url = `${environment.apiBaseUrl}/save_user_code.php`;
     this.http.post(url, data).subscribe(
       (response: any) => {
         if (response.success) {
@@ -266,7 +267,7 @@ export class MyProfileComponent implements OnInit, OnDestroy {
       userPassword: this.userPassword // Solo si la contraseña ha sido cambiada
     };
   
-    const url = `https://www.siinad.mx/php/update_user.php`;
+    const url = `${environment.apiBaseUrl}/update_user.php`;
     this.http.post(url, data).subscribe(
       (response: any) => {
         this.toastrService.showInfo(response.message, response.success ? 'Éxito' : 'Error');
@@ -336,7 +337,7 @@ export class MyProfileComponent implements OnInit, OnDestroy {
     const loading = await this.showLoading('Eliminando código...'); // Mostrar loading
     const data = { employeeId: this.employeeId };
 
-    this.http.post('https://siinad.mx/php/delete-employee-code.php', data).subscribe(
+    this.http.post(`${environment.apiBaseUrl}/delete-employee-code.php`, data).subscribe(
       (response: any) => {
         if (response.success) {
           console.log('Código eliminado con éxito.');

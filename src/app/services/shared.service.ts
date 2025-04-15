@@ -7,7 +7,7 @@ import { AuthService } from './auth.service';
 import { CompanyService } from './company.service';
 import { Observable } from 'rxjs';
 import { tap } from 'rxjs/operators';
-
+import { environment } from '../../environments/environment';
 
 export interface Permission {
   section: string;
@@ -46,7 +46,7 @@ export class SharedService {
     }
   
     const data = { userId, companyId };
-    return this.http.post<{ success: boolean; permissions: Permission[] }>('https://siinad.mx/php/loadPermissions.php', data).pipe(
+    return this.http.post<{ success: boolean; permissions: Permission[] }>(`${environment.apiBaseUrl}/loadPermissions.php`, data).pipe(
       tap(response => {
         if (response.success) {
           this.permissions = response.permissions || [];

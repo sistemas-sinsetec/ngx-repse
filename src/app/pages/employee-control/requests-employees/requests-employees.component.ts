@@ -6,6 +6,7 @@ import { SharedService } from '../../../services/shared.service';
 import { NavController, ToastController, LoadingController, AlertController } from '@ionic/angular';
 import { NgForm } from '@angular/forms';
 import { CustomToastrService } from '../../../services/custom-toastr.service';
+import { environment } from '../../../../environments/environment';
 interface Empleado {
   [key: string]: any;
   employee_id: number;
@@ -97,7 +98,7 @@ export class RequestsEmployeesComponent {
       fechaFin: today.toISOString().split('T')[0],
     };
 
-    this.http.get<any>('https://siinad.mx/php/get_employee_requests.php', { params }).subscribe(
+    this.http.get<any>(`${environment.apiBaseUrl}/get_employee_requests.php`, { params }).subscribe(
       data => {
         console.log('Solicitudes registradas:', data); // Verifica los datos recibidos
 
@@ -195,7 +196,7 @@ export class RequestsEmployeesComponent {
       endpoint = 'get_complete_employees.php';
     }
 
-    this.http.get<any[]>(`https://siinad.mx/php/${endpoint}?company_id=${companyId}`).subscribe(
+    this.http.get<any[]>(`${environment.apiBaseUrl}/${endpoint}?company_id=${companyId}`).subscribe(
       data => {
         console.log('Respuesta del servidor:', data);
         if (Array.isArray(data)) {
@@ -214,7 +215,7 @@ export class RequestsEmployeesComponent {
 
   fetchDepartamentos() {
     const companyId = this.companyService.selectedCompany.id;
-    this.http.get<any[]>(`https://siinad.mx/php/get_departments.php?company_id=${companyId}`).subscribe(
+    this.http.get<any[]>(`${environment.apiBaseUrl}/get_departments.php?company_id=${companyId}`).subscribe(
       data => {
         console.log('Departamentos:', data); // Verificar la respuesta
         this.departamentos = Array.isArray(data) ? data : []; // Asegurarse de que sea un array
@@ -228,7 +229,7 @@ export class RequestsEmployeesComponent {
 
   fetchPuestos() {
     const companyId = this.companyService.selectedCompany.id;
-    this.http.get<any[]>(`https://siinad.mx/php/get_positions.php?company_id=${companyId}`).subscribe(
+    this.http.get<any[]>(`${environment.apiBaseUrl}/get_positions.php?company_id=${companyId}`).subscribe(
       data => {
         console.log('Puestos:', data); // Verificar la respuesta
         this.puestos = Array.isArray(data) ? data : []; // Asegurarse de que sea un array
@@ -242,7 +243,7 @@ export class RequestsEmployeesComponent {
 
   fetchTurnos() {
     const companyId = this.companyService.selectedCompany.id;
-    this.http.get<any[]>(`https://siinad.mx/php/get_shifts.php?company_id=${companyId}`).subscribe(
+    this.http.get<any[]>(`${environment.apiBaseUrl}/get_shifts.php?company_id=${companyId}`).subscribe(
       data => {
         console.log('Turnos:', data); // Verificar la respuesta
         this.turnos = Array.isArray(data) ? data : []; // Asegurarse de que sea un array
@@ -261,7 +262,7 @@ export class RequestsEmployeesComponent {
     });
     await loading.present();
 
-    this.http.get<any[]>('https://siinad.mx/php/get_genders.php').subscribe(
+    this.http.get<any[]>(`${environment.apiBaseUrl}/get_genders.php`).subscribe(
       data => {
         this.genders = data;
 
@@ -280,7 +281,7 @@ export class RequestsEmployeesComponent {
     });
     await loading.present();
 
-    this.http.get<any[]>('https://siinad.mx/php/get_marital_statuses.php').subscribe(
+    this.http.get<any[]>(`${environment.apiBaseUrl}/get_marital_statuses.php`).subscribe(
       data => {
         this.maritalStatuses = data;
 
@@ -299,7 +300,7 @@ export class RequestsEmployeesComponent {
     });
     await loading.present();
 
-    this.http.get<any>(`https://siinad.mx/php/get_employee_files.php?employee_id=${employeeId}`).subscribe(
+    this.http.get<any>(`${environment.apiBaseUrl}/get_employee_files.php?employee_id=${employeeId}`).subscribe(
       data => {
         this.employeeFiles = data;
         this.checkAllFieldsCompleted();
@@ -333,7 +334,7 @@ export class RequestsEmployeesComponent {
       await loading.present();
 
       const employeeId = this.selectedEmployee.employee_id;
-      this.http.post('https://siinad.mx/php/delete_employee_request.php', { employee_id: employeeId }).subscribe(
+      this.http.post(`${environment.apiBaseUrl}/delete_employee_request.php`, { employee_id: employeeId }).subscribe(
         async (response: any) => {
           this.toastrService.showSuccess(
             'Solicitud de empleado eliminada exitosamente.',
@@ -369,7 +370,7 @@ export class RequestsEmployeesComponent {
       };
 
       this.http
-        .post('https://siinad.mx/php/update_employee_status.php', data)
+        .post(`${environment.apiBaseUrl}/update_employee_status.php`, data)
         .subscribe(
           (response: any) => {
             // Toast de éxito con Nebular
@@ -409,7 +410,7 @@ export class RequestsEmployeesComponent {
 
 
   eliminarArchivo(fileId: number) {
-    this.http.post('https://siinad.mx/php/delete_employee_file.php', { file_id: fileId }).subscribe(
+    this.http.post(`${environment.apiBaseUrl}/delete_employee_file.php`, { file_id: fileId }).subscribe(
       response => {
         if (this.selectedEmployee) {
           this.fetchEmployeeFiles(this.selectedEmployee.employee_id);
@@ -509,7 +510,7 @@ export class RequestsEmployeesComponent {
         data.employee_code = this.selectedEmployee.employee_code;
       }
 
-      this.http.post('https://siinad.mx/php/update_employee.php', data).subscribe(
+      this.http.post(`${environment.apiBaseUrl}/update_employee.php`, data).subscribe(
         (response: any) => {
           this.uploadFiles();
           // Toast de éxito con Nebular
@@ -559,7 +560,7 @@ export class RequestsEmployeesComponent {
     }
 
     try {
-      const response = await this.http.post('https://siinad.mx/php/update_upload_files.php', formData).toPromise();
+      const response = await this.http.post(`${environment.apiBaseUrl}/update_upload_files.php`, formData).toPromise();
 
       // Toast de éxito con Nebular
       this.toastrService.showSuccess(
@@ -616,7 +617,7 @@ export class RequestsEmployeesComponent {
       }
 
       // Enviar la solicitud al backend
-      this.http.post('https://siinad.mx/php/update_employee_status.php', data).subscribe(
+      this.http.post(`${environment.apiBaseUrl}/update_employee_status.php`, data).subscribe(
         async (response: any) => {
           if (response && response.folio) {
             console.log('Folio recibido:', response.folio);  // Aquí recibes el folio y lo puedes utilizar
@@ -697,7 +698,7 @@ export class RequestsEmployeesComponent {
   }
 
   downloadFile(filePath: string) {
-    const fullUrl = `https://www.siinad.mx/php/${filePath}`; // URL completa del archivo
+    const fullUrl = `${environment.apiBaseUrl}/${filePath}`; // URL completa del archivo
     window.open(fullUrl, '_blank'); // Abrir el archivo en una nueva pestaña o iniciar la descarga
   }
 

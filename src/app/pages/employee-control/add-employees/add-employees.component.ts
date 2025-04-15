@@ -10,6 +10,7 @@ import { NavController, ToastController, AlertController, LoadingController } fr
 import { AuthService } from '../../../services/auth.service';
 import { CompanyService } from '../../../services/company.service';
 import { NbToastrService } from '@nebular/theme';
+import { environment } from '../../../../environments/environment';
 interface Empleado {
   [key: string]: any;
   departamento: string;
@@ -131,7 +132,7 @@ export class AddEmployeesComponent {
     });
     await loading.present();
   
-    this.http.get<any>('https://siinad.mx/php/get_employee_requests.php', { params }).subscribe(
+    this.http.get<any>(`${environment.apiBaseUrl}/get_employee_requests.php`, { params }).subscribe(
       data => {
         console.log('Solicitudes registradas:', data);
   
@@ -189,7 +190,7 @@ export class AddEmployeesComponent {
 
   fetchDepartamentos() {
     const companyId = this.companyService.selectedCompany.id;
-    this.http.get<any[]>(`https://siinad.mx/php/get_departments.php?company_id=${companyId}`).subscribe(
+    this.http.get<any[]>(`${environment.apiBaseUrl}/get_departments.php?company_id=${companyId}`).subscribe(
       data => {
         console.log('Departamentos:', data); // Verificar la respuesta
         this.departamentos = Array.isArray(data) ? data : []; // Asegurarse de que sea un array
@@ -203,7 +204,7 @@ export class AddEmployeesComponent {
 
   fetchPuestos() {
     const companyId = this.companyService.selectedCompany.id;
-    this.http.get<any[]>(`https://siinad.mx/php/get_positions.php?company_id=${companyId}`).subscribe(
+    this.http.get<any[]>(`${environment.apiBaseUrl}/get_positions.php?company_id=${companyId}`).subscribe(
       data => {
         console.log('Puestos:', data); // Verificar la respuesta
         this.puestos = Array.isArray(data) ? data : []; // Asegurarse de que sea un array
@@ -217,7 +218,7 @@ export class AddEmployeesComponent {
 
   fetchTurnos() {
     const companyId = this.companyService.selectedCompany.id;
-    this.http.get<any[]>(`https://siinad.mx/php/get_shifts.php?company_id=${companyId}`).subscribe(
+    this.http.get<any[]>(`${environment.apiBaseUrl}/get_shifts.php?company_id=${companyId}`).subscribe(
       data => {
         console.log('Turnos:', data); // Verificar la respuesta
         this.turnos = Array.isArray(data) ? data : []; // Asegurarse de que sea un array
@@ -230,14 +231,14 @@ export class AddEmployeesComponent {
   }
 
   fetchGenders() {
-    this.http.get<any[]>('https://siinad.mx/php/get_genders.php').subscribe(
+    this.http.get<any[]>(`${environment.apiBaseUrl}/get_genders.php`).subscribe(
       data => this.genders = data,
       error => console.error('Error al cargar géneros', error)
     );
   }
 
   fetchMaritalStatuses() {
-    this.http.get<any[]>('https://siinad.mx/php/get_marital_statuses.php').subscribe(
+    this.http.get<any[]>(`${environment.apiBaseUrl}/get_marital_statuses.php`).subscribe(
       data => this.maritalStatuses = data,
       error => console.error('Error al cargar estados civiles', error)
     );
@@ -277,7 +278,7 @@ export class AddEmployeesComponent {
         status,
       };
   
-      this.http.post('https://siinad.mx/php/submit_employee.php', data).subscribe(
+      this.http.post(`${environment.apiBaseUrl}/submit_employee.php`, data).subscribe(
         async (response: any) => {
           const employeeId = response.employee_id;
           const requestId = response.request_id;
@@ -376,7 +377,7 @@ export class AddEmployeesComponent {
     });
     await loading.present();
   
-    this.http.post('https://siinad.mx/php/upload_employee_files.php', formData).subscribe(
+    this.http.post(`${environment.apiBaseUrl}/upload_employee_files.php`, formData).subscribe(
       response => {
         // Ocultar el spinner
         loading.dismiss();

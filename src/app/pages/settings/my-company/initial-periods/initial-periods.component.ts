@@ -11,6 +11,7 @@ import { LoadingController } from '@ionic/angular';
 import { SelectCompanyPeriodDialogComponent } from '../../../../select-company-period-dialog/select-company-period-dialog.component';
 import { Router } from '@angular/router';
 import { CustomToastrService } from '../../../../services/custom-toastr.service';
+import { environment } from '../../../../../environments/environment';
 
 @Component({
   selector: 'ngx-initial-periods',
@@ -170,7 +171,7 @@ export class InitialPeriodsComponent {
       periodos: periodos
     };
 
-    this.http.post('https://siinad.mx/php/save-periods.php', configuracion)
+    this.http.post(`${environment.apiBaseUrl}/save-periods.php`, configuracion)
       .subscribe(async (response: any) => {
         console.log('Configuración guardada correctamente', response);
 
@@ -416,7 +417,7 @@ export class InitialPeriodsComponent {
     // Guardar en la BD
     // =================================
     try {
-      await this.http.post('https://siinad.mx/php/create-payroll-period.php', { periods: tempPeriods })
+      await this.http.post(`${environment.apiBaseUrl}/create-payroll-period.php`, { periods: tempPeriods })
         .toPromise();
       console.log('Periodos creados correctamente');
     } catch (error) {

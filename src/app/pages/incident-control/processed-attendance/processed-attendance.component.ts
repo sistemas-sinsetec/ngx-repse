@@ -12,7 +12,7 @@ import { PeriodService } from '../../../services/period.service';
 import * as moment from 'moment';
 import jsPDF from 'jspdf';
 import { CustomToastrService } from '../../../services/custom-toastr.service';
-
+import { environment } from '../../../../environments/environment';
 
 import autoTable from 'jspdf-autotable';
 import html2canvas from 'html2canvas';
@@ -57,7 +57,7 @@ export class ProcessedAttendanceComponent {
    loadPayrollPeriod() {
     const companyId = this.companyService.selectedCompany.id;
     const periodTypeId = this.periodService.selectedPeriod.id;
-    const url = `https://siinad.mx/php/get-payroll-periods.php?company_id=${companyId}&period_type_id=${periodTypeId}`;
+    const url = `${environment.apiBaseUrl}/get-payroll-periods.php?company_id=${companyId}&period_type_id=${periodTypeId}`;
     this.http.get(url).subscribe(
       (data: any[]) => {
         // Se asume que el período actual se identifica por el period_id;
@@ -115,7 +115,7 @@ export class ProcessedAttendanceComponent {
       return;
     }
   
-    const url = `https://siinad.mx/php/get-processed-weeks.php?company_id=${companyId}&period_type_id=${periodTypeId}`;
+    const url = `${environment.apiBaseUrl}/get-processed-weeks.php?company_id=${companyId}&period_type_id=${periodTypeId}`;
   
     this.http.get(url).subscribe(
       (data: any) => {
@@ -195,7 +195,7 @@ export class ProcessedAttendanceComponent {
     });
     await loading.present();
   
-    const url = `https://siinad.mx/php/get-employees-weekly-data.php?week_number=${this.selectedWeek.week_number}&company_id=${companyId}`;
+    const url = `${environment.apiBaseUrl}/get-employees-weekly-data.php?week_number=${this.selectedWeek.week_number}&company_id=${companyId}`;
   
     this.http.get(url).subscribe(
       (data: any) => {
@@ -588,7 +588,7 @@ export class ProcessedAttendanceComponent {
     formData.append('period_type_id', this.selectedWeek.period_type_id);
     formData.append('status', 'Subido');
   
-    this.http.post('https://siinad.mx/php/upload-pdf.php', formData).subscribe(
+    this.http.post(`${environment.apiBaseUrl}/upload-pdf.php`, formData).subscribe(
       async (response) => {
         loading.dismiss();
         const alert = await this.ionicAlertController.create({

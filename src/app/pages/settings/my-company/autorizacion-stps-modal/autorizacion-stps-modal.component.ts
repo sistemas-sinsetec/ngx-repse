@@ -1,6 +1,7 @@
 import { Component, Input, OnInit } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { NbDialogRef } from '@nebular/theme';
+import { environment } from '../../../../../environments/environment';
 
 @Component({
   selector: 'app-autorizacion-stps-modal',
@@ -28,7 +29,7 @@ export class AutorizacionStpsModalComponent implements OnInit {
 
   cargarInformacion() {
     this.http
-      .get<any[]>(`https://siinad.mx/php/getAutorizacionStps.php?companyId=${this.companyId}`)
+      .get<any[]>(`${environment.apiBaseUrl}/getAutorizacionStps.php?companyId=${this.companyId}`)
       .subscribe(
         (response) => {
           if (response && response.length > 0) {
@@ -74,7 +75,7 @@ export class AutorizacionStpsModalComponent implements OnInit {
       tareaId: this.tarea?.id,
     };
 
-    this.http.post('https://siinad.mx/php/saveAutorizacionStps.php', formData).subscribe(
+    this.http.post(`${environment.apiBaseUrl}/saveAutorizacionStps.php`, formData).subscribe(
       (response) => {
         console.log('Respuesta del servidor:', response);
         this.isSubmitting = false;

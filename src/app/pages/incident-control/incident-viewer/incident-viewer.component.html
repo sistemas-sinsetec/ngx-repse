@@ -1,45 +1,70 @@
-<div class="container d-flex flex-column align-items-center justify-content-center">
+<div
+  class="container d-flex flex-column align-items-center justify-content-center"
+>
   <!-- Título Principal -->
 
   <!-- Fila 1: Tarjetas superiores -->
-  <div class="row w-100 ">
+  <div class="row w-100">
     <!-- Tarjeta: Selección de Semana -->
-    <div class="col-md-6 d-flex justify-content-center ">
+    <div class="col-md-6 d-flex justify-content-center">
       <nb-card class="w-100 me-3 hide-header">
         <nb-card-header>
           <span class="title">Selecciona la semana laboral</span>
         </nb-card-header>
         <nb-card-body>
-          <nb-select fullWidth placeholder="Selecciona una semana" [(selected)]="selectedWeek"
-            (selectedChange)="onWeekChange($event)">
+          <nb-select
+            fullWidth
+            placeholder="Selecciona una semana"
+            [(selected)]="selectedWeek"
+            (selectedChange)="onWeekChange($event)"
+          >
             <nb-option *ngFor="let week of weeks" [value]="week">
               {{ week.week_number }}
               <span *ngIf="isCurrentWeek(week)">(Semana Actual)</span>
             </nb-option>
           </nb-select>
           <div *ngIf="selectedWeek" class="mt-3">
-            <p><strong>Inicio del Periodo:</strong> {{ selectedWeek.start_date || 'No disponible' }}</p>
-            <p><strong>Fin del Periodo:</strong> {{ selectedWeek.end_date || 'No disponible' }}</p>
+            <p>
+              <strong>Inicio del Periodo:</strong>
+              {{ selectedWeek.start_date || "No disponible" }}
+            </p>
+            <p>
+              <strong>Fin del Periodo:</strong>
+              {{ selectedWeek.end_date || "No disponible" }}
+            </p>
           </div>
         </nb-card-body>
       </nb-card>
     </div>
 
+<<<<<<< HEAD
     <!-- Tarjeta: Selección de Día -->
-    <div class="col-md-6 d-flex justify-content-center ">
+=======
+    <!-- Tarjeta: Selección de Días -->
+>>>>>>> c731e194c95a7116aca905a283f4e5091e44f4cb
+    <div class="col-md-6 d-flex justify-content-center">
       <nb-card class="w-100 ms-3">
         <nb-card-header>
           <span class="title">Selecciona el día</span>
         </nb-card-header>
         <nb-card-body>
-          <nb-select fullWidth placeholder="Selecciona un día" [(selected)]="selectedDia"
-            (selectedChange)="onDiaChange($event)">
+          <nb-select
+            fullWidth
+            placeholder="Selecciona un día"
+            [(selected)]="selectedDia"
+            (selectedChange)="onDiaChange($event)"
+          >
             <nb-option *ngFor="let dia of diasSemana" [value]="dia.date">
               {{ dia.display }} | {{ dia.date }}
             </nb-option>
           </nb-select>
-          <div *ngIf="diasSemana.length > 0 && selectedDia; else noDias" class="text-success mt-3">
-            <strong>Día seleccionado: {{ getFormattedDate2(selectedDia) }}</strong>
+          <div
+            *ngIf="diasSemana.length > 0 && selectedDia; else noDias"
+            class="text-success mt-3"
+          >
+            <strong
+              >Día seleccionado: {{ getFormattedDate2(selectedDia) }}</strong
+            >
           </div>
           <ng-template #noDias>
             <div class="text-danger mt-3">
@@ -57,69 +82,147 @@
     <div class="col-md-6 d-flex justify-content-center scrollable-container">
       <nb-card class="w-100 me-3">
         <nb-card-header>
-          <span class="title">Empleados asignados a proyectos</span>
-          <input nbInput class="mt-3" fullWidth type="text" name="searchAssigned" placeholder="Buscar empleado asignado"
-            [(ngModel)]="searchAssigned" (input)="filterAssignedEmployees()" />
+          <div class="d-flex justify-content-between align-items-center">
+            <span class="title">Empleados asignados a proyectos</span>
+            <nb-checkbox
+              class="m-0"
+              [checked]="allAssignedSelected()"
+              (checkedChange)="toggleSelectAllAssigned($event)"
+            >
+            </nb-checkbox>
+          </div>
+          <nb-form-field class="mt-3">
+            <nb-icon nbPrefix icon="search-outline" pack="eva"></nb-icon>
+            <input
+              nbInput
+              fullWidth
+              type="text"
+              name="searchAssigned"
+              placeholder="Buscar empleado asignado"
+              [(ngModel)]="searchAssigned"
+              (input)="filterAssignedEmployees()"
+            />
+          </nb-form-field>
         </nb-card-header>
         <nb-card-body>
-
-
-
           <nb-list>
-            <nb-list-item *ngFor="let employee of filteredAssignedEmployees" class="d-flex align-items-center">
-              <nb-checkbox [(ngModel)]="employee.selected" class="me-2"></nb-checkbox>
-              <span>{{ employee.last_name }} {{ employee.middle_name }} {{ employee.first_name }}</span>
+            <nb-list-item
+              *ngFor="let employee of filteredAssignedEmployees"
+              class="d-flex align-items-center"
+            >
+              <nb-checkbox
+                [(ngModel)]="employee.selected"
+                class="me-2"
+              ></nb-checkbox>
+              <span
+                >{{ employee.last_name }} {{ employee.middle_name }}
+                {{ employee.first_name }}</span
+              >
             </nb-list-item>
           </nb-list>
-          <p *ngIf="filteredAssignedEmployees.length === 0" class="text-muted mt-3">
+          <p
+            *ngIf="filteredAssignedEmployees.length === 0"
+            class="text-muted mt-3"
+          >
             No hay empleados asignados a proyectos.
           </p>
         </nb-card-body>
         <!-- Footer con los botones -->
         <nb-card-footer class="button-container">
-          <button nbButton status="info" fullWidth style="margin-right: 10px;" (click)="changeHoursToSelected(true)">
-            <nb-icon icon="clock-outline"></nb-icon> Asignar Horas a Seleccionados
+          <button
+            nbButton
+            status="info"
+            fullWidth
+            style="margin-right: 10px"
+            (click)="changeHoursToSelected(true)"
+          >
+            <nb-icon icon="clock-outline"></nb-icon> Asignar Horas a
+            Seleccionados
           </button>
-          <button nbButton status="danger" fullWidth (click)="addIncidentToSelected(true)">
-            <nb-icon icon="alert-circle-outline"></nb-icon> Asignar Incidencia a Seleccionados
+          <button
+            nbButton
+            status="danger"
+            fullWidth
+            (click)="addIncidentToSelected(true)"
+          >
+            <nb-icon icon="alert-circle-outline"></nb-icon> Asignar Incidencia a
+            Seleccionados
           </button>
         </nb-card-footer>
       </nb-card>
     </div>
 
     <!-- Tarjeta: Empleados No Asignados -->
-    <div class="col-md-6 d-flex justify-content-center  scrollable-container">
+    <div class="col-md-6 d-flex justify-content-center scrollable-container">
       <nb-card class="w-100 ms-3">
         <nb-card-header>
-          <span class="title">Empleados no asignados a proyectos</span>
-          <input nbInput class="mt-3" fullWidth type="text" name="searchUnassigned"
-            placeholder="Buscar empleado no asignado" [(ngModel)]="searchUnassigned"
-            (input)="filterUnassignedEmployees()">
+          <div class="d-flex justify-content-between align-items-center">
+            <span class="title">Empleados no asignados a proyectos</span>
+            <nb-checkbox
+              class="m-0"
+              [checked]="allUnassignedSelected()"
+              (checkedChange)="toggleSelectAllUnassigned($event)"
+            >
+            </nb-checkbox>
+          </div>
+          <nb-form-field class="mt-3">
+            <nb-icon nbPrefix icon="search-outline" pack="eva"></nb-icon>
+            <input
+              nbInput
+              fullWidth
+              type="text"
+              name="searchUnassigned"
+              placeholder="Buscar empleado no asignado"
+              [(ngModel)]="searchUnassigned"
+              (input)="filterUnassignedEmployees()"
+            />
+          </nb-form-field>
         </nb-card-header>
         <nb-card-body>
-
           <nb-list>
-            <nb-list-item *ngFor="let employee of filteredUnassignedEmployees" class="d-flex align-items-center">
-              <nb-checkbox [(ngModel)]="employee.selected" class="me-2"></nb-checkbox>
-              <span>{{ employee.last_name }} {{ employee.middle_name }} {{ employee.first_name }}</span>
+            <nb-list-item
+              *ngFor="let employee of filteredUnassignedEmployees"
+              class="d-flex align-items-center"
+            >
+              <nb-checkbox
+                [(ngModel)]="employee.selected"
+                class="me-2"
+              ></nb-checkbox>
+              <span
+                >{{ employee.last_name }} {{ employee.middle_name }}
+                {{ employee.first_name }}</span
+              >
             </nb-list-item>
           </nb-list>
-          <p *ngIf="filteredUnassignedEmployees.length === 0" class="text-muted mt-3">
+          <p
+            *ngIf="filteredUnassignedEmployees.length === 0"
+            class="text-muted mt-3"
+          >
             No hay empleados no asignados a proyectos.
           </p>
-
         </nb-card-body>
         <nb-card-footer class="button-container">
-          <button nbButton status="info" fullWidth style="margin-right: 10px;" (click)="changeHoursToSelected(false)">
-            <nb-icon icon="clock-outline"></nb-icon> Asignar Horas a Seleccionados
+          <button
+            nbButton
+            status="info"
+            fullWidth
+            style="margin-right: 10px"
+            (click)="changeHoursToSelected(false)"
+          >
+            <nb-icon icon="clock-outline"></nb-icon> Asignar Horas a
+            Seleccionados
           </button>
-          <button nbButton status="danger" fullWidth (click)="addIncidentToSelected(false)">
-            <nb-icon icon="alert-circle-outline"></nb-icon> Asignar Incidencia a Seleccionados
+          <button
+            nbButton
+            status="danger"
+            fullWidth
+            (click)="addIncidentToSelected(false)"
+          >
+            <nb-icon icon="alert-circle-outline"></nb-icon> Asignar Incidencia a
+            Seleccionados
           </button>
         </nb-card-footer>
       </nb-card>
-
     </div>
   </div>
-
 </div>

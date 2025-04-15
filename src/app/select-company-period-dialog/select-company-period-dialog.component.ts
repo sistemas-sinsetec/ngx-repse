@@ -104,7 +104,9 @@ export class SelectCompanyPeriodDialogComponent implements OnInit {
         periodId: this.selectedPeriodId,
       });
 
-      window.location.reload();
+      this.router.navigateByUrl('/', { skipLocationChange: true }).then(() => {
+        this.router.navigate(['/pages/dashboard']);
+      });
     } else {
       alert('Por favor, selecciona una empresa y un período antes de confirmar.');
     }

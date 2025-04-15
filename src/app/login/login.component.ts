@@ -7,6 +7,7 @@ import { CompanyService } from '../services/company.service';  // <-- Importa tu
 import { PeriodService } from '../services/period.service'; // si lo necesitas
 import { SelectCompanyPeriodDialogComponent } from '../select-company-period-dialog/select-company-period-dialog.component'; 
 import { CustomToastrService } from '../services/custom-toastr.service';
+import { environment } from '../../environments/environment';
 
 @Component({
   selector: 'app-login',
@@ -60,7 +61,7 @@ export class LoginComponent implements OnInit {
     data.append('password', this.user.password);
 
     // Hacer la solicitud al backend
-    this.http.post('https://siinad.mx/php/login.php', data).subscribe(
+    this.http.post(`${environment.apiBaseUrl}/login.php`, data).subscribe(
       (response: any) => {
         this.submitted = false;
         if (response.success) {
