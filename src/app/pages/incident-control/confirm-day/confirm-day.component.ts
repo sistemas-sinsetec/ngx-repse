@@ -1,35 +1,43 @@
-import { Component, OnInit } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
-import { NbAlertModule, NbSpinnerService, NbDialogService } from '@nebular/theme';
-import { AuthService } from '../../../services/auth.service';
-import { CompanyService } from '../../../services/company.service';
-import { PeriodService } from '../../../services/period.service';
-import { CustomToastrService } from '../../../services/custom-toastr.service';
-import * as moment from 'moment';
-import { LoadingController, AlertController, NavController } from '@ionic/angular';
+import { Component, OnInit } from "@angular/core";
+import { HttpClient } from "@angular/common/http";
+import {
+  NbAlertModule,
+  NbSpinnerService,
+  NbDialogService,
+} from "@nebular/theme";
+import { AuthService } from "../../../services/auth.service";
+import { CompanyService } from "../../../services/company.service";
+import { PeriodService } from "../../../services/period.service";
+import { CustomToastrService } from "../../../services/custom-toastr.service";
+import * as moment from "moment";
+import "moment/locale/es-mx";
+import {
+  LoadingController,
+  AlertController,
+  NavController,
+} from "@ionic/angular";
 
 @Component({
-  selector: 'ngx-confirm-day',
-  templateUrl: './confirm-day.component.html',
-  styleUrls: ['./confirm-day.component.scss']
+  selector: "ngx-confirm-day",
+  templateUrl: "./confirm-day.component.html",
+  styleUrls: ["./confirm-day.component.scss"],
 })
 export class ConfirmDayComponent {
   diasSemana: any[] = [];
   filteredEmployees: any[] = [];
-  currentSemana: string = '';
-  periodStartDate: string = '';
-  periodEndDate: string = '';
+  currentSemana: string = "";
+  periodStartDate: string = "";
+  periodEndDate: string = "";
   selectedDia: any;
   empleadosDia: any[] = [];
   empleadosIncidencias: any[] = [];
-  currentPeriodId: string = '';
+  currentPeriodId: string = "";
   isWeekConfirmed: boolean = false;
-  currentFecha: string = '';
+  currentFecha: string = "";
 
   filteredEmpleadosDia: any[] = []; // Lista filtrada de empleados asignados
   filteredEmpleadosIncidencias: any[] = []; // Lista filtrada de empleados con incidencias
-  searchTerm: string = ''; // Término de búsqueda
-
+  searchTerm: string = ""; // Término de búsqueda
 
   restDays: string[] = []; // Días de descanso del periodo seleccionado
 
@@ -43,20 +51,20 @@ export class ConfirmDayComponent {
     private dialogService: NbDialogService,
     private toastrService: CustomToastrService,
     private loadingController: LoadingController,
-    private alertController: AlertController,
-    
-
+    private alertController: AlertController
   ) {
-    this.restDays = this.periodService.getSelectedPeriod()?.rest_days_position || [];
-   }
+    this.restDays =
+      this.periodService.getSelectedPeriod()?.rest_days_position || [];
+  }
 
   ngOnInit() {
+    moment.locale("es-mx");
     this.loadWeekData();
   }
 
   async loadWeekData() {
     const loading = await this.loadingController.create({
-      message: 'Cargando datos de la semana...',
+      message: "Cargando datos de la semana...",
     });
     await loading.present();
 
@@ -64,7 +72,7 @@ export class ConfirmDayComponent {
     const periodTypeId = this.periodService.selectedPeriod.id;
 
     if (!companyId || !periodTypeId) {
-      console.error('No se proporcionaron company_id o period_type_id');
+      console.error("No se proporcionaron company_id o period_type_id");
       loading.dismiss();
       return;
     }
@@ -94,13 +102,16 @@ export class ConfirmDayComponent {
 
           this.verificarConfirmacionSemana(companyId, this.currentPeriodId);
         } else {
-          console.error('No se encontraron días confirmados para la semana.');
-          this.toastrService.showWarning('No se encontraron días confirmados para la semana.', 'Aviso');
+          console.error("No se encontraron días confirmados para la semana.");
+          this.toastrService.showWarning(
+            "No se encontraron días confirmados para la semana.",
+            "Aviso"
+          );
         }
         loading.dismiss();
       },
       (error) => {
-        console.error('Error al cargar los datos de la semana', error);
+        console.error("Error al cargar los datos de la semana", error);
         loading.dismiss();
       }
     );
@@ -114,25 +125,16 @@ export class ConfirmDayComponent {
         this.isWeekConfirmed = response && response.length > 0;
       },
       (error) => {
-        console.error('Error al verificar la confirmación de la semana', error);
+        console.error("Error al verificar la confirmación de la semana", error);
       }
     );
   }
 
-
-
- 
-  
-  
-  
-
   async cargarEmpleadosDia(dia: any) {
-
     const loading = await this.loadingController.create({
-      message: 'Cargando empleados para el día seleccionado...',
+      message: "Cargando empleados para el día seleccionado...",
     });
     await loading.present();
-    
 
     // Limpiar listas de empleados asignados e incidencias antes de cargar los nuevos datos
     this.empleadosDia = []; // Lista de empleados asignados
@@ -153,9 +155,11 @@ export class ConfirmDayComponent {
         this.empleadosIncidencias = data.empleados_incidencias || [];
 
         // Crear una lista de empleados combinados
-        this.empleadosDia = this.empleadosDia.map(empAsignado => {
+        this.empleadosDia = this.empleadosDia.map((empAsignado) => {
           // Verificar si el empleado también tiene una incidencia
-          const incidencia = this.empleadosIncidencias.find(inc => inc.employee_id === empAsignado.employee_id);
+          const incidencia = this.empleadosIncidencias.find(
+            (inc) => inc.employee_id === empAsignado.employee_id
+          );
 
           // Si el empleado tiene una incidencia, combinar los datos
           if (incidencia) {
@@ -163,7 +167,7 @@ export class ConfirmDayComponent {
               ...empAsignado,
               incident_type: incidencia.incident_type,
               description: incidencia.description,
-              hasIncidencia: true // Bandera para indicar que tiene una incidencia
+              hasIncidencia: true, // Bandera para indicar que tiene una incidencia
             };
           }
 
@@ -173,21 +177,32 @@ export class ConfirmDayComponent {
 
         // Filtrar empleados con incidencias que no están en `empleadosDia`
         this.empleadosIncidencias = this.empleadosIncidencias.filter(
-          inc => !this.empleadosDia.some(emp => emp.employee_id === inc.employee_id)
+          (inc) =>
+            !this.empleadosDia.some(
+              (emp) => emp.employee_id === inc.employee_id
+            )
         );
 
         // Inicializar las listas filtradas con los datos recién cargados
         this.filteredEmpleadosDia = [...this.empleadosDia];
         this.filteredEmpleadosIncidencias = [...this.empleadosIncidencias];
 
-        if (this.empleadosDia.length === 0 && this.empleadosIncidencias.length === 0) {
-          console.error('No se encontraron empleados para el día seleccionado.');
+        if (
+          this.empleadosDia.length === 0 &&
+          this.empleadosIncidencias.length === 0
+        ) {
+          console.error(
+            "No se encontraron empleados para el día seleccionado."
+          );
         }
       } else {
-        console.error('No se encontraron empleados para el día seleccionado.');
+        console.error("No se encontraron empleados para el día seleccionado.");
       }
     } catch (error) {
-      console.error('Error al cargar los empleados para el día seleccionado', error);
+      console.error(
+        "Error al cargar los empleados para el día seleccionado",
+        error
+      );
     } finally {
       loading.dismiss();
     }
@@ -197,52 +212,66 @@ export class ConfirmDayComponent {
     const searchTermLower = this.searchTerm.toLowerCase();
 
     // Filtrar empleados asignados
-    this.filteredEmpleadosDia = this.empleadosDia.filter(emp =>
-      emp.employee_code.toLowerCase().includes(searchTermLower) ||
-      emp.first_name.toLowerCase().includes(searchTermLower) ||
-      emp.last_name.toLowerCase().includes(searchTermLower) ||
-      (emp.middle_name && emp.middle_name.toLowerCase().includes(searchTermLower))
+    this.filteredEmpleadosDia = this.empleadosDia.filter(
+      (emp) =>
+        emp.employee_code.toLowerCase().includes(searchTermLower) ||
+        emp.first_name.toLowerCase().includes(searchTermLower) ||
+        emp.last_name.toLowerCase().includes(searchTermLower) ||
+        (emp.middle_name &&
+          emp.middle_name.toLowerCase().includes(searchTermLower))
     );
 
     // Filtrar empleados con incidencias
-    this.filteredEmpleadosIncidencias = this.empleadosIncidencias.filter(emp =>
-      emp.employee_code.toLowerCase().includes(searchTermLower) ||
-      emp.first_name.toLowerCase().includes(searchTermLower) ||
-      emp.last_name.toLowerCase().includes(searchTermLower) ||
-      (emp.middle_name && emp.middle_name.toLowerCase().includes(searchTermLower))
+    this.filteredEmpleadosIncidencias = this.empleadosIncidencias.filter(
+      (emp) =>
+        emp.employee_code.toLowerCase().includes(searchTermLower) ||
+        emp.first_name.toLowerCase().includes(searchTermLower) ||
+        emp.last_name.toLowerCase().includes(searchTermLower) ||
+        (emp.middle_name &&
+          emp.middle_name.toLowerCase().includes(searchTermLower))
     );
   }
 
   async mostrarInfoDia(dia: any) {
     this.selectedDia = dia;
     await this.cargarEmpleadosDia(dia); // Cargar empleados del día
-  
+
     // Si es día de descanso pero tiene empleados asignados, permitir confirmar
-    if (dia.isRestDay && (this.empleadosDia.length > 0 || this.empleadosIncidencias.length > 0)) {
+    if (
+      dia.isRestDay &&
+      (this.empleadosDia.length > 0 || this.empleadosIncidencias.length > 0)
+    ) {
       this.toastrService.showWarning(
-        'Este es un día de descanso, pero hay empleados asignados.',
+        "Este es un día de descanso, pero hay empleados asignados.",
         `Información del Día: ${dia.date}`
       );
     }
     // Si no hay empleados, mostrar mensaje normal
-    else if (this.empleadosDia.length === 0 && this.empleadosIncidencias.length === 0) {
+    else if (
+      this.empleadosDia.length === 0 &&
+      this.empleadosIncidencias.length === 0
+    ) {
       this.toastrService.showInfo(
-        'No hay empleados asignados ni con incidencias para este día.',
+        "No hay empleados asignados ni con incidencias para este día.",
         `Información del Día: ${dia.date}`
       );
     }
   }
 
   async confirmarDia(dia: any) {
-    if (dia.isRestDay && this.empleadosDia.length === 0 && this.empleadosIncidencias.length === 0) {
+    if (
+      dia.isRestDay &&
+      this.empleadosDia.length === 0 &&
+      this.empleadosIncidencias.length === 0
+    ) {
       this.toastrService.showWarning(
-        'No se puede confirmar un día de descanso sin empleados asignados.',
-        'Advertencia'
+        "No se puede confirmar un día de descanso sin empleados asignados.",
+        "Advertencia"
       );
       return;
     }
     const loading = await this.loadingController.create({
-      message: 'Confirmando día...',
+      message: "Confirmando día...",
     });
     await loading.present();
 
@@ -252,8 +281,8 @@ export class ConfirmDayComponent {
       period_type_id: this.periodService.selectedPeriod.id, // Asegúrate de que esto esté disponible
       day_of_week: dia.date, // Suponiendo que `dia.date` es el día de la semana
       week_number: this.currentSemana, // Asegúrate de que esto esté disponible
-      confirmation_date: new Date().toISOString().split('T')[0], // La fecha de confirmación
-      status: 'confirmed' // O cualquier estado que necesites
+      confirmation_date: new Date().toISOString().split("T")[0], // La fecha de confirmación
+      status: "confirmed", // O cualquier estado que necesites
     };
 
     const url = `https://siinad.mx/php/confirm-day.php`;
@@ -261,18 +290,28 @@ export class ConfirmDayComponent {
     this.http.post(url, body).subscribe(
       async (response: any) => {
         if (response && response.success) {
-          console.log('Día confirmado correctamente');
-          await this.mostrarAlerta('Día confirmado', `El día ${dia.date} se ha confirmado exitosamente.`);
-          dia.status = 'confirmed';
+          console.log("Día confirmado correctamente");
+          await this.mostrarAlerta(
+            "Día confirmado",
+            `El día ${dia.date} se ha confirmado exitosamente.`
+          );
+          dia.status = "confirmed";
         } else {
-          console.error('Error al confirmar el día:', response.error);
-          await this.mostrarAlerta('Error', response.error || 'Hubo un problema al confirmar el día. Inténtalo de nuevo.');
+          console.error("Error al confirmar el día:", response.error);
+          await this.mostrarAlerta(
+            "Error",
+            response.error ||
+              "Hubo un problema al confirmar el día. Inténtalo de nuevo."
+          );
         }
         loading.dismiss();
       },
       async (error) => {
-        console.error('Error en la solicitud de confirmación del día:', error);
-        await this.mostrarAlerta('Error', 'Hubo un problema al conectar con el servidor. Inténtalo de nuevo.');
+        console.error("Error en la solicitud de confirmación del día:", error);
+        await this.mostrarAlerta(
+          "Error",
+          "Hubo un problema al conectar con el servidor. Inténtalo de nuevo."
+        );
         loading.dismiss();
       }
     );
@@ -282,52 +321,80 @@ export class ConfirmDayComponent {
     const alert = await this.alertController.create({
       header,
       message,
-      buttons: ['OK']
+      buttons: ["OK"],
     });
     await alert.present();
   }
 
-
   async eliminarEmpleadoDelDia(employeeId: string) {
     const alert = await this.alertController.create({
-      header: 'Confirmar eliminación',
-      message: '¿Estás seguro de que deseas eliminar este empleado asignado del día y su incidencia (si existe)?',
+      header: "Confirmar eliminación",
+      message:
+        "¿Estás seguro de que deseas eliminar este empleado asignado del día y su incidencia (si existe)?",
       buttons: [
         {
-          text: 'Cancelar',
-          role: 'cancel',
+          text: "Cancelar",
+          role: "cancel",
         },
         {
-          text: 'Eliminar',
+          text: "Eliminar",
           handler: async () => {
             const loading = await this.loadingController.create({
-              message: 'Eliminando empleado asignado...',
+              message: "Eliminando empleado asignado...",
             });
             await loading.present();
-  
+
             const url = `https://siinad.mx/php/delete-employee-assignment-incident.php`;
-            const body = { employee_id: employeeId, date: this.selectedDia.date };
-  
+            const body = {
+              employee_id: employeeId,
+              date: this.selectedDia.date,
+            };
+
             this.http.post(url, body).subscribe(
               async (response: any) => {
                 if (response && response.success) {
                   // Actualizar las listas eliminando el empleado correspondiente
-                  this.empleadosDia = this.empleadosDia.filter(emp => emp.employee_id !== employeeId);
-                  this.filteredEmpleadosDia = this.filteredEmpleadosDia.filter(emp => emp.employee_id !== employeeId);
-  
-                  this.empleadosIncidencias = this.empleadosIncidencias.filter(emp => emp.employee_id !== employeeId);
-                  this.filteredEmpleadosIncidencias = this.filteredEmpleadosIncidencias.filter(emp => emp.employee_id !== employeeId);
-  
-                  await this.mostrarAlerta('Eliminado', 'El empleado y su incidencia han sido eliminados correctamente.');
+                  this.empleadosDia = this.empleadosDia.filter(
+                    (emp) => emp.employee_id !== employeeId
+                  );
+                  this.filteredEmpleadosDia = this.filteredEmpleadosDia.filter(
+                    (emp) => emp.employee_id !== employeeId
+                  );
+
+                  this.empleadosIncidencias = this.empleadosIncidencias.filter(
+                    (emp) => emp.employee_id !== employeeId
+                  );
+                  this.filteredEmpleadosIncidencias =
+                    this.filteredEmpleadosIncidencias.filter(
+                      (emp) => emp.employee_id !== employeeId
+                    );
+
+                  await this.mostrarAlerta(
+                    "Eliminado",
+                    "El empleado y su incidencia han sido eliminados correctamente."
+                  );
                 } else {
-                  console.error('Error al eliminar el empleado:', response.error);
-                  await this.mostrarAlerta('Error', response.error || 'Hubo un problema al eliminar el empleado.');
+                  console.error(
+                    "Error al eliminar el empleado:",
+                    response.error
+                  );
+                  await this.mostrarAlerta(
+                    "Error",
+                    response.error ||
+                      "Hubo un problema al eliminar el empleado."
+                  );
                 }
                 loading.dismiss();
               },
               async (error) => {
-                console.error('Error en la solicitud de eliminación del empleado:', error);
-                await this.mostrarAlerta('Error', 'Hubo un problema al conectar con el servidor. Inténtalo de nuevo.');
+                console.error(
+                  "Error en la solicitud de eliminación del empleado:",
+                  error
+                );
+                await this.mostrarAlerta(
+                  "Error",
+                  "Hubo un problema al conectar con el servidor. Inténtalo de nuevo."
+                );
                 loading.dismiss();
               }
             );
@@ -335,16 +402,26 @@ export class ConfirmDayComponent {
         },
       ],
     });
-  
+
     await alert.present();
   }
 
-canConfirmDay(dia: any): boolean {
-  // Permitir confirmar si hay empleados, aunque sea día de descanso
-  return (this.empleadosDia.length > 0 || this.empleadosIncidencias.length > 0);
-}
+  canConfirmDay(dia: any): boolean {
+    // Permitir confirmar si hay empleados, aunque sea día de descanso
+    return this.empleadosDia.length > 0 || this.empleadosIncidencias.length > 0;
+  }
 
+  // Mostrar periodStartDate formateado
+  get formattedPeriodStartDate(): string {
+    return this.periodStartDate
+      ? moment(this.periodStartDate).format("LL")
+      : "No disponible";
+  }
 
-  
-
+  // Mostrar periodEndDate formateado
+  get formattedPeriodEndDate(): string {
+    return this.periodEndDate
+      ? moment(this.periodEndDate).format("LL")
+      : "No disponible";
+  }
 }
