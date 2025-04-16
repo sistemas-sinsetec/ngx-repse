@@ -2,8 +2,8 @@
 .day-box-wrapper {
   display: flex;
   flex-direction: column; /* Que la letra quede arriba y la caja abajo */
-  align-items: center;    /* Centrado en columna */
-  margin: 5px;            /* Separa cada wrapper entre sí */
+  align-items: center; /* Centrado en columna */
+  margin: 5px; /* Separa cada wrapper entre sí */
 }
 
 /* Para la letra del día (L, M, X, etc.) */
@@ -35,31 +35,34 @@
 
 /* Día confirmado */
 .day-box.confirmed {
-  background-color: #4caf50; 
+  background-color: #4caf50;
   color: white;
+  &:hover {
+    background-color: #349237;
+  }
 }
 
 /* Día pendiente */
 .day-box.pending {
-  background-color: #ff9800; 
+  background-color: #ff9800;
   color: black;
+  &:hover {
+    background-color: #db8400;
+  }
 }
 
 /* Día de descanso */
 .day-box.rest-day {
   background-color: #ff3b3b;
   color: black;
-}
-
-/* Hover en día */
-.day-box:hover {
-  background-color: #81c784; 
+  &:hover {
+    background-color: #d12121;
+  }
 }
 
 .scrollable-container {
   max-height: 500px; /* Altura máxima del contenedor */
   overflow-y: auto; /* Habilita el scroll vertical */
- 
+
   padding: 8px; /* Espaciado interno */
 }
-

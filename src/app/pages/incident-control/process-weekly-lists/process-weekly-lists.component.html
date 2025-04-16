@@ -1,20 +1,30 @@
 <div class="container mt-4">
   <!-- Selector de Semana Confirmada -->
-  <nb-card class="m-2 p-4 ">
+  <nb-card class="m-2 p-4">
     <nb-card-header>
       <span class="title">Semanas Procesadas</span>
     </nb-card-header>
 
-    <div class="mb-4">
-      <label class="m-2">Seleccionar Semana Confirmada</label>
-      <div class="row">
+    <div>
+      <div class="row mt-3">
         <!-- Selector de Semana Confirmada -->
-        <div class="col-md-8 col-sm-12">
-          <nb-select [(selected)]="selectedWeek" (selectedChange)="onWeekChange($event)">
+        <div class="col-md-8 col-sm-12 mb-3 mb-sm-3">
+          <nb-select
+            [(selected)]="selectedWeek"
+            (selectedChange)="onWeekChange($event)"
+            placeholder="Seleccionar semana confirmada"
+            class="full-width"
+          >
             <nb-option *ngFor="let week of confirmedWeeks" [value]="week">
               Semana {{ week.week_number }}
-              <span *ngIf="week?.payroll_period?.start_date && week?.payroll_period?.end_date">
-                ({{ week.payroll_period.start_date }} - {{ week.payroll_period.end_date }})
+              <span
+                *ngIf="
+                  week?.payroll_period?.start_date &&
+                  week?.payroll_period?.end_date
+                "
+              >
+                ({{ week.payroll_period.start_date }} -
+                {{ week.payroll_period.end_date }})
               </span>
             </nb-option>
           </nb-select>
@@ -22,8 +32,14 @@
 
         <!-- Botón para ver Listas Semanales Procesadas -->
         <div class="col-md-4 col-sm-12 button-col">
-          <button nbButton status="info" fullWidth (click)="openProcessedListsModal()">Listas Semanales
-            Procesadas</button>
+          <button
+            nbButton
+            status="info"
+            fullWidth
+            (click)="openProcessedListsModal()"
+          >
+            Listas Semanales Procesadas
+          </button>
         </div>
       </div>
     </div>
@@ -31,8 +47,10 @@
     <!-- Tabla de Asistencia de la Semana Confirmada -->
     <div class="table-responsive mt-4" *ngIf="selectedWeek">
       <h5 class="text-center">
-        Lista de Asistencia de la Semana {{ selectedWeek.week_number }}
-        ({{ selectedWeek.payroll_period?.start_date }} - {{ selectedWeek.payroll_period?.end_date }})
+        Lista de Asistencia de la Semana {{ selectedWeek.week_number }} ({{
+          selectedWeek.payroll_period?.start_date
+        }}
+        - {{ selectedWeek.payroll_period?.end_date }})
       </h5>
       <table class="table table-bordered table-striped table-hover">
         <thead class="table-primary">
@@ -40,7 +58,9 @@
             <th rowspan="2" class="text-center align-middle">Código</th>
             <th rowspan="2" class="text-center align-middle">Empleado</th>
             <ng-container *ngFor="let dia of diasSemana">
-              <th colspan="8" class="text-center">{{ dia.display }} ({{ dia.date | date: 'dd/MM/yyyy' }})</th>
+              <th colspan="8" class="text-center">
+                {{ dia.display }} ({{ dia.date | date : "dd/MM/yyyy" }})
+              </th>
             </ng-container>
           </tr>
           <tr>
@@ -58,33 +78,58 @@
         </thead>
         <tbody>
           <tr *ngFor="let emp of empleadosSemana">
-            <td class="text-center">{{ emp.employee_code || 'N/A' }}</td>
-            <td>{{ emp.first_name || '' }} {{ emp.middle_name || '' }} {{ emp.last_name || '' }}</td>
+            <td class="text-center">{{ emp.employee_code || "N/A" }}</td>
+            <td>
+              {{ emp.first_name || "" }} {{ emp.middle_name || "" }}
+              {{ emp.last_name || "" }}
+            </td>
             <ng-container *ngFor="let dia of diasSemana">
-              <td class="text-center">{{ formatHour(emp.work_hours?.[dia.date]?.entry_time) || '--:--' }}</td>
-              <td class="text-center">{{ formatHour(emp.work_hours?.[dia.date]?.lunch_start_time) || '--:--' }}</td>
-              <td class="text-center">{{ formatHour(emp.work_hours?.[dia.date]?.lunch_end_time) || '--:--' }}</td>
-              <td class="text-center">{{ formatHour(emp.work_hours?.[dia.date]?.second_lunch_start_time) || '--:--' }}
+              <td class="text-center">
+                {{ formatHour(emp.work_hours?.[dia.date]?.entry_time) || '--:--' }}
               </td>
-              <td class="text-center">{{ formatHour(emp.work_hours?.[dia.date]?.second_lunch_end_time) || '--:--' }}
+              <td class="text-center">
+                {{ formatHour(emp.work_hours?.[dia.date]?.lunch_start_time) || '--:--' }}
               </td>
-              <td class="text-center">{{ formatHour(emp.work_hours?.[dia.date]?.exit_time) || '--:--' }}</td>
-              <td class="text-center">{{ emp.work_hours?.[dia.date]?.incident || 'N/A' }}</td>
-              <td>{{ emp.work_hours?.[dia.date]?.project_name || 'No Asignado' }}</td>
+              <td class="text-center">
+                {{ formatHour(emp.work_hours?.[dia.date]?.lunch_end_time) || '--:--' }}
+              </td>
+              <td class="text-center">
+                {{ formatHour(emp.work_hours?.[dia.date]?.second_lunch_start_time) || '--:--' }}
+              </td>
+              <td class="text-center">
+                {{ formatHour(emp.work_hours?.[dia.date]?.second_lunch_end_time) || '--:--' }}
+              </td>
+              <td class="text-center">
+                {{ formatHour(emp.work_hours?.[dia.date]?.exit_time) || '--:--' }}
+              </td>
+              <td class="text-center">
+                {{ emp.work_hours?.[dia.date]?.incident || 'N/A' }}
+              </td>
+              <td>
+                {{ emp.work_hours?.[dia.date]?.project_name || 'No Asignado' }}
+              </td>
             </ng-container>
           </tr>
         </tbody>
       </table>
-      <div class="text-center mt-4">
-        <button nbButton status="primary" [disabled]="isButtonDisabled" (click)="processSelectedWeek()">
+      <div class="row pl-0 pl-sm-4">
+        <button
+          nbButton
+          status="primary"
+          [disabled]="isButtonDisabled"
+          (click)="processSelectedWeek()"
+          class="mr-2"
+        >
           Procesar Semana
         </button>
-        <button nbButton status="danger" size="small"
-          (click)="deshacerConfirmacionSemanal()" >
+        <button
+          nbButton
+          status="danger"
+          (click)="deshacerConfirmacionSemanal()"
+        >
           Deshacer Confirmación Semanal
         </button>
       </div>
-
     </div>
   </nb-card>
 </div>

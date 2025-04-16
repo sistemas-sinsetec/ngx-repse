@@ -1,7 +1,7 @@
 <div class="row">
   <!-- Columna izquierda para mostrar información de la semana -->
   <div class="col-lg-4 col-md-5">
-    <nb-card class="p-3 mb-4">
+    <nb-card>
       <nb-card-header class="card-title">
         <span class="title">Resumen de la semana</span>
       </nb-card-header>
@@ -53,45 +53,108 @@
   <!-- Columna derecha con detalles de empleados por día -->
   <div class="col-lg-8 col-md-7">
     <nb-card class="p-3 mb-4">
-      <nb-card-header class="card-title">
+      <nb-card-header class="px-0 pt-0 px-sm-3 pt-sm-2">
         <span class="title">Confirmar día </span>
       </nb-card-header>
-      <input
-        nbInput
-        fullWidth
-        type="text"
-        placeholder="Buscar empleados..."
-        [(ngModel)]="searchTerm"
-        (input)="filterEmployees()"
-        class="form-control mb-3"
-      />
 
       <div class="row g-3">
         <!-- Contenedor flex -->
+        <div class="col-12 d-flex justify-content-center mb-3 mt-4">
+          <div class="w-100">
+            <div class="row">
+              <!-- Búsqueda por nombre/código -->
+              <div class="col-12 mb-3">
+                <nb-form-field>
+                  <nb-icon nbPrefix icon="search-outline" pack="eva"></nb-icon>
+                  <input
+                    type="text"
+                    class="form-control"
+                    [(ngModel)]="searchTerm"
+                    (input)="filterEmployees()"
+                    fullWidth
+                    nbInput
+                    placeholder="Buscar empleados..."
+                  />
+                </nb-form-field>
+              </div>
+              <!-- Filtro por proyecto -->
+              <div class="col-12 col-md-5 mb-3 mb-md-0">
+                <nb-select
+                  [(selected)]="projectFilter"
+                  (selectedChange)="filterEmployees()"
+                  placeholder="Filtrar por obra"
+                  fullWidth
+                >
+                  <nb-option
+                    *ngFor="let project of availableProjects"
+                    [value]="project"
+                  >
+                    {{ project }}
+                  </nb-option>
+                </nb-select>
+              </div>
+
+              <!-- Filtro por tipo de incidencia -->
+              <div class="col-12 col-md-5 mb-3 mb-md-0">
+                <nb-select
+                  [(selected)]="incidentFilter"
+                  (selectedChange)="filterEmployees()"
+                  placeholder="Filtrar por incidencia"
+                  fullWidth
+                >
+                  <nb-option
+                    *ngFor="let incident of availableIncidents"
+                    [value]="incident"
+                  >
+                    {{ incident }}
+                  </nb-option>
+                </nb-select>
+              </div>
+
+              <!-- Botón para resetear filtros -->
+              <div class="col-12 col-md-2">
+                <button
+                  nbButton
+                  outline
+                  status="basic"
+                  size="small"
+                  (click)="resetFilters()"
+                  fullWidth
+                  class="h-100"
+                >
+                  <nb-icon icon="refresh"></nb-icon>
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
         <!-- Primera card -->
         <div class="col-12 col-lg-6">
           <!-- Lista de Empleados Asignados -->
-          <nb-card class="p-4 mb-4">
+          <nb-card accent="primary">
             <nb-card-header>
-              <p>Empleados asignados para el día seleccionado</p>
+              <p class="m-0">Empleados asignados para el día seleccionado</p>
             </nb-card-header>
 
             <nb-card-body>
               <nb-list>
-                <nb-list-item *ngFor="let emp of filteredEmpleadosDia">
+                <nb-list-item
+                  *ngFor="let emp of filteredEmpleadosDia"
+                  class="p-0"
+                >
                   <div
-                    class="d-flex justify-content-between align-items-center"
+                    class="d-flex flex-column justify-content-between align-items-center w-100"
                   >
-                    <div>
-                      <h6 class="fw-bold">
+                    <div class="w-100">
+                      <h6 class="font-weight-bold">
                         {{ emp.employee_code }} - {{ emp.first_name }}
                         {{ emp.last_name }} {{ emp.middle_name }}
                       </h6>
-                      <p>
-                        <small>Obra: {{ emp.project_name }}</small>
+                      <p class="m-0">
+                        <small><b>Obra:</b> {{ emp.project_name }}</small>
                       </p>
                       <p>
-                        <small>Estado: {{ emp.project_status }}</small>
+                        <small><b>Estado:</b> {{ emp.project_status }}</small>
                       </p>
 
                       <!-- Mostrar información de incidencia si existe -->
@@ -116,6 +179,7 @@
                       class="ms-3"
                       [disabled]="selectedDia?.status === 'confirmed'"
                       (click)="eliminarEmpleadoDelDia(emp.employee_id)"
+                      class="mb-3"
                     >
                       Eliminar
                     </button>
@@ -129,39 +193,43 @@
           <!-- Lista de Empleados solo con Incidencias (sin asignación) -->
           <nb-card
             *ngIf="filteredEmpleadosIncidencias.length > 0"
-            class="p-4 mb-4"
+            accent="info"
           >
             <nb-card-header>
-              <p>
+              <p class="m-0">
                 Empleados con incidencias para el día seleccionado (sin
                 asignación)
               </p>
             </nb-card-header>
             <nb-card-body>
               <nb-list>
-                <nb-list-item *ngFor="let emp of filteredEmpleadosIncidencias">
+                <nb-list-item
+                  *ngFor="let emp of filteredEmpleadosIncidencias"
+                  class="p-0"
+                >
                   <div
-                    class="d-flex justify-content-between align-items-center"
+                    class="d-flex flex-column justify-content-between align-items-center w-100"
                   >
-                    <div>
-                      <h6 class="fw-bold">
+                    <div class="w-100">
+                      <h6 class="font-weight-bold">
                         {{ emp.employee_code }} - {{ emp.first_name }}
                         {{ emp.last_name }} {{ emp.middle_name }}
                       </h6>
-                      <p>
+                      <p class="m-0">
                         <small
-                          >Tipo de Incidencia:
+                          ><b>Tipo de Incidencia:</b>
                           {{ emp.incident_type || "N/A" }}</small
                         >
                       </p>
-                      <p>
+                      <p class="m-0">
                         <small
-                          >Descripción: {{ emp.description || "N/A" }}</small
+                          ><b>Descripción:</b>
+                          {{ emp.description || "N/A" }}</small
                         >
                       </p>
                       <p>
                         <small
-                          >Fecha:
+                          ><b>Fecha:</b>
                           {{ emp.created_at | date : "dd/MM/yyyy" }}</small
                         >
                       </p>
@@ -170,7 +238,7 @@
                       nbButton
                       status="danger"
                       size="small"
-                      class="ms-3"
+                      class="mb-3"
                       [disabled]="selectedDia?.status === 'confirmed'"
                       (click)="eliminarEmpleadoDelDia(emp.employee_id)"
                     >
@@ -184,7 +252,7 @@
         </div>
       </div>
 
-      <div class="d-flex justify-content-end mt-3">
+      <div class="d-flex justify-content-end">
         <button
           nbButton
           status="primary"

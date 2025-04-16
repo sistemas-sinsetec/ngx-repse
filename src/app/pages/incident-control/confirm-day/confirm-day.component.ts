@@ -39,6 +39,11 @@ export class ConfirmDayComponent {
   filteredEmpleadosIncidencias: any[] = []; // Lista filtrada de empleados con incidencias
   searchTerm: string = ""; // Término de búsqueda
 
+  projectFilter: string = "";
+  incidentFilter: string = "";
+  availableProjects: string[] = [];
+  availableIncidents: string[] = [];
+
   restDays: string[] = []; // Días de descanso del periodo seleccionado
 
   constructor(
@@ -195,6 +200,7 @@ export class ConfirmDayComponent {
             "No se encontraron empleados para el día seleccionado."
           );
         }
+        this.extractFilterOptions();
       } else {
         console.error("No se encontraron empleados para el día seleccionado.");
       }
@@ -210,26 +216,81 @@ export class ConfirmDayComponent {
 
   filterEmployees() {
     const searchTermLower = this.searchTerm.toLowerCase();
+    const projectFilterLower = this.projectFilter.toLowerCase();
+    const incidentFilterLower = this.incidentFilter.toLowerCase();
 
     // Filtrar empleados asignados
-    this.filteredEmpleadosDia = this.empleadosDia.filter(
-      (emp) =>
+    this.filteredEmpleadosDia = this.empleadosDia.filter((emp) => {
+      const matchesSearch =
         emp.employee_code.toLowerCase().includes(searchTermLower) ||
         emp.first_name.toLowerCase().includes(searchTermLower) ||
         emp.last_name.toLowerCase().includes(searchTermLower) ||
         (emp.middle_name &&
-          emp.middle_name.toLowerCase().includes(searchTermLower))
-    );
+          emp.middle_name.toLowerCase().includes(searchTermLower));
+
+      const matchesProject =
+        !this.projectFilter ||
+        (emp.project_name &&
+          emp.project_name.toLowerCase().includes(projectFilterLower));
+
+      const matchesIncident =
+        !this.incidentFilter ||
+        (emp.incident_type &&
+          emp.incident_type.toLowerCase().includes(incidentFilterLower));
+
+      return matchesSearch && matchesProject && matchesIncident;
+    });
 
     // Filtrar empleados con incidencias
     this.filteredEmpleadosIncidencias = this.empleadosIncidencias.filter(
-      (emp) =>
-        emp.employee_code.toLowerCase().includes(searchTermLower) ||
-        emp.first_name.toLowerCase().includes(searchTermLower) ||
-        emp.last_name.toLowerCase().includes(searchTermLower) ||
-        (emp.middle_name &&
-          emp.middle_name.toLowerCase().includes(searchTermLower))
+      (emp) => {
+        const matchesSearch =
+          emp.employee_code.toLowerCase().includes(searchTermLower) ||
+          emp.first_name.toLowerCase().includes(searchTermLower) ||
+          emp.last_name.toLowerCase().includes(searchTermLower) ||
+          (emp.middle_name &&
+            emp.middle_name.toLowerCase().includes(searchTermLower));
+
+        const matchesProject =
+          !this.projectFilter ||
+          (emp.project_name &&
+            emp.project_name.toLowerCase().includes(projectFilterLower));
+
+        const matchesIncident =
+          !this.incidentFilter ||
+          (emp.incident_type &&
+            emp.incident_type.toLowerCase().includes(incidentFilterLower));
+
+        return matchesSearch && matchesProject && matchesIncident;
+      }
     );
+  }
+
+  private extractFilterOptions() {
+    // Proyectos únicos
+    this.availableProjects = [
+      ...new Set(
+        [...this.empleadosDia, ...this.empleadosIncidencias]
+          .map((emp) => emp.project_name)
+          .filter((name) => name)
+      ),
+    ].sort();
+
+    // Tipos de incidencia únicos
+    this.availableIncidents = [
+      ...new Set(
+        [...this.empleadosDia, ...this.empleadosIncidencias]
+          .map((emp) => emp.incident_type)
+          .filter((type) => type)
+      ),
+    ].sort();
+  }
+
+  resetFilters() {
+    this.searchTerm = "";
+    this.projectFilter = "";
+    this.incidentFilter = "";
+    this.filterEmployees();
   }
 
   async mostrarInfoDia(dia: any) {
