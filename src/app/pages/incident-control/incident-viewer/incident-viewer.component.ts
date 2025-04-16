@@ -164,6 +164,9 @@ export class IncidentViewerComponent implements OnInit {
 
     this.selectedDia = ""; // Reinicia el día seleccionado
 
+    this.searchAssigned = "";
+    this.searchUnassigned = "";
+
     console.log("Semana seleccionada:", this.selectedWeek);
     console.log("Días generados:", this.diasSemana);
   }
@@ -200,6 +203,8 @@ export class IncidentViewerComponent implements OnInit {
 
   onDiaChange(dia: string): void {
     this.selectedDia = dia; // Actualizar el día seleccionado
+    this.searchAssigned = "";
+    this.searchUnassigned = "";
     this.loadEmployees(); // Recargar los empleados asignados y no asignados para el día seleccionado
   }
 
