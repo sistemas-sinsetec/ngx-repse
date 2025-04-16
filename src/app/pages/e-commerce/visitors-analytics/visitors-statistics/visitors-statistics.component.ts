@@ -1,57 +1,60 @@
-import { AfterViewInit, Component, Input, OnDestroy } from '@angular/core';
-import { NbThemeService } from '@nebular/theme';
-import { delay, takeWhile } from 'rxjs/operators';
-import { LayoutService } from '../../../../@core/utils/layout.service';
-
+import { AfterViewInit, Component, Input, OnDestroy } from "@angular/core";
+import { NbThemeService } from "@nebular/theme";
+import { delay, takeWhile } from "rxjs/operators";
+import { LayoutService } from "../../../../@core/utils/layout.service";
+import { NgxLegendItemColor } from "../../legend-chart/enum.legend-item-color";
 
 @Component({
-  selector: 'ngx-visitors-statistics',
-  styleUrls: ['./visitors-statistics.component.scss'],
-  templateUrl: './visitors-statistics.component.html',
+  selector: "ngx-visitors-statistics",
+  styleUrls: ["./visitors-statistics.component.scss"],
+  templateUrl: "./visitors-statistics.component.html",
 })
-export class ECommerceVisitorsStatisticsComponent implements AfterViewInit, OnDestroy {
-
+export class ECommerceVisitorsStatisticsComponent
+  implements AfterViewInit, OnDestroy
+{
   private alive = true;
 
   @Input() value: number;
 
   option: any = {};
-  chartLegend: { iconColor: string; title: string }[];
+  chartLegend: { iconColor: NgxLegendItemColor; title: string }[];
   echartsIntance: any;
 
-  constructor(private theme: NbThemeService,
-              private layoutService: LayoutService) {
-    this.layoutService.onSafeChangeLayoutSize()
-      .pipe(
-        takeWhile(() => this.alive),
-      )
+  constructor(
+    private theme: NbThemeService,
+    private layoutService: LayoutService
+  ) {
+    this.layoutService
+      .onSafeChangeLayoutSize()
+      .pipe(takeWhile(() => this.alive))
       .subscribe(() => this.resizeChart());
   }
 
   ngAfterViewInit() {
-    this.theme.getJsTheme()
+    this.theme
+      .getJsTheme()
       .pipe(
         takeWhile(() => this.alive),
-        delay(1),
+        delay(1)
       )
-      .subscribe(config => {
+      .subscribe((config) => {
         const variables: any = config.variables;
         const visitorsPieLegend: any = config.variables.visitorsPieLegend;
 
         this.setOptions(variables);
         this.setLegendItems(visitorsPieLegend);
-    });
+      });
   }
 
   setLegendItems(visitorsPieLegend) {
     this.chartLegend = [
       {
         iconColor: visitorsPieLegend.firstSection,
-        title: 'New Visitors',
+        title: "New Visitors",
       },
       {
         iconColor: visitorsPieLegend.secondSection,
-        title: 'Return Visitors',
+        title: "Return Visitors",
       },
     ];
   }
@@ -61,29 +64,29 @@ export class ECommerceVisitorsStatisticsComponent implements AfterViewInit, OnDe
 
     this.option = {
       tooltip: {
-        trigger: 'item',
-        formatter: '',
+        trigger: "item",
+        formatter: "",
       },
       series: [
         {
-          name: ' ',
+          name: " ",
           clockWise: true,
           hoverAnimation: false,
-          type: 'pie',
-          center: ['50%', '50%'],
+          type: "pie",
+          center: ["50%", "50%"],
           radius: visitorsPie.firstPieRadius,
           data: [
             {
               value: this.value,
-              name: ' ',
+              name: " ",
               label: {
                 normal: {
-                  position: 'center',
-                  formatter: '',
+                  position: "center",
+                  formatter: "",
                   textStyle: {
-                    fontSize: '22',
+                    fontSize: "22",
                     fontFamily: variables.fontSecondary,
-                    fontWeight: '600',
+                    fontWeight: "600",
                     color: variables.fgHeading,
                   },
                 },
@@ -113,13 +116,13 @@ export class ECommerceVisitorsStatisticsComponent implements AfterViewInit, OnDe
             },
             {
               value: 100 - this.value,
-              name: ' ',
+              name: " ",
               tooltip: {
                 show: false,
               },
               label: {
                 normal: {
-                  position: 'inner',
+                  position: "inner",
                 },
               },
               itemStyle: {
@@ -131,24 +134,24 @@ export class ECommerceVisitorsStatisticsComponent implements AfterViewInit, OnDe
           ],
         },
         {
-          name: ' ',
+          name: " ",
           clockWise: true,
           hoverAnimation: false,
-          type: 'pie',
-          center: ['50%', '50%'],
+          type: "pie",
+          center: ["50%", "50%"],
           radius: visitorsPie.secondPieRadius,
           data: [
             {
               value: this.value,
-              name: ' ',
+              name: " ",
               label: {
                 normal: {
-                  position: 'center',
-                  formatter: '',
+                  position: "center",
+                  formatter: "",
                   textStyle: {
-                    fontSize: '22',
+                    fontSize: "22",
                     fontFamily: variables.fontSecondary,
-                    fontWeight: '600',
+                    fontWeight: "600",
                     color: variables.fgHeading,
                   },
                 },
@@ -165,13 +168,13 @@ export class ECommerceVisitorsStatisticsComponent implements AfterViewInit, OnDe
             },
             {
               value: 100 - this.value,
-              name: ' ',
+              name: " ",
               tooltip: {
                 show: false,
               },
               label: {
                 normal: {
-                  position: 'inner',
+                  position: "inner",
                 },
               },
               itemStyle: {

@@ -1,22 +1,29 @@
-import { Component, ElementRef, EventEmitter, Output, ViewChild } from '@angular/core';
+import {
+  Component,
+  ElementRef,
+  EventEmitter,
+  Output,
+  ViewChild,
+} from "@angular/core";
 
 @Component({
-  selector: 'ngx-search-input',
-  styleUrls: ['./search-input.component.scss'],
+  selector: "ngx-search-input",
+  styleUrls: ["./search-input.component.scss"],
   template: `
-    <i class="control-icon ion ion-ios-search"
-       (click)="showInput()"></i>
-    <input placeholder="Type your search request here..."
-           #input
-           [class.hidden]="!isInputShown"
-           (blur)="hideInput()"
-           (input)="onInput($event)">
+    <i class="control-icon ion ion-ios-search" (click)="showInput()"></i>
+    <input
+      placeholder="Type your search request here..."
+      #input
+      [class.hidden]="!isInputShown"
+      (blur)="hideInput()"
+      (input)="onInput(input.value)"
+    />
   `,
 })
 export class SearchInputComponent {
-  @ViewChild('input', { static: true }) input: ElementRef;
+  @ViewChild("input", { static: true }) input: ElementRef<HTMLInputElement>;
 
-  @Output() search: EventEmitter<string> = new EventEmitter<string>();
+  @Output() search = new EventEmitter<string>();
 
   isInputShown = false;
 

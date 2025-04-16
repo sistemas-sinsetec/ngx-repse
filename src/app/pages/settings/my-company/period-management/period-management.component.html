@@ -3,15 +3,17 @@
     <!-- Columna Izquierda: Lista de Periodos -->
     <div class="col-md-4">
       <nb-card>
-        <nb-card-header>
-          Lista de Periodos
-        </nb-card-header>
+        <nb-card-header> Lista de Periodos </nb-card-header>
         <nb-card-body>
           <nb-list class="period-list">
             <!-- Iterar sobre la lista de periodos -->
-            <nb-list-item *ngFor="let period of periods" (click)="selectPeriod(period)"
-              [class.selected]="period === selectedPeriod" class="pointer">
-              {{ period.period_type_name }} - {{ period.fiscal_year}}
+            <nb-list-item
+              *ngFor="let period of periods"
+              (click)="selectPeriod(period)"
+              [class.selected]="period === selectedPeriod"
+              class="pointer"
+            >
+              {{ period.period_type_name }} - {{ period.fiscal_year }}
             </nb-list-item>
           </nb-list>
         </nb-card-body>
@@ -21,24 +23,25 @@
     <!-- Columna Derecha: Tabla de Semanas y Formulario de Detalles -->
     <div class="col-md-8">
       <nb-card *ngIf="selectedPeriod.period_type_id">
-        <nb-card-header>
-          <nb-card-title class="text-center">
-            Semanas de {{ selectedPeriod.period_type_name }} | {{ selectedPeriod.fiscal_year }}
-          </nb-card-title>
+        <nb-card-header class="card-title">
+          Semanas de {{ selectedPeriod.period_type_name }} |
+          {{ selectedPeriod.fiscal_year }}
         </nb-card-header>
         <nb-card-body>
           <!-- Tabla de semanas usando ng2-smart-table -->
-          <ng2-smart-table [settings]="settings" [source]="tableSource" (userRowSelect)="onRowSelect($event)">
+          <ng2-smart-table
+            [settings]="settings"
+            [source]="tableSource"
+            (userRowSelect)="onRowSelect($event)"
+          >
           </ng2-smart-table>
         </nb-card-body>
       </nb-card>
 
       <!-- Mensaje si no hay un periodo seleccionado -->
       <nb-card *ngIf="!selectedPeriod.period_type_id">
-        <nb-card-header>
-          <nb-card-title class="text-center">
-            Selecciona un periodo para ver sus semanas
-          </nb-card-title>
+        <nb-card-header class="text-center">
+          Selecciona un periodo para ver sus semanas
         </nb-card-header>
         <nb-card-body>
           <p class="text-center text-muted">
@@ -55,90 +58,179 @@
             <!-- Número del Periodo -->
             <div class="form-group">
               <label for="numero-periodo">Número del Periodo</label>
-              <input type="number" id="numero-periodo" nbInput fullWidth placeholder="Ingrese el número del periodo"
-                [(ngModel)]="selectedPeriod.period_number" name="numero-periodo" class="form-control" required>
+              <input
+                type="number"
+                id="numero-periodo"
+                nbInput
+                fullWidth
+                placeholder="Ingrese el número del periodo"
+                [(ngModel)]="selectedPeriod.period_number"
+                name="numero-periodo"
+                class="form-control"
+                required
+              />
             </div>
 
             <!-- Fecha Inicio -->
             <div class="form-group">
               <label for="fecha-inicio">Fecha de Inicio</label>
-              <input nbInput fullWidth placeholder="Seleccione la fecha de inicio" [nbDatepicker]="startDatePicker"
-                [(ngModel)]="selectedPeriod.start_date" name="fecha-inicio" id="fecha-inicio" class="form-control"
-                required>
+              <input
+                nbInput
+                fullWidth
+                placeholder="Seleccione la fecha de inicio"
+                [nbDatepicker]="startDatePicker"
+                [(ngModel)]="selectedPeriod.start_date"
+                name="fecha-inicio"
+                id="fecha-inicio"
+                class="form-control"
+                required
+              />
               <nb-datepicker #startDatePicker></nb-datepicker>
             </div>
 
             <!-- Fecha Fin -->
             <div class="form-group">
               <label for="fecha-fin">Fecha de Fin</label>
-              <input nbInput fullWidth placeholder="Seleccione la fecha de fin" [nbDatepicker]="endDatePicker"
-                [(ngModel)]="selectedPeriod.end_date" name="fecha-fin" id="fecha-fin" class="form-control" required>
+              <input
+                nbInput
+                fullWidth
+                placeholder="Seleccione la fecha de fin"
+                [nbDatepicker]="endDatePicker"
+                [(ngModel)]="selectedPeriod.end_date"
+                name="fecha-fin"
+                id="fecha-fin"
+                class="form-control"
+                required
+              />
               <nb-datepicker #endDatePicker></nb-datepicker>
             </div>
 
             <!-- Fecha de Pago -->
             <div class="form-group">
               <label for="fecha-pago">Fecha de Pago</label>
-              <input nbInput fullWidth placeholder="Seleccione la fecha de pago" [nbDatepicker]="paymentDatePicker"
-                [(ngModel)]="selectedPeriod.payment_date" name="fecha-pago" id="fecha-pago" class="form-control"
-                required>
+              <input
+                nbInput
+                fullWidth
+                placeholder="Seleccione la fecha de pago"
+                [nbDatepicker]="paymentDatePicker"
+                [(ngModel)]="selectedPeriod.payment_date"
+                name="fecha-pago"
+                id="fecha-pago"
+                class="form-control"
+                required
+              />
               <nb-datepicker #paymentDatePicker></nb-datepicker>
             </div>
 
             <!-- Ejercicio -->
             <div class="form-group">
               <label for="ejercicio">Ejercicio</label>
-              <input type="number" id="ejercicio" nbInput fullWidth placeholder="Ingrese el ejercicio"
-                [(ngModel)]="selectedPeriod.fiscal_year" name="ejercicio" class="form-control" required>
+              <input
+                type="number"
+                id="ejercicio"
+                nbInput
+                fullWidth
+                placeholder="Ingrese el ejercicio"
+                [(ngModel)]="selectedPeriod.fiscal_year"
+                name="ejercicio"
+                class="form-control"
+                required
+              />
             </div>
 
             <!-- Mes -->
             <div class="form-group">
               <label for="mes">Mes</label>
-              <input type="number" id="mes" nbInput fullWidth placeholder="Ingrese el mes"
-                [(ngModel)]="selectedPeriod.month" name="mes" class="form-control" required>
+              <input
+                type="number"
+                id="mes"
+                nbInput
+                fullWidth
+                placeholder="Ingrese el mes"
+                [(ngModel)]="selectedPeriod.month"
+                name="mes"
+                class="form-control"
+                required
+              />
             </div>
 
             <!-- Días de Pago -->
             <div class="form-group">
               <label for="dias-pago">Días de Pago</label>
-              <input type="number" id="dias-pago" nbInput fullWidth placeholder="Ingrese los días de pago"
-                [(ngModel)]="selectedPeriod.payment_days" name="dias-pago" class="form-control" required>
+              <input
+                type="number"
+                id="dias-pago"
+                nbInput
+                fullWidth
+                placeholder="Ingrese los días de pago"
+                [(ngModel)]="selectedPeriod.payment_days"
+                name="dias-pago"
+                class="form-control"
+                required
+              />
             </div>
 
             <!-- Checkboxes -->
             <div class="form-group d-flex align-items-center">
-              <nb-checkbox [(ngModel)]="selectedPeriod.month_start" name="inicio-mes" id="inicio-mes"></nb-checkbox>
+              <nb-checkbox
+                [(ngModel)]="selectedPeriod.month_start"
+                name="inicio-mes"
+                id="inicio-mes"
+              ></nb-checkbox>
               <label for="inicio-mes" class="ml-2 mb-0">Inicio de mes</label>
             </div>
 
             <div class="form-group d-flex align-items-center">
-              <nb-checkbox [(ngModel)]="selectedPeriod.month_end" name="fin-mes" id="fin-mes"></nb-checkbox>
+              <nb-checkbox
+                [(ngModel)]="selectedPeriod.month_end"
+                name="fin-mes"
+                id="fin-mes"
+              ></nb-checkbox>
               <label for="fin-mes" class="ml-2 mb-0">Fin de mes</label>
             </div>
 
             <div class="form-group d-flex align-items-center">
-              <nb-checkbox [(ngModel)]="selectedPeriod.imss_bimonthly_start" name="inicio-bimestre-imss"
-                id="inicio-bimestre-imss"></nb-checkbox>
-              <label for="inicio-bimestre-imss" class="ml-2 mb-0">Inicio bimestre IMSS</label>
+              <nb-checkbox
+                [(ngModel)]="selectedPeriod.imss_bimonthly_start"
+                name="inicio-bimestre-imss"
+                id="inicio-bimestre-imss"
+              ></nb-checkbox>
+              <label for="inicio-bimestre-imss" class="ml-2 mb-0"
+                >Inicio bimestre IMSS</label
+              >
             </div>
 
             <div class="form-group d-flex align-items-center">
-              <nb-checkbox [(ngModel)]="selectedPeriod.imss_bimonthly_end" name="fin-bimestre-imss"
-                id="fin-bimestre-imss"></nb-checkbox>
-              <label for="fin-bimestre-imss" class="ml-2 mb-0">Fin bimestre IMSS</label>
+              <nb-checkbox
+                [(ngModel)]="selectedPeriod.imss_bimonthly_end"
+                name="fin-bimestre-imss"
+                id="fin-bimestre-imss"
+              ></nb-checkbox>
+              <label for="fin-bimestre-imss" class="ml-2 mb-0"
+                >Fin bimestre IMSS</label
+              >
             </div>
 
             <div class="form-group d-flex align-items-center">
-              <nb-checkbox [(ngModel)]="selectedPeriod.fiscal_start" name="inicio-ejercicio"
-                id="inicio-ejercicio"></nb-checkbox>
-              <label for="inicio-ejercicio" class="ml-2 mb-0">Inicio de ejercicio</label>
+              <nb-checkbox
+                [(ngModel)]="selectedPeriod.fiscal_start"
+                name="inicio-ejercicio"
+                id="inicio-ejercicio"
+              ></nb-checkbox>
+              <label for="inicio-ejercicio" class="ml-2 mb-0"
+                >Inicio de ejercicio</label
+              >
             </div>
 
             <div class="form-group d-flex align-items-center">
-              <nb-checkbox [(ngModel)]="selectedPeriod.fiscal_end" name="fin-ejercicio"
-                id="fin-ejercicio"></nb-checkbox>
-              <label for="fin-ejercicio" class="ml-2 mb-0">Fin de ejercicio</label>
+              <nb-checkbox
+                [(ngModel)]="selectedPeriod.fiscal_end"
+                name="fin-ejercicio"
+                id="fin-ejercicio"
+              ></nb-checkbox>
+              <label for="fin-ejercicio" class="ml-2 mb-0"
+                >Fin de ejercicio</label
+              >
             </div>
 
             <!-- Botón de Guardar -->
