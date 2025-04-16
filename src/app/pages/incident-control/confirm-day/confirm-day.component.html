@@ -257,7 +257,9 @@
           nbButton
           status="primary"
           *ngIf="selectedDia"
-          [disabled]="!canConfirmDay() || selectedDia?.status === 'confirmed'"
+          [disabled]="
+            !canConfirmDay(selectedDia) || selectedDia?.status === 'confirmed'
+          "
           (click)="confirmarDia(selectedDia)"
         >
           Confirmar Día

@@ -1,7 +1,7 @@
-import {Component, OnDestroy} from '@angular/core';
-import { NbThemeService } from '@nebular/theme';
-import { takeWhile } from 'rxjs/operators' ;
-import { SolarData } from '../../@core/data/solar';
+import { Component, OnDestroy } from "@angular/core";
+import { NbThemeService } from "@nebular/theme";
+import { takeWhile } from "rxjs/operators";
+import { SolarData } from "../../@core/data/solar";
 
 interface CardSettings {
   title: string;
@@ -10,37 +10,37 @@ interface CardSettings {
 }
 
 @Component({
-  selector: 'ngx-dashboard',
-  styleUrls: ['./dashboard.component.scss'],
-  templateUrl: './dashboard.component.html',
+  selector: "ngx-dashboard",
+  styleUrls: ["./dashboard.component.scss"],
+  templateUrl: "./dashboard.component.html",
 })
 export class DashboardComponent implements OnDestroy {
-
   private alive = true;
 
   solarValue: number;
+
   lightCard: CardSettings = {
-    title: 'Light',
-    iconClass: 'nb-lightbulb',
-    type: 'primary',
+    title: "Light",
+    iconClass: "nb-lightbulb",
+    type: "primary",
   };
   rollerShadesCard: CardSettings = {
-    title: 'Roller Shades',
-    iconClass: 'nb-roller-shades',
-    type: 'success',
+    title: "Roller Shades",
+    iconClass: "nb-roller-shades",
+    type: "success",
   };
   wirelessAudioCard: CardSettings = {
-    title: 'Wireless Audio',
-    iconClass: 'nb-audio',
-    type: 'info',
+    title: "Wireless Audio",
+    iconClass: "nb-audio",
+    type: "info",
   };
   coffeeMakerCard: CardSettings = {
-    title: 'Coffee Maker',
-    iconClass: 'nb-coffee-maker',
-    type: 'warning',
+    title: "Coffee Maker",
+    iconClass: "nb-coffee-maker",
+    type: "warning",
   };
 
-  statusCards: string;
+  statusCards: CardSettings[] = [];
 
   commonStatusCardsSet: CardSettings[] = [
     this.lightCard,
@@ -49,44 +49,32 @@ export class DashboardComponent implements OnDestroy {
     this.coffeeMakerCard,
   ];
 
-  statusCardsByThemes: {
-    default: CardSettings[];
-    cosmic: CardSettings[];
-    corporate: CardSettings[];
-    dark: CardSettings[];
-  } = {
+  statusCardsByThemes: { [themeName: string]: CardSettings[] } = {
     default: this.commonStatusCardsSet,
     cosmic: this.commonStatusCardsSet,
     corporate: [
-      {
-        ...this.lightCard,
-        type: 'warning',
-      },
-      {
-        ...this.rollerShadesCard,
-        type: 'primary',
-      },
-      {
-        ...this.wirelessAudioCard,
-        type: 'danger',
-      },
-      {
-        ...this.coffeeMakerCard,
-        type: 'info',
-      },
+      { ...this.lightCard, type: "warning" },
+      { ...this.rollerShadesCard, type: "primary" },
+      { ...this.wirelessAudioCard, type: "danger" },
+      { ...this.coffeeMakerCard, type: "info" },
     ],
     dark: this.commonStatusCardsSet,
   };
 
-  constructor(private themeService: NbThemeService,
-              private solarService: SolarData) {
-    this.themeService.getJsTheme()
+  constructor(
+    private themeService: NbThemeService,
+    private solarService: SolarData
+  ) {
+    this.themeService
+      .getJsTheme()
       .pipe(takeWhile(() => this.alive))
-      .subscribe(theme => {
-        this.statusCards = this.statusCardsByThemes[theme.name];
-    });
+      .subscribe((theme) => {
+        this.statusCards =
+          this.statusCardsByThemes[theme.name] || this.commonStatusCardsSet;
+      });
 
-    this.solarService.getSolarData()
+    this.solarService
+      .getSolarData()
       .pipe(takeWhile(() => this.alive))
       .subscribe((data) => {
         this.solarValue = data;

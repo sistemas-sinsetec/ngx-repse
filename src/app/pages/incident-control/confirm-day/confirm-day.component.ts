@@ -468,7 +468,8 @@ export class ConfirmDayComponent {
   }
 
   canConfirmDay(dia: any): boolean {
-    // Permitir confirmar si hay empleados, aunque sea día de descanso
+    if (!dia) return false;
+    // lógica basada en el día, si aplica
     return this.empleadosDia.length > 0 || this.empleadosIncidencias.length > 0;
   }
 
