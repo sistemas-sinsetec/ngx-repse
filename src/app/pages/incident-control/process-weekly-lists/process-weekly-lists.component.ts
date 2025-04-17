@@ -1,34 +1,35 @@
-
 /*
   En este codigo se procesan las semanas para mandarlas al siguiente estado de revision, tambien se visualiza
   una tabla en la que tenemos los datos de la lista de asistencia
 */
 
-import { Component, OnInit } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
-import { NbSpinnerService, NbAlertModule, NbDialogService } from '@nebular/theme';
-import { AuthService } from '../../../services/auth.service';
-import { CompanyService } from '../../../services/company.service';
-import { PeriodService } from '../../../services/period.service';
-import * as moment from 'moment';
-import { ProcessedListDialogComponent } from '../processed-list-dialog/processed-list-dialog.component';
-import { LoadingController, AlertController } from '@ionic/angular';
-import { CustomToastrService } from '../../../services/custom-toastr.service';
-import { environment } from '../../../../environments/environment';
+import { Component, OnInit } from "@angular/core";
+import { HttpClient } from "@angular/common/http";
+import {
+  NbSpinnerService,
+  NbAlertModule,
+  NbDialogService,
+} from "@nebular/theme";
+import { AuthService } from "../../../services/auth.service";
+import { CompanyService } from "../../../services/company.service";
+import { PeriodService } from "../../../services/period.service";
+import * as moment from "moment";
+import { ProcessedListDialogComponent } from "../processed-list-dialog/processed-list-dialog.component";
+import { LoadingController, AlertController } from "@ionic/angular";
+import { CustomToastrService } from "../../../services/custom-toastr.service";
+import { environment } from "../../../../environments/environment";
 @Component({
-  selector: 'ngx-process-weekly-lists',
-  templateUrl: './process-weekly-lists.component.html',
-  styleUrls: ['./process-weekly-lists.component.scss']
+  selector: "ngx-process-weekly-lists",
+  templateUrl: "./process-weekly-lists.component.html",
+  styleUrls: ["./process-weekly-lists.component.scss"],
 })
 export class ProcessWeeklyListsComponent {
-
   confirmedWeeks: any[] = []; // Lista de semanas confirmadas
   selectedWeek: any; // Semana confirmada seleccionada
   diasSemana: any[] = []; // Días de la semana seleccionada
   empleadosSemana: any[] = []; // Lista de empleados con sus horarios y incidencias
 
   isButtonDisabled: boolean = false;
-
 
   constructor(
     private authService: AuthService,
@@ -44,14 +45,14 @@ export class ProcessWeeklyListsComponent {
   ) {}
 
   ngOnInit() {
-    moment.locale('es'); // Configurar moment.js para usar el idioma español
+    moment.locale("es"); // Configurar moment.js para usar el idioma español
     this.loadConfirmedWeeks(); // Cargar las semanas confirmadas al iniciar la página
   }
 
   // Cargar las semanas confirmadas
   async loadConfirmedWeeks() {
     const loading = await this.loadingController.create({
-      message: 'Cargando semanas confirmadas...',
+      message: "Cargando semanas confirmadas...",
     });
     await loading.present();
 
@@ -59,7 +60,7 @@ export class ProcessWeeklyListsComponent {
     const periodTypeId = this.periodService.selectedPeriod.id;
 
     if (!companyId || !periodTypeId) {
-      console.error('No se proporcionaron company_id o period_type_id');
+      console.error("No se proporcionaron company_id o period_type_id");
       loading.dismiss();
       return;
     }
@@ -74,11 +75,14 @@ export class ProcessWeeklyListsComponent {
         } else {
           // Si data está vacío o no es un array, muestra el toast
           this.confirmedWeeks = [];
-          this.toastrService.showWarning('No hay semanas confirmadas por el momento. Inténtalo más tarde.','Aviso');
+          this.toastrService.showWarning(
+            "No hay semanas confirmadas por el momento. Inténtalo más tarde.",
+            "Aviso"
+          );
         }
       },
       (error) => {
-        console.error('Error al cargar semanas confirmadas', error);
+        console.error("Error al cargar semanas confirmadas", error);
         loading.dismiss();
       }
     );
@@ -87,12 +91,22 @@ export class ProcessWeeklyListsComponent {
   // Cargar los días de la semana y los empleados al seleccionar una semana
   async onWeekChange(week: any) {
     this.isButtonDisabled = false; // Habilitar el botón
-    if (week && week.payroll_period && week.payroll_period.start_date && week.payroll_period.end_date) {
+    if (
+      week &&
+      week.payroll_period &&
+      week.payroll_period.start_date &&
+      week.payroll_period.end_date
+    ) {
       this.selectedWeek = week;
-      this.generateWeekDays(week.payroll_period.start_date, week.payroll_period.end_date);
+      this.generateWeekDays(
+        week.payroll_period.start_date,
+        week.payroll_period.end_date
+      );
       await this.loadEmployeesForWeek();
     } else {
-      console.error('La semana seleccionada no contiene información de payroll_period o las fechas no están definidas');
+      console.error(
+        "La semana seleccionada no contiene información de payroll_period o las fechas no están definidas"
+      );
     }
   }
 
@@ -104,42 +118,41 @@ export class ProcessWeeklyListsComponent {
 
     while (start.isSameOrBefore(end)) {
       this.diasSemana.push({
-        date: start.format('YYYY-MM-DD'),
-        display: start.format('dddd'),
+        date: start.format("YYYY-MM-DD"),
+        display: start.format("dddd"),
       });
-      start.add(1, 'days');
+      start.add(1, "days");
     }
   }
 
   // Cargar los empleados y sus horas de trabajo para la semana seleccionada
   // Cargar los empleados y sus horas de trabajo para la semana seleccionada
-async loadEmployeesForWeek() {
-  if (!this.selectedWeek || !this.companyService.selectedCompany) return;
+  async loadEmployeesForWeek() {
+    if (!this.selectedWeek || !this.companyService.selectedCompany) return;
 
-  const loading = await this.loadingController.create({
-    message: 'Cargando datos de empleados...',
-  });
-  await loading.present();
+    const loading = await this.loadingController.create({
+      message: "Cargando datos de empleados...",
+    });
+    await loading.present();
 
-  // Obtener el ID de la compañía
-  const companyId = this.companyService.selectedCompany.id;
+    // Obtener el ID de la compañía
+    const companyId = this.companyService.selectedCompany.id;
 
-  // Incluir el ID de la compañía como parámetro en la URL
-  const url = `${environment.apiBaseUrl}/get-employees-weekly-data.php?week_number=${this.selectedWeek.week_number}&company_id=${companyId}`;
+    // Incluir el ID de la compañía como parámetro en la URL
+    const url = `${environment.apiBaseUrl}/get-employees-weekly-data.php?week_number=${this.selectedWeek.week_number}&company_id=${companyId}`;
 
-  this.http.get(url).subscribe(
-    (data: any) => {
-      const processedData = this.processEmployeeData(data);
-      this.empleadosSemana = processedData;
-      loading.dismiss();
-    },
-    (error) => {
-      console.error('Error al cargar datos de empleados', error);
-      loading.dismiss();
-    }
-  );
-}
-
+    this.http.get(url).subscribe(
+      (data: any) => {
+        const processedData = this.processEmployeeData(data);
+        this.empleadosSemana = processedData;
+        loading.dismiss();
+      },
+      (error) => {
+        console.error("Error al cargar datos de empleados", error);
+        loading.dismiss();
+      }
+    );
+  }
 
   // Procesar los datos de los empleados para organizar por fecha y evitar repetición
   processEmployeeData(data: any[]): any[] {
@@ -172,20 +185,20 @@ async loadEmployeesForWeek() {
     return Object.values(employeesMap);
   }
 
-   // Procesar la semana seleccionada
-   async processSelectedWeek() {
+  // Procesar la semana seleccionada
+  async processSelectedWeek() {
     if (!this.selectedWeek) return;
-  
+
     const loading = await this.loadingController.create({
-      message: 'Procesando semana seleccionada...',
+      message: "Procesando semana seleccionada...",
     });
     await loading.present();
-  
+
     const companyId = this.companyService.selectedCompany.id;
     const periodTypeId = this.periodService.selectedPeriod.id;
     const startDate = this.selectedWeek.payroll_period?.start_date;
     const endDate = this.selectedWeek.payroll_period?.end_date;
-  
+
     const url = `${environment.apiBaseUrl}/process-week.php`;
     const data = {
       week_number: this.selectedWeek.week_number,
@@ -194,79 +207,80 @@ async loadEmployeesForWeek() {
       start_date: startDate,
       end_date: endDate,
     };
-  
+
     this.http.post(url, data).subscribe(
       async (response: any) => {
         loading.dismiss();
         this.isButtonDisabled = true; // Deshabilitar el botón
         const alert = await this.alertController.create({
-          header: 'Éxito',
-          message: 'La semana ha sido procesada exitosamente.',
-          buttons: ['OK'],
+          header: "Éxito",
+          message: "La semana ha sido procesada exitosamente.",
+          buttons: ["OK"],
         });
         await alert.present();
-  
+
         this.toastrService.showSuccess(
-          'La semana ha sido procesada exitosamente.',
-          'Éxito'
+          "La semana ha sido procesada exitosamente.",
+          "Éxito"
         );
       },
       async (error) => {
         loading.dismiss();
         this.toastrService.showError(
-          'Hubo un error al procesar la semana. Por favor, intente nuevamente.',
-          'Error'
+          "Hubo un error al procesar la semana. Por favor, intente nuevamente.",
+          "Error"
         );
-        console.error('Error al procesar la semana', error);
+        console.error("Error al procesar la semana", error);
       }
     );
   }
 
   formatHour(hour: string): string | null {
-    if (!hour || hour === '00:00:00') {
+    if (!hour || hour === "00:00:00") {
       return null; // Devuelve null si la hora es '00:00:00' o está vacía
     }
-    return moment(hour, 'HH:mm:ss').format('hh:mm A'); // Convierte a formato 12 horas con AM/PM
+    return moment(hour, "HH:mm:ss").format("hh:mm A"); // Convierte a formato 12 horas con AM/PM
   }
-  
 
   openProcessedListsModal() {
     this.dialogService.open(ProcessedListDialogComponent, {
-      context: {}, 
+      context: {},
       closeOnBackdropClick: true, // Permitir el cierre al hacer clic fuera del modal
       hasScroll: true,
     });
-    
   }
-
 
   async deshacerConfirmacionSemanal() {
     if (!this.selectedWeek) {
-      this.toastrService.showWarning('Debes seleccionar una semana para deshacer la confirmación.', 'Aviso');
+      this.toastrService.showWarning(
+        "Debes seleccionar una semana para deshacer la confirmación.",
+        "Aviso"
+      );
       return;
     }
-  
+
     const alert = await this.alertController.create({
-      header: 'Confirmación',
-      message: '¿Estás seguro que deseas deshacer la confirmación de esta semana?',
+      header: "Confirmación",
+      message:
+        "¿Estás seguro que deseas deshacer la confirmación de esta semana?",
       buttons: [
         {
-          text: 'Cancelar',
-          role: 'cancel',
+          text: "Cancelar",
+          role: "cancel",
         },
         {
-          text: 'Aceptar',
+          text: "Aceptar",
           handler: async () => {
             const loading = await this.loadingController.create({
-              message: 'Deshaciendo confirmación de la semana...',
+              message: "Deshaciendo confirmación de la semana...",
             });
             await loading.present();
-  
+
             const companyId = this.companyService.selectedCompany.id;
             const periodTypeId = this.periodService.selectedPeriod.id;
             const startDate = this.selectedWeek.payroll_period?.start_date;
             const endDate = this.selectedWeek.payroll_period?.end_date;
-  
+
             const url = `${environment.apiBaseUrl}/unconfirm-week.php`; // Asegúrate que este endpoint exista
             const data = {
               week_number: this.selectedWeek.week_number,
@@ -275,11 +289,14 @@ async loadEmployeesForWeek() {
               start_date: startDate,
               end_date: endDate,
             };
-  
+
             this.http.post(url, data).subscribe(
               async (response: any) => {
                 loading.dismiss();
-                this.toastrService.showSuccess('Se ha deshecho la confirmación de la semana.', 'Éxito');
+                this.toastrService.showSuccess(
+                  "Se ha deshecho la confirmación de la semana.",
+                  "Éxito"
+                );
                 this.loadConfirmedWeeks(); // Refrescar las semanas
                 this.selectedWeek = null;
                 this.diasSemana = [];
@@ -287,18 +304,32 @@ async loadEmployeesForWeek() {
               },
               async (error) => {
                 loading.dismiss();
-                this.toastrService.showError('Error al deshacer la confirmación de la semana.', 'Error');
-                console.error('Error al deshacer confirmación:', error);
+                this.toastrService.showError(
+                  "Error al deshacer la confirmación de la semana.",
+                  "Error"
+                );
+                console.error("Error al deshacer confirmación:", error);
               }
             );
           },
         },
       ],
     });
-  
+
     await alert.present();
   }
-  
 
+  // Mostrar periodStartDate formateado
+  get formattedStartDate(): string {
+    return this.selectedWeek.payroll_period?.start_date
+      ? moment(this.selectedWeek.payroll_period?.start_date).format("LL")
+      : "No disponible";
+  }
 
+  // Mostrar periodEndDate formateado
+  get formattedEndDate(): string {
+    return this.selectedWeek.payroll_period?.end_date
+      ? moment(this.selectedWeek.payroll_period?.end_date).format("LL")
+      : "No disponible";
+  }
 }

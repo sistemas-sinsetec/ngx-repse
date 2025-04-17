@@ -5,13 +5,13 @@
   </nb-card-header>
   <nb-card-body>
     <!-- Selector de Semana Confirmada -->
-    <div class="mb-4">
-      <label for="weekSelector" class="fw-bold">Seleccionar Semana Confirmada:</label>
+    <div class="mb-4 d-flex row">
       <nb-select
         id="weekSelector"
         [(ngModel)]="selectedWeek"
         (ngModelChange)="onWeekChange($event)"
-        placeholder="Seleccionar Semana"
+        placeholder="Seleccionar semana confirmada"
+        class="col-12 col-sm-6"
       >
         <nb-option *ngFor="let week of processedWeeks" [value]="week">
           Semana {{ week.week_number }}
@@ -25,17 +25,22 @@
     <!-- Tabla de Asistencia de la Semana Confirmada -->
     <div class="table-responsive mt-4" *ngIf="selectedWeek">
       <h5 class="text-center bg-primary text-white py-2 rounded">
-        Lista de Asistencia: Semana {{ selectedWeek.week_number }}
-        ({{ selectedWeek.start_date }} - {{ selectedWeek.end_date }})
+        Lista de Asistencia: Semana {{ selectedWeek.week_number }} ({{
+          formattedStartDate
+        }}
+        - {{ formattedEndDate }})
       </h5>
-      <table id="attendance-table" class="table table-bordered table-hover table-striped shadow-sm">
+      <table
+        id="attendance-table"
+        class="table table-bordered table-hover table-striped shadow-sm"
+      >
         <thead class="thead-dark">
           <tr>
             <th rowspan="2" class="text-center align-middle">Código</th>
             <th rowspan="2" class="text-center align-middle">Empleado</th>
             <ng-container *ngFor="let dia of diasSemana">
               <th colspan="6" class="text-center">
-                {{ dia.display }} ({{ dia.date | date: 'dd/MM/yyyy' }})
+                {{ dia.display }} ({{ dia.date | date : "dd/MM/yyyy" }})
               </th>
             </ng-container>
           </tr>
@@ -52,17 +57,30 @@
         </thead>
         <tbody>
           <tr *ngFor="let emp of empleadosSemana">
-            <td class="text-center">{{ emp.employee_code || 'N/A' }}</td>
+            <td class="text-center">{{ emp.employee_code || "N/A" }}</td>
             <td>
-              {{ emp.first_name || '' }} {{ emp.middle_name || '' }} {{ emp.last_name || '' }}
+              {{ emp.first_name || "" }} {{ emp.middle_name || "" }}
+              {{ emp.last_name || "" }}
             </td>
             <ng-container *ngFor="let dia of diasSemana">
-              <td class="text-center">{{ emp.work_hours?.[dia.date]?.entry_time || '--:--' }}</td>
-              <td class="text-center">{{ emp.work_hours?.[dia.date]?.lunch_start_time || '--:--' }}</td>
-              <td class="text-center">{{ emp.work_hours?.[dia.date]?.lunch_end_time || '--:--' }}</td>
-              <td class="text-center">{{ emp.work_hours?.[dia.date]?.exit_time || '--:--' }}</td>
-              <td class="text-center">{{ emp.work_hours?.[dia.date]?.incident || 'N/A' }}</td>
-              <td>{{ emp.work_hours?.[dia.date]?.project_name || 'No Asignado' }}</td>
+              <td class="text-center">
+                {{ emp.work_hours?.[dia.date]?.entry_time || '--:--' }}
+              </td>
+              <td class="text-center">
+                {{ emp.work_hours?.[dia.date]?.lunch_start_time || '--:--' }}
+              </td>
+              <td class="text-center">
+                {{ emp.work_hours?.[dia.date]?.lunch_end_time || '--:--' }}
+              </td>
+              <td class="text-center">
+                {{ emp.work_hours?.[dia.date]?.exit_time || '--:--' }}
+              </td>
+              <td class="text-center">
+                {{ emp.work_hours?.[dia.date]?.incident || 'N/A' }}
+              </td>
+              <td>
+                {{ emp.work_hours?.[dia.date]?.project_name || 'No Asignado' }}
+              </td>
             </ng-container>
           </tr>
         </tbody>
@@ -72,7 +90,9 @@
     <!-- Sección de botones e input de archivo PDF -->
     <div class="text-center mt-4" *ngIf="selectedWeek">
       <!-- Contenedor para la subida de archivos -->
-      <div class="upload-container p-4 mb-4 border rounded shadow-sm bg-light w-50 mx-auto">
+      <div
+        class="upload-container p-4 mb-4 border rounded shadow-sm bg-light w-50 mx-auto"
+      >
         <h6 class="mb-3 text-secondary fw-bold">
           <span class="text-primary">📄 Subir Documento PDF</span>
         </h6>
@@ -85,21 +105,28 @@
             accept="application/pdf"
           />
           <label class="custom-file-label" for="pdfUpload">
-            {{ uploadedFileName ? uploadedFileName : 'Seleccionar archivo PDF' }}
+            {{
+              uploadedFileName ? uploadedFileName : "Seleccionar archivo PDF"
+            }}
           </label>
         </div>
       </div>
-    
+
       <!-- Botones para acciones -->
       <div class="button-group d-flex justify-content-center gap-3">
         <button nbButton (click)="generatePDF()" status="primary" class="px-4">
           <nb-icon icon="printer-outline" class="me-2"></nb-icon> Imprimir
         </button>
-        <button nbButton (change)="onFileSelected($event)" (click)="uploadPDF()" status="success" class="px-4">
+        <button
+          nbButton
+          (change)="onFileSelected($event)"
+          (click)="uploadPDF()"
+          status="success"
+          class="px-4"
+        >
           <nb-icon icon="cloud-upload-outline" class="me-2"></nb-icon> Subir PDF
         </button>
       </div>
     </div>
-    
   </nb-card-body>
 </nb-card>

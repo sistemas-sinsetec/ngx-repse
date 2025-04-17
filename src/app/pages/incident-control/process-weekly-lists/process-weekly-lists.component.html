@@ -48,9 +48,9 @@
     <div class="table-responsive mt-4" *ngIf="selectedWeek">
       <h5 class="text-center">
         Lista de Asistencia de la Semana {{ selectedWeek.week_number }} ({{
-          selectedWeek.payroll_period?.start_date
+          formattedStartDate
         }}
-        - {{ selectedWeek.payroll_period?.end_date }})
+        - {{ formattedEndDate }})
       </h5>
       <table class="table table-bordered table-striped table-hover">
         <thead class="table-primary">
