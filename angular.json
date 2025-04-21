@@ -28,7 +28,6 @@
               }
             ],
             "styles": [
-
               "node_modules/bootstrap/dist/css/bootstrap.css",
               "node_modules/typeface-exo/index.css",
               "node_modules/roboto-fontface/css/roboto/roboto-fontface.css",
@@ -71,7 +70,14 @@
               "eva-icons",
               "moment",
               "file-saver",
-              "tesseract.js"
+              "tesseract.js",
+              "core-js",
+              "canvg",
+              "raf",
+              "rgbcolor",
+              "jszip",
+              "google-libphonenumber",
+              "pdfjs-dist"
             ],
             "vendorChunk": true,
             "extractLicenses": false,
@@ -166,10 +172,7 @@
         "lint": {
           "builder": "@angular-eslint/builder:lint",
           "options": {
-            "lintFilePatterns": [
-              "src/**/*.ts",
-              "src/**/*.html"
-            ]
+            "lintFilePatterns": ["src/**/*.ts", "src/**/*.html"]
           }
         }
       }
