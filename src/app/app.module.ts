@@ -86,10 +86,7 @@ import { SelectCompanyPeriodDialogComponent } from "./select-company-period-dial
     CoreModule.forRoot(),
     ThemeModule.forRoot(),
   ],
-  providers: [
-    AuthService,
-    { provide: LocationStrategy, useClass: HashLocationStrategy },
-  ],
+  providers: [AuthService],
   bootstrap: [AppComponent],
 })
 export class AppModule {}
