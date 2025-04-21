@@ -4,7 +4,6 @@ import { NbSpinnerService, NbDialogService } from "@nebular/theme";
 import { AuthService } from "../../../services/auth.service";
 import { CompanyService } from "../../../services/company.service";
 import { PeriodService } from "../../../services/period.service";
-import { DialogComponent } from "../../modal-overlays/dialog/dialog.component";
 import * as moment from "moment";
 import { LoadingController, AlertController } from "@ionic/angular";
 import { CustomToastrService } from "../../../services/custom-toastr.service";
