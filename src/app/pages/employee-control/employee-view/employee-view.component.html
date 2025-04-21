@@ -121,24 +121,26 @@
 
     <!-- Detalles a la derecha: Lista de Empleados -->
     <div class="col-12 col-md-9">
-      <!-- Campo de búsqueda -->
-      <nb-card class="busqueda mb-4" *ngIf="mostrarBusqueda">
-        <nb-form-field>
-          <label for="searchQuery">Buscar empleados</label>
-          <input
-            nbInput
-            id="searchQuery"
-            [(ngModel)]="searchQuery"
-            (ngModelChange)="buscarEmpleados()"
-            placeholder="Escribe aquí"
-          />
-        </nb-form-field>
-      </nb-card>
+      <nb-card>
+        <nb-card-header class="text-center">
+          <div class="flex flex-column align-items-center">
+            <span>Empleados</span>
+            <nb-form-field class="mt-2 mx-auto">
+              <nb-icon nbPrefix icon="search-outline" pack="eva"></nb-icon>
+              <input
+                nbInput
+                id="searchQuery"
+                [(ngModel)]="searchQuery"
+                (ngModelChange)="buscarEmpleados()"
+                placeholder="Buscar"
+              />
+            </nb-form-field>
+            <nb-button-group></nb-button-group>
+          </div>
+        </nb-card-header>
 
-      <nb-card *ngIf="empleadosFiltrados.length > 0">
-        <nb-card-header class="text-center"> Empleados </nb-card-header>
         <nb-card-body>
-          <div class="table-responsive">
+          <div class="table-responsive" *ngIf="empleadosFiltrados.length > 0">
             <table class="table">
               <thead>
                 <tr>

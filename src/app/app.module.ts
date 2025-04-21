@@ -1,14 +1,14 @@
-import { BrowserModule } from '@angular/platform-browser';
-import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
-import { NgModule } from '@angular/core';
-import { HttpClientModule } from '@angular/common/http';
-import { FormsModule } from '@angular/forms'; // Importa FormsModule
-import { CoreModule } from './@core/core.module';
-import { ThemeModule } from './@theme/theme.module';
-import { AppComponent } from './app.component';
-import { AppRoutingModule } from './app-routing.module';
-import { IonicModule } from '@ionic/angular';
-import { HashLocationStrategy, LocationStrategy } from '@angular/common';
+import { BrowserModule } from "@angular/platform-browser";
+import { BrowserAnimationsModule } from "@angular/platform-browser/animations";
+import { NgModule } from "@angular/core";
+import { HttpClientModule } from "@angular/common/http";
+import { FormsModule } from "@angular/forms"; // Importa FormsModule
+import { CoreModule } from "./@core/core.module";
+import { ThemeModule } from "./@theme/theme.module";
+import { AppComponent } from "./app.component";
+import { AppRoutingModule } from "./app-routing.module";
+import { IonicModule } from "@ionic/angular";
+import { HashLocationStrategy, LocationStrategy } from "@angular/common";
 
 import {
   NbChatModule,
@@ -21,33 +21,33 @@ import {
   NbWindowModule,
   NbInputModule,
   NbButtonModule,
+  NbButtonGroupModule,
   NbAlertModule,
   NbCheckboxModule,
-  NbCardModule,       // <-- Importa NbCardModule para usar <nb-card>
-  NbSelectModule,     // <-- Importa NbSelectModule para usar <nb-select>
-  NbIconModule,  
+  NbCardModule, // <-- Importa NbCardModule para usar <nb-card>
+  NbSelectModule, // <-- Importa NbSelectModule para usar <nb-select>
+  NbIconModule,
 
-       // <-- Importa NbIconModule si usas <nb-icon>
-} from '@nebular/theme';
+  // <-- Importa NbIconModule si usas <nb-icon>
+} from "@nebular/theme";
 
-import { NbAuthModule } from '@nebular/auth'; 
-import { LoginComponent } from './login/login.component';
-import { AuthService } from './services/auth.service';
-import { SelectCompanyPeriodDialogComponent } from './select-company-period-dialog/select-company-period-dialog.component';
+import { NbAuthModule } from "@nebular/auth";
+import { LoginComponent } from "./login/login.component";
+import { AuthService } from "./services/auth.service";
+import { SelectCompanyPeriodDialogComponent } from "./select-company-period-dialog/select-company-period-dialog.component";
 
 @NgModule({
   declarations: [
-
     AppComponent,
     LoginComponent,
     SelectCompanyPeriodDialogComponent,
-   ],
+  ],
   imports: [
     BrowserModule,
     BrowserAnimationsModule,
     HttpClientModule,
     AppRoutingModule,
-    FormsModule, // Para manejar [(ngModel)]
+    FormsModule,
     NbSidebarModule.forRoot(),
     NbMenuModule.forRoot(),
     NbDatepickerModule.forRoot(),
@@ -56,24 +56,25 @@ import { SelectCompanyPeriodDialogComponent } from './select-company-period-dial
     NbToastrModule.forRoot(),
     IonicModule.forRoot(),
     NbChatModule.forRoot({
-      messageGoogleMapKey: 'AIzaSyA_wNuCzia92MAmdLRzmqitRGvCF7wCZPY',
+      messageGoogleMapKey: "AIzaSyA_wNuCzia92MAmdLRzmqitRGvCF7wCZPY",
     }),
 
     // Módulos Nebular para componentes
-    NbInputModule,       
-    NbButtonModule,      
-    NbAlertModule,       
+    NbInputModule,
+    NbButtonModule,
+    NbButtonGroupModule,
+    NbAlertModule,
     NbCheckboxModule,
-    NbCardModule,        // <-- Asegúrate de estar importando NbCardModule
-    NbSelectModule,      // <-- Asegúrate de estar importando NbSelectModule
-    NbIconModule,   // <-- Asegúrate de estar importando NbIconModule si usas <nb-icon>
-    NbActionsModule,     
+    NbCardModule, // <-- Asegúrate de estar importando NbCardModule
+    NbSelectModule, // <-- Asegúrate de estar importando NbSelectModule
+    NbIconModule, // <-- Asegúrate de estar importando NbIconModule si usas <nb-icon>
+    NbActionsModule,
     NbAuthModule.forRoot({
       strategies: [],
       forms: {
         login: {
           redirectDelay: 500,
-          strategy: 'email',
+          strategy: "email",
           rememberMe: true,
           showMessages: {
             success: true,
@@ -87,7 +88,7 @@ import { SelectCompanyPeriodDialogComponent } from './select-company-period-dial
   ],
   providers: [
     AuthService,
-    { provide: LocationStrategy, useClass: HashLocationStrategy }
+    { provide: LocationStrategy, useClass: HashLocationStrategy },
   ],
   bootstrap: [AppComponent],
 })

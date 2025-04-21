@@ -1,65 +1,59 @@
- /* Estilo para resaltar la opción seleccionada */
- .selected {
-    background-color: #d0e4f7;
-    font-weight: bold;
-    border-left: 4px solid #007bff;
-  }
+/* Estilo para resaltar la opción seleccionada */
+.selected {
+  background-color: #d0e4f7;
+  font-weight: bold;
+  border-left: 4px solid #007bff;
+}
 
-  .selected h2 {
-    color: #007bff;
-  }
+.selected h2 {
+  color: #007bff;
+}
 
-  .steps-container {
-    margin-bottom: 20px;
-  }
+.steps-container {
+  margin-bottom: 20px;
+}
 
-  .sidebar-section h6 {
-    margin-top: 20px;
-    font-weight: bold;
-  }
+.sidebar-section h6 {
+  margin-top: 20px;
+  font-weight: bold;
+}
 
-  .list-group-item {
-    cursor: pointer;
-    padding: 10px;
-    border-radius: 4px;
-  }
+.list-group-item {
+  cursor: pointer;
+  padding: 10px;
+  border-radius: 4px;
+}
 
-  .list-group-item:hover {
-    background-color: #f1f1f1;
-  }
+.list-group-item:hover {
+  background-color: #f1f1f1;
+}
 
-  .busqueda {
-    margin-top: 20px;
-    display: flex;
-    justify-content: center; /* Centrar horizontalmente */
-    align-items: center;    /* Centrar verticalmente */
-    height: 100px;           /* Asegúrate de que la altura ocupe el espacio necesario */
-    text-align: center;     /* Opcional: centrar texto */
-  }
+.busqueda {
+  margin-top: 20px;
+  display: flex;
+  justify-content: center; /* Centrar horizontalmente */
+  align-items: center; /* Centrar verticalmente */
+  height: 100px; /* Asegúrate de que la altura ocupe el espacio necesario */
+  text-align: center; /* Opcional: centrar texto */
+}
 
-  .busqueda label{
-    font-size: 20px;
-    font-weight: bold;
-  }
+.busqueda label {
+  font-size: 20px;
+  font-weight: bold;
+}
 
-  input::placeholder {
-    text-align: center; /* Centra el texto del placeholder */
-    color: gray;        /* Cambia el color del placeholder si lo necesitas */
-    font-style: italic; /* Opcional: estilo adicional */
-  }
+.sidebar-section > h6 {
+  text-align: center;
+}
 
-  .sidebar-section > h6{
-    text-align: center;
-  }
+.custom-dialog-scroll {
+  max-height: 80vh; /* Define una altura máxima del 80% del viewport */
+  overflow-y: auto; /* Habilita el scroll vertical cuando el contenido excede la altura */
+}
 
-  .custom-dialog-scroll {
-    max-height: 80vh; /* Define una altura máxima del 80% del viewport */
-    overflow-y: auto; /* Habilita el scroll vertical cuando el contenido excede la altura */
-  }
-
-
-  /* Asegura que el layout ocupe al menos el alto de la ventana */
-nb-layout, nb-layout-column {
+/* Asegura que el layout ocupe al menos el alto de la ventana */
+nb-layout,
+nb-layout-column {
   height: 100vh;
   overflow: hidden;
 }
@@ -97,36 +91,30 @@ nb-layout, nb-layout-column {
   }
 }
 
-::ng-deep .cdk-global-scrollblock
-    {
-    position: static !important;
-    }
+::ng-deep .cdk-global-scrollblock {
+  position: static !important;
+}
 
-    .baja {
-      color: #8B4513; /* Color café */
-    }
-    
-    .load-more {
-      cursor: pointer;
-      background-color: #f8f9fa; /* color de fondo sutil */
-      text-align: center;
-      font-weight: bold;
-      color: #007bff; /* color predeterminado para "Ver más" */
-    }
-    
-    .load-more:hover {
-      background-color: #e2e6ea;
-    }
-    
-    /* Estilos específicos para "Ver menos": color de texto rojo */
-    .ver-menos {
-      color: #d9534f; /* rojo Bootstrap */
-    }
-    .ver-menos:hover {
-      background-color: #f2dede; /* fondo suave para el hover */
-    }
-    
+.baja {
+  color: #8b4513; /* Color café */
+}
 
+.load-more {
+  cursor: pointer;
+  background-color: #f8f9fa; /* color de fondo sutil */
+  text-align: center;
+  font-weight: bold;
+  color: #007bff; /* color predeterminado para "Ver más" */
+}
 
+.load-more:hover {
+  background-color: #e2e6ea;
+}
 
-  
+/* Estilos específicos para "Ver menos": color de texto rojo */
+.ver-menos {
+  color: #d9534f; /* rojo Bootstrap */
+}
+.ver-menos:hover {
+  background-color: #f2dede; /* fondo suave para el hover */
+}

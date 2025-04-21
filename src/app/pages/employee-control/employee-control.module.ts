@@ -1,6 +1,7 @@
-import { NgModule } from '@angular/core';
+import { NgModule } from "@angular/core";
 import {
   NbButtonModule,
+  NbButtonGroupModule,
   NbCardModule,
   NbIconModule,
   NbAlertModule,
@@ -26,39 +27,39 @@ import {
   NbSidebarModule,
   NbTreeGridComponent,
   NbTreeGridModule,
+} from "@nebular/theme";
+import { ThemeModule } from "../../@theme/theme.module";
 
-} from '@nebular/theme';
-import { ThemeModule } from '../../@theme/theme.module';
+import { CommonModule } from "@angular/common";
+import { employeeControlComponent } from "./employee-control.component";
+import {
+  FormsModule,
+  ReactiveFormsModule,
+  FormBuilder,
+  FormGroup,
+} from "@angular/forms";
+import { Ng2SmartTableModule } from "ng2-smart-table";
+import { EmployeeControlRoutingModule } from "./employee-control-routing.module";
 
-import { CommonModule } from '@angular/common';
-import { employeeControlComponent } from './employee-control.component';
-import { FormsModule, ReactiveFormsModule, FormBuilder, FormGroup } from '@angular/forms';
-import { Ng2SmartTableModule } from 'ng2-smart-table';
-import { EmployeeControlRoutingModule } from './employee-control-routing.module';
-
-import { IonicModule } from '@ionic/angular';
-import { RequestsEmployeesComponent } from './requests-employees/requests-employees.component';
-import { EmployeeViewComponent } from './employee-view/employee-view.component';
-import { EmployeeDetailsComponent } from './employee-details/employee-details.component';
-import { EditEmployeeComponent } from './edit-employee/edit-employee.component';
-import { AddEmployeesComponent } from './add-employees/add-employees.component';
-import { VacationsKardexComponent } from './vacations-kardex/vacations-kardex.component';
-import { RegisterUserComponent } from './register-user/register-user.component';
-
+import { IonicModule } from "@ionic/angular";
+import { RequestsEmployeesComponent } from "./requests-employees/requests-employees.component";
+import { EmployeeViewComponent } from "./employee-view/employee-view.component";
+import { EmployeeDetailsComponent } from "./employee-details/employee-details.component";
+import { EditEmployeeComponent } from "./edit-employee/edit-employee.component";
+import { AddEmployeesComponent } from "./add-employees/add-employees.component";
+import { VacationsKardexComponent } from "./vacations-kardex/vacations-kardex.component";
+import { RegisterUserComponent } from "./register-user/register-user.component";
 
 @NgModule({
   declarations: [
     employeeControlComponent,
-   RequestsEmployeesComponent,
+    RequestsEmployeesComponent,
     EmployeeViewComponent,
     EmployeeDetailsComponent,
     EditEmployeeComponent,
     AddEmployeesComponent,
     VacationsKardexComponent,
-    RegisterUserComponent
-
-   
-
+    RegisterUserComponent,
   ],
   imports: [
     NbTreeGridModule,
@@ -89,7 +90,7 @@ import { RegisterUserComponent } from './register-user/register-user.component';
     NbUserModule,
     IonicModule,
     NbSidebarModule,
-
-  ]
+    NbButtonGroupModule,
+  ],
 })
-export class EmployeeControlModule { }
+export class EmployeeControlModule {}

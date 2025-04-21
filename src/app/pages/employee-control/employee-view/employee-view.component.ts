@@ -15,7 +15,6 @@ import { NbWindowService } from "@nebular/theme";
 import { RegisterUserComponent } from "../register-user/register-user.component";
 import { environment } from "../../../../environments/environment";
 
-
 interface Empleado {
   employee_id: number;
   first_name: string;
@@ -96,16 +95,16 @@ export class EmployeeViewComponent implements OnInit {
     this.loadUsers();
   }
 
-
-   // Método para cargar usuarios desde el backend
-   loadUsers() {
-    this.http.get<User[]>(`${environment.apiBaseUrl}/getUsuarios.php`)
+  // Método para cargar usuarios desde el backend
+  loadUsers() {
+    this.http
+      .get<User[]>(`${environment.apiBaseUrl}/getUsuarios.php`)
       .subscribe(
-        data => {
+        (data) => {
           this.users = data;
         },
-        error => {
-          console.error('Error al cargar usuarios:', error);
+        (error) => {
+          console.error("Error al cargar usuarios:", error);
         }
       );
   }
@@ -113,7 +112,10 @@ export class EmployeeViewComponent implements OnInit {
   // Carga todos los empleados sin filtros
   loadAllEmployees() {
     const companyId = this.companyService.selectedCompany.id;
-    this.http.get<Empleado[]>(`${environment.apiBaseUrl}/get_empleados.php?companyId=${companyId}`)
+    this.http
+      .get<Empleado[]>(
+        `${environment.apiBaseUrl}/get_empleados.php?companyId=${companyId}`
+      )
 
       .subscribe(
         (data) => {
@@ -189,47 +191,56 @@ export class EmployeeViewComponent implements OnInit {
   // Cargar departamentos sin dependencia
   loadDepartments() {
     const companyId = this.companyService.selectedCompany.id;
-    this.http.get<Departamento[]>(`${environment.apiBaseUrl}/get_departments.php?company_id=${companyId}`).subscribe(
-      data => {
-        this.departamentos = data;
-        this.displayedDepartamentos = this.departamentos.slice(0, this.pageSize);
-      },
-      error => {
-        console.error('Error al cargar los departamentos:', error);
-      }
-    );
+    this.http
+      .get<Departamento[]>(
+        `${environment.apiBaseUrl}/get_departments.php?company_id=${companyId}`
+      )
+      .subscribe(
+        (data) => {
+          this.departamentos = data;
+          this.displayedDepartamentos = this.departamentos.slice(
+            0,
+            this.pageSize
+          );
+        },
+        (error) => {
+          console.error("Error al cargar los departamentos:", error);
+        }
+      );
   }
 
-    // Método para cargar más departamentos
-    loadMoreDepartments() {
-      this.departamentosPage++;
-      const itemsToShow = this.departamentosPage * this.pageSize;
-      this.displayedDepartamentos = this.departamentos.slice(0, itemsToShow);
-    }
-    // Método para volver a mostrar solo los 5 primeros departamentos
-loadLessDepartments() {
-  this.departamentosPage = 1;
-  this.displayedDepartamentos = this.departamentos.slice(0, this.pageSize);
-}
+  // Método para cargar más departamentos
+  loadMoreDepartments() {
+    this.departamentosPage++;
+    const itemsToShow = this.departamentosPage * this.pageSize;
+    this.displayedDepartamentos = this.departamentos.slice(0, itemsToShow);
+  }
+  // Método para volver a mostrar solo los 5 primeros departamentos
+  loadLessDepartments() {
+    this.departamentosPage = 1;
+    this.displayedDepartamentos = this.departamentos.slice(0, this.pageSize);
+  }
 
- // Cargar puestos y preparar la vista inicial
- loadPositions() {
-  const companyId = this.companyService.selectedCompany.id;
-  this.http.get<Puesto[]>(`${environment.apiBaseUrl}/get_positions.php?company_id=${companyId}`).subscribe(
-    data => {
-      // Filtrar puestos que NO se llamen "Empresa"
-      this.puestos = data.filter(puesto => puesto.position_name !== 'Empresa');
-      this.displayedPuestos = this.puestos.slice(0, this.pageSize);
-    },
-    error => {
-      console.error('Error al cargar los puestos:', error);
-    }
-  );
-}
-
-
-
- 
+  // Cargar puestos y preparar la vista inicial
+  loadPositions() {
+    const companyId = this.companyService.selectedCompany.id;
+    this.http
+      .get<Puesto[]>(
+        `${environment.apiBaseUrl}/get_positions.php?company_id=${companyId}`
+      )
+      .subscribe(
+        (data) => {
+          // Filtrar puestos que NO se llamen "Empresa"
+          this.puestos = data.filter(
+            (puesto) => puesto.position_name !== "Empresa"
+          );
+          this.displayedPuestos = this.puestos.slice(0, this.pageSize);
+        },
+        (error) => {
+          console.error("Error al cargar los puestos:", error);
+        }
+      );
+  }
 
   // Método para cargar más puestos
   loadMorePositions() {
@@ -248,119 +259,139 @@ loadLessDepartments() {
   loadShifts() {
     const companyId = this.companyService.selectedCompany.id;
 
-    this.http.get<Turno[]>(`${environment.apiBaseUrl}/get_shifts.php?company_id=${companyId}`).subscribe(
-      data => {
-        this.turnos = data;
-      },
-      error => {
-        console.error('Error al cargar los turnos:', error);
-      }
-    );
-
+    this.http
+      .get<Turno[]>(
+        `${environment.apiBaseUrl}/get_shifts.php?company_id=${companyId}`
+      )
+      .subscribe(
+        (data) => {
+          this.turnos = data;
+        },
+        (error) => {
+          console.error("Error al cargar los turnos:", error);
+        }
+      );
   }
 
   // Seleccionar y mostrar empleados por departamento (con toggle)
   selectDepartamento(departamento: Departamento) {
     // Resetear el filtro de estado al cambiar de filtro principal
     this.activeFilter = null;
-  if (this.departamentoSeleccionado &&
-      this.departamentoSeleccionado.department_id === departamento.department_id) {
-    // Si ya estaba seleccionado, se deselecciona y se carga la lista completa
-    this.departamentoSeleccionado = null;
-    this.loadAllEmployees();
-  } else {
-    this.departamentoSeleccionado = departamento;
-    this.puestoSeleccionado = null;  // Limpiar selección de puesto
-    this.turnoSeleccionado = null;   // Limpiar selección de turno
-    const companyId = this.companyService.selectedCompany.id;
-    this.http.get<{ success: boolean, employees: Empleado[] }>(
-      `${environment.apiBaseUrl}/get_employees_by_department.php?company_id=${companyId}&department_id=${departamento.department_id}`
-    ).subscribe(
-      response => {
-        if (response.success) {
-          this.empleados = response.employees;
-          this.empleadosFiltrados = response.employees;
-          // Se aplica también el filtro de búsqueda (si lo hubiera)
-          this.applyFilters();
-        } else {
-          console.error('Error al cargar los empleados del departamento');
-        }
-      },
-      error => {
-        console.error('Error al cargar los empleados del departamento:', error);
-      }
-    );
+    if (
+      this.departamentoSeleccionado &&
+      this.departamentoSeleccionado.department_id === departamento.department_id
+    ) {
+      // Si ya estaba seleccionado, se deselecciona y se carga la lista completa
+      this.departamentoSeleccionado = null;
+      this.loadAllEmployees();
+    } else {
+      this.departamentoSeleccionado = departamento;
+      this.puestoSeleccionado = null; // Limpiar selección de puesto
+      this.turnoSeleccionado = null; // Limpiar selección de turno
+      const companyId = this.companyService.selectedCompany.id;
+      this.http
+        .get<{ success: boolean; employees: Empleado[] }>(
+          `${environment.apiBaseUrl}/get_employees_by_department.php?company_id=${companyId}&department_id=${departamento.department_id}`
+        )
+        .subscribe(
+          (response) => {
+            if (response.success) {
+              this.empleados = response.employees;
+              this.empleadosFiltrados = response.employees;
+              // Se aplica también el filtro de búsqueda (si lo hubiera)
+              this.applyFilters();
+            } else {
+              console.error("Error al cargar los empleados del departamento");
+            }
+          },
+          (error) => {
+            console.error(
+              "Error al cargar los empleados del departamento:",
+              error
+            );
+          }
+        );
+    }
   }
-}
 
   // Seleccionar y mostrar empleados por puesto (con toggle)
   selectPuesto(puesto: Puesto) {
     // Resetear el filtro de estado
     this.activeFilter = null;
-  if (this.puestoSeleccionado &&
-      this.puestoSeleccionado.position_id === puesto.position_id) {
-    this.puestoSeleccionado = null;
-    this.loadAllEmployees();
-  } else {
-    this.puestoSeleccionado = puesto;
-    this.departamentoSeleccionado = null;  // Limpiar selección de departamento
-    this.turnoSeleccionado = null;
-    const companyId = this.companyService.selectedCompany.id;
-    this.http.get<{ success: boolean, employees: Empleado[] }>(
-      `${environment.apiBaseUrl}/get_employees_by_position.php?company_id=${companyId}&position_id=${puesto.position_id}`
-    ).subscribe(
-      response => {
-        if (response.success) {
-          this.empleados = response.employees;
-          this.empleadosFiltrados = response.employees;
-          this.applyFilters();
-        } else {
-          console.error('Error al cargar los empleados del puesto');
-        }
-      },
-      error => {
-        console.error('Error al cargar los empleados del puesto:', error);
-      }
-    );
+    if (
+      this.puestoSeleccionado &&
+      this.puestoSeleccionado.position_id === puesto.position_id
+    ) {
+      this.puestoSeleccionado = null;
+      this.loadAllEmployees();
+    } else {
+      this.puestoSeleccionado = puesto;
+      this.departamentoSeleccionado = null; // Limpiar selección de departamento
+      this.turnoSeleccionado = null;
+      const companyId = this.companyService.selectedCompany.id;
+      this.http
+        .get<{ success: boolean; employees: Empleado[] }>(
+          `${environment.apiBaseUrl}/get_employees_by_position.php?company_id=${companyId}&position_id=${puesto.position_id}`
+        )
+        .subscribe(
+          (response) => {
+            if (response.success) {
+              this.empleados = response.employees;
+              this.empleadosFiltrados = response.employees;
+              this.applyFilters();
+            } else {
+              console.error("Error al cargar los empleados del puesto");
+            }
+          },
+          (error) => {
+            console.error("Error al cargar los empleados del puesto:", error);
+          }
+        );
+    }
   }
-}
 
   // Seleccionar y mostrar empleados por turno (con toggle)
   selectTurno(turno: Turno) {
     // Resetear el filtro de estado
     this.activeFilter = null;
 
-  if (this.turnoSeleccionado &&
-      this.turnoSeleccionado.shift_id === turno.shift_id) {
-    this.turnoSeleccionado = null;
-    this.loadAllEmployees();
-  } else {
-    this.turnoSeleccionado = turno;
-    this.departamentoSeleccionado = null; // Limpiar selección de departamento
-    this.puestoSeleccionado = null;  
-    const companyId = this.companyService.selectedCompany.id;
-    this.http.get<{ success: boolean, employees: Empleado[] }>(
-      `${environment.apiBaseUrl}/get_employees_by_shifts.php?company_id=${companyId}&shift_id=${turno.shift_id}`
-    ).subscribe(
-      response => {
-        if (response.success && response.employees.length > 0) {
-          this.empleados = response.employees;
-          this.empleadosFiltrados = response.employees;
-          this.applyFilters();
-        } else {
-          this.empleados = [];
-          this.empleadosFiltrados = [];
-          console.error('No se encontraron empleados para el turno seleccionado');
-        }
-      },
-      error => {
-        this.empleados = [];
-        this.empleadosFiltrados = [];
-        console.error('Error al cargar los empleados del turno:', error);
-      }
-    );
+    if (
+      this.turnoSeleccionado &&
+      this.turnoSeleccionado.shift_id === turno.shift_id
+    ) {
+      this.turnoSeleccionado = null;
+      this.loadAllEmployees();
+    } else {
+      this.turnoSeleccionado = turno;
+      this.departamentoSeleccionado = null; // Limpiar selección de departamento
+      this.puestoSeleccionado = null;
+      const companyId = this.companyService.selectedCompany.id;
+      this.http
+        .get<{ success: boolean; employees: Empleado[] }>(
+          `${environment.apiBaseUrl}/get_employees_by_shifts.php?company_id=${companyId}&shift_id=${turno.shift_id}`
+        )
+        .subscribe(
+          (response) => {
+            if (response.success && response.employees.length > 0) {
+              this.empleados = response.employees;
+              this.empleadosFiltrados = response.employees;
+              this.applyFilters();
+            } else {
+              this.empleados = [];
+              this.empleadosFiltrados = [];
+              console.error(
+                "No se encontraron empleados para el turno seleccionado"
+              );
+            }
+          },
+          (error) => {
+            this.empleados = [];
+            this.empleadosFiltrados = [];
+            console.error("Error al cargar los empleados del turno:", error);
+          }
+        );
+    }
   }
-}
   // Función para filtrar empleados en la búsqueda
   buscarEmpleados() {
     this.applyFilters();

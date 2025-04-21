@@ -1,24 +1,24 @@
 nb-list-item.selected {
-    background-color: #f0f0f0; /* Fondo gris claro */
-    color: #333; /* Color del texto */
-    font-weight: bold; /* Opcional: resaltar texto */
-  }
-  
-  nb-list-item.disabled {
-    pointer-events: none; /* Deshabilita clics */
-    cursor: not-allowed; /* Cambia el cursor */
-    background-color: #f8f9fa; /* Fondo gris claro */
-    color: #6c757d; /* Texto gris oscuro */
-    border-left: 4px solid #dc3545; /* Borde rojo a la izquierda */
-    opacity: 0.8; /* Ligera transparencia */
-    transition: all 0.3s ease; /* Transición suave */
-  }
-  
-  nb-list-item.disabled:hover {
-    background-color: #e9ecef; /* Cambio de fondo al pasar el mouse */
-  }
+  background-color: #f0f0f0; /* Fondo gris claro */
+  color: #333; /* Color del texto */
+  font-weight: bold; /* Opcional: resaltar texto */
+}
 
-  /* Contenedor principal del mensaje */
+nb-list-item.disabled {
+  pointer-events: none; /* Deshabilita clics */
+  cursor: not-allowed; /* Cambia el cursor */
+  background-color: #f8f9fa; /* Fondo gris claro */
+  color: #6c757d; /* Texto gris oscuro */
+  border-left: 4px solid #dc3545; /* Borde rojo a la izquierda */
+  opacity: 0.8; /* Ligera transparencia */
+  transition: all 0.3s ease; /* Transición suave */
+}
+
+nb-list-item.disabled:hover {
+  background-color: #e9ecef; /* Cambio de fondo al pasar el mouse */
+}
+
+/* Contenedor principal del mensaje */
 .no-employees-message {
   display: flex;
   justify-content: center;
@@ -26,8 +26,6 @@ nb-list-item.selected {
   height: 100%; /* Ocupa toda la altura disponible */
   min-height: 200px; /* Altura mínima para asegurar visibilidad */
   padding: 20px;
- 
-
 }
 
 /* Contenedor interno del mensaje */
@@ -39,7 +37,7 @@ nb-list-item.selected {
 /* Ícono del mensaje */
 .message-icon {
   font-size: 2.5rem;
-  color: #6c757d; /* Color gris oscuro */
+  color: #cacaca; /* Color gris oscuro */
   margin-bottom: 15px;
 }
 
@@ -48,24 +46,13 @@ nb-list-item.selected {
   font-size: 1rem;
   color: #495057; /* Color gris más oscuro */
   margin: 0;
-  line-height: 1.0;
+  line-height: 1;
   font-weight: 400; /* Peso de la fuente normal */
 }
 
 .scrollable-container {
   max-height: 400px; /* Altura máxima del contenedor */
   overflow-y: auto; /* Habilita el scroll vertical */
- 
+
   padding: 8px; /* Espaciado interno */
 }
-
-.izq{
-position: sticky !important;
-top: 100px;
-height: 500px;
-margin-bottom: 80px;
-}
-
-
-
-

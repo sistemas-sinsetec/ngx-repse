@@ -1,6 +1,6 @@
 <div class="row">
   <!-- Columna izquierda fija con el resumen de selección -->
-  <div class="col-lg-4 col-md-5 izq">
+  <div class="col-lg-4 col-md-5">
     <nb-card class="p-3 mb-4">
       <nb-card-header class="fw-bold text-center"
         >Resumen de Selección</nb-card-header
@@ -91,17 +91,17 @@
                 <span *ngIf="isCurrentWeek(semana)">(Semana Actual)</span>
               </nb-option>
             </nb-select>
-          </div>
 
-          <!-- Período seleccionado -->
-          <div id="periodoSeleccionado" class="my-3">
-            <p class="text-muted mb-0">
-              <small>
-                Período seleccionado:
-                {{ formatDate(selectedSemana?.start_date) }} -
-                {{ formatDate(selectedSemana?.end_date) }}
-              </small>
-            </p>
+            <!-- Período seleccionado -->
+            <div id="periodoSeleccionado">
+              <p class="text-muted mb-0">
+                <small>
+                  Período seleccionado:
+                  {{ formatDate(selectedSemana?.start_date) }} -
+                  {{ formatDate(selectedSemana?.end_date) }}
+                </small>
+              </p>
+            </div>
           </div>
 
           <!-- Selector de día de la semana -->
@@ -127,8 +127,8 @@
             <label for="obraDia" class="form-label fw-bold"
               >Selecciona la obra:</label
             >
-            <div class="d-flex align-items-center mb-2">
-              <nb-icon icon="search-outline" pack="eva" class="mr-3"></nb-icon>
+            <nb-form-field class="mb-2">
+              <nb-icon nbPrefix icon="search-outline" pack="eva"></nb-icon>
               <input
                 type="text"
                 nbInput
@@ -139,7 +139,7 @@
                 name="searchObra"
                 (input)="filterObras()"
               />
-            </div>
+            </nb-form-field>
             <nb-select
               placeholder="Selecciona una obra"
               fullWidth
@@ -170,8 +170,8 @@
             <label for="buscarEmpleado" class="form-label fw-bold"
               >Seleccionar empleados:</label
             >
-            <div class="d-flex align-items-center">
-              <nb-icon icon="search-outline" pack="eva" class="mr-3"></nb-icon>
+            <nb-form-field class="mb-2">
+              <nb-icon nbPrefix icon="search-outline" pack="eva"></nb-icon>
               <input
                 type="text"
                 nbInput
@@ -182,7 +182,7 @@
                 name="searchEmployee"
                 (input)="onSearchChange()"
               />
-            </div>
+            </nb-form-field>
 
             <!-- Lista de empleados -->
 

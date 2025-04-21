@@ -24,7 +24,7 @@
 
     <!-- Tabla de Asistencia de la Semana Confirmada -->
     <div class="table-responsive mt-4" *ngIf="selectedWeek">
-      <h5 class="text-center bg-primary text-white py-2 rounded">
+      <h5 class="text-center bg-primary text-white p-2 rounded">
         Lista de Asistencia: Semana {{ selectedWeek.week_number }} ({{
           formattedStartDate
         }}
@@ -91,7 +91,7 @@
     <div class="text-center mt-4" *ngIf="selectedWeek">
       <!-- Contenedor para la subida de archivos -->
       <div
-        class="upload-container p-4 mb-4 border rounded shadow-sm bg-light w-50 mx-auto"
+        class="upload-container p-4 mb-4 border rounded shadow-sm bg-light mx-0 mx-sm-auto"
       >
         <h6 class="mb-3 text-secondary fw-bold">
           <span class="text-primary">📄 Subir Documento PDF</span>
@@ -104,17 +104,23 @@
             (change)="onFileSelected($event)"
             accept="application/pdf"
           />
-          <label class="custom-file-label" for="pdfUpload">
-            {{
-              uploadedFileName ? uploadedFileName : "Seleccionar archivo PDF"
-            }}
+          <label
+            class="custom-file-label text-left text-sm-center"
+            for="pdfUpload"
+          >
+            {{ uploadedFileName ? uploadedFileName : "Seleccionar archivo" }}
           </label>
         </div>
       </div>
 
       <!-- Botones para acciones -->
-      <div class="button-group d-flex justify-content-center gap-3">
-        <button nbButton (click)="generatePDF()" status="primary" class="px-4">
+      <div class="w-100 d-flex justify-content-center">
+        <button
+          nbButton
+          (click)="generatePDF()"
+          status="primary"
+          class="px-4 mr-4"
+        >
           <nb-icon icon="printer-outline" class="me-2"></nb-icon> Imprimir
         </button>
         <button

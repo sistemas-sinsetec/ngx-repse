@@ -1,13 +1,23 @@
 <nb-card accent="primary" class="corporate-card">
   <!-- Encabezado de la tarjeta -->
-  <nb-card-header class="corporate-header">
-    <div class="header-content">
-      <span class="title">Visualizar proyectos</span>
+  <nb-card-header>
+    <div
+      class="d-flex flex-column flex-sm-row align-items-center justify-content-between px-2"
+    >
+      <span class="w-100 text-center text-sm-left mb-2 mb-sm-0"
+        >Visualizar proyectos</span
+      >
+      <!-- Botón para descargar Excel -->
+      <button
+        nbButton
+        status="primary"
+        (click)="downloadExcel()"
+        nbTooltip="Descargar en Excel"
+        class=""
+      >
+        <nb-icon icon="download-outline"></nb-icon> Exportar a Excel
+      </button>
     </div>
-    <!-- Botón para descargar Excel -->
-    <button nbButton status="primary"  (click)="downloadExcel()" nbTooltip="Descargar en Excel">
-      <nb-icon icon="download-outline"></nb-icon> Exportar a Excel
-    </button>
   </nb-card-header>
 
   <!-- Cuerpo de la tarjeta -->
@@ -15,18 +25,29 @@
     <!-- Controles de filtrado con Nebular y Bootstrap -->
     <div class="d-flex align-items-center mb-3">
       <!-- Selector de año con Nebular -->
-      <nb-select [(selected)]="selectedYear" placeholder="Seleccionar año" (selectedChange)="filterByYear()" class="me-2 mr-2">
+      <nb-select
+        [(selected)]="selectedYear"
+        placeholder="Seleccionar año"
+        (selectedChange)="filterByYear()"
+        class="me-2 mr-2 w-100 w-sm-25"
+      >
         <nb-option value="">Seleccionar año</nb-option>
-        <nb-option *ngFor="let year of availableYears" [value]="year">{{ year }}</nb-option>
+        <nb-option *ngFor="let year of availableYears" [value]="year">{{
+          year
+        }}</nb-option>
       </nb-select>
 
       <!-- Botón para reiniciar el filtro con Nebular -->
-      <button nbButton status="warning" (click)="resetFilter()">
-        <nb-icon icon="refresh-outline"></nb-icon> Reiniciar
+      <button nbButton outline (click)="resetFilter()">
+        <nb-icon icon="refresh-outline"></nb-icon>
       </button>
     </div>
 
     <!-- Tabla Smart Table -->
-    <ng2-smart-table [settings]="settings" [source]="filteredSource" class="corporate-table"></ng2-smart-table>
+    <ng2-smart-table
+      [settings]="settings"
+      [source]="filteredSource"
+      class="corporate-table"
+    ></ng2-smart-table>
   </nb-card-body>
 </nb-card>
