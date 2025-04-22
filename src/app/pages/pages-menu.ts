@@ -3,346 +3,442 @@
   se especifican las secciones, subsecciones y la ruta a la que llevan 
 */
 
-import { CustomMenuItem } from './custom-menu-item'; // Asegúrate de usar la ruta correcta
+import { CustomMenuItem } from "./custom-menu-item"; // Asegúrate de usar la ruta correcta
 
 export const MENU_ITEMS: CustomMenuItem[] = [
   // Grupo: Servicios
   {
-    title: 'Mis servicios',
+    title: "Mis servicios",
     group: true,
   },
   {
-    title: 'Sistema REPSE',
-    icon: 'layout-outline',
-    link: '',
+    title: "Sistema REPSE",
+    icon: "layout-outline",
+    link: "",
     hidden: false, // Default visible (se actualizará en runtime)
-    permission: { section: 'Sistema REPSE' }, // Permiso para validar
+    permission: { section: "Sistema REPSE" }, // Permiso para validar
+    children: [
+      {
+        title: "Configuración de documentos",
+        link: "",
+      },
+      {
+        title: "Asignación de requisitos",
+        link: "/pages/repse-system/requirements-assignment",
+      },
+      {
+        title: "Carga de documentos",
+        link: "/pages/repse-system/document-upload",
+      },
+      {
+        title: "Revisión de documentos",
+        link: "/pages/repse-system/document-review",
+      },
+    ],
   },
 
   // Grupo: Proyectos
   {
-    title: 'Gestión de Proyectos',
+    title: "Gestión de Proyectos",
     group: true,
   },
   {
-    title: 'Control de proyectos',
-    icon: 'edit-2-outline',
+    title: "Control de proyectos",
+    icon: "edit-2-outline",
     hidden: false, // Default visible (se actualizará en runtime)
-    permission: { section: 'Control de proyectos' }, // Permiso para validar
+    permission: { section: "Control de proyectos" }, // Permiso para validar
     children: [
       {
-        title: 'Asignación de proyectos',
-        link: '/pages/project-control/assign-projects',
+        title: "Asignación de proyectos",
+        link: "/pages/project-control/assign-projects",
         hidden: false,
-        permission: { section: 'Control de proyectos', subSection: 'Asignacion de proyectos' },
+        permission: {
+          section: "Control de proyectos",
+          subSection: "Asignacion de proyectos",
+        },
       },
       {
-        title: 'Registros de proyectos',
-        link: '',
+        title: "Registros de proyectos",
+        link: "",
         hidden: false,
-        permission: { section: 'Control de proyectos', subSection: 'Registro de proyectos' },
+        permission: {
+          section: "Control de proyectos",
+          subSection: "Registro de proyectos",
+        },
       },
       {
-        title: 'Visualización de proyectos',
-        link: '/pages/project-control/deploy-projects',
+        title: "Visualización de proyectos",
+        link: "/pages/project-control/deploy-projects",
         hidden: false,
-        permission: { section: 'Control de proyectos', subSection: 'Vizualizar proyectos' },
+        permission: {
+          section: "Control de proyectos",
+          subSection: "Vizualizar proyectos",
+        },
       },
       {
-        title: 'Seguimiento de proyectos',
-        link: '',
+        title: "Seguimiento de proyectos",
+        link: "",
         hidden: false,
-        permission: { section: 'Control de proyectos', subSection: 'Seguimiento de proyectos' },
+        permission: {
+          section: "Control de proyectos",
+          subSection: "Seguimiento de proyectos",
+        },
       },
     ],
   },
 
   // Grupo: Empleados
   {
-    title: 'Gestión de Recursos Humanos',
+    title: "Gestión de Recursos Humanos",
     group: true,
   },
   {
-    title: 'Gestión de empleados',
-    icon: 'people-outline',
+    title: "Gestión de empleados",
+    icon: "people-outline",
     hidden: false, // Default visible (se actualizará en runtime)
-    permission: { section: 'Empleados' }, // Permiso para validar
+    permission: { section: "Empleados" }, // Permiso para validar
     children: [
       {
-        title: 'Crear solicitudes',
+        title: "Crear solicitudes",
 
-        link: '/pages/employee-control/add-employees',
+        link: "/pages/employee-control/add-employees",
 
         hidden: false,
-        permission: { section: 'Empleados', subSection: 'Registrar solicitudes de empleados' },
+        permission: {
+          section: "Empleados",
+          subSection: "Registrar solicitudes de empleados",
+        },
       },
       {
-        title: 'Editar solicitudes',
-        link: '/pages/employee-control/edit-employees',
+        title: "Editar solicitudes",
+        link: "/pages/employee-control/edit-employees",
         hidden: false,
-        permission: { section: 'Empleados', subSection: 'Editar solicitudes de empleados' },
+        permission: {
+          section: "Empleados",
+          subSection: "Editar solicitudes de empleados",
+        },
       },
       {
-        title: 'Aceptar solicitudes',
-        link: '/pages/employee-control/accept-requests',
+        title: "Aceptar solicitudes",
+        link: "/pages/employee-control/accept-requests",
         hidden: false,
-        permission: { section: 'Empleados', subSection: 'Aceptar solicitudes de empleados' },
+        permission: {
+          section: "Empleados",
+          subSection: "Aceptar solicitudes de empleados",
+        },
       },
       {
-        title: 'Procesar empleados',
-        link: '/pages/employee-control/process-employees',
+        title: "Procesar empleados",
+        link: "/pages/employee-control/process-employees",
         hidden: false,
-        permission: { section: 'Empleados', subSection: 'Procesar empleados' },
+        permission: { section: "Empleados", subSection: "Procesar empleados" },
       },
       {
-        title: 'Mis empleados',
-        link: '/pages/employee-control/employee-view',
+        title: "Mis empleados",
+        link: "/pages/employee-control/employee-view",
         hidden: false,
-        permission: { section: 'Empleados', subSection: 'Ver empleados registrados' },
+        permission: {
+          section: "Empleados",
+          subSection: "Ver empleados registrados",
+        },
       },
       {
-        title: 'Kardex de vacaciones',
-        link: '/pages/employee-control/vacations-kardex',
+        title: "Kardex de vacaciones",
+        link: "/pages/employee-control/vacations-kardex",
         hidden: false,
-        permission: { section: 'Empleados', subSection: 'Kardex de vacaciones' },
+        permission: {
+          section: "Empleados",
+          subSection: "Kardex de vacaciones",
+        },
       },
     ],
   },
 
   // Grupo: Incidencias
   {
-    title: 'Gestión de Incidencias',
+    title: "Gestión de Incidencias",
     group: true,
   },
   {
-    title: 'Control de incidencias',
-    icon: 'alert-circle-outline',
+    title: "Control de incidencias",
+    icon: "alert-circle-outline",
     hidden: false, // Default visible (se actualizará en runtime)
-    permission: { section: 'Incidencias' },
+    permission: { section: "Incidencias" },
     children: [
       {
-        title: 'Registro de incidencias',
-        link: '/pages/incident-control/incident-viewer',
+        title: "Registro de incidencias",
+        link: "/pages/incident-control/incident-viewer",
         hidden: false,
-        permission: { section: 'Incidencias', subSection: 'Control de incidencias' },
+        permission: {
+          section: "Incidencias",
+          subSection: "Control de incidencias",
+        },
       },
       {
-        title: 'Confirmar día',
-        link: '/pages/incident-control/confirm-day',
+        title: "Confirmar día",
+        link: "/pages/incident-control/confirm-day",
         hidden: false,
-        permission: { section: 'Incidencias', subSection: 'Confirmar dia' },
+        permission: { section: "Incidencias", subSection: "Confirmar dia" },
       },
       {
-        title: 'Confirmar semana',
-        link: '/pages/incident-control/confirm-week',
+        title: "Confirmar semana",
+        link: "/pages/incident-control/confirm-week",
         hidden: false,
-        permission: { section: 'Incidencias', subSection: 'Confirmar semana' },
+        permission: { section: "Incidencias", subSection: "Confirmar semana" },
       },
       {
-        title: 'Semanas Procesadas',
-        link: '/pages/incident-control/process-weekly-lists',
+        title: "Semanas Procesadas",
+        link: "/pages/incident-control/process-weekly-lists",
         hidden: false,
-        permission: { section: 'Incidencias', subSection: 'Semanas procesadas' },
+        permission: {
+          section: "Incidencias",
+          subSection: "Semanas procesadas",
+        },
       },
       {
-        title: 'Listas de asistencias',
-        link: '/pages/incident-control/processed-attendance',
+        title: "Listas de asistencias",
+        link: "/pages/incident-control/processed-attendance",
         hidden: false,
-        permission: { section: 'Incidencias', subSection: 'Lista de asistencia' },
+        permission: {
+          section: "Incidencias",
+          subSection: "Lista de asistencia",
+        },
       },
     ],
   },
   // Grupo: Finanzas
   {
-    title: 'Finanzas',
+    title: "Finanzas",
     group: true,
   },
   {
-    title: 'Costos',
-    icon: 'pricetags-outline',
+    title: "Costos",
+    icon: "pricetags-outline",
     hidden: false, // Default visible (se actualizará en runtime)
-    permission: { section: 'Costos' },
-
+    permission: { section: "Costos" },
   },
   {
-    title: 'Ventas',
-    icon: 'shopping-cart-outline',
+    title: "Ventas",
+    icon: "shopping-cart-outline",
     hidden: false, // Default visible (se actualizará en runtime)
-    permission: { section: 'Ventas' },
-
+    permission: { section: "Ventas" },
   },
 
   // Grupo: Configuración
   {
-    title: 'Configuración y Administración',
+    title: "Configuración y Administración",
     group: true,
   },
   {
-    title: 'Configuración',
-    icon: 'settings-outline',
+    title: "Configuración",
+    icon: "settings-outline",
     children: [
       {
-        title: 'Mi empresa',
-        icon: 'briefcase-outline',
+        title: "Mi empresa",
+        icon: "briefcase-outline",
         hidden: false,
-        permission: { section: 'Configuracion de mi empresa' },
+        permission: { section: "Configuracion de mi empresa" },
         children: [
           {
-            title: 'Asignar logo',
-            link: '/pages/settings/my-company/upload-logo',
+            title: "Asignar logo",
+            link: "/pages/settings/my-company/upload-logo",
             hidden: false,
-            permission: { section: 'Configuracion de mi empresa', subSection: 'Asignar logo de la empresa' },
+            permission: {
+              section: "Configuracion de mi empresa",
+              subSection: "Asignar logo de la empresa",
+            },
           },
           {
-            title: 'Código de mi empresa',
-            link: '/pages/settings/my-company/code-company',
+            title: "Código de mi empresa",
+            link: "/pages/settings/my-company/code-company",
             hidden: false,
-            permission: { section: 'Configuracion de mi empresa', subSection: 'Código de la empresa' },
+            permission: {
+              section: "Configuracion de mi empresa",
+              subSection: "Código de la empresa",
+            },
           },
           {
-            title: 'Mis departamentos',
-            link: '/pages/settings/my-company/department-management',
+            title: "Mis departamentos",
+            link: "/pages/settings/my-company/department-management",
             hidden: false,
-            permission: { section: 'Configuracion de mi empresa', subSection: 'Departamentos' },
+            permission: {
+              section: "Configuracion de mi empresa",
+              subSection: "Departamentos",
+            },
           },
           {
-            title: 'Tipos de periodos',
-            link: '/pages/settings/my-company/period-configuration',
+            title: "Tipos de periodos",
+            link: "/pages/settings/my-company/period-configuration",
             hidden: false,
-            permission: { section: 'Configuracion de mi empresa', subSection: 'Tipos de período' },
+            permission: {
+              section: "Configuracion de mi empresa",
+              subSection: "Tipos de período",
+            },
           },
           {
-            title: 'Catálogo de periodos',
-            link: '/pages/settings/my-company/period-management',
+            title: "Catálogo de periodos",
+            link: "/pages/settings/my-company/period-management",
             hidden: false,
-            permission: { section: 'Configuracion de mi empresa', subSection: 'Catálogo de períodos' },
+            permission: {
+              section: "Configuracion de mi empresa",
+              subSection: "Catálogo de períodos",
+            },
           },
           {
-            title: 'Mi información fiscal',
-            link: '/pages/settings/my-company/company-tax-details',
+            title: "Mi información fiscal",
+            link: "/pages/settings/my-company/company-tax-details",
             hidden: false,
-            permission: { section: 'Configuracion de mi empresa', subSection: 'Mi informacion fiscal' },
+            permission: {
+              section: "Configuracion de mi empresa",
+              subSection: "Mi informacion fiscal",
+            },
           },
           {
-            title: 'Expedientes digitales',
-            link: '/pages/settings/my-company/anual-review',
+            title: "Expedientes digitales",
+            link: "/pages/settings/my-company/anual-review",
             hidden: false,
-            permission: { section: 'Configuracion de mi empresa', subSection: 'Confirmar expendientes digitales' },
+            permission: {
+              section: "Configuracion de mi empresa",
+              subSection: "Confirmar expendientes digitales",
+            },
           },
           {
-            title: 'Subir expedientes digitales',
-            link: '/pages/settings/my-company/anual-upload',
+            title: "Subir expedientes digitales",
+            link: "/pages/settings/my-company/anual-upload",
             hidden: false,
-            permission: { section: 'Configuracion de mi empresa', subSection: 'Subir expendientes digitales' },
+            permission: {
+              section: "Configuracion de mi empresa",
+              subSection: "Subir expendientes digitales",
+            },
           },
           {
-            title: 'Expediente Mensual',
-            link: '/pages/settings/my-company/mensual-review',
+            title: "Expediente Mensual",
+            link: "/pages/settings/my-company/mensual-review",
             hidden: false,
-            permission: { section: 'Configuracion de mi empresa', subSection: 'Confirmar expendientes digitales' },
+            permission: {
+              section: "Configuracion de mi empresa",
+              subSection: "Confirmar expendientes digitales",
+            },
           },
           {
-            title: 'Subir expediente mensual',
-            link: '/pages/settings/my-company/mensual-upload',
+            title: "Subir expediente mensual",
+            link: "/pages/settings/my-company/mensual-upload",
             hidden: false,
-            permission: { section: 'Configuracion de mi empresa', subSection: 'Subir expendientes digitales' },
+            permission: {
+              section: "Configuracion de mi empresa",
+              subSection: "Subir expendientes digitales",
+            },
           },
         ],
       },
       {
-        title: 'Secciones de perfiles',
-        icon: 'eye-off-outline',
-        link: '/pages/settings/permissions-sections',
-        requiredLevel: ['adminS', 'adminE', 'adminEE'], // Arreglo de valores permitidos
+        title: "Secciones de perfiles",
+        icon: "eye-off-outline",
+        link: "/pages/settings/permissions-sections",
+        requiredLevel: ["adminS", "adminE", "adminEE"], // Arreglo de valores permitidos
       },
       {
-        title: 'Socios comerciales',
-        icon: 'person-outline',
+        title: "Socios comerciales",
+        icon: "person-outline",
         hidden: false,
-        permission: { section: 'Configuracion de socios comerciales' },
+        permission: { section: "Configuracion de socios comerciales" },
         children: [
           {
-            title: 'Autorizar socio comercial',
-            link: 'settings/business-partner/cp-auth',
+            title: "Autorizar socio comercial",
+            link: "settings/business-partner/cp-auth",
             hidden: false,
-            permission: { section: 'Configuracion de socios comerciales', subSection: 'Autorizar socio comercial' },
+            permission: {
+              section: "Configuracion de socios comerciales",
+              subSection: "Autorizar socio comercial",
+            },
           },
           {
-            title: 'Editar roles de socios comercial',
-            link: 'settings/business-partner/edit-roles',
+            title: "Editar roles de socios comercial",
+            link: "settings/business-partner/edit-roles",
             hidden: false,
-            permission: { section: 'Configuracion de socios comerciales', subSection: 'Editar roles de los socios comerciales' },
+            permission: {
+              section: "Configuracion de socios comerciales",
+              subSection: "Editar roles de los socios comerciales",
+            },
           },
           {
-            title: 'Registrar socio comercial',
-            link: 'settings/business-partner/business-partner-register',
+            title: "Registrar socio comercial",
+            link: "settings/business-partner/business-partner-register",
             hidden: false,
-            permission: { section: 'Configuracion de socios comerciales', subSection: 'Registrar socio comercial' },
-
+            permission: {
+              section: "Configuracion de socios comerciales",
+              subSection: "Registrar socio comercial",
+            },
           },
           {
-            title: 'Secciones visibles de mis socios comerciales',
-            link: 'settings/business-partner/permissions-businees-partner',
+            title: "Secciones visibles de mis socios comerciales",
+            link: "settings/business-partner/permissions-businees-partner",
             hidden: false,
-            permission: { section: 'Configuracion de socios comerciales', subSection: 'Secciones visibles de los socios comerciales' },
-
+            permission: {
+              section: "Configuracion de socios comerciales",
+              subSection: "Secciones visibles de los socios comerciales",
+            },
           },
         ],
       },
       {
-        title: 'Usuarios',
-        icon: 'person-outline',
+        title: "Usuarios",
+        icon: "person-outline",
         hidden: false,
-        permission: { section: 'Configuracion de usuarios' },
+        permission: { section: "Configuracion de usuarios" },
         children: [
           {
-            title: 'Registrar usuarios',
-            link: '/pages/settings/users/register',
+            title: "Registrar usuarios",
+            link: "/pages/settings/users/register",
             hidden: false,
-            permission: { section: 'Configuracion de usuarios', subSection: 'Registrar usuarios' },
+            permission: {
+              section: "Configuracion de usuarios",
+              subSection: "Registrar usuarios",
+            },
           },
           {
-            title: 'Mis usuarios',
-            link: '/pages/settings/users/my-users',
+            title: "Mis usuarios",
+            link: "/pages/settings/users/my-users",
             hidden: false,
-            permission: { section: 'Configuracion de usuarios', subSection: 'Mis usuarios' },
+            permission: {
+              section: "Configuracion de usuarios",
+              subSection: "Mis usuarios",
+            },
           },
           {
-            title: 'Editar mi usuario',
-            link: '/pages/settings/users/my-profile',
+            title: "Editar mi usuario",
+            link: "/pages/settings/users/my-profile",
             hidden: false,
-            permission: { section: 'Configuracion de usuarios', subSection: 'Editar mi usuario' },
+            permission: {
+              section: "Configuracion de usuarios",
+              subSection: "Editar mi usuario",
+            },
           },
         ],
       },
       {
-        title: 'App',
-        icon: 'smartphone-outline',
-        requiredLevel: ['adminS'], // Asegúrate de que esta propiedad esté definida
+        title: "App",
+        icon: "smartphone-outline",
+        requiredLevel: ["adminS"], // Asegúrate de que esta propiedad esté definida
         children: [
           {
-            title: 'Secciones visibles de empresas',
-            link: '/pages/settings/site/company-permissions-sections',
+            title: "Secciones visibles de empresas",
+            link: "/pages/settings/site/company-permissions-sections",
           },
           {
-            title: 'Empresas registradas',
-            link: '/pages/settings/site/companies-info',
+            title: "Empresas registradas",
+            link: "/pages/settings/site/companies-info",
           },
           {
-            title: 'Registrar empresas',
-            link: '/pages/settings/site/reg-company',
+            title: "Registrar empresas",
+            link: "/pages/settings/site/reg-company",
           },
           {
-            title: 'Confirmar solicitudes premium',
-            link: '/pages/settings/site/premium-auth',
+            title: "Confirmar solicitudes premium",
+            link: "/pages/settings/site/premium-auth",
           },
         ],
       },
     ],
   },
-
-
-
-
 ];
-

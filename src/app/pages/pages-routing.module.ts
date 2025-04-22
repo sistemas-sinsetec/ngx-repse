@@ -58,6 +58,13 @@ const routes: Routes = [
           ),
       },
       {
+        path: "repse-system",
+        loadChildren: () =>
+          import("./repse-system/repse-system.module").then(
+            (m) => m.RepseSystemModule
+          ),
+      },
+      {
         path: "",
         redirectTo: "dashboard",
         pathMatch: "full",

@@ -1,0 +1,232 @@
+<nb-card>
+  <nb-card-header>Asignación de requisitos</nb-card-header>
+  <nb-card-body class="d-flex flex-column">
+    <div class="form-container">
+      <form [formGroup]="requirementsForm" (ngSubmit)="onSubmit()">
+        <div class="row mb-3">
+          <div class="col-md-6 mb-3 mb-sm-0">
+            <nb-select
+              formControlName="documentType"
+              placeholder="Tipo de documento"
+              fullWidth
+            >
+              <nb-option *ngFor="let type of documentTypes" [value]="type">{{
+                type
+              }}</nb-option>
+            </nb-select>
+          </div>
+          <div class="col-md-6 d-flex align-items-center">
+            <nb-checkbox formControlName="isPeriodic"
+              >¿Es periódico?</nb-checkbox
+            >
+          </div>
+        </div>
+
+        <div class="row mb-3" *ngIf="requirementsForm.get('isPeriodic')?.value">
+          <div class="col-md-3 mb-3 mb-sm-0">
+            <nb-form-field>
+              <label for="periodAmount">Cantidad</label>
+              <input
+                nbInput
+                type="number"
+                formControlName="periodAmount"
+                placeholder="0"
+                min="1"
+              />
+            </nb-form-field>
+          </div>
+          <div class="col-md-3 mb-3 mb-sm-0">
+            <nb-form-field>
+              <label for="periodType"> Período </label>
+              <nb-select
+                formControlName="periodType"
+                placeholder="Tipo"
+                fullWidth
+              >
+                <nb-option *ngFor="let type of periodTypes" [value]="type">{{
+                  type
+                }}</nb-option>
+              </nb-select>
+            </nb-form-field>
+          </div>
+          <div class="col-md-6">
+            <nb-form-field>
+              <label for="startDate">Fecha de inicio</label>
+              <input
+                nbInput
+                fullWidth
+                type="date"
+                formControlName="startDate"
+                placeholder="Fecha de inicio"
+              />
+            </nb-form-field>
+          </div>
+        </div>
+
+        <div class="row mb-3">
+          <div class="col-12 col-sm-3">
+            <nb-form-field>
+              <label for="minQuantity">Mínimo de archivos requeridos</label>
+              <input
+                nbInput
+                type="number"
+                formControlName="minQuantity"
+                placeholder="Cantidad mínima"
+                min="1"
+                fullWidth
+              />
+            </nb-form-field>
+          </div>
+        </div>
+
+        <div class="col-12 col-sm-4 p-0">
+          <button
+            nbButton
+            type="submit"
+            [disabled]="!requirementsForm.valid"
+            status="primary"
+            fullWidth
+          >
+            Guardar Configuración
+          </button>
+        </div>
+      </form>
+    </div>
+
+    <hr />
+
+    <h4>Requisitos configurados</h4>
+    <div class="table-container flex-grow-1">
+      <div class="table-responsive">
+        <table class="table" nbTable>
+          <thead>
+            <tr>
+              <th>Documento</th>
+              <th>Activo</th>
+              <th>Periódico</th>
+              <th>Periodicidad</th>
+              <th>Cant. Mínima</th>
+              <th>Socios</th>
+              <th>Acciones</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let req of requirements">
+              <td>{{ req.documentType }}</td>
+              <td>
+                {{ req.isActive ? "Sí" : "No" }}
+              </td>
+              <td>{{ req.isPeriodic ? "Sí" : "No" }}</td>
+              <td>
+                <span *ngIf="req.isPeriodic">
+                  Cada {{ req.periodAmount }} {{ req.periodType }}
+                </span>
+              </td>
+              <td>{{ req.minQuantity }}</td>
+              <td>{{ req.partners.length }} socios</td>
+              <td>
+                <button nbButton size="small" (click)="openPartnerModal(req)">
+                  Gestionar Socios
+                </button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </nb-card-body>
+</nb-card>
+
+<!-- modal de visibilidad de socios -->
+
+<ng-template #partnerModal let-data>
+  <nb-card>
+    <nb-card-header>{{ data.title }}</nb-card-header>
+    <nb-card-body>
+      <div class="row mb-3">
+        <div class="col-md-6">
+          <nb-form-field class="mb-3 mb-sm-0">
+            <nb-icon nbPrefix icon="search" pack="eva"></nb-icon>
+            <input
+              nbInput
+              [formControl]="searchControl"
+              placeholder="Buscar socio"
+              (input)="filterPartners()"
+              fullWidth
+            />
+          </nb-form-field>
+        </div>
+        <div class="col-md-6">
+          <nb-select
+            [formControl]="affiliationFilter"
+            (selectedChange)="filterPartners()"
+            placeholder="Filtrar por afiliación"
+            fullWidth
+          >
+            <nb-option value="todos">Todos</nb-option>
+            <nb-option value="proveedor">Proveedores</nb-option>
+            <nb-option value="cliente">Clientes</nb-option>
+            <nb-option value="proveedor/cliente">Proveedor/Cliente</nb-option>
+          </nb-select>
+        </div>
+      </div>
+
+      <div class="mb-3">
+        <nb-checkbox
+          [checked]="allSelected"
+          [indeterminate]="someSelected()"
+          (checkedChange)="toggleAllSelected($event)"
+        >
+          Seleccionar todos los socios <strong>visibles</strong> ({{
+            filteredPartners.length
+          }})
+        </nb-checkbox>
+      </div>
+
+      <table class="table" nbTable>
+        <thead>
+          <tr>
+            <th>Seleccionar</th>
+            <th>Nombre</th>
+            <th>Afiliación</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let partner of filteredPartners">
+            <td>
+              <nb-checkbox
+                [checked]="partner.selected"
+                (checkedChange)="partner.selected = $event; updateAllSelected()"
+              >
+              </nb-checkbox>
+            </td>
+            <td>{{ partner.name }}</td>
+            <td>{{ partner.affiliation }}</td>
+          </tr>
+        </tbody>
+      </table>
+    </nb-card-body>
+    <nb-card-footer>
+      <div class="d-flex justify-content-center">
+        <button
+          nbButton
+          fullWidth
+          status="primary"
+          (click)="savePartnersSelection()"
+        >
+          Confirmar
+        </button>
+
+        <button
+          nbButton
+          fullWidth
+          status="basic"
+          (click)="closeModal()"
+          class="ml-2"
+        >
+          Cancelar
+        </button>
+      </div>
+    </nb-card-footer>
+  </nb-card>
+</ng-template>
