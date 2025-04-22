@@ -19,10 +19,6 @@ export const MENU_ITEMS: CustomMenuItem[] = [
     permission: { section: "Sistema REPSE" }, // Permiso para validar
     children: [
       {
-        title: "Configuración de documentos",
-        link: "",
-      },
-      {
         title: "Asignación de requisitos",
         link: "/pages/repse-system/requirements-assignment",
       },
@@ -436,6 +432,10 @@ export const MENU_ITEMS: CustomMenuItem[] = [
           {
             title: "Confirmar solicitudes premium",
             link: "/pages/settings/site/premium-auth",
+          },
+          {
+            title: "Configuración de documentos",
+            link: "/pages/settings/site/document-config",
           },
         ],
       },

@@ -22,6 +22,7 @@ import {
   NbTagModule,
   NbUserModule,
   NbSpinnerModule,
+  NbDialogModule,
 } from "@nebular/theme";
 import { ThemeModule } from "../../@theme/theme.module";
 import { SettingsRoutingModule } from "./settings-routing.module";
@@ -67,6 +68,7 @@ import { PermissionsBusineesPartnerComponent } from "./business-partner/permissi
 import { DeleteModalComponent } from "./site/delete-modal/delete-modal.component";
 import { MensualUploadComponent } from "./my-company/mensual-upload/mensual-upload.component";
 import { MensualReviewComponent } from "./my-company/mensual-review/mensual-review.component";
+import { DocumentConfigComponent } from "./site/document-config/document-config.component";
 
 @NgModule({
   declarations: [
@@ -110,6 +112,7 @@ import { MensualReviewComponent } from "./my-company/mensual-review/mensual-revi
     DeleteModalComponent,
     MensualUploadComponent,
     MensualReviewComponent,
+    DocumentConfigComponent,
   ],
   imports: [
     ThemeModule,
@@ -122,10 +125,12 @@ import { MensualReviewComponent } from "./my-company/mensual-review/mensual-revi
     NbListModule,
     NbCheckboxModule,
     FormsModule,
+    ReactiveFormsModule,
     NbCalendarModule,
     NbCalendarKitModule,
     NbCalendarRangeModule,
     NbDatepickerModule.forRoot(),
+    NbDialogModule.forRoot(),
     NbOptionModule, // Aquí añadimos el Datepicker
     Ng2SmartTableModule,
     NbSelectModule,
