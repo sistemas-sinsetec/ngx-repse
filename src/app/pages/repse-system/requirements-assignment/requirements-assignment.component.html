@@ -55,10 +55,17 @@
               <input
                 nbInput
                 fullWidth
-                type="date"
+                [nbDatepicker]="datepicker"
                 formControlName="startDate"
-                placeholder="Fecha de inicio"
+                placeholder="YYYY-MM-DD"
+                [min]="minDate"
+                readonly
               />
+              <nb-datepicker
+                #datepicker
+                format="yyyy-MM-dd"
+                [filter]="dateFilter"
+              ></nb-datepicker>
             </nb-form-field>
           </div>
         </div>

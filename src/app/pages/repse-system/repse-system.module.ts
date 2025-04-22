@@ -13,6 +13,7 @@ import {
   NbDialogModule,
   NbFormFieldModule,
   NbIconModule,
+  NbDatepickerModule,
 } from "@nebular/theme";
 import { FormsModule, ReactiveFormsModule } from "@angular/forms";
 
@@ -33,6 +34,7 @@ import { DocumentReviewComponent } from "./document-review/document-review.compo
     FormsModule,
     ReactiveFormsModule,
     NbCardModule,
+    NbDatepickerModule.forRoot(),
     NbSelectModule,
     NbInputModule,
     NbButtonModule,

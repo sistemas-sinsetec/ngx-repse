@@ -1,8 +1,10 @@
 import { Component, OnInit, TemplateRef, ViewChild } from "@angular/core";
 import {
+  AbstractControl,
   FormBuilder,
   FormControl,
   FormGroup,
+  ValidationErrors,
   Validators,
 } from "@angular/forms";
 import { NbDialogRef, NbDialogService } from "@nebular/theme";
@@ -39,6 +41,7 @@ interface Partner {
 export class RequirementsAssignmentComponent implements OnInit {
   requirementsForm: FormGroup;
   requirements: Requirement[] = [];
+  minDate: Date;
 
   documentTypes: { id: number; name: string }[] = [];
   periodTypes = ["semanas", "meses", "años"];
@@ -64,12 +67,15 @@ export class RequirementsAssignmentComponent implements OnInit {
     private http: HttpClient,
     private companyService: CompanyService
   ) {
+    this.minDate = new Date();
+    this.minDate.setHours(0, 0, 0, 0);
+
     this.requirementsForm = this.fb.group({
       documentType: [null, Validators.required],
       isPeriodic: [false],
       periodAmount: [null],
       periodType: ["semanas"],
-      startDate: [null],
+      startDate: [null, [this.validateDate.bind(this)]],
       minQuantity: [1, [Validators.required, Validators.min(1)]],
     });
 
@@ -89,6 +95,19 @@ export class RequirementsAssignmentComponent implements OnInit {
   ngOnInit(): void {
     this.loadDocumentTypes();
     this.loadRequirements();
+  }
+
+  validateDate(control: AbstractControl): ValidationErrors | null {
+    if (!control.value) return null;
+
+    const selectedDate = new Date(control.value);
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    if (selectedDate < today) {
+      return { invalidDate: true };
+    }
+    return null;
   }
 
   private loadDocumentTypes(): void {
@@ -301,4 +320,10 @@ export class RequirementsAssignmentComponent implements OnInit {
   closeModal(): void {
     this.dialogRef.close();
   }
+
+  dateFilter = (date: Date): boolean => {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    return date >= today;
+  };
 }
