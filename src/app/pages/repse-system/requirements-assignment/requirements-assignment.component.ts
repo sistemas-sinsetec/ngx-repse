@@ -7,6 +7,8 @@ import {
 } from "@angular/forms";
 import { NbDialogRef, NbDialogService } from "@nebular/theme";
 import { HttpClient, HttpParams } from "@angular/common/http";
+import { forkJoin, Observable } from "rxjs";
+import { map } from "rxjs/operators";
 import { environment } from "../../../../environments/environment";
 import { CompanyService } from "../../../services/company.service";
 
@@ -20,6 +22,13 @@ interface Requirement {
   startDate?: Date;
   minQuantity: number;
   partners: string[];
+}
+
+interface Partner {
+  id: number;
+  name: string;
+  affiliation: string;
+  selected: boolean;
 }
 
 @Component({
@@ -36,12 +45,14 @@ export class RequirementsAssignmentComponent implements OnInit {
 
   private fileTypesUrl = `${environment.apiBaseUrl}/file_types.php`;
   private reqFilesUrl = `${environment.apiBaseUrl}/company_required_files.php`;
+  private visibUrl = `${environment.apiBaseUrl}/required_file_visibilities.php`;
+  private bpUrl = `${environment.apiBaseUrl}/getBusinessPartner.php`;
 
-  // Modal partners
   @ViewChild("partnerModal") partnerModalTemplate!: TemplateRef<any>;
   selectedRequirement!: Requirement;
-  allPartners: any[] = [];
-  filteredPartners: any[] = [];
+  allPartners: Partner[] = [];
+  filteredPartners: Partner[] = [];
+  initialVisibleIds: number[] = [];
   searchControl = new FormControl("");
   affiliationFilter = new FormControl("todos");
   allSelected = false;
@@ -109,7 +120,8 @@ export class RequirementsAssignmentComponent implements OnInit {
             periodType: cfg.periodicity_type,
             startDate: new Date(cfg.start_date),
             minQuantity: cfg.min_documents_needed,
-            partners: [],
+            // Rellenamos un array de longitud partner_count
+            partners: Array(cfg.partner_count).fill(""),
           }));
         },
         error: (err) => console.error("Error cargando requisitos", err),
@@ -163,31 +175,63 @@ export class RequirementsAssignmentComponent implements OnInit {
   }
 
   toggleActive(req: Requirement): void {
-    req.isActive = !req.isActive;
-    // Aquí podrías hacer PUT a reqFilesUrl para guardar el cambio
+    const payload = {
+      required_file_id: req.id,
+      is_active: req.isActive ? 0 : 1,
+    };
+    this.http.put(this.reqFilesUrl, payload).subscribe({
+      next: () => (req.isActive = !req.isActive),
+      error: (err) => console.error("Error toggle active", err),
+    });
   }
 
-  private getAvailablePartners(): any[] {
-    return [
-      { id: 1, name: "Socio 1", affiliation: "proveedor" },
-      { id: 2, name: "Socio 2", affiliation: "cliente" },
-      { id: 3, name: "Socio 3", affiliation: "proveedor/cliente" },
-      { id: 4, name: "Socio 4", affiliation: "cliente" },
-    ];
+  private loadBusinessPartners(): Observable<Partner[]> {
+    const params = new HttpParams().set(
+      "association_id",
+      this.companyService.selectedCompany.id.toString()
+    );
+    return this.http.get<any[]>(this.bpUrl, { params }).pipe(
+      map((list) =>
+        list.map((p) => ({
+          id: +p.businessPartnerId, // <-- el + fuerza número
+          name: p.nameCompany,
+          affiliation: p.roleName,
+          selected: false,
+        }))
+      )
+    );
   }
 
   openPartnerModal(req: Requirement): void {
     this.selectedRequirement = req;
-    this.allPartners = this.getAvailablePartners().map((p) => ({
-      ...p,
-      selected: req.partners.includes(p.name),
-    }));
-    this.filteredPartners = [...this.allPartners];
-    this.updateAllSelected();
 
-    this.dialogRef = this.dialogService.open(this.partnerModalTemplate, {
-      context: { title: `Socios que pueden ver ${req.documentType}` },
-      hasScroll: true,
+    const vis$ = this.http.get<
+      { visibility_id: number; provider_id: number; is_visible: number }[]
+    >(this.visibUrl, {
+      params: new HttpParams().set("required_file_id", req.id.toString()),
+    });
+    const bp$ = this.loadBusinessPartners();
+
+    forkJoin([bp$, vis$]).subscribe({
+      next: ([partners, vis]) => {
+        this.initialVisibleIds = vis
+          .filter((v) => v.is_visible === 1)
+          .map((v) => v.provider_id);
+
+        this.allPartners = partners.map((p) => ({
+          ...p,
+          selected: this.initialVisibleIds.includes(p.id),
+        }));
+        this.filteredPartners = [...this.allPartners];
+        this.updateAllSelected();
+
+        this.dialogRef = this.dialogService.open(this.partnerModalTemplate, {
+          context: { title: `Socios que pueden ver ${req.documentType}` },
+          hasScroll: true,
+        });
+      },
+      error: (err) =>
+        console.error("Error cargando socios o visibilidades", err),
     });
   }
 
@@ -205,8 +249,9 @@ export class RequirementsAssignmentComponent implements OnInit {
   toggleAllSelected(checked: boolean): void {
     this.filteredPartners.forEach((p) => (p.selected = checked));
     this.allPartners.forEach((p) => {
-      if (this.filteredPartners.some((fp) => fp.id === p.id))
+      if (this.filteredPartners.some((fp) => fp.id === p.id)) {
         p.selected = checked;
+      }
     });
     this.allSelected = checked;
   }
@@ -220,11 +265,37 @@ export class RequirementsAssignmentComponent implements OnInit {
   }
 
   savePartnersSelection(): void {
+    const toAdd = this.allPartners.filter(
+      (p) => p.selected && !this.initialVisibleIds.includes(p.id)
+    );
+    const toRemove = this.initialVisibleIds.filter(
+      (id) => !this.allPartners.some((p) => p.id === id && p.selected)
+    );
+
+    toAdd.forEach((p) => {
+      this.http
+        .post(this.visibUrl, {
+          required_file_id: this.selectedRequirement.id,
+          provider_id: p.id,
+          is_visible: 1,
+        })
+        .subscribe();
+    });
+    toRemove.forEach((id) => {
+      const params = new HttpParams()
+        .set("required_file_id", this.selectedRequirement.id.toString())
+        .set("provider_id", id.toString());
+      this.http.delete(this.visibUrl, { params }).subscribe();
+    });
+
     this.selectedRequirement.partners = this.allPartners
       .filter((p) => p.selected)
       .map((p) => p.name);
+    this.initialVisibleIds = this.allPartners
+      .filter((p) => p.selected)
+      .map((p) => p.id);
+
     this.dialogRef.close();
-    // Aquí guardas la visibilidad en el backend
   }
 
   closeModal(): void {
