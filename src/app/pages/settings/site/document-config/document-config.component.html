@@ -1,12 +1,12 @@
 <!-- document-config.component.html -->
 <nb-card>
-  <nb-card-header>Configuración de Documentos</nb-card-header>
+  <nb-card-header>Configuración de documentos</nb-card-header>
   <nb-card-body>
     <form [formGroup]="documentForm" (ngSubmit)="onSubmit()">
       <div class="row">
         <div class="col-md-4">
           <div class="form-group">
-            <label for="name" class="label">Nombre del Documento</label>
+            <label for="name">Nombre del documento</label>
             <input
               nbInput
               fullWidth
@@ -19,7 +19,7 @@
         </div>
         <div class="col-md-6">
           <div class="form-group">
-            <label for="description" class="label">Descripción</label>
+            <label for="description">Descripción</label>
             <input
               nbInput
               fullWidth
@@ -30,13 +30,18 @@
             />
           </div>
         </div>
-        <div class="col-md-2">
+        <div class="col-md-2 d-flex align-items-center">
           <div class="form-group">
             <nb-checkbox formControlName="active">Activo</nb-checkbox>
           </div>
         </div>
       </div>
-      <button nbButton type="submit" [disabled]="!documentForm.valid">
+      <button
+        nbButton
+        type="submit"
+        status="primary"
+        [disabled]="!documentForm.valid"
+      >
         Agregar Documento
       </button>
     </form>
@@ -57,29 +62,31 @@
             <td>{{ doc.description }}</td>
             <td>
               <nb-tag
+                appearance="outline"
                 [text]="doc.active ? 'Activo' : 'Inactivo'"
                 [status]="doc.active ? 'success' : 'danger'"
               ></nb-tag>
             </td>
             <td class="actions">
-              <button
-                nbButton
-                size="small"
-                (click)="onEdit(doc)"
-                ghost
-                status="info"
-              >
-                <nb-icon icon="edit-2-outline"></nb-icon>
-              </button>
-              <button
-                nbButton
-                size="small"
-                (click)="onDelete(doc)"
-                ghost
-                status="danger"
-              >
-                <nb-icon icon="trash-2-outline"></nb-icon>
-              </button>
+              <div class="d-flex flex-column flex-sm-row">
+                <button
+                  nbButton
+                  size="small"
+                  (click)="onEdit(doc)"
+                  status="primary"
+                  class="mb-2 mb-sm-0 mr-sm-2"
+                >
+                  <nb-icon icon="edit-2-outline"></nb-icon>
+                </button>
+                <button
+                  nbButton
+                  size="small"
+                  (click)="onDelete(doc)"
+                  status="danger"
+                >
+                  <nb-icon icon="trash-2-outline"></nb-icon>
+                </button>
+              </div>
             </td>
           </tr>
         </tbody>
@@ -91,10 +98,10 @@
 <!-- Template para el modal de edición -->
 <ng-template #editModal let-data>
   <nb-card>
-    <nb-card-header>Editar Documento</nb-card-header>
+    <nb-card-header>Editar documento</nb-card-header>
     <nb-card-body>
       <div class="form-group">
-        <label for="editName" class="label">Nombre del Documento</label>
+        <label for="editName" class="label">Nombre del documento</label>
         <input
           nbInput
           fullWidth
@@ -123,7 +130,9 @@
       <button nbButton status="primary" (click)="confirmEdit()">
         Guardar Cambios
       </button>
-      <button nbButton status="basic" (click)="cancelEdit()">Cancelar</button>
+      <button nbButton status="basic" (click)="cancelEdit()" class="ml-3">
+        Cancelar
+      </button>
     </nb-card-footer>
   </nb-card>
 </ng-template>
@@ -131,7 +140,7 @@
 <!-- Template para el modal de eliminación -->
 <ng-template #deleteModal let-data>
   <nb-card>
-    <nb-card-header>Confirmar Eliminación</nb-card-header>
+    <nb-card-header>Confirmar eliminación</nb-card-header>
     <nb-card-body>
       <p>¿Estás seguro que deseas eliminar "{{ data.name }}"?</p>
       <p>Esta acción no se puede deshacer.</p>
@@ -140,7 +149,9 @@
       <button nbButton status="danger" (click)="confirmDelete()">
         Eliminar
       </button>
-      <button nbButton status="basic" (click)="cancelDelete()">Cancelar</button>
+      <button nbButton status="basic" (click)="cancelDelete()" class="ml-3">
+        Cancelar
+      </button>
     </nb-card-footer>
   </nb-card>
 </ng-template>
