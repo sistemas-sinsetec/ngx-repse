@@ -1,0 +1,11 @@
+.form-container {
+  flex-shrink: 0; /* Evita que se reduzca */
+}
+
+.table-container {
+  overflow: auto;
+
+  .table-responsive {
+    min-height: min-content; /* Asegura que el contenedor tenga al menos el alto del contenido */
+  }
+}

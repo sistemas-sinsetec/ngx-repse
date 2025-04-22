@@ -1,7 +1,7 @@
 import { Component } from "@angular/core";
 
 @Component({
-  selector: "ngx-project-control",
+  selector: "ngx-repse-system",
   template: ` <router-outlet></router-outlet> `,
 })
-export class ProjectControlComponent {}
+export class RepseSystemComponent {}
