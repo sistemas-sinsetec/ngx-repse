@@ -57,10 +57,12 @@ export class DocumentConfigComponent implements OnInit {
     this.http.get<any[]>(this.baseUrl).subscribe({
       next: (data) => {
         this.documentTypes = data.map((item) => ({
-          id: item.file_type_id,
+          id: Number(item.file_type_id),
           name: item.name,
           description: item.description,
-          active: item.is_active === 1,
+          // Aquí convertimos "1" a 1 y comparamos:
+          active: Number(item.is_active) === 1,
+          // o bien: active: item.is_active === '1',
         }));
       },
       error: (err) => {

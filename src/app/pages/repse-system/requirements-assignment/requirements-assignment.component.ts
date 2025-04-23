@@ -113,10 +113,14 @@ export class RequirementsAssignmentComponent implements OnInit {
   private loadDocumentTypes(): void {
     this.http.get<any[]>(this.fileTypesUrl).subscribe({
       next: (types) => {
-        this.documentTypes = types.map((t) => ({
-          id: t.file_type_id,
-          name: t.name,
-        }));
+        this.documentTypes = types
+          // primero filtramos los activos (si viene como "1" o como número 1)
+          .filter((t) => Number(t.is_active) === 1)
+          // luego mapeamos al formato que usas
+          .map((t) => ({
+            id: Number(t.file_type_id),
+            name: t.name,
+          }));
       },
       error: (err) => console.error("Error cargando tipos de documento", err),
     });
