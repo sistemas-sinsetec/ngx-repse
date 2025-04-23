@@ -165,7 +165,9 @@
                   <td [ngClass]="{ baja: empleado.employee_status === 'B' }">
                     {{ empleado.email }}
                   </td>
-                  <td>
+                  <td
+                    class="px-0 d-flex justify-content-center align-items-center"
+                  >
                     <button
                       title="Ver detalles"
                       nbButton
@@ -187,6 +189,7 @@
                         employeeHasUser(empleado.employee_id) ||
                         empleado.employee_status === 'B'
                       "
+                      class="ml-2"
                     >
                       <nb-icon icon="person-add-outline"></nb-icon>
                     </button>

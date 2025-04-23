@@ -10,10 +10,14 @@
       <div class="corporate-section">
         <h6 class="section-title">Logo Actual</h6>
         <div *ngIf="currentLogo" class="logo-container">
-          <img [src]="currentLogo" alt="Logo actual" class="logo-img">
+          <img [src]="currentLogo" alt="Logo actual" class="logo-img" />
         </div>
         <div *ngIf="!currentLogo" class="placeholder-container">
-          <nb-icon icon="image-outline" pack="eva" class="placeholder-icon"></nb-icon>
+          <nb-icon
+            icon="image-outline"
+            pack="eva"
+            class="placeholder-icon"
+          ></nb-icon>
           <span class="placeholder-text">Sin logo actual</span>
         </div>
       </div>
@@ -30,7 +34,11 @@
             class="upload-input"
           />
           <label for="logoUpload" class="upload-label">
-            <nb-icon icon="cloud-upload-outline" pack="eva" class="upload-icon"></nb-icon>
+            <nb-icon
+              icon="cloud-upload-outline"
+              pack="eva"
+              class="upload-icon"
+            ></nb-icon>
             Seleccionar archivo
           </label>
         </div>
@@ -38,14 +46,19 @@
         <!-- Vista previa -->
         <div *ngIf="previewLogo" class="preview-container">
           <h6 class="preview-title">Vista Previa</h6>
-          <img [src]="previewLogo" alt="Vista previa" class="preview-img">
+          <img [src]="previewLogo" alt="Vista previa" class="preview-img" />
         </div>
       </div>
     </div>
 
     <!-- Botón para subir -->
     <div class="button-container">
-      <button nbButton status="success" size="large" (click)="uploadLogo()" [disabled]="!selectedFile">
+      <button
+        nbButton
+        status="success"
+        (click)="uploadLogo()"
+        [disabled]="!selectedFile"
+      >
         <nb-icon icon="checkmark-outline"></nb-icon>
         Subir Logo
       </button>

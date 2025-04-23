@@ -1,308 +1,518 @@
-<nb-card class="p-4 scrollable-container">
-  <nb-card accent="info">
-    <nb-card-header status="success">
-      <h2 *ngIf="employee.request_id" class="folio-text">
-        Folio: {{ employee.request_id }}
-      </h2>
-    </nb-card-header>
+<nb-card class="p-0 p-sm-2 scrollable-container">
+  <nb-card-body>
+    <nb-card>
+      <nb-card-header status="success">
+        <h2 *ngIf="employee.request_id">Folio: {{ employee.request_id }}</h2>
+      </nb-card-header>
 
-    <nb-card-body>
-      <!-- Contenedor del perfil -->
-      <div class="profile-container text-center">
+      <nb-card-body class="p-2 p-sm-3">
+        <!-- Contenedor del perfil -->
+        <div class="text-center">
+          <!-- Foto de perfil -->
 
-        <!-- Foto de perfil -->
+          <div class="mb-3" (click)="triggerFileInput('photo-input')">
+            <img
+              [src]="employee.photo || '/assets/images/default-profile.png'"
+              width="150px"
+              alt="Foto de perfil"
+              class="img-fluid"
+            />
+            <input
+              type="file"
+              id="photo-input"
+              (change)="onPhotoChange($event)"
+              hidden
+            />
+          </div>
 
-        <div class="image-container" (click)="triggerFileInput('photo-input')">
-          <img [src]="employee.photo || '/assets/images/default-profile.png'" width="150px" alt="Foto de perfil"
-            class="profile-picture">
-          <input type="file" id="photo-input" (change)="onPhotoChange($event)" hidden>
-        </div>
+          <!-- <button nbButton status="info" (click)="triggerFileInput('photo-input')">Cambiar Foto</button> -->
 
-        <!-- <button nbButton status="info" (click)="triggerFileInput('photo-input')">Cambiar Foto</button> -->
+          <!-- Nombre del empleado -->
+          <h2 class="employee-name">{{ employee.full_name }}</h2>
+          <p class="employee-code">Código: {{ employee.employee_code }}</p>
 
-        <!-- Nombre del empleado -->
-        <h2 class="employee-name">{{ employee.full_name }}</h2>
-        <p class="employee-code">Código: {{ employee.employee_code }}</p>
+          <p *ngIf="employee.folio_number_imss && employee.lot_number_imss">
+            Folio IMSS: {{ employee.folio_number_imss }} <br />
+            Número de Lote IMSS: {{ employee.lot_number_imss }}
+          </p>
 
-        <p *ngIf="employee.folio_number_imss && employee.lot_number_imss">
-          Folio IMSS: {{ employee.folio_number_imss }} <br>
-          Número de Lote IMSS: {{ employee.lot_number_imss }}
-        </p>
-
-        <p *ngIf="employee.request_id && employee.folio_number_imss && employee.lot_number_imss; else notActiveImss"
-          class="imss-status">
-          Activo en el IMSS
-        </p>
-        <ng-template #notActiveImss>
-          <p class="imss-status">No activo en el IMSS</p>
-        </ng-template>
-
-        <button class="btn-download-info" nbButton status="success" (click)="downloadEmployeeData()">Descargar
-          Información del Usuario</button>
-
-      </div>
-    </nb-card-body>
-  </nb-card>
-
-  <!-- Tarjetas de información -->
-  <nb-card class="mb-4">
-    <nb-card-header class="bg-primary text-white">
-      <h5 class="mb-0">Información General</h5>
-    </nb-card-header>
-    <nb-card-body>
-      <nb-form-field>
-        <label>Código de Empleado</label>
-        <input nbInput fullWidth shape="semi-round" [(ngModel)]="employee.employee_code">
-      </nb-form-field>
-      <nb-form-field>
-        <label>Nombre</label>
-        <input nbInput fullWidth shape="semi-round" [(ngModel)]="employee.first_name" #firstName="ngModel"
-          required (keypress)="soloLetrasEspacios($event)" />
-        <small class="text-danger" *ngIf="firstName.invalid && firstName.touched">
-          El nombre es requerido y solo debe contener letras.
-        </small>
-      </nb-form-field>
-    <!-- Apellido Paterno -->
-      <nb-form-field>
-        <label>Apellido Paterno</label>
-        <input nbInput fullWidth shape="semi-round" [(ngModel)]="employee.last_name" #lastName="ngModel"
-          required (keypress)="soloLetrasEspacios($event)" />
-        <small class="text-danger" *ngIf="lastName.invalid && lastName.touched">
-          El apellido paterno es requerido y solo debe contener letras.
-        </small>
-      </nb-form-field>
-      <!-- Teléfono -->
-      <nb-form-field>
-        <label>Teléfono</label>
-        <input nbInput fullWidth shape="semi-round" [(ngModel)]="employee.phone_number" #phoneNumber="ngModel"
-          required pattern="^\d{10}$" maxlength="10"
-          oninput="this.value = this.value.replace(/[^0-9]/g, '')" />
-        <small class="text-danger" *ngIf="phoneNumber.invalid && phoneNumber.touched">
-          El teléfono debe contener exactamente 10 dígitos numéricos.
-        </small>
-      </nb-form-field>
-      <nb-form-field>
-        <label>Fecha de Nacimiento</label>
-        <input nbInput fullWidth shape="semi-round" [(ngModel)]="employee.birth_date" type="date">
-      </nb-form-field>
-      <nb-form-field>
-        <label>Lugar de Nacimiento</label>
-        <input nbInput fullWidth shape="semi-round" [(ngModel)]="employee.birth_place" (keypress)="soloLetrasEspacios($event)">
-      </nb-form-field>
-      <nb-form-field>
-        <label>CURP</label>
-        <input nbInput fullWidth shape="semi-round" [(ngModel)]="employee.curp" #curp="ngModel"
-          required pattern="^[A-Z0-9]{18}$" />
-        <small class="text-danger" *ngIf="curp.invalid && curp.touched">
-          La CURP debe contener exactamente 18 caracteres alfanuméricos en mayúsculas.
-        </small>
-      </nb-form-field>
-     <!-- RFC -->
-      <nb-form-field>
-        <label>RFC</label>
-        <input nbInput fullWidth shape="semi-round" [(ngModel)]="employee.rfc" #rfc="ngModel"
-          required pattern="^[A-Z0-9]{12,13}$" />
-        <small class="text-danger" *ngIf="rfc.invalid && rfc.touched">
-          El RFC debe contener entre 12 y 13 caracteres alfanuméricos en mayúsculas.
-        </small>
-      </nb-form-field>
-      <nb-form-field>
-        <label>Teléfono</label>
-        <input nbInput fullWidth shape="semi-round" [(ngModel)]="employee.phone_number" pattern="\d*"
-          oninput="this.value = this.value.replace(/[^0-9]/g, '')">
-      </nb-form-field>
-     <!-- Correo Electrónico -->
-      <nb-form-field>
-        <label>Correo Electrónico</label>
-        <input nbInput fullWidth shape="semi-round" [(ngModel)]="employee.email" #email="ngModel"
-          required email />
-        <small class="text-danger" *ngIf="email.invalid && email.touched">
-          Ingrese un correo válido.
-        </small>
-      </nb-form-field>
-      <nb-form-field>
-        <label>Género</label>
-        <nb-select fullWidth shape="semi-round" [(ngModel)]="employee.gender_id">
-          <nb-option *ngFor="let gender of genders" [value]="gender.gender_id">
-            {{ gender.gender_name }}
-          </nb-option>
-        </nb-select>
-      </nb-form-field>
-      <nb-form-field>
-        <label>Estado Civil</label>
-        <nb-select fullWidth shape="semi-round" [(ngModel)]="employee.marital_status_id">
-          <nb-option *ngFor="let status of maritalStatuses" [value]="status.status_id">
-            {{ status.status_name }}
-          </nb-option>
-        </nb-select>
-      </nb-form-field>
-      <div class="text-center">
-        <button nbButton status="primary" (click)="saveGeneralInfo()" class="btn-save-info">Guardar Cambios de
-          Información General</button>
-      </div>
-    </nb-card-body>
-  </nb-card>
-
-  <!-- Tarjetas similares para Información Financiera, Laboral y de Emergencia -->
-  <nb-card class="mb-4">
-    <nb-card-header class="bg-primary text-white">
-      <h5 class="mb-0">Información Financiera y Bancaria</h5>
-    </nb-card-header>
-    <nb-card-body>
-      <nb-form-field>
-        <label>Número de Seguro Social</label>
-        <input nbInput fullWidth shape="semi-round" [(ngModel)]="employee.social_security_number" #nss="ngModel"
-          required pattern="^\d{11}$" maxlength="11"
-          oninput="this.value = this.value.replace(/[^0-9]/g, '')" />
-        <small class="text-danger" *ngIf="nss.invalid && nss.touched">
-          El NSS debe contener exactamente 11 dígitos numéricos.
-        </small>
-      </nb-form-field>
-      <nb-form-field>
-        <label>Número de Cuenta Bancaria</label>
-        <input nbInput fullWidth shape="semi-round" [(ngModel)]="employee.bank_account_number" type="number"
-          pattern="\d*" oninput="this.value = this.value.replace(/[^0-9]/g, '')">
-      </nb-form-field>
-      <nb-form-field>
-        <label>Banco</label>
-        <input nbInput fullWidth shape="semi-round" [(ngModel)]="employee.bank_name">
-      </nb-form-field>
-      <nb-form-field>
-        <label>Sucursal</label>
-        <input nbInput fullWidth shape="semi-round" [(ngModel)]="employee.bank_branch">
-      </nb-form-field>
-      <nb-form-field>
-        <label>CLABE Interbancaria</label>
-        <input nbInput fullWidth shape="semi-round" [(ngModel)]="employee.clabe" #clabe="ngModel"
-          pattern="^\d{18}$" maxlength="18"
-          oninput="this.value = this.value.replace(/[^0-9]/g, '')" />
-        <small class="text-danger" *ngIf="clabe.invalid && clabe.touched">
-          La CLABE debe contener exactamente 18 dígitos numéricos.
-        </small>
-      </nb-form-field>
-      <div class="text-center">
-        <button nbButton status="primary" (click)="saveFinancialInfo()">Guardar Información Financiera</button>
-      </div>
-    </nb-card-body>
-  </nb-card>
-
-  <!--  Informacion de trabajo-->
-  <nb-card class="mb-4">
-    <nb-card-header class="bg-primary text-white">
-      <h5 class="mb-0">Información De Trabajo</h5>
-    </nb-card-header>
-    <nb-card-body>
-
-      <nb-form-field>
-        <label>Departamento</label>
-        <nb-select fullWidth shape="semi-round" [(ngModel)]="employee.department_id">
-          <nb-option *ngFor="let departament of departamentos" [value]="departament.department_id">
-            {{ departament.department_name }}
-          </nb-option>
-        </nb-select>
-      </nb-form-field>
-
-      <nb-form-field>
-        <label>Puesto</label>
-        <nb-select fullWidth shape="semi-round" [(ngModel)]="employee.position_id">
-          <nb-option *ngFor="let puesto of puestos" [value]="puesto.position_id">
-            {{ puesto.position_name }}
-          </nb-option>
-        </nb-select>
-      </nb-form-field>
-
-      <nb-form-field>
-        <label>Turno</label>
-        <nb-select fullWidth shape="semi-round" placeholder="Seleccionar" [(ngModel)]="employee.shift_id">
-          <nb-option *ngFor="let turno of turnos" [value]="turno.shift_id">
-            {{ turno.shift_name }}
-          </nb-option>
-        </nb-select>
-      </nb-form-field>
-<!-- Fecha de Inicio -->
-<nb-form-field>
-  <label>Fecha de Inicio</label>
-  <input nbInput fullWidth shape="semi-round" [(ngModel)]="employee.start_date" #startDate="ngModel"
-    required type="date" />
-  <small class="text-danger" *ngIf="startDate.invalid && startDate.touched">
-    La fecha de inicio es obligatoria.
-  </small>
-</nb-form-field>
-
-
-      <!-- Sueldo Neto -->
-      <nb-form-field>
-        <label>Sueldo Neto*</label>
-        <input fullWidth shape="semi-round" nbInput type="number" [(ngModel)]="employee.net_balance"
-        (keypress)="soloNumeros($event)"
- />
-      </nb-form-field>
-
-      <!-- Sueldo Diario -->
-      <nb-form-field>
-        <label>Sueldo Diario*</label>
-        <input fullWidth shape="semi-round" nbInput type="number" [(ngModel)]="employee.daily_salary"
-        (keypress)="soloNumeros($event)"
-/>
-      </nb-form-field>
-
-      <div class="text-center">
-        <button nbButton status="primary" (click)="saveWorkInfo()">Guardar Información De Trabajo</button>
-      </div>
-
-    </nb-card-body>
-  </nb-card>
-
-  <!-- Contacto de Emergencia -->
-  <nb-card class="mb-4">
-    <nb-card-header class="bg-primary text-white">
-      <h5 class="mb-0">Contacto De Emergencia</h5>
-    </nb-card-header>
-    <nb-card-body>
-      <nb-form-field>
-        <label>Contacto de Emergencia</label>
-        <input fullWidth shape="semi-round" nbInput type="text" [(ngModel)]="employee.emergency_contact_name" 
-        (keypress)="soloLetrasEspacios($event)" />
-      </nb-form-field>
-
-      <nb-form-field>
-        <label>Número de Emergencia</label>
-        <input nbInput type="tel" maxlength="10" fullWidth shape="semi-round" minlength="10"
-          [(ngModel)]="employee.emergency_contact_number" pattern="\d*"
-          oninput="this.value = this.value.replace(/[^0-9]/g, '')" />
-      </nb-form-field>
-
-      <div class="text-center">
-        <button nbButton status="primary" (click)="saveEmergencyContact()">Guardar Contacto De Emergencia</button>
-      </div>
-
-    </nb-card-body>
-  </nb-card>
-  <!-- Tarjeta de archivos -->
-  <nb-card class="mb-4">
-    <nb-card-header class="bg-primary text-white">
-      <h5 class="mb-0">Archivos del Empleado</h5>
-    </nb-card-header>
-    <nb-card-body>
-      <div *ngFor="let expectedFileType of expectedFileTypes">
-        <label>{{ getLabelForFileType(expectedFileType) }}</label>
-        <div class="d-flex align-items-center">
-          <ng-container *ngIf="getFileByType(expectedFileType) as file; else uploadFile">
-            <button nbButton status="info" (click)="downloadFile(file.file_path)">Descargar</button>
-            <button nbButton status="danger" (click)="deleteFile(file.file_id)">Eliminar</button>
-            <input type="file" id="file-input-{{ file.file_id }}"
-              (change)="onFileChange($event, expectedFileType, file.file_id)" hidden>
-            <button nbButton status="secondary" (click)="triggerFileInput('file-input-' + file.file_id)">Seleccionar
-              Archivo</button>
-          </ng-container>
-          <ng-template #uploadFile>
-            <button fullWidth nbButton status="secondary"
-              (click)="triggerFileInput('file-input-' + expectedFileType)">Subir Archivo</button>
-            <input type="file" id="file-input-{{ expectedFileType }}" (change)="onFileChange($event, expectedFileType)"
-              hidden>
+          <p
+            *ngIf="
+              employee.request_id &&
+                employee.folio_number_imss &&
+                employee.lot_number_imss;
+              else notActiveImss
+            "
+          >
+            Activo en el IMSS
+          </p>
+          <ng-template #notActiveImss>
+            <p>No activo en el IMSS</p>
           </ng-template>
+
+          <button
+            class="w-100 mb-3"
+            nbButton
+            status="success"
+            (click)="downloadEmployeeData()"
+          >
+            Descargar Información del Usuario
+          </button>
         </div>
-      </div>
-    </nb-card-body>
-  </nb-card>
+      </nb-card-body>
+    </nb-card>
+
+    <!-- Tarjetas de información -->
+    <nb-card class="mb-4">
+      <nb-card-header class="bg-primary text-white">
+        <h5 class="mb-0">Información General</h5>
+      </nb-card-header>
+      <nb-card-body class="p-2 p-md-3">
+        <div class="row mb-3">
+          <!-- Agregado row para formulario responsivo -->
+          <div class="col-12 col-md-6">
+            <nb-form-field>
+              <label>Código de Empleado</label>
+              <input nbInput fullWidth [(ngModel)]="employee.employee_code" />
+            </nb-form-field>
+          </div>
+        </div>
+        <nb-form-field class="mb-3">
+          <label>Nombre</label>
+          <input
+            nbInput
+            fullWidth
+            [(ngModel)]="employee.first_name"
+            #firstName="ngModel"
+            required
+            (keypress)="soloLetrasEspacios($event)"
+          />
+          <small
+            class="text-danger"
+            *ngIf="firstName.invalid && firstName.touched"
+          >
+            El nombre es requerido y solo debe contener letras.
+          </small>
+        </nb-form-field>
+        <!-- Apellido Paterno -->
+        <nb-form-field class="mb-3">
+          <label>Apellido Paterno</label>
+          <input
+            nbInput
+            fullWidth
+            [(ngModel)]="employee.last_name"
+            #lastName="ngModel"
+            required
+            (keypress)="soloLetrasEspacios($event)"
+          />
+          <small
+            class="text-danger"
+            *ngIf="lastName.invalid && lastName.touched"
+          >
+            El apellido paterno es requerido y solo debe contener letras.
+          </small>
+        </nb-form-field>
+        <!-- Teléfono -->
+        <nb-form-field class="mb-3">
+          <label>Teléfono</label>
+          <input
+            nbInput
+            fullWidth
+            [(ngModel)]="employee.phone_number"
+            #phoneNumber="ngModel"
+            required
+            pattern="^\d{10}$"
+            maxlength="10"
+            oninput="this.value = this.value.replace(/[^0-9]/g, '')"
+          />
+          <small
+            class="text-danger"
+            *ngIf="phoneNumber.invalid && phoneNumber.touched"
+          >
+            El teléfono debe contener exactamente 10 dígitos numéricos.
+          </small>
+        </nb-form-field>
+        <nb-form-field class="mb-3">
+          <label>Fecha de Nacimiento</label>
+          <input
+            nbInput
+            fullWidth
+            [(ngModel)]="employee.birth_date"
+            type="date"
+          />
+        </nb-form-field>
+        <nb-form-field class="mb-3">
+          <label>Lugar de Nacimiento</label>
+          <input
+            nbInput
+            fullWidth
+            [(ngModel)]="employee.birth_place"
+            (keypress)="soloLetrasEspacios($event)"
+          />
+        </nb-form-field>
+        <nb-form-field class="mb-3">
+          <label>CURP</label>
+          <input
+            nbInput
+            fullWidth
+            [(ngModel)]="employee.curp"
+            #curp="ngModel"
+            required
+            pattern="^[A-Z0-9]{18}$"
+          />
+          <small class="text-danger" *ngIf="curp.invalid && curp.touched">
+            La CURP debe contener exactamente 18 caracteres alfanuméricos en
+            mayúsculas.
+          </small>
+        </nb-form-field>
+        <!-- RFC -->
+        <nb-form-field class="mb-3">
+          <label>RFC</label>
+          <input
+            nbInput
+            fullWidth
+            [(ngModel)]="employee.rfc"
+            #rfc="ngModel"
+            required
+            pattern="^[A-Z0-9]{12,13}$"
+          />
+          <small class="text-danger" *ngIf="rfc.invalid && rfc.touched">
+            El RFC debe contener entre 12 y 13 caracteres alfanuméricos en
+            mayúsculas.
+          </small>
+        </nb-form-field>
+        <nb-form-field class="mb-3">
+          <label>Teléfono</label>
+          <input
+            nbInput
+            fullWidth
+            [(ngModel)]="employee.phone_number"
+            pattern="\d*"
+            oninput="this.value = this.value.replace(/[^0-9]/g, '')"
+          />
+        </nb-form-field>
+        <!-- Correo Electrónico -->
+        <nb-form-field class="mb-3">
+          <label>Correo Electrónico</label>
+          <input
+            nbInput
+            fullWidth
+            [(ngModel)]="employee.email"
+            #email="ngModel"
+            required
+            email
+          />
+          <small class="text-danger" *ngIf="email.invalid && email.touched">
+            Ingrese un correo válido.
+          </small>
+        </nb-form-field>
+        <nb-form-field class="mb-3">
+          <label>Género</label>
+          <nb-select fullWidth [(ngModel)]="employee.gender_id">
+            <nb-option
+              *ngFor="let gender of genders"
+              [value]="gender.gender_id"
+            >
+              {{ gender.gender_name }}
+            </nb-option>
+          </nb-select>
+        </nb-form-field>
+        <nb-form-field class="mb-4">
+          <label>Estado Civil</label>
+          <nb-select fullWidth [(ngModel)]="employee.marital_status_id">
+            <nb-option
+              *ngFor="let status of maritalStatuses"
+              [value]="status.status_id"
+            >
+              {{ status.status_name }}
+            </nb-option>
+          </nb-select>
+        </nb-form-field>
+        <div class="mb-1">
+          <button
+            nbButton
+            status="primary"
+            (click)="saveGeneralInfo()"
+            fullWidth
+          >
+            Guardar Cambios de Información General
+          </button>
+        </div>
+      </nb-card-body>
+    </nb-card>
+
+    <!-- Tarjetas similares para Información Financiera, Laboral y de Emergencia -->
+    <nb-card class="mb-4">
+      <nb-card-header class="bg-primary text-white">
+        <h5 class="mb-0">Información Financiera y Bancaria</h5>
+      </nb-card-header>
+      <nb-card-body>
+        <nb-form-field class="mb-3">
+          <label>Número de Seguro Social</label>
+          <input
+            nbInput
+            fullWidth
+            [(ngModel)]="employee.social_security_number"
+            #nss="ngModel"
+            required
+            pattern="^\d{11}$"
+            maxlength="11"
+            oninput="this.value = this.value.replace(/[^0-9]/g, '')"
+          />
+          <small class="text-danger" *ngIf="nss.invalid && nss.touched">
+            El NSS debe contener exactamente 11 dígitos numéricos.
+          </small>
+        </nb-form-field>
+        <nb-form-field class="mb-3">
+          <label>Número de Cuenta Bancaria</label>
+          <input
+            nbInput
+            fullWidth
+            [(ngModel)]="employee.bank_account_number"
+            type="number"
+            pattern="\d*"
+            oninput="this.value = this.value.replace(/[^0-9]/g, '')"
+          />
+        </nb-form-field>
+        <nb-form-field class="mb-3">
+          <label>Banco</label>
+          <input nbInput fullWidth [(ngModel)]="employee.bank_name" />
+        </nb-form-field>
+        <nb-form-field class="mb-3">
+          <label>Sucursal</label>
+          <input nbInput fullWidth [(ngModel)]="employee.bank_branch" />
+        </nb-form-field>
+        <nb-form-field class="mb-4">
+          <label>CLABE Interbancaria</label>
+          <input
+            nbInput
+            fullWidth
+            [(ngModel)]="employee.clabe"
+            #clabe="ngModel"
+            pattern="^\d{18}$"
+            maxlength="18"
+            oninput="this.value = this.value.replace(/[^0-9]/g, '')"
+          />
+          <small class="text-danger" *ngIf="clabe.invalid && clabe.touched">
+            La CLABE debe contener exactamente 18 dígitos numéricos.
+          </small>
+        </nb-form-field>
+        <div class="text-center">
+          <button
+            nbButton
+            status="primary"
+            fullWidth
+            (click)="saveFinancialInfo()"
+          >
+            Guardar Información Financiera
+          </button>
+        </div>
+      </nb-card-body>
+    </nb-card>
+
+    <!--  Informacion de trabajo-->
+    <nb-card class="mb-4">
+      <nb-card-header class="bg-primary text-white">
+        <h5 class="mb-0">Información De Trabajo</h5>
+      </nb-card-header>
+      <nb-card-body>
+        <nb-form-field class="mb-3">
+          <label>Departamento</label>
+          <nb-select fullWidth [(ngModel)]="employee.department_id">
+            <nb-option
+              *ngFor="let departament of departamentos"
+              [value]="departament.department_id"
+            >
+              {{ departament.department_name }}
+            </nb-option>
+          </nb-select>
+        </nb-form-field>
+
+        <nb-form-field class="mb-3">
+          <label>Puesto</label>
+          <nb-select fullWidth [(ngModel)]="employee.position_id">
+            <nb-option
+              *ngFor="let puesto of puestos"
+              [value]="puesto.position_id"
+            >
+              {{ puesto.position_name }}
+            </nb-option>
+          </nb-select>
+        </nb-form-field>
+
+        <nb-form-field class="mb-3">
+          <label>Turno</label>
+          <nb-select
+            fullWidth
+            placeholder="Seleccionar"
+            [(ngModel)]="employee.shift_id"
+          >
+            <nb-option *ngFor="let turno of turnos" [value]="turno.shift_id">
+              {{ turno.shift_name }}
+            </nb-option>
+          </nb-select>
+        </nb-form-field>
+        <!-- Fecha de Inicio -->
+        <nb-form-field class="mb-3">
+          <label>Fecha de Inicio</label>
+          <input
+            nbInput
+            fullWidth
+            [(ngModel)]="employee.start_date"
+            #startDate="ngModel"
+            required
+            type="date"
+          />
+          <small
+            class="text-danger"
+            *ngIf="startDate.invalid && startDate.touched"
+          >
+            La fecha de inicio es obligatoria.
+          </small>
+        </nb-form-field>
+
+        <!-- Sueldo Neto -->
+        <nb-form-field class="mb-3">
+          <label>Sueldo Neto*</label>
+          <input
+            fullWidth
+            nbInput
+            type="number"
+            [(ngModel)]="employee.net_balance"
+            (keypress)="soloNumeros($event)"
+          />
+        </nb-form-field>
+
+        <!-- Sueldo Diario -->
+        <nb-form-field class="mb-4">
+          <label>Sueldo Diario*</label>
+          <input
+            fullWidth
+            nbInput
+            type="number"
+            [(ngModel)]="employee.daily_salary"
+            (keypress)="soloNumeros($event)"
+          />
+        </nb-form-field>
+
+        <div class="text-center mb-1">
+          <button nbButton status="primary" fullWidth (click)="saveWorkInfo()">
+            Guardar Información De Trabajo
+          </button>
+        </div>
+      </nb-card-body>
+    </nb-card>
+
+    <!-- Contacto de Emergencia -->
+    <nb-card class="mb-4">
+      <nb-card-header class="bg-primary text-white">
+        <h5 class="mb-0">Contacto De Emergencia</h5>
+      </nb-card-header>
+      <nb-card-body>
+        <nb-form-field class="mb-3">
+          <label>Contacto de Emergencia</label>
+          <input
+            fullWidth
+            nbInput
+            type="text"
+            [(ngModel)]="employee.emergency_contact_name"
+            (keypress)="soloLetrasEspacios($event)"
+          />
+        </nb-form-field>
+
+        <nb-form-field class="mb-4">
+          <label>Número de Emergencia</label>
+          <input
+            nbInput
+            type="tel"
+            maxlength="10"
+            fullWidth
+            minlength="10"
+            [(ngModel)]="employee.emergency_contact_number"
+            pattern="\d*"
+            oninput="this.value = this.value.replace(/[^0-9]/g, '')"
+          />
+        </nb-form-field>
+
+        <div class="text-center mb-1">
+          <button
+            nbButton
+            status="primary"
+            fullWidth
+            (click)="saveEmergencyContact()"
+          >
+            Guardar Contacto De Emergencia
+          </button>
+        </div>
+      </nb-card-body>
+    </nb-card>
+
+    <!-- Tarjeta de archivos -->
+    <nb-card class="mb-4">
+      <nb-card-header class="bg-primary text-white">
+        <h5 class="mb-0">Archivos del Empleado</h5>
+      </nb-card-header>
+      <nb-card-body class="p-2 p-sm-4">
+        <div *ngFor="let expectedFileType of expectedFileTypes" class="mb-3">
+          <label>{{ getLabelForFileType(expectedFileType) }}</label>
+          <div class="d-flex align-items-center">
+            <ng-container
+              *ngIf="getFileByType(expectedFileType) as file; else uploadFile"
+            >
+              <div class="d-flex flex-column flex-sm-row w-100">
+                <div class="d-flex flex-sm-inline-flex mb-2 mb-sm-0">
+                  <button
+                    nbButton
+                    status="info"
+                    (click)="downloadFile(file.file_path)"
+                    class="flex-grow-1"
+                  >
+                    Descargar
+                  </button>
+                  <button
+                    nbButton
+                    status="danger"
+                    (click)="deleteFile(file.file_id)"
+                    class="flex-grow-1 ml-2"
+                  >
+                    Eliminar
+                  </button>
+                </div>
+                <button
+                  nbButton
+                  status="secondary"
+                  (click)="triggerFileInput('file-input-' + file.file_id)"
+                  class="ml-sm-2"
+                >
+                  Seleccionar Archivo
+                </button>
+              </div>
+              <input
+                type="file"
+                id="file-input-{{ file.file_id }}"
+                (change)="onFileChange($event, expectedFileType, file.file_id)"
+                hidden
+              />
+            </ng-container>
+            <ng-template #uploadFile>
+              <button
+                fullWidth
+                nbButton
+                status="secondary"
+                (click)="triggerFileInput('file-input-' + expectedFileType)"
+              >
+                Subir Archivo
+              </button>
+              <input
+                type="file"
+                id="file-input-{{ expectedFileType }}"
+                (change)="onFileChange($event, expectedFileType)"
+                hidden
+              />
+            </ng-template>
+          </div>
+        </div>
+      </nb-card-body>
+    </nb-card>
+  </nb-card-body>
 </nb-card>

@@ -17,17 +17,19 @@
 
 .section-title {
   font-size: 1rem;
- 
+
   color: #34495e;
   margin-bottom: 0.5rem;
 }
 
-.logo-container, .preview-container {
+.logo-container,
+.preview-container {
   text-align: center;
   margin-top: 1rem;
 }
 
-.logo-img, .preview-img {
+.logo-img,
+.preview-img {
   max-width: 100%;
   height: auto;
   border-radius: 4px;
