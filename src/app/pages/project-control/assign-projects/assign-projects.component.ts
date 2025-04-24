@@ -520,7 +520,10 @@ export class AssignProjectsComponent implements OnInit {
         selectedEmpleados: this.selectedEmpleados,
         authService: this.authService,
       },
-      closeOnBackdropClick: false,
+      closeOnBackdropClick: true,
+      autoFocus: true,
+      closeOnEsc: true,
+      hasScroll: true,
     });
 
     dialogRef.onClose.subscribe((data) => {

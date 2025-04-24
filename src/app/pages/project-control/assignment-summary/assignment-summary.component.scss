@@ -1,7 +1,4 @@
 .scrollable-container {
-    max-height: 600px; /* Altura máxima del contenedor */
-    overflow-y: auto; /* Habilita el scroll vertical */
-   
-    padding: 8px; /* Espaciado interno */
-  }
-
+  overflow-y: auto;
+  max-height: 50vh;
+}
