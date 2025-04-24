@@ -14,12 +14,15 @@ import {
   NbFormFieldModule,
   NbIconModule,
   NbDatepickerModule,
+  NbTagModule,
+  NbAlertModule,
 } from "@nebular/theme";
 import { FormsModule, ReactiveFormsModule } from "@angular/forms";
 
 import { RequirementsAssignmentComponent } from "./requirements-assignment/requirements-assignment.component";
 import { DocumentUploadComponent } from "./document-upload/document-upload.component";
 import { DocumentReviewComponent } from "./document-review/document-review.component";
+import { DocumentService } from "../../services/repse/document.service";
 
 @NgModule({
   declarations: [
@@ -33,6 +36,7 @@ import { DocumentReviewComponent } from "./document-review/document-review.compo
     RepseSystemRoutingModule,
     FormsModule,
     ReactiveFormsModule,
+    NbAlertModule,
     NbCardModule,
     NbDatepickerModule.forRoot(),
     NbSelectModule,
@@ -42,6 +46,8 @@ import { DocumentReviewComponent } from "./document-review/document-review.compo
     NbDialogModule.forChild(),
     NbFormFieldModule,
     NbIconModule,
+    NbTagModule,
   ],
+  providers: [DocumentService],
 })
 export class RepseSystemModule {}
