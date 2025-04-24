@@ -67,10 +67,9 @@ switch ($method) {
         break;
 
     case 'POST':
-        // Inserta nueva configuración
         $data = json_decode(file_get_contents('php://input'), true);
 
-        // Validar campos obligatorios
+        // Campos obligatorios
         $always = ['company_id', 'file_type_id', 'is_periodic', 'min_documents_needed', 'start_date'];
         foreach ($always as $f) {
             if (!isset($data[$f])) {
@@ -80,7 +79,7 @@ switch ($method) {
             }
         }
 
-        // Si es periódico, validar periodicity_type y periodicity_count
+        // Validar periodicidad
         $isPeriodic = (bool) $data['is_periodic'];
         if ($isPeriodic) {
             foreach (['periodicity_type', 'periodicity_count'] as $f) {
@@ -92,7 +91,7 @@ switch ($method) {
             }
         }
 
-        // Asignar valores
+        // Valores para insertar
         $company_id = intval($data['company_id']);
         $file_type_id = intval($data['file_type_id']);
         $is_periodic = $isPeriodic ? 1 : 0;
@@ -108,15 +107,15 @@ switch ($method) {
             ? "'" . $mysqli->real_escape_string($data['end_date']) . "'"
             : "NULL";
 
-        // Insert
+        // Insert en company_required_files
         $sql = "
-            INSERT INTO company_required_files
-              (company_id, file_type_id, is_periodic,
-               periodicity_type, periodicity_count,
-               min_documents_needed, start_date, end_date)
-            VALUES
-              (?, ?, ?, ?, ?, ?, ?, {$end_date_clause})
-        ";
+        INSERT INTO company_required_files
+          (company_id, file_type_id, is_periodic,
+           periodicity_type, periodicity_count,
+           min_documents_needed, start_date, end_date)
+        VALUES
+          (?, ?, ?, ?, ?, ?, ?, {$end_date_clause})
+    ";
         $stmt = $mysqli->prepare($sql);
         $stmt->bind_param(
             'iiisiis',
@@ -128,17 +127,71 @@ switch ($method) {
             $min_docs,
             $start_date
         );
+
         if ($stmt->execute()) {
+            $required_file_id = $stmt->insert_id;
+
+            // Calcular fecha fin del periodo según periodicidad
+            if ($isPeriodic) {
+                try {
+                    $fechaInicio = new DateTime($start_date);
+                    switch (strtolower($periodicity_type)) {
+                        case 'semanas':
+                            $interval = "P" . ($periodicity_count * 7) . "D";
+                            break;
+                        case 'meses':
+                            $interval = "P{$periodicity_count}M";
+                            break;
+                        case 'años':
+                            $interval = "P{$periodicity_count}Y";
+                            break;
+                        default:
+                            throw new Exception("Periodicidad no válida");
+                    }
+
+                    $fechaFin = clone $fechaInicio;
+                    $fechaFin->add(new DateInterval($interval));
+
+                    // Insertar en document_periods
+                    $insertPeriod = $mysqli->prepare("
+                INSERT INTO document_periods
+                    (required_file_id, start_date, end_date, created_at)
+                VALUES (?, ?, ?, NOW())
+            ");
+                    $start_date_formatted = $fechaInicio->format('Y-m-d');
+                    $end_date_formatted = $fechaFin->format('Y-m-d');
+
+                    $insertPeriod->bind_param(
+                        'iss',
+                        $required_file_id,
+                        $start_date_formatted,
+                        $end_date_formatted
+                    );
+
+                    if (!$insertPeriod->execute()) {
+                        throw new Exception($insertPeriod->error);
+                    }
+
+                    $insertPeriod->close();
+                } catch (Exception $e) {
+                    http_response_code(500);
+                    echo json_encode(['error' => 'Error al crear periodo: ' . $e->getMessage()]);
+                    exit;
+                }
+            }
+
             echo json_encode([
                 'success' => true,
-                'required_file_id' => $stmt->insert_id,
+                'required_file_id' => $required_file_id,
             ]);
         } else {
             http_response_code(500);
             echo json_encode(['error' => $stmt->error]);
         }
+
         $stmt->close();
         break;
+
 
     default:
         http_response_code(405);

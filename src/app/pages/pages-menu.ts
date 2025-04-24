@@ -14,21 +14,35 @@ export const MENU_ITEMS: CustomMenuItem[] = [
   {
     title: "Sistema REPSE",
     icon: "layout-outline",
-    link: "",
     hidden: false, // Default visible (se actualizará en runtime)
     permission: { section: "Sistema REPSE" }, // Permiso para validar
     children: [
       {
         title: "Asignación de requisitos",
         link: "/pages/repse-system/requirements-assignment",
+        hidden: false,
+        permission: {
+          section: "Sistema REPSE",
+          subSection: "Asignacion de requisitos",
+        },
       },
       {
         title: "Carga de documentos",
         link: "/pages/repse-system/document-upload",
+        hidden: false,
+        permission: {
+          section: "Sistema REPSE",
+          subSection: "Carga de documentos",
+        },
       },
       {
         title: "Revisión de documentos",
         link: "/pages/repse-system/document-review",
+        hidden: false,
+        permission: {
+          section: "Sistema REPSE",
+          subSection: "Revision de documentos",
+        },
       },
     ],
   },

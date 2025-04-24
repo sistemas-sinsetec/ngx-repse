@@ -17,6 +17,10 @@ import {
   NbTagModule,
   NbAlertModule,
 } from "@nebular/theme";
+
+// Importa el adaptador aquí, en el mismo módulo donde usas Datepicker:
+import { NbMomentDateModule } from "@nebular/moment";
+
 import { FormsModule, ReactiveFormsModule } from "@angular/forms";
 
 import { RequirementsAssignmentComponent } from "./requirements-assignment/requirements-assignment.component";
@@ -36,9 +40,14 @@ import { DocumentService } from "../../services/repse/document.service";
     RepseSystemRoutingModule,
     FormsModule,
     ReactiveFormsModule,
+
     NbAlertModule,
     NbCardModule,
-    NbDatepickerModule.forRoot(),
+
+    // En módulos hijos NO uses .forRoot()
+    NbDatepickerModule,
+    NbMomentDateModule, // ← aquí el adapter
+
     NbSelectModule,
     NbInputModule,
     NbButtonModule,
