@@ -211,7 +211,19 @@ export class ProcessWeeklyListsComponent {
     this.http.post(url, data).subscribe(
       async (response: any) => {
         loading.dismiss();
-        this.isButtonDisabled = true; // Deshabilitar el botón
+        this.isButtonDisabled = true;
+
+        // Eliminar la semana procesada del arreglo
+        this.confirmedWeeks = this.confirmedWeeks.filter(
+          (week) => week.week_number !== this.selectedWeek.week_number
+        );
+
+        // Limpiar los datos visuales
+        this.selectedWeek = null;
+        this.diasSemana = [];
+        this.empleadosSemana = [];
+
+        // Mostrar alertas
         const alert = await this.alertController.create({
           header: "Éxito",
           message: "La semana ha sido procesada exitosamente.",
