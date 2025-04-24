@@ -15,16 +15,28 @@ const routes: Routes = [
         path: "requirements-assignment",
         component: RequirementsAssignmentComponent,
         canActivate: [authGuard],
+        data: {
+          section: "Sistema REPSE",
+          subSection: "Asignacion de requisitos",
+        }, // Sección requerida para acceder
       },
       {
         path: "document-upload",
         component: DocumentUploadComponent,
         canActivate: [authGuard],
+        data: {
+          section: "Sistema REPSE",
+          subSection: "Carga de documentos",
+        }, // Sección requerida para acceder
       },
       {
         path: "document-review",
         component: DocumentReviewComponent,
         canActivate: [authGuard],
+        data: {
+          section: "Sistema REPSE",
+          subSection: "Revision de documentos",
+        }, // Sección requerida para acceder
       },
     ],
   },

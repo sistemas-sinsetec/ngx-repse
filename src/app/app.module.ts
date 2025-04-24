@@ -9,6 +9,8 @@ import { AppComponent } from "./app.component";
 import { AppRoutingModule } from "./app-routing.module";
 import { IonicModule } from "@ionic/angular";
 
+import { NbMomentDateModule } from "@nebular/moment";
+
 import {
   NbChatModule,
   NbActionsModule,
@@ -50,6 +52,7 @@ import { SelectCompanyPeriodDialogComponent } from "./select-company-period-dial
     NbSidebarModule.forRoot(),
     NbMenuModule.forRoot(),
     NbDatepickerModule.forRoot(),
+    NbMomentDateModule,
     NbDialogModule.forRoot(),
     NbWindowModule.forRoot(),
     NbToastrModule.forRoot(),
