@@ -31,7 +31,6 @@
     "docs:serve": "compodoc -p src/tsconfig.app.json -d docs -s",
     "release:changelog": "npm run conventional-changelog -- -p angular -i CHANGELOG.md -s",
     "postinstall": "ngcc --properties es2015 es5 browser module main --first-only --create-ivy-entry-points --tsconfig \"./src/tsconfig.app.json\""
-    
   },
   "dependencies": {
     "@angular/animations": "^15.2.10",
@@ -51,6 +50,7 @@
     "@ionic/angular-toolkit": "^7.0.0",
     "@nebular/auth": "11.0.1",
     "@nebular/eva-icons": "11.0.1",
+    "@nebular/moment": "^15.0.0",
     "@nebular/security": "11.0.1",
     "@nebular/theme": "11.0.1",
     "@ng-matero/extensions": "^19.1.0",
