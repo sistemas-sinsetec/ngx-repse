@@ -295,6 +295,7 @@ export class ConfirmDayComponent {
 
   async mostrarInfoDia(dia: any) {
     this.selectedDia = dia;
+    this.currentFecha = moment(dia.date).format("LL");
     await this.cargarEmpleadosDia(dia); // Cargar empleados del día
 
     // Si es día de descanso pero tiene empleados asignados, permitir confirmar

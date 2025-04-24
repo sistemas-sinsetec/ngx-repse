@@ -5,6 +5,10 @@
     <nb-card class="mb-2">
       <nb-card-header class="fw-bold">Resumen de la Semana</nb-card-header>
       <nb-card-body>
+        <p>
+          <strong>Fecha seleccionada:</strong>
+          {{ currentFecha || "No seleccionada" }}
+        </p>
         <p><strong>Semana:</strong> {{ currentSemana || "No disponible" }}</p>
         <p>
           <strong>Inicio del Periodo:</strong> {{ formattedPeriodStartDate }}
@@ -102,7 +106,7 @@
                 <nb-select
                   [(selected)]="projectFilter"
                   (selectedChange)="filterEmployees()"
-                  placeholder="Filtrar por obra"
+                  placeholder="Filtrar por proyecto"
                   fullWidth
                 >
                   <nb-option
@@ -171,7 +175,7 @@
                         {{ emp.last_name }} {{ emp.middle_name }}
                       </h6>
                       <p class="mb-0">
-                        <small><b>Obra:</b> {{ emp.project_name }}</small>
+                        <small><b>Proyecto:</b> {{ emp.project_name }}</small>
                       </p>
                       <p>
                         <small><b>Estado:</b> {{ emp.project_status }}</small>

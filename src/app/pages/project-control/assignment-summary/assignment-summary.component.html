@@ -1,17 +1,28 @@
-<nb-card class="shadow-lg scrollable-container" >
+<nb-card class="shadow-lg scrollable-container">
   <nb-card-header class="text-center">
     <h5 class="fw-bold">Detalles de la Asignación</h5>
-    <p class="text-muted mb-0">Revise la información antes de confirmar la asignación.</p>
+    <p class="text-muted mb-0">
+      Revise la información antes de confirmar la asignación.
+    </p>
   </nb-card-header>
-  
+
   <nb-card-body>
     <!-- Información de Asignación -->
     <nb-card class="shadow-sm mb-4">
       <nb-card-body>
-        <p><strong class="text-primary">Semana:</strong> {{ selectedSemana?.week_number }}</p>
+        <p>
+          <strong class="text-primary">Semana:</strong>
+          {{ selectedSemana?.week_number }}
+        </p>
         <p><strong class="text-primary">Día:</strong> {{ selectedDia }}</p>
-        <p><strong class="text-primary">Periodo:</strong> {{ periodService.selectedPeriod.year }}</p>
-        <p><strong class="text-primary">Obra:</strong> {{ selectedObra?.project_name }}</p>
+        <p>
+          <strong class="text-primary">Periodo:</strong>
+          {{ periodService.selectedPeriod.year }}
+        </p>
+        <p>
+          <strong class="text-primary">Proyecto:</strong>
+          {{ selectedObra?.project_name }}
+        </p>
       </nb-card-body>
     </nb-card>
 
@@ -21,8 +32,16 @@
         <h6 class="fw-bold mb-3 text-primary">Empleados Seleccionados:</h6>
         <nb-list>
           <nb-list-item *ngFor="let empleado of selectedEmpleados">
-            <nb-icon icon="person-outline" pack="eva" status="info" class="me-2"></nb-icon>
-            <span>{{ empleado.last_name }} {{ empleado.middle_name }} {{ empleado.first_name }}</span>
+            <nb-icon
+              icon="person-outline"
+              pack="eva"
+              status="info"
+              class="me-2"
+            ></nb-icon>
+            <span
+              >{{ empleado.last_name }} {{ empleado.middle_name }}
+              {{ empleado.first_name }}</span
+            >
           </nb-list-item>
         </nb-list>
       </nb-card-body>
@@ -30,8 +49,14 @@
 
     <!-- Botones de Acción -->
     <div class="d-flex justify-content-center mt-4">
-      <button nbButton status="success" class="m-2" (click)="confirmAssignment()">
-        <nb-icon icon="checkmark-circle-outline" pack="eva"></nb-icon> Confirmar Asignación
+      <button
+        nbButton
+        status="success"
+        class="m-2"
+        (click)="confirmAssignment()"
+      >
+        <nb-icon icon="checkmark-circle-outline" pack="eva"></nb-icon> Confirmar
+        Asignación
       </button>
       <button nbButton status="warning" class="m-2" (click)="closeModal()">
         <nb-icon icon="close-circle-outline" pack="eva"></nb-icon> Cancelar

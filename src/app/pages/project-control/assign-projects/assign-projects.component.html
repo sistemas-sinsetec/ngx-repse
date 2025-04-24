@@ -12,7 +12,7 @@
         </p>
         <p><strong>Día:</strong> {{ formattedSelectedDia }}</p>
         <p>
-          <strong>Obra:</strong>
+          <strong>Proyecto:</strong>
           {{ selectedObra?.project_name || "No seleccionada" }}
         </p>
         <p>
@@ -42,7 +42,7 @@
             <strong>{{
               pastAssignmentsInfo.date | date : "dd MMM yyyy"
             }}</strong>
-            en la obra: <strong>{{ selectedObra?.project_name }}</strong
+            en el proyecto: <strong>{{ selectedObra?.project_name }}</strong
             >.
           </p>
         </div>
@@ -122,10 +122,10 @@
             </nb-select>
           </div>
 
-          <!-- Selector de obra del día -->
+          <!-- Selector de proyecto del día -->
           <div class="mb-4">
             <label for="obraDia" class="form-label fw-bold"
-              >Selecciona la obra:</label
+              >Selecciona el proyecto:</label
             >
             <nb-form-field class="mb-2">
               <nb-icon nbPrefix icon="search-outline" pack="eva"></nb-icon>
@@ -133,7 +133,7 @@
                 type="text"
                 nbInput
                 fullWidth
-                placeholder="Buscar obra"
+                placeholder="Buscar proyecto"
                 class="flex-grow-1 ms-2"
                 [(ngModel)]="searchObra"
                 name="searchObra"
@@ -141,7 +141,7 @@
               />
             </nb-form-field>
             <nb-select
-              placeholder="Selecciona una obra"
+              placeholder="Selecciona un proyecto"
               fullWidth
               [(selected)]="selectedObra"
               (selectedChange)="onObraChange($event)"
@@ -157,7 +157,7 @@
               <!-- Verifica por una propiedad existente -->
               <p class="text-muted mb-0">
                 <small>
-                  Fechas de la obra:
+                  Fechas de el proyecto:
                   {{ formatDate(selectedObra.start_date) }} -
                   {{ formatDate(selectedObra.end_date) }}
                 </small>
