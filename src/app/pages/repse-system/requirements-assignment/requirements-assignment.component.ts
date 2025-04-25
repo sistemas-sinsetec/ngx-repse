@@ -35,6 +35,14 @@ interface Partner {
   selected: boolean;
 }
 
+interface FileFormat {
+  id: number;
+  name: string;
+  extension: string;
+  selected: boolean;
+  minQuantity: number;
+}
+
 @Component({
   selector: "ngx-requirements-assignment",
   templateUrl: "./requirements-assignment.component.html",
@@ -47,6 +55,14 @@ export class RequirementsAssignmentComponent implements OnInit {
 
   documentTypes: { id: number; name: string }[] = [];
   periodTypes = ["semanas", "meses", "años"];
+
+  fileFormats: FileFormat[] = [
+    { id: 1, name: "PDF", extension: "pdf", selected: false, minQuantity: 1 },
+    { id: 2, name: "XML", extension: "xml", selected: false, minQuantity: 1 },
+    { id: 3, name: "TXT", extension: "txt", selected: false, minQuantity: 1 },
+    { id: 4, name: "JPEG", extension: "jpg", selected: false, minQuantity: 1 },
+    { id: 5, name: "PNG", extension: "png", selected: false, minQuantity: 1 },
+  ];
 
   private fileTypesUrl = `${environment.apiBaseUrl}/file_types.php`;
   private reqFilesUrl = `${environment.apiBaseUrl}/company_required_files.php`;
@@ -113,6 +129,8 @@ export class RequirementsAssignmentComponent implements OnInit {
   ngOnInit(): void {
     this.loadDocumentTypes();
     this.loadRequirements();
+    // Podrías cargar los formatos desde el servicio si los tienes allí
+    // this.loadFileFormats();
   }
 
   private loadDocumentTypes(): void {
@@ -163,13 +181,21 @@ export class RequirementsAssignmentComponent implements OnInit {
     const companyId = this.companyService.selectedCompany.id;
     const startDate = f.startDate || "";
 
+    // Obtener formatos seleccionados
+    const selectedFormats = this.fileFormats
+      .filter((format) => format.selected)
+      .map((format) => ({
+        format: format.extension,
+        min_quantity: format.minQuantity,
+      }));
+
     const payload = {
       company_id: companyId,
       file_type_id: f.documentType,
       is_periodic: f.isPeriodic,
       periodicity_type: f.periodType,
       periodicity_count: f.periodAmount,
-      min_documents_needed: f.minQuantity,
+      file_formats: selectedFormats, // Enviar los formatos seleccionados
       start_date: startDate,
       end_date: "",
     };
@@ -190,14 +216,22 @@ export class RequirementsAssignmentComponent implements OnInit {
             periodAmount: f.isPeriodic ? f.periodAmount : undefined,
             periodType: f.isPeriodic ? f.periodType : undefined,
             startDate: f.isPeriodic ? moment(f.startDate) : undefined,
-            minQuantity: f.minQuantity,
+            minQuantity: selectedFormats.reduce(
+              (sum, fmt) => sum + fmt.min_quantity,
+              0
+            ),
             partners: [],
           });
           this.requirementsForm.reset({
             documentType: null,
             isPeriodic: false,
             periodType: "semanas",
-            minQuantity: 1,
+          });
+
+          // Resetear los formatos
+          this.fileFormats.forEach((format) => {
+            format.selected = false;
+            format.minQuantity = 1;
           });
         },
         error: (err) => console.error("Error guardando configuración", err),
@@ -386,5 +420,12 @@ export class RequirementsAssignmentComponent implements OnInit {
 
   closeModal(): void {
     this.dialogRef.close();
+  }
+
+  onFormatToggle(format: FileFormat): void {
+    format.selected = !format.selected;
+    if (!format.selected) {
+      format.minQuantity = 1;
+    }
   }
 }
