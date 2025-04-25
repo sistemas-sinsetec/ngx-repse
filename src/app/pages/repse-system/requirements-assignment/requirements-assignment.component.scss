@@ -9,3 +9,10 @@
     min-height: min-content; /* Asegura que el contenedor tenga al menos el alto del contenido */
   }
 }
+
+.no-manual-input {
+  /* Evita que el cursor de texto aparezca */
+  caret-color: transparent !important;
+  /* Deshabilita selección de texto */
+  user-select: none !important;
+}

@@ -84,18 +84,20 @@
     <h6 class="section-title">Secciones asignadas:</h6>
     <nb-list>
       <nb-list-item *ngFor="let perm of permissions" class="section-item">
-        <div class="section-info">
-          <!-- En tu TS, cada permiso se llama "NameSection", así que puedes mostrarlo así -->
-          <span class="section-name">{{ perm.NameSection }}</span>
+        <div class="d-flex flex-row justify-content-between w-100">
+          <div class="section-info d-flex align-items-center">
+            <!-- En tu TS, cada permiso se llama "NameSection", así que puedes mostrarlo así -->
+            <span class="section-name">{{ perm.NameSection }}</span>
+          </div>
+          <button
+            nbButton
+            status="danger"
+            size="small"
+            (click)="removePermission(perm.NameSection)"
+          >
+            <nb-icon icon="trash-outline"></nb-icon>
+          </button>
         </div>
-        <button
-          nbButton
-          status="danger"
-          size="small"
-          (click)="removePermission(perm.NameSection)"
-        >
-          <nb-icon icon="trash-outline"></nb-icon>
-        </button>
       </nb-list-item>
     </nb-list>
   </nb-card-footer>

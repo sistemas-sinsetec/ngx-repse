@@ -1,0 +1,8 @@
+.pointer {
+  cursor: pointer;
+  &:hover {
+    background-color: rgb(250, 249, 249);
+  }
+
+  transition: 0.2s ease;
+}

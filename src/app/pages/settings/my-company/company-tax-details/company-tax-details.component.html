@@ -1,250 +1,279 @@
-
 <!-- company-tax-details.component.html -->
 <div class="container mt-4">
-
   <div class="card shadow-sm p-4 mb-4 bg-white rounded text-center">
     <!-- Fecha de inicio de operaciones y Selección de Registro -->
     <div class="row mb-3">
       <!-- Fecha de inicio de operaciones -->
       <div class="col-md-6">
-        
         <div class="mb-3">
           <label for="startDate">Fecha de inicio de operaciones:</label>
-          <input nbInput fullWidth class="text-center"
-            id="startDate" 
-            type="text" 
-            [value]="fechaInicioOperaciones || 'No disponible'" 
-            readonly 
+          <input
+            nbInput
+            fullWidth
+            class="text-center"
+            id="startDate"
+            type="text"
+            [value]="fechaInicioOperaciones || 'No disponible'"
+            readonly
           />
         </div>
       </div>
-  
+
       <!-- Selección de Registro -->
       <div class="col-md-6">
         <div class="mb-3">
           <label for="">Ver informacion</label>
-          <nb-select fullWidth
-          id="infoSelect" 
-          [(selected)]="companyData.id" 
-          (selectedChange)="onRegistroSeleccionado($event)">
-          <nb-option
-            *ngFor="let item of companyData; let idx = index" 
-            [value]="idx">
-            Registro {{ idx + 1 }}
-          </nb-option>
-        </nb-select>
-        
+          <nb-select
+            fullWidth
+            id="infoSelect"
+            [(selected)]="companyData.id"
+            (selectedChange)="onRegistroSeleccionado($event)"
+          >
+            <nb-option
+              *ngFor="let item of companyData; let idx = index"
+              [value]="idx"
+            >
+              Registro {{ idx + 1 }}
+            </nb-option>
+          </nb-select>
         </div>
       </div>
     </div>
   </div>
-  
+
   <nb-card accent="info">
     <!-- Datos de Identificación del Contribuyente -->
     <div class="mb-4">
       <nb-card-header class="text-center">
         <h5>Datos de Identificación del Contribuyente</h5>
       </nb-card-header>
-      <table class="table table-bordered">
-        <tbody>
-          <tr>
-            <td><strong>CURP:</strong></td>
-            <td>{{ datosIdentificacion?.curp || 'No aplica' }}</td>
-          </tr>
-          <tr>
-            <td><strong>RFC:</strong></td>
-            <td>{{ datosIdentificacion?.rfc || 'No disponible' }}</td>
-          </tr>
-          <tr>
-            <td><strong>Nombre:</strong></td>
-            <td>{{ datosIdentificacion?.nombre || 'No aplica' }}</td>
-          </tr>
-          <tr>
-            <td><strong>Primer Apellido:</strong></td>
-            <td>{{ datosIdentificacion?.primerApellido || 'No aplica' }}</td>
-          </tr>
-          <tr>
-            <td><strong>Segundo Apellido:</strong></td>
-            <td>{{ datosIdentificacion?.segundoApellido || 'No aplica' }}</td>
-          </tr>
-          <tr>
-            <td><strong>Denominación o Razón Social:</strong></td>
-            <td>{{ datosIdentificacion?.razonSocial || 'No aplica' }}</td>
-          </tr>
-          <tr>
-            <td><strong>Régimen de Capital:</strong></td>
-            <td>{{ datosIdentificacion?.regimenCapital || 'No aplica' }}</td>
-          </tr>
-          <tr>
-            <td><strong>Nombre Comercial:</strong></td>
-            <td>{{ datosIdentificacion?.nombreComercial || 'No aplica' }}</td>
-          </tr>
-          <tr>
-            <td><strong>Fecha de Inicio de Operaciones:</strong></td>
-            <td>{{ fechaInicioOperaciones || 'No disponible' }}</td>
-          </tr>
-          <tr>
-            <td><strong>Estatus en el Padrón:</strong></td>
-            <td>{{ datosIdentificacion?.estatus || 'No disponible' }}</td>
-          </tr>
-          <tr>
-            <td><strong>Fecha de Último Cambio de Estado:</strong></td>
-            <td>{{ datosIdentificacion?.fechaCambioEstado || 'No disponible' }}</td>
-          </tr>
-        </tbody>
-      </table>
+      <div class="table-responsive">
+        <table class="table table-bordered">
+          <tbody>
+            <tr>
+              <td><strong>CURP:</strong></td>
+              <td>{{ datosIdentificacion?.curp || "No aplica" }}</td>
+            </tr>
+            <tr>
+              <td><strong>RFC:</strong></td>
+              <td>{{ datosIdentificacion?.rfc || "No disponible" }}</td>
+            </tr>
+            <tr>
+              <td><strong>Nombre:</strong></td>
+              <td>{{ datosIdentificacion?.nombre || "No aplica" }}</td>
+            </tr>
+            <tr>
+              <td><strong>Primer Apellido:</strong></td>
+              <td>{{ datosIdentificacion?.primerApellido || "No aplica" }}</td>
+            </tr>
+            <tr>
+              <td><strong>Segundo Apellido:</strong></td>
+              <td>{{ datosIdentificacion?.segundoApellido || "No aplica" }}</td>
+            </tr>
+            <tr>
+              <td><strong>Denominación o Razón Social:</strong></td>
+              <td>{{ datosIdentificacion?.razonSocial || "No aplica" }}</td>
+            </tr>
+            <tr>
+              <td><strong>Régimen de Capital:</strong></td>
+              <td>{{ datosIdentificacion?.regimenCapital || "No aplica" }}</td>
+            </tr>
+            <tr>
+              <td><strong>Nombre Comercial:</strong></td>
+              <td>{{ datosIdentificacion?.nombreComercial || "No aplica" }}</td>
+            </tr>
+            <tr>
+              <td><strong>Fecha de Inicio de Operaciones:</strong></td>
+              <td>{{ fechaInicioOperaciones || "No disponible" }}</td>
+            </tr>
+            <tr>
+              <td><strong>Estatus en el Padrón:</strong></td>
+              <td>{{ datosIdentificacion?.estatus || "No disponible" }}</td>
+            </tr>
+            <tr>
+              <td><strong>Fecha de Último Cambio de Estado:</strong></td>
+              <td>
+                {{ datosIdentificacion?.fechaCambioEstado || "No disponible" }}
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
     </div>
   </nb-card>
   <nb-card accent="info">
     <!-- Datos del Domicilio Registrado -->
     <div class="mb-4">
       <nb-card-header class="text-center">
-      <h5>Datos del Domicilio Registrado</h5>
+        <h5>Datos del Domicilio Registrado</h5>
       </nb-card-header>
-      <table class="table table-bordered">
-        <tbody>
-          <tr>
-            <td><strong>Código Postal:</strong></td>
-            <td>{{ domicilio?.codigoPostal || 'No disponible' }}</td>
-          </tr>
-          <tr>
-            <td><strong>Tipo de Vialidad:</strong></td>
-            <td>{{ domicilio?.tipoVialidad || 'No disponible' }}</td>
-          </tr>
-          <tr>
-            <td><strong>Nombre de Vialidad:</strong></td>
-            <td>{{ domicilio?.nombreVialidad || 'No disponible' }}</td>
-          </tr>
-          <tr>
-            <td><strong>Número Exterior:</strong></td>
-            <td>{{ domicilio?.numeroExterior || 'No disponible' }}</td>
-          </tr>
-          <tr>
-            <td><strong>Número Interior:</strong></td>
-            <td>{{ domicilio?.numeroInterior || 'No aplica' }}</td>
-          </tr>
-          <tr>
-            <td><strong>Colonia:</strong></td>
-            <td>{{ domicilio?.colonia || 'No disponible' }}</td>
-          </tr>
-          <tr>
-            <td><strong>Localidad:</strong></td>
-            <td>{{ domicilio?.localidad || 'No disponible' }}</td>
-          </tr>
-          <tr>
-            <td><strong>Municipio:</strong></td>
-            <td>{{ domicilio?.municipio || 'No disponible' }}</td>
-          </tr>
-          <tr>
-            <td><strong>Entidad Federativa:</strong></td>
-            <td>{{ domicilio?.entidadFederativa || 'No disponible' }}</td>
-          </tr>
-          <tr>
-            <td><strong>Entre Calle:</strong></td>
-            <td>{{ domicilio?.entreCalle || 'No disponible' }}</td>
-          </tr>
-          <tr>
-            <td><strong>Y Calle:</strong></td>
-            <td>{{ domicilio?.yCalle || 'No disponible' }}</td>
-          </tr>
-        </tbody>
-      </table>
+      <div class="table-responsive">
+        <table class="table table-bordered">
+          <tbody>
+            <tr>
+              <td><strong>Código Postal:</strong></td>
+              <td>{{ domicilio?.codigoPostal || "No disponible" }}</td>
+            </tr>
+            <tr>
+              <td><strong>Tipo de Vialidad:</strong></td>
+              <td>{{ domicilio?.tipoVialidad || "No disponible" }}</td>
+            </tr>
+            <tr>
+              <td><strong>Nombre de Vialidad:</strong></td>
+              <td>{{ domicilio?.nombreVialidad || "No disponible" }}</td>
+            </tr>
+            <tr>
+              <td><strong>Número Exterior:</strong></td>
+              <td>{{ domicilio?.numeroExterior || "No disponible" }}</td>
+            </tr>
+            <tr>
+              <td><strong>Número Interior:</strong></td>
+              <td>{{ domicilio?.numeroInterior || "No aplica" }}</td>
+            </tr>
+            <tr>
+              <td><strong>Colonia:</strong></td>
+              <td>{{ domicilio?.colonia || "No disponible" }}</td>
+            </tr>
+            <tr>
+              <td><strong>Localidad:</strong></td>
+              <td>{{ domicilio?.localidad || "No disponible" }}</td>
+            </tr>
+            <tr>
+              <td><strong>Municipio:</strong></td>
+              <td>{{ domicilio?.municipio || "No disponible" }}</td>
+            </tr>
+            <tr>
+              <td><strong>Entidad Federativa:</strong></td>
+              <td>{{ domicilio?.entidadFederativa || "No disponible" }}</td>
+            </tr>
+            <tr>
+              <td><strong>Entre Calle:</strong></td>
+              <td>{{ domicilio?.entreCalle || "No disponible" }}</td>
+            </tr>
+            <tr>
+              <td><strong>Y Calle:</strong></td>
+              <td>{{ domicilio?.yCalle || "No disponible" }}</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
     </div>
   </nb-card>
   <nb-card accent="info">
-   <!-- Actividades Económicas -->
-<div class="mb-4">
-  <nb-card-header class="text-center">
-  <h5>Actividades Económicas</h5>
-  </nb-card-header>
-  <table class="table table-bordered">
-    <thead>
-      <tr>
-        <th>Actividad</th>
-        <th>Porcentaje</th>
-        <th>Fecha Inicio</th>
-        <th>Fecha Fin</th>
-      </tr>
-    </thead>
-    <tbody>
-      <tr *ngFor="let actividad of actividadesEconomicas" (click)="onRowSelectActividad(actividad)">
-        <td>{{ actividad.actividad }}</td>
-        <td>{{ actividad.porcentaje }} %</td>
-        <td>{{ actividad.fechaInicio }}</td>
-        <td>{{ actividad.fechaFin }}</td>
-      </tr>
-    </tbody>
-  </table>
-</div>
-</nb-card>
-<nb-card accent="info">
-<!-- Regímenes -->
-<div class="mb-4">
-  <nb-card-header class="text-center">
-  <h5>Regímenes</h5>
-  </nb-card-header>
-  <table class="table table-bordered">
-    <thead>
-      <tr>
-        <th>Nombre</th>
-        <th>Fecha de inicio</th>
-        <th>Fecha de fin</th>
-      </tr>
-    </thead>
-    <tbody>
-      <tr *ngFor="let regimen of regimenes" (click)="onRowSelectRegimen(regimen)">
-        <td>{{ regimen.regimen }}</td>
-        <td>{{ regimen.fechaInicio}}</td>
-        <td>{{ regimen.fechaFin}}</td>
-      </tr>
-    </tbody>
-  </table>
-</div>
-</nb-card>
-<nb-card accent="info">
-<!-- Obligaciones -->
-<div class="mb-4">
-  <nb-card-header class="text-center">
-  <h5>Obligaciones</h5>
-  </nb-card-header>
-  <table class="table table-bordered">
-    <thead>
-      <tr>
-        <th>Obligación</th>
-        <th>Vencimiento</th>
-        <th>Fecha de inicio</th>
-        <th>Fecha de fin</th>
-      </tr>
-    </thead>
-    <tbody>
-      <tr *ngFor="let obligacion of obligaciones" (click)="onRowSelectObligacion(obligacion)">
-        <td>{{ obligacion.descripcion }}</td>
-        <td>{{ obligacion.vencimiento }}</td>
-        <td>{{ obligacion.fechaInicio }}</td>
-        <td>{{ obligacion.fechaFin }}</td>
-      </tr>
-    </tbody>
-  </table>
-</div>
-</nb-card>
+    <!-- Actividades Económicas -->
+    <div class="mb-4">
+      <nb-card-header class="text-center">
+        <h5>Actividades Económicas</h5>
+      </nb-card-header>
+      <div class="table-responsive">
+        <table class="table table-bordered">
+          <thead>
+            <tr>
+              <th>Actividad</th>
+              <th>Porcentaje</th>
+              <th>Fecha Inicio</th>
+              <th>Fecha Fin</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr
+              *ngFor="let actividad of actividadesEconomicas"
+              (click)="onRowSelectActividad(actividad)"
+            >
+              <td>{{ actividad.actividad }}</td>
+              <td>{{ actividad.porcentaje }} %</td>
+              <td>{{ actividad.fechaInicio }}</td>
+              <td>{{ actividad.fechaFin }}</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </nb-card>
+  <nb-card accent="info">
+    <!-- Regímenes -->
+    <div class="mb-4">
+      <nb-card-header class="text-center">
+        <h5>Regímenes</h5>
+      </nb-card-header>
+      <div class="table-responsive">
+        <table class="table table-bordered">
+          <thead>
+            <tr>
+              <th>Nombre</th>
+              <th>Fecha de inicio</th>
+              <th>Fecha de fin</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr
+              *ngFor="let regimen of regimenes"
+              (click)="onRowSelectRegimen(regimen)"
+            >
+              <td>{{ regimen.regimen }}</td>
+              <td>{{ regimen.fechaInicio }}</td>
+              <td>{{ regimen.fechaFin }}</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </nb-card>
+  <nb-card accent="info">
+    <!-- Obligaciones -->
+    <div class="mb-4">
+      <nb-card-header class="text-center">
+        <h5>Obligaciones</h5>
+      </nb-card-header>
+      <div class="table-responsive">
+        <table class="table table-bordered">
+          <thead>
+            <tr>
+              <th>Obligación</th>
+              <th>Vencimiento</th>
+              <th>Fecha de inicio</th>
+              <th>Fecha de fin</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr
+              *ngFor="let obligacion of obligaciones"
+              (click)="onRowSelectObligacion(obligacion)"
+            >
+              <td>{{ obligacion.descripcion }}</td>
+              <td>{{ obligacion.vencimiento }}</td>
+              <td>{{ obligacion.fechaInicio }}</td>
+              <td>{{ obligacion.fechaFin }}</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </nb-card>
 
   <nb-card accent="info">
     <!-- Sección para cargar archivo PDF -->
     <div class="container mt-4">
       <!-- Botón para cargar el archivo PDF -->
       <div class="mb-3 d-flex justify-content-center">
-        <div class="form-group text-center" style="max-width: 400px; width: 100%;">
+        <div
+          class="form-group text-center"
+          style="max-width: 400px; width: 100%"
+        >
           <nb-card-header class="mb-3">
             <h5 class="mb-0">Cargar archivo PDF</h5>
           </nb-card-header>
           <div class="dropZoneContainer">
-            <input type="file"
-                   id="drop_zone"
-                   class="FileUpload"
-                   accept="application/pdf"
-                   onchange="handleFileSelect(this)" />
+            <input
+              type="file"
+              id="drop_zone"
+              class="FileUpload"
+              accept="application/pdf"
+              onchange="handleFileSelect(this)"
+            />
             <div class="dropZoneOverlay">
-              Arrastra y suelta tu archivo PDF <br />o<br />Haz clic para seleccionar
+              Arrastra y suelta tu archivo PDF <br />o<br />Haz clic para
+              seleccionar
             </div>
           </div>
           <small class="form-text text-muted mt-2">
@@ -252,20 +281,18 @@
           </small>
         </div>
       </div>
-  
+
       <!-- Botón para abrir el modal con los datos extraídos -->
       <div *ngIf="extractedData">
-        <button 
-          nbButton 
-          status="primary" 
-          (click)="mostrarDatosEnModal()" 
-          class="mt-2">
+        <button
+          nbButton
+          status="primary"
+          (click)="mostrarDatosEnModal()"
+          class="mt-2"
+        >
           Ver y Guardar Datos Extraídos
         </button>
       </div>
     </div>
   </nb-card>
-  </div>
-  
-
-  
+</div>

@@ -1,4 +1,5 @@
 import { Component, OnInit, TemplateRef, ViewChild } from "@angular/core";
+import { NbDateService } from "@nebular/theme";
 import {
   AbstractControl,
   FormBuilder,
@@ -13,6 +14,7 @@ import { forkJoin, Observable } from "rxjs";
 import { map } from "rxjs/operators";
 import { environment } from "../../../../environments/environment";
 import { CompanyService } from "../../../services/company.service";
+import * as moment from "moment";
 
 interface Requirement {
   id: number;
@@ -21,7 +23,7 @@ interface Requirement {
   isPeriodic: boolean;
   periodAmount?: number;
   periodType?: string;
-  startDate?: Date;
+  startDate?: moment.Moment;
   minQuantity: number;
   partners: string[];
 }
@@ -41,7 +43,7 @@ interface Partner {
 export class RequirementsAssignmentComponent implements OnInit {
   requirementsForm: FormGroup;
   requirements: Requirement[] = [];
-  minDate: Date;
+  minDate: moment.Moment;
 
   documentTypes: { id: number; name: string }[] = [];
   periodTypes = ["semanas", "meses", "años"];
@@ -67,28 +69,44 @@ export class RequirementsAssignmentComponent implements OnInit {
     private http: HttpClient,
     private companyService: CompanyService
   ) {
-    this.minDate = new Date();
-    this.minDate.setHours(0, 0, 0, 0);
+    this.minDate = moment();
 
     this.requirementsForm = this.fb.group({
       documentType: [null, Validators.required],
       isPeriodic: [false],
       periodAmount: [null],
       periodType: ["semanas"],
-      startDate: [null, [this.validateDate.bind(this)]],
+      startDate: [null as moment.Moment | null],
       minQuantity: [1, [Validators.required, Validators.min(1)]],
     });
 
+    // Si es periódico, agregamos validadores requeridos
     this.requirementsForm
       .get("isPeriodic")
       ?.valueChanges.subscribe((isPeriodic) => {
-        if (!isPeriodic) {
+        const periodAmount = this.requirementsForm.get("periodAmount");
+        const periodType = this.requirementsForm.get("periodType");
+        const startDate = this.requirementsForm.get("startDate");
+
+        if (isPeriodic) {
+          periodAmount?.setValidators([Validators.required, Validators.min(1)]);
+          periodType?.setValidators([Validators.required]);
+          startDate?.setValidators([Validators.required]);
+        } else {
+          periodAmount?.clearValidators();
+          periodType?.clearValidators();
+          startDate?.clearValidators();
+
           this.requirementsForm.patchValue({
             periodAmount: null,
             periodType: "semanas",
             startDate: null,
           });
         }
+
+        periodAmount?.updateValueAndValidity();
+        periodType?.updateValueAndValidity();
+        startDate?.updateValueAndValidity();
       });
   }
 
@@ -97,26 +115,13 @@ export class RequirementsAssignmentComponent implements OnInit {
     this.loadRequirements();
   }
 
-  validateDate(control: AbstractControl): ValidationErrors | null {
-    if (!control.value) return null;
-
-    const selectedDate = new Date(control.value);
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-
-    if (selectedDate < today) {
-      return { invalidDate: true };
-    }
-    return null;
-  }
-
   private loadDocumentTypes(): void {
     this.http.get<any[]>(this.fileTypesUrl).subscribe({
       next: (types) => {
         this.documentTypes = types
           // primero filtramos los activos (si viene como "1" o como número 1)
           .filter((t) => Number(t.is_active) === 1)
-          // luego mapeamos al formato que usas
+          // luego mapeamos al formato usado
           .map((t) => ({
             id: Number(t.file_type_id),
             name: t.name,
@@ -141,7 +146,7 @@ export class RequirementsAssignmentComponent implements OnInit {
             isPeriodic: cfg.is_periodic === 1,
             periodAmount: cfg.periodicity_count,
             periodType: cfg.periodicity_type,
-            startDate: new Date(cfg.start_date),
+            startDate: cfg.start_date ? moment(cfg.start_date) : undefined,
             minQuantity: cfg.min_documents_needed,
             // Rellenamos un array de longitud partner_count
             partners: Array(cfg.partner_count).fill(""),
@@ -156,6 +161,8 @@ export class RequirementsAssignmentComponent implements OnInit {
 
     const f = this.requirementsForm.value;
     const companyId = this.companyService.selectedCompany.id;
+    const startDate = f.startDate || "";
+
     const payload = {
       company_id: companyId,
       file_type_id: f.documentType,
@@ -163,7 +170,7 @@ export class RequirementsAssignmentComponent implements OnInit {
       periodicity_type: f.periodType,
       periodicity_count: f.periodAmount,
       min_documents_needed: f.minQuantity,
-      start_date: f.startDate || "",
+      start_date: startDate,
       end_date: "",
     };
 
@@ -182,7 +189,7 @@ export class RequirementsAssignmentComponent implements OnInit {
             isPeriodic: f.isPeriodic,
             periodAmount: f.isPeriodic ? f.periodAmount : undefined,
             periodType: f.isPeriodic ? f.periodType : undefined,
-            startDate: f.isPeriodic ? f.startDate : undefined,
+            startDate: f.isPeriodic ? moment(f.startDate) : undefined,
             minQuantity: f.minQuantity,
             partners: [],
           });
@@ -195,6 +202,62 @@ export class RequirementsAssignmentComponent implements OnInit {
         },
         error: (err) => console.error("Error guardando configuración", err),
       });
+  }
+
+  logSelectedDate(): void {
+    const selectedDate = this.requirementsForm.get("startDate")?.value;
+    const isPeriodic = this.requirementsForm.get("isPeriodic")?.value;
+
+    console.log("--- Información de fecha ---");
+    console.log("Fecha cruda:", selectedDate);
+
+    if (selectedDate) {
+      const date = moment(selectedDate);
+      console.log("Fecha formateada (DD/MM/YYYY):", date.format("DD/MM/YYYY"));
+      console.log("Día de la semana:", date.format("dddd"));
+      console.log("Es periódico:", isPeriodic ? "Sí" : "No");
+
+      if (isPeriodic) {
+        const periodAmount = this.requirementsForm.get("periodAmount")?.value;
+        const periodType = this.requirementsForm.get("periodType")?.value;
+        console.log(`Periodicidad: Cada ${periodAmount} ${periodType}`);
+      }
+    } else {
+      console.log("No hay fecha seleccionada");
+    }
+  }
+
+  forceDatePicker(event: Event): void {
+    const input = event.target as HTMLInputElement;
+
+    input.removeAttribute("readonly");
+    // Abre el datepicker nativo
+    input.showPicker();
+
+    // Restaura el estado 'readonly' después de seleccionar
+    input.addEventListener(
+      "change",
+      () => {
+        input.setAttribute("readonly", "true");
+        this.validateDate(); // Validación adicional
+      },
+      { once: true }
+    );
+  }
+
+  preventManualInput(event: KeyboardEvent | ClipboardEvent): void {
+    event.preventDefault(); // Bloquea cualquier entrada manual
+  }
+
+  validateDate(): void {
+    const selectedDate = this.requirementsForm.get("startDate")?.value;
+    const minDate = this.minDate.format("YYYY-MM-DD");
+
+    if (selectedDate && selectedDate < minDate) {
+      // Si la fecha es menor al mínimo, la resetea
+      this.requirementsForm.get("startDate")?.setValue(minDate);
+      console.warn("Fecha no válida. Se ajustó al mínimo permitido.");
+    }
   }
 
   toggleActive(req: Requirement): void {
@@ -216,7 +279,7 @@ export class RequirementsAssignmentComponent implements OnInit {
     return this.http.get<any[]>(this.bpUrl, { params }).pipe(
       map((list) =>
         list.map((p) => ({
-          id: +p.businessPartnerId, // <-- el + fuerza número
+          id: +p.businessPartnerId,
           name: p.nameCompany,
           affiliation: p.roleName,
           selected: false,
@@ -324,10 +387,4 @@ export class RequirementsAssignmentComponent implements OnInit {
   closeModal(): void {
     this.dialogRef.close();
   }
-
-  dateFilter = (date: Date): boolean => {
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-    return date >= today;
-  };
 }
