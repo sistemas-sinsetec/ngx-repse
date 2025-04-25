@@ -70,18 +70,44 @@
         </div>
 
         <div class="row mb-3">
-          <div class="col-12 col-sm-3">
-            <nb-form-field>
-              <label for="minQuantity">Mínimo de archivos requeridos</label>
-              <input
-                nbInput
-                type="number"
-                formControlName="minQuantity"
-                placeholder="Cantidad mínima"
-                min="1"
-                fullWidth
-              />
-            </nb-form-field>
+          <div class="col-12">
+            <h5>Formatos de archivo requeridos</h5>
+            <p class="text-muted small">
+              Seleccione los formatos aceptados y especifique la cantidad mínima
+              requerida para cada uno.
+            </p>
+
+            <div class="file-formats-container">
+              <div
+                *ngFor="let format of fileFormats"
+                class="file-format-item mb-2"
+              >
+                <div class="d-flex col-12 col-sm-4 justify-content-between">
+                  <div class="d-flex py-2 align-items-center">
+                    <nb-checkbox
+                      [checked]="format.selected"
+                      (checkedChange)="onFormatToggle(format)"
+                    >
+                    </nb-checkbox>
+                    <span class="ml-2 mr-3"
+                      >{{ format.name }} (.{{ format.extension }})</span
+                    >
+                  </div>
+
+                  <input
+                    *ngIf="format.selected"
+                    nbInput
+                    type="number"
+                    [(ngModel)]="format.minQuantity"
+                    [ngModelOptions]="{ standalone: true }"
+                    min="1"
+                    class="w-50"
+                    placeholder="Cantidad"
+                    [disabled]="!format.selected"
+                  />
+                </div>
+              </div>
+            </div>
           </div>
         </div>
 
