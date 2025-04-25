@@ -3,199 +3,242 @@ header('Content-Type: application/json');
 require_once 'cors.php';
 require_once 'conexion.php';
 
+function respond(int $code, array $payload): never
+{
+    http_response_code($code);
+    echo json_encode($payload);
+    exit;
+}
+
 $method = $_SERVER['REQUEST_METHOD'];
 
 switch ($method) {
+    /*──────────────────────────────────────────────────────────────────────*/
+    /*  GET  /api/company_required_files.php?company_id=#                   */
+    /*──────────────────────────────────────────────────────────────────────*/
     case 'GET':
-        // Validar company_id
         if (!isset($_GET['company_id'])) {
-            http_response_code(400);
-            echo json_encode(['error' => 'company_id parameter is required']);
-            exit;
+            respond(400, ['error' => 'company_id parameter is required']);
         }
-        $company_id = intval($_GET['company_id']);
+        $company_id = (int) $_GET['company_id'];
 
-        // 1) Tipos de documento activos
+        /* Tipos de documento activos ------------------------------------ */
         $typesStmt = $mysqli->prepare("
-            SELECT 
-                file_type_id AS id,
-                name,
-                description,
-                is_active
-            FROM file_types
-            WHERE is_active = 1
-        ");
+        SELECT file_type_id AS id, name, description, is_active
+          FROM file_types
+         WHERE is_active = 1
+    ") or respond(500, ['error' => $mysqli->error]);
         $typesStmt->execute();
         $types = $typesStmt->get_result()->fetch_all(MYSQLI_ASSOC);
         $typesStmt->close();
 
-        // 2) Configuraciones existentes + cuenta de socios visibles
+        /* Configuraciones activas --------------------------------------- */
         $confStmt = $mysqli->prepare("
-            SELECT 
-                crf.required_file_id      AS id,
-                crf.file_type_id          AS file_type_id,
-                ft.name                   AS file_type_name,
-                crf.is_periodic,
-                crf.periodicity_type,
-                crf.periodicity_count,
-                crf.min_documents_needed,
-                crf.start_date,
-                crf.end_date,
-                crf.is_active,
-                (
-                  SELECT COUNT(*)
-                    FROM required_file_visibilities v
-                   WHERE v.required_file_id = crf.required_file_id
-                     AND v.is_visible       = 1
-                )                         AS partner_count
-            FROM company_required_files crf
-            JOIN file_types ft 
-              ON ft.file_type_id = crf.file_type_id
-           WHERE crf.company_id = ?
-             AND crf.is_active  = 1
-           ORDER BY crf.start_date DESC
-        ");
+        SELECT crf.required_file_id   AS id,
+               crf.file_type_id,
+               ft.name                AS file_type_name,
+               crf.is_periodic,
+               crf.periodicity_type,
+               crf.periodicity_count,
+               crf.min_documents_needed,
+               crf.start_date,
+               crf.end_date,
+               crf.is_active,
+               ( SELECT COUNT(*)
+                     FROM required_file_visibilities v
+                    WHERE v.required_file_id = crf.required_file_id
+                      AND v.is_visible = 1
+               ) AS partner_count
+          FROM company_required_files crf
+          JOIN file_types ft ON ft.file_type_id = crf.file_type_id
+         WHERE crf.company_id = ?
+           AND crf.is_active  = 1
+         ORDER BY crf.start_date DESC
+    ") or respond(500, ['error' => $mysqli->error]);
         $confStmt->bind_param('i', $company_id);
         $confStmt->execute();
         $configs = $confStmt->get_result()->fetch_all(MYSQLI_ASSOC);
         $confStmt->close();
 
-        echo json_encode([
-            'file_types' => $types,
-            'configs' => $configs,
-        ]);
-        break;
+        respond(200, ['file_types' => $types, 'configs' => $configs]);
 
+    /*──────────────────────────────────────────────────────────────────────*/
+    /*  POST  /api/company_required_files.php                               */
+    /*──────────────────────────────────────────────────────────────────────*/
     case 'POST':
-        $data = json_decode(file_get_contents('php://input'), true);
+        $data = json_decode(file_get_contents('php://input'), true) ?? [];
 
-        // Campos obligatorios
-        $always = ['company_id', 'file_type_id', 'is_periodic', 'min_documents_needed', 'start_date'];
-        foreach ($always as $f) {
-            if (!isset($data[$f])) {
-                http_response_code(400);
-                echo json_encode(['error' => "Field {$f} is required"]);
-                exit;
+        /* ── Validaciones básicas ─────────────────────────────────────── */
+        $required = [
+            'company_id',
+            'file_type_id',
+            'is_periodic',
+            'file_formats',
+            'start_date'
+        ];
+        foreach ($required as $f) {
+            if (!isset($data[$f]))
+                respond(400, ['error' => "Field {$f} is required"]);
+        }
+
+        /* Validar file_formats ----------------------------------------- */
+        $fileFormats = $data['file_formats'];
+        if (!is_array($fileFormats) || !$fileFormats) {
+            respond(400, ['error' => 'file_formats must be a non-empty array']);
+        }
+        foreach ($fileFormats as $idx => $ff) {
+            if (!isset($ff['format_code'], $ff['min_quantity'])) {
+                respond(400, [
+                    'error' =>
+                        "file_formats[$idx] needs format_code and min_quantity"
+                ]);
+            }
+            if ($ff['min_quantity'] < 1) {
+                respond(400, [
+                    'error' =>
+                        "file_formats[$idx].min_quantity must be ≥ 1"
+                ]);
             }
         }
 
-        // Validar periodicidad
         $isPeriodic = (bool) $data['is_periodic'];
-        if ($isPeriodic) {
-            foreach (['periodicity_type', 'periodicity_count'] as $f) {
-                if (!isset($data[$f])) {
-                    http_response_code(400);
-                    echo json_encode(['error' => "Field {$f} is required when is_periodic is true"]);
-                    exit;
-                }
-            }
+        if (
+            $isPeriodic &&
+            (!isset($data['periodicity_type'], $data['periodicity_count']))
+        ) {
+            respond(400, [
+                'error' =>
+                    'periodicity_type and periodicity_count are required when is_periodic is true'
+            ]);
         }
 
-        // Valores para insertar
-        $company_id = intval($data['company_id']);
-        $file_type_id = intval($data['file_type_id']);
-        $is_periodic = $isPeriodic ? 1 : 0;
-        $periodicity_type = $isPeriodic
-            ? $mysqli->real_escape_string($data['periodicity_type'])
-            : null;
-        $periodicity_count = $isPeriodic
-            ? intval($data['periodicity_count'])
-            : null;
-        $min_docs = intval($data['min_documents_needed']);
-        $start_date = $mysqli->real_escape_string($data['start_date']);
-        $end_date_clause = (isset($data['end_date']) && $data['end_date'] !== '')
-            ? "'" . $mysqli->real_escape_string($data['end_date']) . "'"
-            : "NULL";
+        /* ── Conversión de valores ────────────────────────────────────── */
+        $company_id = (int) $data['company_id'];
+        $file_type_id = (int) $data['file_type_id'];
+        $start_date = $data['start_date'];                       // YYYY-MM-DD
+        $end_date = $data['end_date'] ?? null;
+        $periodicity_type = $isPeriodic ? $data['periodicity_type'] : null;
+        $periodicity_count = $isPeriodic ? (int) $data['periodicity_count'] : null;
+        $isPeriodicInt = (int) $isPeriodic;
 
-        // Insert en company_required_files
-        $sql = "
-        INSERT INTO company_required_files
-          (company_id, file_type_id, is_periodic,
-           periodicity_type, periodicity_count,
-           min_documents_needed, start_date, end_date)
-        VALUES
-          (?, ?, ?, ?, ?, ?, ?, {$end_date_clause})
-    ";
-        $stmt = $mysqli->prepare($sql);
-        $stmt->bind_param(
-            'iiisiis',
-            $company_id,
-            $file_type_id,
-            $is_periodic,
-            $periodicity_type,
-            $periodicity_count,
-            $min_docs,
-            $start_date
-        );
+        /* Suma total de mínimos por formato ---------------------------- */
+        $min_docs = array_sum(array_column($fileFormats, 'min_quantity'));
 
-        if ($stmt->execute()) {
-            $required_file_id = $stmt->insert_id;
+        /* ── Transacción ──────────────────────────────────────────────── */
+        $mysqli->begin_transaction();
+        try {
+            /* 1) Desactivar versión anterior --------------------------- */
+            $off = $mysqli->prepare("
+            UPDATE company_required_files
+               SET is_active = 0,
+                   end_date  = IF(end_date IS NULL OR end_date > ?,
+                                   DATE_SUB(?, INTERVAL 1 DAY),
+                                   end_date)
+             WHERE company_id   = ?
+               AND file_type_id = ?
+               AND is_active    = 1
+        ");
+            $off->bind_param(
+                'ssii',
+                $start_date,
+                $start_date,
+                $company_id,
+                $file_type_id
+            );
+            $off->execute();
+            $off->close();
 
-            // Calcular fecha fin del periodo según periodicidad
+            /* 2) Insertar cabecera ------------------------------------- */
+            $ins = $mysqli->prepare("
+            INSERT INTO company_required_files
+                  (company_id, file_type_id, is_periodic,
+                   periodicity_type, periodicity_count,
+                   min_documents_needed, start_date, end_date, is_active)
+            VALUES (?,?,?,?,?,?,?, ?, 1)
+        ");
+            $ins->bind_param(
+                'iiisiiss',
+                $company_id,
+                $file_type_id,
+                $isPeriodicInt,        // ✅ variable, no expresión
+                $periodicity_type,
+                $periodicity_count,
+                $min_docs,
+                $start_date,
+                $end_date
+            );
+            $ins->execute();
+            $required_file_id = $ins->insert_id;
+            $ins->close();
+
+            /* 3) Detalle de formatos ----------------------------------- */
+            $rf = $mysqli->prepare("
+            INSERT INTO required_file_formats
+                  (required_file_id, format_code, min_required)
+            VALUES (?,?,?)
+        ");
+            foreach ($fileFormats as $ff) {
+                $fmt = strtolower($ff['format_code']);
+                $min = (int) $ff['min_quantity'];
+                $rf->bind_param('isi', $required_file_id, $fmt, $min);
+                $rf->execute();
+            }
+            $rf->close();
+
+            /* 4) Crear primer periodo (si aplica) ---------------------- */
             if ($isPeriodic) {
-                try {
-                    $fechaInicio = new DateTime($start_date);
-                    switch (strtolower($periodicity_type)) {
-                        case 'semanas':
-                            $interval = "P" . ($periodicity_count * 7) . "D";
-                            break;
-                        case 'meses':
-                            $interval = "P{$periodicity_count}M";
-                            break;
-                        case 'años':
-                            $interval = "P{$periodicity_count}Y";
-                            break;
-                        default:
-                            throw new Exception("Periodicidad no válida");
-                    }
-
-                    $fechaFin = clone $fechaInicio;
-                    $fechaFin->add(new DateInterval($interval));
-
-                    // Insertar en document_periods
-                    $insertPeriod = $mysqli->prepare("
-                INSERT INTO document_periods
-                    (required_file_id, start_date, end_date, created_at)
-                VALUES (?, ?, ?, NOW())
-            ");
-                    $start_date_formatted = $fechaInicio->format('Y-m-d');
-                    $end_date_formatted = $fechaFin->format('Y-m-d');
-
-                    $insertPeriod->bind_param(
-                        'iss',
-                        $required_file_id,
-                        $start_date_formatted,
-                        $end_date_formatted
-                    );
-
-                    if (!$insertPeriod->execute()) {
-                        throw new Exception($insertPeriod->error);
-                    }
-
-                    $insertPeriod->close();
-                } catch (Exception $e) {
-                    http_response_code(500);
-                    echo json_encode(['error' => 'Error al crear periodo: ' . $e->getMessage()]);
-                    exit;
+                $inicio = new DateTime($start_date);
+                $cnt = $periodicity_count;
+                switch (strtolower($periodicity_type)) {
+                    case 'días':
+                        $interval = "P{$cnt}D";
+                        break;
+                    case 'semanas':
+                        $interval = "P{$cnt}W";
+                        break;
+                    case 'meses':
+                        $interval = "P{$cnt}M";
+                        break;
+                    case 'años':
+                        $interval = "P{$cnt}Y";
+                        break;
+                    default:
+                        throw new Exception('Periodicidad no válida');
                 }
+                $fin = (clone $inicio)->add(new DateInterval($interval));
+
+                $p = $mysqli->prepare("
+                INSERT INTO document_periods
+                      (required_file_id, start_date, end_date, created_at)
+                VALUES (?,?,?,NOW())
+            ");
+                $p->bind_param(
+                    'iss',
+                    $required_file_id,
+                    $inicio->format('Y-m-d'),
+                    $fin->format('Y-m-d')
+                );
+                $p->execute();
+                $p->close();
             }
 
-            echo json_encode([
+            /* 5) Commit ------------------------------------------------ */
+            $mysqli->commit();
+            respond(201, [
                 'success' => true,
                 'required_file_id' => $required_file_id,
+                'min_documents' => $min_docs
             ]);
-        } else {
-            http_response_code(500);
-            echo json_encode(['error' => $stmt->error]);
+
+        } catch (Throwable $e) {
+            $mysqli->rollback();
+            respond(500, ['error' => $e->getMessage()]);
         }
 
-        $stmt->close();
-        break;
-
-
+    /*──────────────────────────────────────────────────────────────────────*/
     default:
-        http_response_code(405);
-        echo json_encode(['error' => 'Method not allowed']);
+        respond(405, ['error' => 'Method not allowed']);
 }
 
 $mysqli->close();
+?>

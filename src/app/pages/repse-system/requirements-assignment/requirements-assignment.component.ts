@@ -28,19 +28,18 @@ interface Requirement {
   partners: string[];
 }
 
-interface Partner {
-  id: number;
-  name: string;
-  affiliation: string;
-  selected: boolean;
-}
-
 interface FileFormat {
   id: number;
   name: string;
   extension: string;
   selected: boolean;
   minQuantity: number;
+}
+interface Partner {
+  id: number;
+  name: string;
+  affiliation: string;
+  selected: boolean;
 }
 
 @Component({
@@ -52,22 +51,16 @@ export class RequirementsAssignmentComponent implements OnInit {
   requirementsForm: FormGroup;
   requirements: Requirement[] = [];
   minDate: moment.Moment;
+  fileFormats: FileFormat[] = [];
 
   documentTypes: { id: number; name: string }[] = [];
   periodTypes = ["semanas", "meses", "años"];
-
-  fileFormats: FileFormat[] = [
-    { id: 1, name: "PDF", extension: "pdf", selected: false, minQuantity: 1 },
-    { id: 2, name: "XML", extension: "xml", selected: false, minQuantity: 1 },
-    { id: 3, name: "TXT", extension: "txt", selected: false, minQuantity: 1 },
-    { id: 4, name: "JPEG", extension: "jpg", selected: false, minQuantity: 1 },
-    { id: 5, name: "PNG", extension: "png", selected: false, minQuantity: 1 },
-  ];
 
   private fileTypesUrl = `${environment.apiBaseUrl}/file_types.php`;
   private reqFilesUrl = `${environment.apiBaseUrl}/company_required_files.php`;
   private visibUrl = `${environment.apiBaseUrl}/required_file_visibilities.php`;
   private bpUrl = `${environment.apiBaseUrl}/getBusinessPartner.php`;
+  private fileFormatsUrl = `${environment.apiBaseUrl}/file_formats.php`;
 
   @ViewChild("partnerModal") partnerModalTemplate!: TemplateRef<any>;
   selectedRequirement!: Requirement;
@@ -93,7 +86,6 @@ export class RequirementsAssignmentComponent implements OnInit {
       periodAmount: [null],
       periodType: ["semanas"],
       startDate: [null as moment.Moment | null],
-      minQuantity: [1, [Validators.required, Validators.min(1)]],
     });
 
     // Si es periódico, agregamos validadores requeridos
@@ -129,8 +121,34 @@ export class RequirementsAssignmentComponent implements OnInit {
   ngOnInit(): void {
     this.loadDocumentTypes();
     this.loadRequirements();
+    this.loadFileFormats();
     // Podrías cargar los formatos desde el servicio si los tienes allí
     // this.loadFileFormats();
+  }
+
+  private loadFileFormats(): void {
+    this.http
+      .get<{ code: string; name: string; mime: string }[]>(this.fileFormatsUrl)
+      .subscribe({
+        next: (list) => {
+          this.fileFormats = list.map((f, i) => ({
+            id: i + 1, // o cualquier otra lógica
+            name: f.name,
+            extension: f.code,
+            selected: false,
+            minQuantity: 1,
+          }));
+        },
+        error: (err) => console.error("Error cargando formatos", err),
+      });
+  }
+
+  onFormatToggle(idx: number): void {
+    const fmt = this.fileFormats[idx];
+    fmt.selected = !fmt.selected;
+    if (!fmt.selected) {
+      fmt.minQuantity = 1;
+    }
   }
 
   private loadDocumentTypes(): void {
@@ -183,10 +201,10 @@ export class RequirementsAssignmentComponent implements OnInit {
 
     // Obtener formatos seleccionados
     const selectedFormats = this.fileFormats
-      .filter((format) => format.selected)
-      .map((format) => ({
-        format: format.extension,
-        min_quantity: format.minQuantity,
+      .filter((f) => f.selected)
+      .map((f) => ({
+        format_code: f.extension, // «pdf», «xml», …
+        min_quantity: f.minQuantity, // el mínimo para este formato
       }));
 
     const payload = {
@@ -195,7 +213,7 @@ export class RequirementsAssignmentComponent implements OnInit {
       is_periodic: f.isPeriodic,
       periodicity_type: f.periodType,
       periodicity_count: f.periodAmount,
-      file_formats: selectedFormats, // Enviar los formatos seleccionados
+      file_formats: selectedFormats,
       start_date: startDate,
       end_date: "",
     };
@@ -420,12 +438,5 @@ export class RequirementsAssignmentComponent implements OnInit {
 
   closeModal(): void {
     this.dialogRef.close();
-  }
-
-  onFormatToggle(format: FileFormat): void {
-    format.selected = !format.selected;
-    if (!format.selected) {
-      format.minQuantity = 1;
-    }
   }
 }
