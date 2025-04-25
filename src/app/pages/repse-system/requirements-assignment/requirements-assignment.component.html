@@ -54,18 +54,17 @@
               <label for="startDate">Fecha de inicio</label>
               <input
                 nbInput
-                fullWidth
-                [nbDatepicker]="datepicker"
+                type="date"
                 formControlName="startDate"
-                placeholder="YYYY-MM-DD"
-                [min]="minDate"
+                [min]="minDate.format('YYYY-MM-DD')"
                 readonly
+                (click)="forceDatePicker($event)"
+                (keydown)="preventManualInput($event)"
+                (paste)="preventManualInput($event)"
+                (input)="validateDate()"
+                class="no-manual-input"
+                fullWidth
               />
-              <nb-datepicker
-                #datepicker
-                format="yyyy-MM-dd"
-                [filter]="dateFilter"
-              ></nb-datepicker>
             </nb-form-field>
           </div>
         </div>

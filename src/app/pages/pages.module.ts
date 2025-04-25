@@ -15,7 +15,7 @@ import { ProcessedAttendanceComponent } from "./incident-control/processed-atten
     PagesRoutingModule,
     ThemeModule,
     NbMenuModule,
-    FormsModule, // Añade FormsModule aquí
+    FormsModule,
     DashboardModule,
     MiscellaneousModule,
     SettingsModule,
