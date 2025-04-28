@@ -235,19 +235,6 @@ export class DocumentUploadComponent {
     );
   }
 
-  getIncompletePeriods(): any[] {
-    if (!this.selectedDocument) return [];
-
-    const today = new Date();
-    return this.selectedDocument.periods.filter((p: any) => {
-      const end = new Date(p.end_date);
-      const stillIncomplete =
-        p.uploaded_count < this.selectedDocument.min_documents_needed;
-      const alreadyEnded = end < today;
-      return stillIncomplete && alreadyEnded;
-    });
-  }
-
   // ── Download modal ───────────────────────────────────────────
 
   openDownloadModal(file: any): void {
@@ -390,6 +377,17 @@ export class DocumentUploadComponent {
       this.dialogRef.close();
       this.dialogRef = null!;
     }
+  }
+
+  getIncompletePeriods(): any[] {
+    if (!this.selectedDocument) return [];
+
+    const now = moment().startOf("day");
+    return this.selectedDocument.periods.filter(
+      (p: any) =>
+        moment(p.end_date).isBefore(now, "day") &&
+        p.uploaded_count < this.selectedDocument.min_documents_needed
+    );
   }
 
   private formatDate(dateString: string): string {
