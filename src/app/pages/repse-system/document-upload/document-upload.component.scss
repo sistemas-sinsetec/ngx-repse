@@ -1,0 +1,10 @@
+// En tu document-upload.component.scss o en styles.scss
+.custom-dialog {
+  @media (max-width: 575.98px) {
+    width: 100%;
+  }
+
+  @media (min-width: 576px) {
+    width: 75%;
+  }
+}

@@ -319,12 +319,28 @@ export class DocumentService {
     return "pendiente";
   }
 
-  getPastPeriods(requiredFileId: number) {
-    return of(
-      this.documentPeriods.filter(
-        (p) => p.required_file_id === requiredFileId && p.is_active === 0
-      )
+  // En tu DocumentService, actualiza getPastPeriods para incluir información de completitud:
+
+  getPastPeriods(requiredFileId: number): Observable<any[]> {
+    const periods = this.documentPeriods.filter(
+      (p) => p.required_file_id === requiredFileId && p.is_active === 0
     );
+
+    // Agregar información de completitud a cada periodo
+    const periodsWithStatus = periods.map((period) => {
+      const uploadedFiles = this.uploadedFiles.filter(
+        (f) =>
+          f.required_file_id === requiredFileId &&
+          f.period_id === period.period_id
+      );
+
+      return {
+        ...period,
+        is_complete: uploadedFiles.length > 0,
+      };
+    });
+
+    return of(periodsWithStatus);
   }
 
   // Simulación de subida/descarga
@@ -337,15 +353,190 @@ export class DocumentService {
     link.click();
   }
 
-  uploadFile(file: File, requiredFileId: number, periodId?: number) {
+  uploadFile(
+    file: File,
+    requiredFileId: number,
+    periodId?: number,
+    format?: string
+  ) {
     console.log(
-      `Subiendo archivo para requiredFileId: ${requiredFileId}, periodId: ${periodId}`
+      `Subiendo archivo para requiredFileId: ${requiredFileId}, periodId: ${periodId}, format: ${format}`
     );
     // Simulación de subida
     return of({
       success: true,
       file_id: Math.floor(Math.random() * 1000) + 100,
       file_path: `uploads/${file.name}`,
+      format: format || "unknown",
     });
+  }
+
+  // Agrega este método a tu DocumentService
+  getFileStructure(requiredFileId: number, periodId?: number): Observable<any> {
+    // Datos de ejemplo basados en tu estructura actual
+    const exampleStructures = {
+      20: {
+        // RFC (semanal)
+        name: "RFC",
+        periods: [
+          {
+            name: "Abr 2025 - Semana 2",
+            isCurrent: true,
+            formats: [
+              {
+                type: "PDF",
+                files: [
+                  {
+                    name: "RFC_20250418.pdf",
+                    path: "RFC_20250418.pdf",
+                    uploaded_at: "2025-04-18T10:30:00Z",
+                    isCurrent: true,
+                  },
+                ],
+              },
+            ],
+          },
+          {
+            name: "Abr 2025 - Semana 1",
+            isCurrent: false,
+            formats: [
+              {
+                type: "PDF",
+                files: [
+                  {
+                    name: "RFC_20250412.pdf",
+                    path: "RFC_20250412.pdf",
+                    uploaded_at: "2025-04-12T14:45:00Z",
+                    isCurrent: false,
+                  },
+                ],
+              },
+              {
+                type: "XML",
+                files: [
+                  {
+                    name: "RFC_20250412.xml",
+                    path: "RFC_20250412.xml",
+                    uploaded_at: "2025-04-12T14:46:00Z",
+                    isCurrent: false,
+                  },
+                ],
+              },
+            ],
+          },
+        ],
+      },
+      21: {
+        // Constancia de Situación Fiscal (mensual)
+        name: "Constancia de Situación Fiscal",
+        periods: [
+          {
+            name: "Mar 2025",
+            isCurrent: false,
+            formats: [
+              {
+                type: "PDF",
+                files: [
+                  {
+                    name: "Constancia_20250315.pdf",
+                    path: "Constancia_20250315.pdf",
+                    uploaded_at: "2025-03-15T09:20:00Z",
+                    isCurrent: false,
+                  },
+                ],
+              },
+            ],
+          },
+        ],
+      },
+      23: {
+        // Comprobante de Domicilio (no periódico)
+        name: "Comprobante de Domicilio",
+        periods: [
+          {
+            name: "Único",
+            isCurrent: true,
+            formats: [
+              {
+                type: "PDF",
+                files: [
+                  {
+                    name: "Comprobante_20250410.pdf",
+                    path: "Comprobante_20250410.pdf",
+                    uploaded_at: "2025-04-10T11:15:00Z",
+                    isCurrent: true,
+                  },
+                ],
+              },
+              {
+                type: "JPG",
+                files: [
+                  {
+                    name: "Comprobante_20250410.jpg",
+                    path: "Comprobante_20250410.jpg",
+                    uploaded_at: "2025-04-10T11:16:00Z",
+                    isCurrent: true,
+                  },
+                ],
+              },
+            ],
+          },
+        ],
+      },
+      24: {
+        // Identificación Oficial (no periódico)
+        name: "Identificación Oficial",
+        periods: [
+          {
+            name: "Único",
+            isCurrent: true,
+            formats: [
+              {
+                type: "PDF",
+                files: [
+                  {
+                    name: "INE_20240115.pdf",
+                    path: "INE_20240115.pdf",
+                    uploaded_at: "2025-01-15T16:20:00Z",
+                    isCurrent: true,
+                  },
+                ],
+              },
+            ],
+          },
+        ],
+      },
+    };
+
+    // Devolver la estructura correspondiente al requiredFileId
+    const structure = exampleStructures[requiredFileId] || {
+      name: "Documento Desconocido",
+      periods: [],
+    };
+
+    // Filtrar por periodo si se especifica
+    if (periodId) {
+      structure.periods = structure.periods.filter(
+        (p) =>
+          p.name.includes(`Semana ${periodId}`) ||
+          p.name.includes(moment(periodId).format("MMM YYYY"))
+      );
+    }
+
+    return of(structure);
+  }
+
+  // Método auxiliar para determinar el tipo de formato
+  private getFormatType(extension: string): string {
+    const formatMap = {
+      pdf: "PDF",
+      xml: "XML",
+      txt: "TXT",
+      jpg: "Imagen",
+      jpeg: "Imagen",
+      png: "Imagen",
+    };
+
+    return formatMap[extension] || extension.toUpperCase();
   }
 }

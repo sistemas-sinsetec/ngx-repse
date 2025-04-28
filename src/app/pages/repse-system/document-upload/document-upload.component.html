@@ -9,17 +9,17 @@
         <button
           nbButton
           [status]="activeTab === 'regular' ? 'primary' : 'basic'"
-          (click)="activeTab = 'regular'"
+          (click)="onTabChange('regular')"
           class="mr-2"
         >
-          Carga Regular
+          Regular
         </button>
         <button
           nbButton
           [status]="activeTab === 'late' ? 'primary' : 'basic'"
-          (click)="activeTab = 'late'"
+          (click)="onTabChange('late')"
         >
-          Carga con Retraso
+          Con retraso
         </button>
       </div>
 
@@ -27,7 +27,7 @@
       <div *ngIf="activeTab === 'regular'" class="tab-content">
         <h2>Documentos Requeridos</h2>
         <p class="mb-4">
-          Lista de documentos que deben ser cargados para el periodo actual.
+          Lista de documentos que deben ser cargados para los periodos actuales.
         </p>
 
         <nb-alert *ngIf="loading" status="info"
@@ -36,60 +36,73 @@
 
         <div *ngIf="!loading" class="table-responsive">
           <table class="table table-striped table-bordered">
-            <thead class="thead-light">
+            <thead class="thead-light text-center">
               <tr>
                 <th>Documento</th>
                 <th class="d-none d-sm-table-cell">Periodicidad</th>
                 <th class="d-none d-md-table-cell">Fecha límite</th>
                 <th>Estado</th>
+                <th>Progreso</th>
                 <th>Acciones</th>
               </tr>
             </thead>
             <tbody>
               <tr *ngFor="let file of requiredFiles">
-                <td>{{ file.name }}</td>
-                <td class="d-none d-sm-table-cell">
+                <td class="align-middle">{{ file.name }}</td>
+                <td class="d-none d-sm-table-cell text-center align-middle">
                   {{
                     file.is_periodic
                       ? file.periodicity_count + " " + file.periodicity_type
                       : "No periódico"
                   }}
                 </td>
-                <td class="d-none d-md-table-cell">
+                <td class="d-none d-md-table-cell text-center align-middle">
                   {{ file.deadline | date : "dd/MM/yyyy" }}
                 </td>
-                <td>
+                <td class="align-middle text-center">
                   <nb-tag
                     appearance="outline"
                     [status]="getStatusColor(file.status)"
                     [text]="file.status | titlecase"
                   ></nb-tag>
                 </td>
+                <td class="text-center align-middle">
+                  {{ getUploadProgress(file) }}
+                </td>
                 <td>
-                  <div class="d-flex flex-wrap gap-2">
+                  <input
+                    #fileInput
+                    type="file"
+                    style="display: none"
+                    (change)="onFileSelected($event)"
+                  />
+                  <div class="d-flex flex-wrap align-items-center gap-1">
                     <button
                       nbButton
+                      fullWidth
                       size="small"
                       status="primary"
-                      [disabled]="!file.hasFiles"
-                      (click)="openDownloadModal(file)"
-                    >
-                      Descargar
-                    </button>
-                    <input
-                      #fileInput
-                      type="file"
-                      style="display: none"
-                      (change)="onFileSelected($event)"
-                    />
-                    <button
-                      nbButton
-                      size="small"
-                      [status]="file.status === 'pending' ? 'success' : 'basic'"
                       (click)="prepareUpload(file)"
                       [disabled]="!file.is_active"
+                      class="d-flex align-items-center"
                     >
-                      {{ file.status === "pending" ? "Subir" : "Subir Nuevo" }}
+                      <nb-icon icon="upload-outline" class="mr-1"></nb-icon>
+                      <span>{{
+                        file.status === "pending" ? "Subir" : "Nuevo"
+                      }}</span>
+                    </button>
+                    <button
+                      nbButton
+                      fullWidth
+                      outline
+                      size="small"
+                      [status]="file.status === 'pending' ? 'success' : 'basic'"
+                      [disabled]="!file.hasFiles"
+                      (click)="openDownloadModal(file)"
+                      class="d-flex align-items-center mt-2"
+                    >
+                      <nb-icon icon="download-outline" class="mr-1"></nb-icon>
+                      <span>Descargar</span>
                     </button>
                   </div>
                 </td>
@@ -113,6 +126,7 @@
 
             <form>
               <div class="row">
+                <!-- Selector de tipo de documento -->
                 <div class="col-md-6 mb-3">
                   <label for="document-type" class="form-label"
                     >Tipo de Documento:</label
@@ -125,14 +139,22 @@
                   >
                     <nb-option value="">Seleccione un documento</nb-option>
                     <nb-option
-                      *ngFor="let file of requiredFiles"
+                      *ngFor="let file of getIncompletePeriodicFiles()"
                       [value]="file"
+                      [disabled]="!hasAvailablePeriods(file)"
                     >
                       {{ file.name }}
+                      <small
+                        *ngIf="!hasAvailablePeriods(file)"
+                        class="text-danger d-block"
+                      >
+                        (Todos los periodos están completos)
+                      </small>
                     </nb-option>
                   </nb-select>
                 </div>
 
+                <!-- Selector de periodo -->
                 <div class="col-md-6 mb-3">
                   <label for="period" class="form-label">Periodo:</label>
                   <nb-select
@@ -144,15 +166,46 @@
                   >
                     <nb-option value="">Seleccione un periodo</nb-option>
                     <nb-option
-                      *ngFor="let period of pastPeriods"
+                      *ngFor="let period of getIncompletePeriods()"
                       [value]="period"
                     >
                       {{ period.start_date | date : "MMM yyyy" }} -
                       {{ period.end_date | date : "MMM yyyy" }}
+                      <small
+                        *ngIf="isPeriodComplete(period)"
+                        class="text-success d-block"
+                      >
+                        (Completo)
+                      </small>
                     </nb-option>
                   </nb-select>
                 </div>
 
+                <!-- Nuevo Selector de formato de archivo -->
+                <div
+                  class="col-md-6 mb-3"
+                  *ngIf="selectedDocument && selectedPeriod"
+                >
+                  <label for="file-format" class="form-label"
+                    >Formato de Archivo:</label
+                  >
+                  <nb-select
+                    id="file-format"
+                    fullWidth
+                    [(selected)]="selectedFormat"
+                    [disabled]="!selectedDocument || !selectedPeriod"
+                  >
+                    <nb-option value="">Seleccione un formato</nb-option>
+                    <nb-option
+                      *ngFor="let format of availableFormats"
+                      [value]="format"
+                    >
+                      {{ format }}
+                    </nb-option>
+                  </nb-select>
+                </div>
+
+                <!-- Selector de archivo -->
                 <div class="col-12 mb-3">
                   <label class="form-label">Archivo:</label>
                   <div class="d-flex align-items-center">
@@ -160,10 +213,15 @@
                       nbButton
                       (click)="fileInput.click()"
                       [disabled]="!canSelectFile()"
+                      class="me-2"
                     >
                       <nb-icon icon="upload"></nb-icon> Seleccionar archivo
                     </button>
-                    <span class="ml-2" *ngIf="selectedFile">
+                    <span
+                      *ngIf="selectedFile"
+                      class="text-truncate"
+                      style="max-width: 300px"
+                    >
                       {{ selectedFile.name }}
                     </span>
                   </div>
@@ -173,6 +231,7 @@
                     style="display: none"
                     (change)="onFileSelected($event)"
                     [disabled]="!canSelectFile()"
+                    [accept]="getFileAccept()"
                   />
                 </div>
 
@@ -197,7 +256,7 @@
 
 <!-- Modal para descargar archivos -->
 <ng-template #downloadModal let-ref="dialogRef">
-  <nb-card>
+  <nb-card class="custom-dialog mx-auto">
     <nb-card-header>
       {{ modalTitle }}
       <button
@@ -210,34 +269,117 @@
         <nb-icon icon="close-outline"></nb-icon>
       </button>
     </nb-card-header>
-    <nb-card-body>
-      <div class="file-list">
-        <div
-          *ngFor="let file of uploadedFiles"
-          class="file-item d-flex justify-content-between align-items-center mb-3 p-2 border-bottom"
-        >
-          <div>
-            <strong>{{ file.file_path.split("/").pop() }}</strong>
-            <div class="text-muted small">
-              Subido el {{ formatDate(file.uploaded_at) }}
-              <span *ngIf="file.is_current">(Más reciente)</span>
-            </div>
-          </div>
-          <button
-            nbButton
-            size="small"
-            status="primary"
-            (click)="downloadFile(file.file_path); closeModal()"
-          >
-            Descargar
-          </button>
-        </div>
+    <nb-card-body class="p-0">
+      <div class="table-responsive">
+        <table [nbTreeGrid]="treeGridDataSource" class="table mb-0">
+          <tr nbTreeGridHeaderRow *nbTreeGridHeaderRowDef="allColumns"></tr>
+          <tr
+            nbTreeGridRow
+            *nbTreeGridRowDef="let row; columns: allColumns"
+          ></tr>
+
+          <!-- Columna de selección -->
+          <ng-container [nbTreeGridColumnDef]="'select'">
+            <th
+              nbTreeGridHeaderCell
+              *nbTreeGridHeaderCellDef
+              class="text-center col-2 col-sm-1"
+            >
+              <nb-checkbox
+                [checked]="allSelected"
+                [indeterminate]="someSelected"
+                (checkedChange)="toggleAllSelection()"
+              >
+              </nb-checkbox>
+            </th>
+            <td
+              nbTreeGridCell
+              *nbTreeGridCellDef="let row"
+              class="text-center p-2"
+            >
+              <nb-checkbox
+                *ngIf="row.data.type === 'file'"
+                [checked]="isSelected(row)"
+                (checkedChange)="toggleSelection(row)"
+              >
+              </nb-checkbox>
+            </td>
+          </ng-container>
+
+          <!-- Columna principal  -->
+          <ng-container [nbTreeGridColumnDef]="'name'">
+            <th
+              nbTreeGridHeaderCell
+              *nbTreeGridHeaderCellDef
+              class="col-8 col-sm-9"
+            >
+              Documento
+            </th>
+            <td nbTreeGridCell *nbTreeGridCellDef="let row">
+              <div
+                class="d-flex align-items-center"
+                [style.padding-left.px]="getNodePadding(row)"
+              >
+                <nb-tree-grid-row-toggle
+                  [expanded]="row.expanded"
+                  *ngIf="row.data.type !== 'file'"
+                  class="me-2"
+                >
+                </nb-tree-grid-row-toggle>
+                <nb-icon
+                  [icon]="getIconForType(row.data.type)"
+                  class="me-2"
+                ></nb-icon>
+                <span class="text-truncate">{{ row.data.name }}</span>
+              </div>
+            </td>
+          </ng-container>
+
+          <!-- Columna de acciones ancho mínimo) -->
+          <ng-container [nbTreeGridColumnDef]="'actions'">
+            <th
+              nbTreeGridHeaderCell
+              *nbTreeGridHeaderCellDef
+              class="text-center col-2 col-sm-2"
+            >
+              Acciones
+            </th>
+            <td
+              nbTreeGridCell
+              *nbTreeGridCellDef="let row"
+              class="text-center w-10"
+            >
+              <button
+                *ngIf="row.data.type === 'file'"
+                nbButton
+                size="small"
+                status="primary"
+                class="my-1"
+                (click)="downloadSingleFile(row)"
+              >
+                <nb-icon icon="download-outline"></nb-icon>
+              </button>
+            </td>
+          </ng-container>
+        </table>
       </div>
     </nb-card-body>
-    <nb-card-footer class="text-right">
-      <button nbButton status="success" (click)="downloadAll()">
-        Descargar Todos
-      </button>
+    <nb-card-footer class="d-flex justify-content-between align-items-center">
+      <div>
+        <span class="text-muted">
+          {{ selectedNodes.length }} archivos seleccionados
+        </span>
+      </div>
+      <div>
+        <button
+          nbButton
+          status="success"
+          [disabled]="selectedNodes.length === 0"
+          (click)="downloadSelected()"
+        >
+          Descargar selección ({{ selectedNodes.length }})
+        </button>
+      </div>
     </nb-card-footer>
   </nb-card>
 </ng-template>

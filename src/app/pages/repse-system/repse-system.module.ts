@@ -16,6 +16,7 @@ import {
   NbDatepickerModule,
   NbTagModule,
   NbAlertModule,
+  NbTreeGridModule,
 } from "@nebular/theme";
 
 import { NbMomentDateModule } from "@nebular/moment";
@@ -54,6 +55,7 @@ import { DocumentService } from "../../services/repse/document.service";
     NbFormFieldModule,
     NbIconModule,
     NbTagModule,
+    NbTreeGridModule,
   ],
   providers: [DocumentService],
 })
