@@ -391,4 +391,8 @@ export class DocumentUploadComponent {
       this.dialogRef = null!;
     }
   }
+
+  private formatDate(dateString: string): string {
+    return moment(dateString).format("DD/MM/YYYY");
+  }
 }

@@ -162,8 +162,8 @@
                       *ngFor="let period of getIncompletePeriods()"
                       [value]="period"
                     >
-                      {{ period.start_date | date : "MMM yyyy" }} -
-                      {{ period.end_date | date : "MMM yyyy" }}
+                      {{ period.start_date | date : "dd/MM/yyyy" }} -
+                      {{ period.end_date | date : "dd/MM/yyyy" }}
                     </nb-option>
                   </nb-select>
                 </div>
