@@ -3,6 +3,24 @@ header('Content-Type: application/json');
 require_once 'cors.php';
 require_once 'conexion.php';
 
+if (!function_exists('refValues')) {
+    /**
+     * Convierte un array en un array de referencias,
+     * necesario para bind_param + call_user_func_array en PHP ≥ 5.3
+     *
+     * @param array $arr
+     * @return array
+     */
+    function refValues(array &$arr): array
+    {
+        $refs = [];
+        foreach ($arr as $key => &$value) {
+            $refs[$key] = &$value;
+        }
+        return $refs;
+    }
+}
+
 function respond(int $code, array $payload): never
 {
     http_response_code($code);
@@ -20,48 +38,141 @@ switch ($method) {
         if (!isset($_GET['company_id'])) {
             respond(400, ['error' => 'company_id parameter is required']);
         }
-        $company_id = (int) $_GET['company_id'];
+        $companyId = (int) $_GET['company_id'];
 
-        /* Tipos de documento activos ------------------------------------ */
-        $typesStmt = $mysqli->prepare("
-        SELECT file_type_id AS id, name, description, is_active
-          FROM file_types
-         WHERE is_active = 1
-    ") or respond(500, ['error' => $mysqli->error]);
-        $typesStmt->execute();
-        $types = $typesStmt->get_result()->fetch_all(MYSQLI_ASSOC);
-        $typesStmt->close();
+        // 1) documentos activos
+        $docsStmt = $mysqli->prepare("
+            SELECT crf.required_file_id,
+                   ft.name,
+                   crf.is_periodic,
+                   crf.periodicity_type,
+                   crf.periodicity_count
+              FROM company_required_files crf
+              JOIN file_types ft ON ft.file_type_id = crf.file_type_id
+             WHERE crf.company_id = ?
+               AND crf.is_active  = 1
+        ") or respond(500, ['error' => $mysqli->error]);
+        $docsStmt->bind_param('i', $companyId);
+        $docsStmt->execute();
+        $docs = $docsStmt->get_result()->fetch_all(MYSQLI_ASSOC);
+        $docsStmt->close();
 
-        /* Configuraciones activas --------------------------------------- */
-        $confStmt = $mysqli->prepare("
-        SELECT crf.required_file_id   AS id,
-               crf.file_type_id,
-               ft.name                AS file_type_name,
-               crf.is_periodic,
-               crf.periodicity_type,
-               crf.periodicity_count,
-               crf.min_documents_needed,
-               crf.start_date,
-               crf.end_date,
-               crf.is_active,
-               ( SELECT COUNT(*)
-                     FROM required_file_visibilities v
-                    WHERE v.required_file_id = crf.required_file_id
-                      AND v.is_visible = 1
-               ) AS partner_count
-          FROM company_required_files crf
-          JOIN file_types ft ON ft.file_type_id = crf.file_type_id
-         WHERE crf.company_id = ?
-           AND crf.is_active  = 1
-         ORDER BY crf.start_date DESC
-    ") or respond(500, ['error' => $mysqli->error]);
-        $confStmt->bind_param('i', $company_id);
-        $confStmt->execute();
-        $configs = $confStmt->get_result()->fetch_all(MYSQLI_ASSOC);
-        $confStmt->close();
+        if (!$docs) {
+            respond(200, []);
+        }
 
-        respond(200, ['file_types' => $types, 'configs' => $configs]);
+        // ids y placeholders
+        $ids = array_column($docs, 'required_file_id');
+        $placeholders = implode(',', array_fill(0, count($ids), '?'));
 
+        // 2) formatos mínimos
+        $sqlFmts = "
+            SELECT required_file_id,
+                   format_code AS code,
+                   min_required
+              FROM required_file_formats
+             WHERE required_file_id IN ($placeholders)
+        ";
+        $fmtsStmt = $mysqli->prepare($sqlFmts)
+            or respond(500, ['error' => $mysqli->error]);
+        // bind dynamic
+        $types = str_repeat('i', count($ids));
+        $fmtsStmt->bind_param(...refValues(array_merge([$types], $ids)));
+        $fmtsStmt->execute();
+        $fmts = $fmtsStmt->get_result()->fetch_all(MYSQLI_ASSOC);
+        $fmtsStmt->close();
+
+        // 3) periodos + archivos subidos
+        $sqlPers = "
+            SELECT p.period_id,
+                   p.required_file_id,
+                   p.start_date,
+                   p.end_date,
+                   COUNT(cf.file_id) AS uploaded_count
+              FROM document_periods p
+              LEFT JOIN company_files cf
+                     ON cf.period_id = p.period_id
+             WHERE p.required_file_id IN ($placeholders)
+             GROUP BY p.period_id
+             ORDER BY p.start_date
+        ";
+        $persStmt = $mysqli->prepare($sqlPers)
+            or respond(500, ['error' => $mysqli->error]);
+        $persStmt->bind_param(...refValues(array_merge([$types], $ids)));
+        $persStmt->execute();
+        $pers = $persStmt->get_result()->fetch_all(MYSQLI_ASSOC);
+        $persStmt->close();
+
+        // 4) armar estructura
+        $today = new DateTimeImmutable('today');
+        $out = [];
+
+        foreach ($docs as $d) {
+            $out[$d['required_file_id']] = $d + [
+                'formats' => [],
+                'periods' => [],
+                'min_documents_needed' => 0,
+                'deadline' => null,
+                'current_period' => null,
+                'status' => 'pending',
+            ];
+        }
+
+        // 4-a formatos y sumatoria
+        foreach ($fmts as $f) {
+            $doc = &$out[$f['required_file_id']];
+            $doc['formats'][] = [
+                'code' => $f['code'],
+                'min_required' => (int) $f['min_required'],
+            ];
+            $doc['min_documents_needed'] += (int) $f['min_required'];
+        }
+
+        // 4-b periodos, deadline y periodo actual
+        foreach ($pers as $p) {
+            $doc = &$out[$p['required_file_id']];
+            $period = [
+                'period_id' => (int) $p['period_id'],
+                'start_date' => $p['start_date'],
+                'end_date' => $p['end_date'],
+                'uploaded_count' => (int) $p['uploaded_count'],
+            ];
+            $doc['periods'][] = $period;
+
+            $start = new DateTimeImmutable($p['start_date']);
+            $end = new DateTimeImmutable($p['end_date']);
+
+            if ($today >= $start && $today <= $end) {
+                $doc['current_period'] = $period;
+                $doc['deadline'] = $p['end_date'];
+            }
+        }
+
+        // 4-c calcular estado
+        foreach ($out as &$doc) {
+            $minPer = max($doc['min_documents_needed'], 1);
+            $done = array_reduce(
+                $doc['periods'],
+                fn($s, $p) => $s + $p['uploaded_count'],
+                0
+            );
+            $needed = $minPer * max(count($doc['periods']), 1);
+
+            if ($done >= $needed) {
+                $doc['status'] = 'complete';
+            } elseif (
+                $doc['deadline'] &&
+                $today > new DateTimeImmutable($doc['deadline'])
+            ) {
+                $doc['status'] = 'overdue';
+            } elseif ($done > 0) {
+                $doc['status'] = 'partial';
+            } else {
+                $doc['status'] = 'pending';
+            }
+        }
+
+        respond(200, array_values($out));
     /*──────────────────────────────────────────────────────────────────────*/
     /*  POST  /api/company_required_files.php                               */
     /*──────────────────────────────────────────────────────────────────────*/

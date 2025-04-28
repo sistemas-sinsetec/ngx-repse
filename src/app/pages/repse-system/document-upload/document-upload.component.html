@@ -128,28 +128,21 @@
               <div class="row">
                 <!-- Selector de tipo de documento -->
                 <div class="col-md-6 mb-3">
-                  <label for="document-type" class="form-label"
-                    >Tipo de Documento:</label
-                  >
+                  <label for="document-type" class="form-label">
+                    Tipo de Documento:
+                  </label>
                   <nb-select
                     id="document-type"
                     fullWidth
                     [(selected)]="selectedDocument"
-                    (selectedChange)="onDocumentSelect()"
+                    (selectedChange)="selectForLateUpload(selectedDocument)"
                   >
                     <nb-option value="">Seleccione un documento</nb-option>
                     <nb-option
                       *ngFor="let file of getIncompletePeriodicFiles()"
                       [value]="file"
-                      [disabled]="!hasAvailablePeriods(file)"
                     >
                       {{ file.name }}
-                      <small
-                        *ngIf="!hasAvailablePeriods(file)"
-                        class="text-danger d-block"
-                      >
-                        (Todos los periodos están completos)
-                      </small>
                     </nb-option>
                   </nb-select>
                 </div>
@@ -161,8 +154,8 @@
                     id="period"
                     fullWidth
                     [(selected)]="selectedPeriod"
-                    (selectedChange)="onPeriodSelect()"
-                    [disabled]="!selectedDocument || pastPeriods.length === 0"
+                    (selectedChange)="loadAvailableFormats()"
+                    [disabled]="!selectedDocument"
                   >
                     <nb-option value="">Seleccione un periodo</nb-option>
                     <nb-option
@@ -171,12 +164,6 @@
                     >
                       {{ period.start_date | date : "MMM yyyy" }} -
                       {{ period.end_date | date : "MMM yyyy" }}
-                      <small
-                        *ngIf="isPeriodComplete(period)"
-                        class="text-success d-block"
-                      >
-                        (Completo)
-                      </small>
                     </nb-option>
                   </nb-select>
                 </div>
