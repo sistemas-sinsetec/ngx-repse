@@ -171,25 +171,24 @@ export class RequirementsAssignmentComponent implements OnInit {
     const companyId = this.companyService.selectedCompany.id;
     const params = new HttpParams().set("company_id", companyId.toString());
 
-    this.http
-      .get<{ file_types: any[]; configs: any[] }>(this.reqFilesUrl, { params })
-      .subscribe({
-        next: (res) => {
-          this.requirements = res.configs.map((cfg) => ({
-            id: cfg.id,
-            documentType: cfg.file_type_name,
-            isActive: cfg.is_active === 1,
-            isPeriodic: cfg.is_periodic === 1,
-            periodAmount: cfg.periodicity_count,
-            periodType: cfg.periodicity_type,
-            startDate: cfg.start_date ? moment(cfg.start_date) : undefined,
-            minQuantity: cfg.min_documents_needed,
-            // Rellenamos un array de longitud partner_count
-            partners: Array(cfg.partner_count).fill(""),
-          }));
-        },
-        error: (err) => console.error("Error cargando requisitos", err),
-      });
+    this.http.get<any[]>(this.reqFilesUrl, { params }).subscribe({
+      next: (configs) => {
+        this.requirements = configs.map((cfg) => ({
+          id: cfg.required_file_id,
+          documentType: cfg.name,
+          isActive: true, // en tu PHP sólo envías activos
+          isPeriodic: cfg.is_periodic === 1,
+          periodAmount: cfg.periodicity_count,
+          periodType: cfg.periodicity_type,
+          startDate: cfg.current_period
+            ? moment(cfg.current_period.start_date)
+            : undefined,
+          minQuantity: cfg.min_documents_needed,
+          partners: [], // aquí pones lo que necesites
+        }));
+      },
+      error: (err) => console.error("Error cargando requisitos", err),
+    });
   }
 
   onSubmit(): void {
