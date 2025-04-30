@@ -163,11 +163,13 @@ export class PermissionsSectionsComponent implements OnInit {
   }
 
   async loadSubSections(section: string) {
+    //Las ve la empresa
     const subSectionsMap: { [key: string]: string[] } = {
       "Sistema REPSE": [
-        "Asignacion de requisitos",
-        "Carga de documentos",
+        "Asignacion de requisitos de empresa",
+        "Carga de documentos de empresa",
         "Revision de documentos",
+        "Asignacion de requisitos de socios comerciales",
       ],
       "Control de proyectos": [
         "Asignacion de proyectos",
@@ -221,11 +223,14 @@ export class PermissionsSectionsComponent implements OnInit {
       ],
     };
 
+    //Las ven los clientes
     const subSectionsProviderMap: { [key: string]: string[] } = {
       "Sistema REPSE": [
         "Asignacion de requisitos",
         "Carga de documentos",
         "Revision de documentos",
+        "Carga de documentos de socios comerciales",
+        "Vista de documentos de compañías",
       ],
       "Control de proyectos": [
         "Asignacion de proyectosSDASDSAS",

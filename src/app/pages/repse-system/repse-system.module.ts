@@ -28,6 +28,8 @@ import { DocumentUploadComponent } from "./my-company/document-upload/document-u
 import { DocumentReviewComponent } from "./my-company/document-review/document-review.component";
 import { DocumentService } from "../../services/repse/document.service";
 import { RejectionCommentComponent } from "./my-company/rejection-comment/rejection-comment.component";
+import { RequirementAssignmentComponent } from './bussiness-partners/requirement-assignment/requirement-assignment.component';
+import { CompaniesDocumentsViewComponent } from './bussiness-partners/companies-documents-view/companies-documents-view.component';
 
 @NgModule({
   declarations: [
@@ -36,6 +38,8 @@ import { RejectionCommentComponent } from "./my-company/rejection-comment/reject
     DocumentUploadComponent,
     DocumentReviewComponent,
     RejectionCommentComponent,
+    RequirementAssignmentComponent,
+    CompaniesDocumentsViewComponent,
   ],
   imports: [
     CommonModule,

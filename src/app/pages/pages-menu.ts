@@ -24,25 +24,25 @@ export const MENU_ITEMS: CustomMenuItem[] = [
         children: [
           {
             title: "Asignación de requisitos",
-            link: "/pages/repse-system/requirements-assignment",
+            link: "/pages/repse-system/my-company/requirements-assignment",
             hidden: false,
             permission: {
               section: "Sistema REPSE",
-              subSection: "Asignacion de requisitos",
+              subSection: "Asignacion de requisitos de empresa",
             },
           },
           {
             title: "Carga de documentos",
-            link: "/pages/repse-system/document-upload",
+            link: "/pages/repse-system/my-company/document-upload",
             hidden: false,
             permission: {
               section: "Sistema REPSE",
-              subSection: "Carga de documentos",
+              subSection: "Carga de documentos de empresa",
             },
           },
           {
             title: "Revisión de documentos",
-            link: "/pages/repse-system/document-review",
+            link: "/pages/repse-system/my-company/document-review",
             hidden: false,
             permission: {
               section: "Sistema REPSE",
@@ -55,6 +55,35 @@ export const MENU_ITEMS: CustomMenuItem[] = [
         title: "Socios comerciales",
         icon: "person-outline",
         hidden: false,
+        children: [
+          {
+            title: "Asignación de requisitos",
+            link: "/pages/repse-system/bussiness-partners/requirements-assignment",
+            hidden: false,
+            permission: {
+              section: "Sistema REPSE",
+              subSection: "Asignacion de requisitos de socios comerciales",
+            },
+          },
+          {
+            title: "Carga de documentos",
+            link: "/pages/repse-system/bussiness-partners/document-upload",
+            hidden: false,
+            permission: {
+              section: "Sistema REPSE",
+              subSection: "Carga de documentos de socios comerciales",
+            },
+          },
+          {
+            title: "Revisión de documentos",
+            link: "/pages/repse-system/bussiness-partners/companies-documents-view",
+            hidden: false,
+            permission: {
+              section: "Sistema REPSE",
+              subSection: "Vista de documentos de compañías",
+            },
+          },
+        ],
       },
     ],
   },
