@@ -263,18 +263,18 @@ switch ($method) {
 
             /* 2) Insertar cabecera ------------------------------------- */
             $ins = $mysqli->prepare("
-            INSERT INTO company_required_files
-                  (company_id,  assigned_by, file_type_id, is_periodic,
-                   periodicity_type, periodicity_count,
-                   min_documents_needed, start_date, end_date, is_active)
-            VALUES (?,?,?,?,?,?,?,?, ?, 1)
-        ");
+                INSERT INTO company_required_files
+                    (company_id, assigned_by, file_type_id, is_periodic,
+                    periodicity_type, periodicity_count,
+                    min_documents_needed, start_date, end_date, is_active)
+                VALUES (?,?,?,?,?,?,?,?,?, 1)
+            ");
             $ins->bind_param(
-                'iiiisiiss',
+                'iiisiisss',  // Nota el tipo adicional 'i' para assigned_by
                 $company_id,
-                $assigned_by,
+                $company_id,
                 $file_type_id,
-                $isPeriodicInt,        // ✅ variable, no expresión
+                $isPeriodicInt,
                 $periodicity_type,
                 $periodicity_count,
                 $min_docs,
