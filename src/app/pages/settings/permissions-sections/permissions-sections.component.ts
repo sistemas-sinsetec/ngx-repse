@@ -225,111 +225,31 @@ export class PermissionsSectionsComponent implements OnInit {
 
     //Las ven los clientes
     const subSectionsProviderMap: { [key: string]: string[] } = {
-      "Sistema REPSE": [
-        "Asignacion de requisitos",
-        "Carga de documentos",
-        "Revision de documentos",
-        "Carga de documentos de socios comerciales",
-        "Vista de documentos de compañías",
-      ],
-      "Control de proyectos": [
-        "Asignacion de proyectosSDASDSAS",
-        "Registro de proyectos",
-        "Vizualizar proyectos",
-        "Seguimiento de proyectos",
-      ],
-      Empleados: [
-        "Registrar solicitudes de empleados",
-        "editar solicitudes de empleados",
-        "Ver empleados registrados",
-      ],
-      Incidencias: [
-        "Control de incidencias",
-        "Confirmar dia",
-        "Confirmar semana",
-        "Semanas procesadas",
-        "Lista de asistencia",
-      ],
+      "Sistema REPSE": [],
+      "Control de proyectos": [""],
+      Empleados: [""],
+      Incidencias: [""],
       Costos: [""],
       Ventas: [""],
-      "Configuracion de mi empresa": [
-        "Asignar logo de la empresa",
-        "Código de la empresa",
-        "Departamentos",
-        "Configuración inicial de períodos",
-        "Tipos de período",
-        "Catálogo de períodos",
-      ],
+      "Configuracion de mi empresa": [],
       "Configuracion de perfiles": [""],
-      "Configuracion de socios comerciales": [
-        "Autorizar socio comercial",
-        "Editar roles de los socios comerciales",
-        "Registrar socio comercial",
-        "Secciones visibles de los socios comerciales",
-      ],
-      "Configuracion de sitio": [
-        "Secciones visibles de empresas",
-        "Empresas registradas en la página",
-        "Registrar empresas",
-        "Confirmar solicitudes premium",
-      ],
-      "Configuracion de usuarios": [
-        "Registrar, eliminar, ver y editar usuarios",
-        "Editar mi usuario",
-      ],
+      "Configuracion de socios comerciales": [""],
+      "Configuracion de sitio": [""],
+      "Configuracion de usuarios": [""],
     };
 
     const subSectionsClientMap: { [key: string]: string[] } = {
-      "Sistema REPSE": [
-        "Asignacion de requisitos",
-        "Carga de documentos",
-        "Revision de documentos",
-      ],
-      "Control de proyectos": [
-        "Asignacion de proyectoCXVVXXVCVXCs",
-        "Registro de proyectos",
-        "Vizualizar proyectos",
-        "Seguimiento de proyectos",
-      ],
-      Empleados: [
-        "Registrar solicitudes de empleados",
-        "editar solicitudes de empleados",
-        "Ver empleados registrados",
-      ],
-      Incidencias: [
-        "Control de incidencias",
-        "Confirmar dia",
-        "Confirmar semana",
-        "Semanas procesadas",
-        "Lista de asistencia",
-      ],
+      "Sistema REPSE": [""],
+      "Control de proyectos": [""],
+      Empleados: [""],
+      Incidencias: [""],
       Costos: [""],
       Ventas: [""],
-      "Configuracion de mi empresa": [
-        "Asignar logo de la empresa",
-        "Código de la empresa",
-        "Departamentos",
-        "Configuración inicial de períodos",
-        "Tipos de período",
-        "Catálogo de períodos",
-      ],
+      "Configuracion de mi empresa": [""],
       "Configuracion de perfiles": [""],
-      "Configuracion de socios comerciales": [
-        "Autorizar socio comercial",
-        "Editar roles de los socios comerciales",
-        "Registrar socio comercial",
-        "Secciones visibles de los socios comerciales",
-      ],
-      "Configuracion de sitio": [
-        "Secciones visibles de empresas",
-        "Empresas registradas en la página",
-        "Registrar empresas",
-        "Confirmar solicitudes premium",
-      ],
-      "Configuracion de usuarios": [
-        "Registrar, eliminar, ver y editar usuarios",
-        "Editar mi usuario",
-      ],
+      "Configuracion de socios comerciales": [""],
+      "Configuracion de sitio": [""],
+      "Configuracion de usuarios": [""],
     };
 
     this.subSections = subSectionsMap[section] || [];
