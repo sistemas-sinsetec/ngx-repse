@@ -27,6 +27,7 @@ import { RequirementsAssignmentComponent } from "./requirements-assignment/requi
 import { DocumentUploadComponent } from "./document-upload/document-upload.component";
 import { DocumentReviewComponent } from "./document-review/document-review.component";
 import { DocumentService } from "../../services/repse/document.service";
+import { RejectionCommentComponent } from './rejection-comment/rejection-comment.component';
 
 @NgModule({
   declarations: [
@@ -34,6 +35,7 @@ import { DocumentService } from "../../services/repse/document.service";
     RequirementsAssignmentComponent,
     DocumentUploadComponent,
     DocumentReviewComponent,
+    RejectionCommentComponent,
   ],
   imports: [
     CommonModule,

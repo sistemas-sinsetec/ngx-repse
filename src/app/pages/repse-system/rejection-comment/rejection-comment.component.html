@@ -1,0 +1,30 @@
+<nb-card>
+  <nb-card-header>
+    <h3>Motivo de Rechazo</h3>
+  </nb-card-header>
+
+  <nb-card-body>
+    <p>Por favor, indica el motivo por el cual rechazas este documento:</p>
+
+    <textarea
+      nbInput
+      fullWidth
+      rows="4"
+      [(ngModel)]="comment"
+      placeholder="Escribe aquí el motivo de rechazo..."
+    ></textarea>
+  </nb-card-body>
+
+  <nb-card-footer>
+    <button nbButton status="basic" (click)="cancel()">Cancelar</button>
+    <button
+      nbButton
+      status="danger"
+      (click)="submit()"
+      [disabled]="!comment"
+      class="ml-2"
+    >
+      Rechazar Documento
+    </button>
+  </nb-card-footer>
+</nb-card>

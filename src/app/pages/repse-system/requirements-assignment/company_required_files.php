@@ -2,7 +2,7 @@
 header('Content-Type: application/json');
 require_once 'cors.php';
 require_once 'conexion.php';
-
+ 
 if (!function_exists('refValues')) {
     /**
      * Convierte un array en un array de referencias,
@@ -20,16 +20,16 @@ if (!function_exists('refValues')) {
         return $refs;
     }
 }
-
+ 
 function respond(int $code, array $payload): never
 {
     http_response_code($code);
     echo json_encode($payload);
     exit;
 }
-
+ 
 $method = $_SERVER['REQUEST_METHOD'];
-
+ 
 switch ($method) {
     /*──────────────────────────────────────────────────────────────────────*/
     /*  GET  /api/company_required_files.php?company_id=#                   */
@@ -39,7 +39,7 @@ switch ($method) {
             respond(400, ['error' => 'company_id parameter is required']);
         }
         $companyId = (int) $_GET['company_id'];
-
+ 
         // 1) documentos activos
         $docsStmt = $mysqli->prepare("
             SELECT crf.required_file_id,
@@ -56,15 +56,15 @@ switch ($method) {
         $docsStmt->execute();
         $docs = $docsStmt->get_result()->fetch_all(MYSQLI_ASSOC);
         $docsStmt->close();
-
+ 
         if (!$docs) {
             respond(200, []);
         }
-
+ 
         // ids y placeholders
         $ids = array_column($docs, 'required_file_id');
         $placeholders = implode(',', array_fill(0, count($ids), '?'));
-
+ 
         // 2) formatos mínimos
         $sqlFmts = "
             SELECT required_file_id,
@@ -81,7 +81,7 @@ switch ($method) {
         $fmtsStmt->execute();
         $fmts = $fmtsStmt->get_result()->fetch_all(MYSQLI_ASSOC);
         $fmtsStmt->close();
-
+ 
         // 3) periodos + archivos subidos
         $sqlPers = "
             SELECT p.period_id,
@@ -102,11 +102,11 @@ switch ($method) {
         $persStmt->execute();
         $pers = $persStmt->get_result()->fetch_all(MYSQLI_ASSOC);
         $persStmt->close();
-
+ 
         // 4) armar estructura
         $today = new DateTimeImmutable('today');
         $out = [];
-
+ 
         foreach ($docs as $d) {
             $out[$d['required_file_id']] = $d + [
                 'formats' => [],
@@ -117,7 +117,7 @@ switch ($method) {
                 'status' => 'pending',
             ];
         }
-
+ 
         // 4-a formatos y sumatoria
         foreach ($fmts as $f) {
             $doc = &$out[$f['required_file_id']];
@@ -127,7 +127,7 @@ switch ($method) {
             ];
             $doc['min_documents_needed'] += (int) $f['min_required'];
         }
-
+ 
         // 4-b periodos, deadline y periodo actual
         foreach ($pers as $p) {
             $doc = &$out[$p['required_file_id']];
@@ -138,16 +138,16 @@ switch ($method) {
                 'uploaded_count' => (int) $p['uploaded_count'],
             ];
             $doc['periods'][] = $period;
-
+ 
             $start = new DateTimeImmutable($p['start_date']);
             $end = new DateTimeImmutable($p['end_date']);
-
+ 
             if ($today >= $start && $today <= $end) {
                 $doc['current_period'] = $period;
                 $doc['deadline'] = $p['end_date'];
             }
         }
-
+ 
         // 4-c calcular estado
         foreach ($out as &$doc) {
             $minPer = max($doc['min_documents_needed'], 1);
@@ -157,7 +157,7 @@ switch ($method) {
                 0
             );
             $needed = $minPer * max(count($doc['periods']), 1);
-
+ 
             if ($done >= $needed) {
                 $doc['status'] = 'complete';
             } elseif (
@@ -171,14 +171,14 @@ switch ($method) {
                 $doc['status'] = 'pending';
             }
         }
-
+ 
         respond(200, array_values($out));
     /*──────────────────────────────────────────────────────────────────────*/
     /*  POST  /api/company_required_files.php                               */
     /*──────────────────────────────────────────────────────────────────────*/
     case 'POST':
         $data = json_decode(file_get_contents('php://input'), true) ?? [];
-
+ 
         /* ── Validaciones básicas ─────────────────────────────────────── */
         $required = [
             'company_id',
@@ -191,7 +191,7 @@ switch ($method) {
             if (!isset($data[$f]))
                 respond(400, ['error' => "Field {$f} is required"]);
         }
-
+ 
         /* Validar file_formats ----------------------------------------- */
         $fileFormats = $data['file_formats'];
         if (!is_array($fileFormats) || !$fileFormats) {
@@ -211,7 +211,7 @@ switch ($method) {
                 ]);
             }
         }
-
+ 
         $isPeriodic = (bool) $data['is_periodic'];
         if (
             $isPeriodic &&
@@ -222,7 +222,7 @@ switch ($method) {
                     'periodicity_type and periodicity_count are required when is_periodic is true'
             ]);
         }
-
+ 
         /* ── Conversión de valores ────────────────────────────────────── */
         $company_id = (int) $data['company_id'];
         $file_type_id = (int) $data['file_type_id'];
@@ -231,10 +231,10 @@ switch ($method) {
         $periodicity_type = $isPeriodic ? $data['periodicity_type'] : null;
         $periodicity_count = $isPeriodic ? (int) $data['periodicity_count'] : null;
         $isPeriodicInt = (int) $isPeriodic;
-
+ 
         /* Suma total de mínimos por formato ---------------------------- */
         $min_docs = array_sum(array_column($fileFormats, 'min_quantity'));
-
+ 
         /* ── Transacción ──────────────────────────────────────────────── */
         $mysqli->begin_transaction();
         try {
@@ -258,20 +258,21 @@ switch ($method) {
             );
             $off->execute();
             $off->close();
-
+ 
             /* 2) Insertar cabecera ------------------------------------- */
             $ins = $mysqli->prepare("
-            INSERT INTO company_required_files
-                  (company_id, file_type_id, is_periodic,
-                   periodicity_type, periodicity_count,
-                   min_documents_needed, start_date, end_date, is_active)
-            VALUES (?,?,?,?,?,?,?, ?, 1)
-        ");
+                INSERT INTO company_required_files
+                    (company_id, assigned_by, file_type_id, is_periodic,
+                    periodicity_type, periodicity_count,
+                    min_documents_needed, start_date, end_date, is_active)
+                VALUES (?,?,?,?,?,?,?,?,?, 1)
+            ");
             $ins->bind_param(
-                'iiisiiss',
+                'iiisiisss',  // Nota el tipo adicional 'i' para assigned_by
                 $company_id,
+                $company_id,   
                 $file_type_id,
-                $isPeriodicInt,        // ✅ variable, no expresión
+                $isPeriodicInt,
                 $periodicity_type,
                 $periodicity_count,
                 $min_docs,
@@ -281,7 +282,7 @@ switch ($method) {
             $ins->execute();
             $required_file_id = $ins->insert_id;
             $ins->close();
-
+ 
             /* 3) Detalle de formatos ----------------------------------- */
             $rf = $mysqli->prepare("
             INSERT INTO required_file_formats
@@ -295,7 +296,7 @@ switch ($method) {
                 $rf->execute();
             }
             $rf->close();
-
+ 
             /* 4) Crear primer periodo (si aplica) ---------------------- */
             if ($isPeriodic) {
                 $inicio = new DateTime($start_date);
@@ -317,7 +318,7 @@ switch ($method) {
                         throw new Exception('Periodicidad no válida');
                 }
                 $fin = (clone $inicio)->add(new DateInterval($interval));
-
+ 
                 $p = $mysqli->prepare("
                 INSERT INTO document_periods
                       (required_file_id, start_date, end_date, created_at)
@@ -332,7 +333,7 @@ switch ($method) {
                 $p->execute();
                 $p->close();
             }
-
+ 
             /* 5) Commit ------------------------------------------------ */
             $mysqli->commit();
             respond(201, [
@@ -340,16 +341,16 @@ switch ($method) {
                 'required_file_id' => $required_file_id,
                 'min_documents' => $min_docs
             ]);
-
+ 
         } catch (Throwable $e) {
             $mysqli->rollback();
             respond(500, ['error' => $e->getMessage()]);
         }
-
+ 
     /*──────────────────────────────────────────────────────────────────────*/
     default:
         respond(405, ['error' => 'Method not allowed']);
 }
-
+ 
 $mysqli->close();
 ?>
