@@ -26,6 +26,7 @@ interface Requirement {
   startDate?: moment.Moment;
   minQuantity: number;
   partners: string[];
+  partnerCount: number;
 }
 
 interface FileFormat {
@@ -185,6 +186,7 @@ export class RequirementsAssignmentComponent implements OnInit {
             : undefined,
           minQuantity: cfg.min_documents_needed,
           partners: [], // aquí pones lo que necesites
+          partnerCount: cfg.partner_count,
         }));
       },
       error: (err) => console.error("Error cargando requisitos", err),
@@ -240,6 +242,7 @@ export class RequirementsAssignmentComponent implements OnInit {
               0
             ),
             partners: [],
+            partnerCount: 0,
           });
           this.requirementsForm.reset({
             documentType: null,
@@ -427,9 +430,10 @@ export class RequirementsAssignmentComponent implements OnInit {
       this.http.delete(this.visibUrl, { params }).subscribe();
     });
 
-    this.selectedRequirement.partners = this.allPartners
-      .filter((p) => p.selected)
-      .map((p) => p.name);
+    this.selectedRequirement.partnerCount = this.allPartners.filter(
+      (p) => p.selected
+    ).length;
+
     this.initialVisibleIds = this.allPartners
       .filter((p) => p.selected)
       .map((p) => p.id);
