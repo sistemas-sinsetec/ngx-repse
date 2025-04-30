@@ -196,6 +196,7 @@ export class RequirementsAssignmentComponent implements OnInit {
 
     const f = this.requirementsForm.value;
     const companyId = this.companyService.selectedCompany.id;
+    const assigned_by = this.companyService.selectedCompany.id;
     const startDate = f.startDate || "";
 
     // Obtener formatos seleccionados
@@ -208,6 +209,7 @@ export class RequirementsAssignmentComponent implements OnInit {
 
     const payload = {
       company_id: companyId,
+      assigned_by: assigned_by,
       file_type_id: f.documentType,
       is_periodic: f.isPeriodic,
       periodicity_type: f.periodType,

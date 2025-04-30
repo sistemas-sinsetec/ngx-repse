@@ -182,6 +182,7 @@ switch ($method) {
         /* ── Validaciones básicas ─────────────────────────────────────── */
         $required = [
             'company_id',
+            'assigned_by',
             'file_type_id',
             'is_periodic',
             'file_formats',
@@ -225,6 +226,7 @@ switch ($method) {
 
         /* ── Conversión de valores ────────────────────────────────────── */
         $company_id = (int) $data['company_id'];
+        $assigned_by = (int) $data['assigned_by'];
         $file_type_id = (int) $data['file_type_id'];
         $start_date = $data['start_date'];                       // YYYY-MM-DD
         $end_date = $data['end_date'] ?? null;
@@ -262,14 +264,15 @@ switch ($method) {
             /* 2) Insertar cabecera ------------------------------------- */
             $ins = $mysqli->prepare("
             INSERT INTO company_required_files
-                  (company_id, file_type_id, is_periodic,
+                  (company_id,  assigned_by, file_type_id, is_periodic,
                    periodicity_type, periodicity_count,
                    min_documents_needed, start_date, end_date, is_active)
-            VALUES (?,?,?,?,?,?,?, ?, 1)
+            VALUES (?,?,?,?,?,?,?,?, ?, 1)
         ");
             $ins->bind_param(
-                'iiisiiss',
+                'iiiisiiss',
                 $company_id,
+                $assigned_by,
                 $file_type_id,
                 $isPeriodicInt,        // ✅ variable, no expresión
                 $periodicity_type,
