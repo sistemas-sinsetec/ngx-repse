@@ -6,9 +6,9 @@ import {
   NbTreeGridDataSourceBuilder,
   NbTreeGridDataSource,
 } from "@nebular/theme";
-import { DocumentService } from "../../../services/repse/document.service";
+import { DocumentService } from "../../../../services/repse/document.service";
 import * as moment from "moment";
-import { CompanyService } from "../../../services/company.service";
+import { CompanyService } from "../../../../services/company.service";
 
 interface FileNode {
   name: string;

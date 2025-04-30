@@ -1,10 +1,10 @@
 import { NgModule } from "@angular/core";
 import { RouterModule, Routes } from "@angular/router";
 import { RepseSystemComponent } from "./repse-system.component";
-import { RequirementsAssignmentComponent } from "./requirements-assignment/requirements-assignment.component";
+import { RequirementsAssignmentComponent } from "./my-company/requirements-assignment/requirements-assignment.component";
 import { authGuard } from "../../services/auth-guard";
-import { DocumentUploadComponent } from "./document-upload/document-upload.component";
-import { DocumentReviewComponent } from "./document-review/document-review.component";
+import { DocumentUploadComponent } from "./my-company/document-upload/document-upload.component";
+import { DocumentReviewComponent } from "./my-company/document-review/document-review.component";
 
 const routes: Routes = [
   {

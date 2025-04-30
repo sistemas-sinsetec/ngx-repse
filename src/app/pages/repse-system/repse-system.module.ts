@@ -23,11 +23,11 @@ import { NbMomentDateModule } from "@nebular/moment";
 
 import { FormsModule, ReactiveFormsModule } from "@angular/forms";
 
-import { RequirementsAssignmentComponent } from "./requirements-assignment/requirements-assignment.component";
-import { DocumentUploadComponent } from "./document-upload/document-upload.component";
-import { DocumentReviewComponent } from "./document-review/document-review.component";
+import { RequirementsAssignmentComponent } from "./my-company/requirements-assignment/requirements-assignment.component";
+import { DocumentUploadComponent } from "./my-company/document-upload/document-upload.component";
+import { DocumentReviewComponent } from "./my-company/document-review/document-review.component";
 import { DocumentService } from "../../services/repse/document.service";
-import { RejectionCommentComponent } from './rejection-comment/rejection-comment.component';
+import { RejectionCommentComponent } from "./my-company/rejection-comment/rejection-comment.component";
 
 @NgModule({
   declarations: [

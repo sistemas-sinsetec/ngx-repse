@@ -12,8 +12,8 @@ import { NbDialogRef, NbDialogService } from "@nebular/theme";
 import { HttpClient, HttpParams } from "@angular/common/http";
 import { forkJoin, Observable } from "rxjs";
 import { map } from "rxjs/operators";
-import { environment } from "../../../../environments/environment";
-import { CompanyService } from "../../../services/company.service";
+import { environment } from "../../../../../environments/environment";
+import { CompanyService } from "../../../../services/company.service";
 import * as moment from "moment";
 
 interface Requirement {

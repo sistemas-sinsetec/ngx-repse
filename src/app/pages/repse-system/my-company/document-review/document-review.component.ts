@@ -5,7 +5,7 @@ import {
   CompanyFile,
   DocumentPeriod,
   FileType,
-} from "../../../services/repse/document.service";
+} from "../../../../services/repse/document.service";
 import { NbDialogService, NbToastrService } from "@nebular/theme";
 
 interface PendingDocument extends CompanyFile {
