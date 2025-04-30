@@ -299,7 +299,7 @@ switch ($method) {
             }
             $rf->close();
 
-            /* 4) Crear primer periodo (si aplica) ---------------------- */
+            /* 4) Crear primer periodo (si aplica) ----------------------*/
             if ($isPeriodic) {
                 $inicio = new DateTime($start_date);
                 $cnt = $periodicity_count;
