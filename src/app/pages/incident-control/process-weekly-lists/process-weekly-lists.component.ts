@@ -257,14 +257,6 @@ export class ProcessWeeklyListsComponent {
     return moment(hour, "HH:mm:ss").format("hh:mm A"); // Convierte a formato 12 horas con AM/PM
   }
 
-  openProcessedListsModal() {
-    this.dialogService.open(ProcessedListDialogComponent, {
-      context: {},
-      closeOnBackdropClick: true, // Permitir el cierre al hacer clic fuera del modal
-      hasScroll: true,
-    });
-  }
-
   async deshacerConfirmacionSemanal() {
     if (!this.selectedWeek) {
       this.toastrService.showWarning(

@@ -5,7 +5,11 @@
 
 import { Component, OnInit } from "@angular/core";
 import { HttpClient } from "@angular/common/http";
-import { NbSpinnerService, NbAlertModule } from "@nebular/theme";
+import {
+  NbSpinnerService,
+  NbAlertModule,
+  NbDialogService,
+} from "@nebular/theme";
 import { AuthService } from ".././/../../services/auth.service";
 import { CompanyService } from "../../../services/company.service";
 import { PeriodService } from "../../../services/period.service";
@@ -17,6 +21,7 @@ import { environment } from "../../../../environments/environment";
 import autoTable from "jspdf-autotable";
 import html2canvas from "html2canvas";
 import { LoadingController, AlertController } from "@ionic/angular";
+import { ProcessedListDialogComponent } from "../processed-list-dialog/processed-list-dialog.component";
 
 @Component({
   selector: "ngx-processed-attendance",
@@ -42,6 +47,7 @@ export class ProcessedAttendanceComponent {
     private toastrService: CustomToastrService,
     private companyService: CompanyService,
     private periodService: PeriodService,
+    private dialogService: NbDialogService,
     private loadingController: LoadingController,
     private ionicAlertController: AlertController
   ) {}
@@ -612,6 +618,14 @@ export class ProcessedAttendanceComponent {
       this.file = selectedFile;
       this.uploadedFileName = selectedFile.name; // Se asigna el nombre del archivo
     }
+  }
+
+  openProcessedListsModal() {
+    this.dialogService.open(ProcessedListDialogComponent, {
+      context: {},
+      closeOnBackdropClick: true, // Permitir el cierre al hacer clic fuera del modal
+      hasScroll: true,
+    });
   }
 
   async uploadPDF() {
