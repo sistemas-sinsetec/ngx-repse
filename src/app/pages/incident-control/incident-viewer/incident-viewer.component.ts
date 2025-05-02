@@ -34,7 +34,7 @@ export class IncidentViewerComponent implements OnInit {
   companyId: string; // Usar tipo string para companyId, como lo proporciona el AuthService
 
   // Opciones de incidencia para empleados asignados y no asignados
-  assignedIncidents = ["Asistencia", "Retardo", "Horas Extras"];
+  assignedIncidents = ["Asistencia", "Retardo", "Horas Extras", "Préstamo"];
   unassignedIncidents = [
     "Asistencia sin proyecto",
     "Descanso",
@@ -45,6 +45,7 @@ export class IncidentViewerComponent implements OnInit {
     "Permiso sin Goce de Sueldo",
     "Permiso con Goce de Sueldo",
     "Día de castigo",
+    "Préstamo",
   ];
   userId: number;
   constructor(
