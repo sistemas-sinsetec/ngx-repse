@@ -176,9 +176,12 @@ export class ProcessWeeklyListsComponent {
         entry_time: record.entry_time,
         lunch_start_time: record.lunch_start_time,
         lunch_end_time: record.lunch_end_time,
+        second_lunch_start_time: record.second_lunch_start_time,
+        second_lunch_end_time: record.second_lunch_end_time,
         exit_time: record.exit_time,
         incident: record.incident_type,
         project_name: record.project_name,
+        description: record.description,
       };
     });
 

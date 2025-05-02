@@ -240,8 +240,11 @@ export class ProcessedAttendanceComponent {
         entry_time: record.entry_time,
         lunch_start_time: record.lunch_start_time,
         lunch_end_time: record.lunch_end_time,
+        second_lunch_start_time: record.second_lunch_start_time,
+        second_lunch_end_time: record.second_lunch_end_time,
         exit_time: record.exit_time,
         incident: record.incident_type,
+        description: record.description,
         project_name: record.project_name,
       };
     });
@@ -252,13 +255,11 @@ export class ProcessedAttendanceComponent {
   // Generar el PDF con los datos de asistencia
 
   async generatePDF() {
-    // Mostrar spinner de carga
     const loading = await this.loadingController.create({
       message: "Generando PDF...",
     });
     await loading.present();
 
-    // Crear objeto jsPDF en orientación horizontal, unidades milimétricas y tamaño A4
     const pdf = new jsPDF("l", "mm", "a4");
     const pageWidth = pdf.internal.pageSize.getWidth();
     const marginLeft = 5;
@@ -266,21 +267,16 @@ export class ProcessedAttendanceComponent {
     const tableWidth = pageWidth - (marginLeft + marginRight);
     let currentY = 5;
 
-    // Recorremos cada día de la semana
     for (let i = 0; i < this.diasSemana.length; i++) {
       const dia = this.diasSemana[i];
 
-      // Si el día está marcado como descanso...
       if (dia.isRest) {
-        // Filtrar empleados que tengan incidencia EXACTA de "Horas Extras"
         const extraEmployees = this.empleadosSemana.filter((emp) => {
           const wh = emp.work_hours[dia.date] || {};
           return wh.incident === "Horas Extras";
         });
 
-        // Si hay empleados con incidencia "Horas Extras", se imprime la tabla
         if (extraEmployees.length > 0) {
-          // Determinar si se deben mostrar columnas de segunda comida
           const showSecondMeal = extraEmployees.some((emp) => {
             const wh = emp.work_hours[dia.date] || {};
             return (
@@ -289,7 +285,6 @@ export class ProcessedAttendanceComponent {
             );
           });
 
-          // Armar el encabezado de la tabla
           let headerRow: any[] = [
             {
               content: "Código",
@@ -334,6 +329,10 @@ export class ProcessedAttendanceComponent {
               styles: { fontSize: 6, cellPadding: 1, textColor: 0 },
             },
             {
+              content: "Descripción",
+              styles: { fontSize: 6, cellPadding: 1, textColor: 0 },
+            }, // añadido
+            {
               content: "Empresa y Obra",
               styles: { fontSize: 6, cellPadding: 1, textColor: 0 },
             },
@@ -360,7 +359,6 @@ export class ProcessedAttendanceComponent {
             headerRow,
           ];
 
-          // Armar las filas con los datos de los empleados filtrados
           const dataRows = extraEmployees.map((emp) => {
             const wh = emp.work_hours[dia.date] || {};
             return [
@@ -377,42 +375,27 @@ export class ProcessedAttendanceComponent {
                 : []),
               this.formatHour(wh.exit_time) || "--:--",
               wh.incident || "N/A",
+              wh.description || "Sin descripción",
               wh.project_name || "No Asignado",
-              "", // Firma vacía
+              "",
             ];
           });
 
-          // Definir anchos de columna
-          let colWidths: number[];
-          if (showSecondMeal) {
-            colWidths = [
-              tableWidth * 0.07,
-              tableWidth * 0.2,
-              tableWidth * 0.05,
-              tableWidth * 0.05,
-              tableWidth * 0.05,
-              tableWidth * 0.06,
-              tableWidth * 0.06,
-              tableWidth * 0.05,
-              tableWidth * 0.08,
-              tableWidth * 0.24,
-              tableWidth * 0.1,
-            ];
-          } else {
-            colWidths = [
-              tableWidth * 0.07,
-              tableWidth * 0.2,
-              tableWidth * 0.05,
-              tableWidth * 0.05,
-              tableWidth * 0.05,
-              tableWidth * 0.05,
-              tableWidth * 0.08,
-              tableWidth * 0.24,
-              tableWidth * 0.1,
-            ];
-          }
+          const baseCols = [
+            0.035,
+            0.2,
+            0.05,
+            0.05,
+            0.05,
+            ...(showSecondMeal ? [0.06, 0.06] : []),
+            0.05,
+            0.08,
+            0.1,
+            0.18,
+            0.1,
+          ];
+          const colWidths = baseCols.map((ratio) => tableWidth * ratio);
 
-          // Si no hay espacio suficiente en la página, agregamos una nueva
           if (currentY + 10 > pdf.internal.pageSize.getHeight()) {
             pdf.addPage();
             currentY = 5;
@@ -434,12 +417,10 @@ export class ProcessedAttendanceComponent {
             columnStyles: colWidths.reduce((acc, width, index) => {
               acc[index] = { cellWidth: width };
               return acc;
-            }, {} as { [key: number]: { cellWidth: number } }),
+            }, {}),
           });
           currentY = (pdf as any).lastAutoTable.finalY + 2;
-        }
-        // Si es descanso y NO hay incidencias de "Horas Extras", imprimimos solo el encabezado
-        else {
+        } else {
           const headerContent = `Día ${dia.display} (${dia.date}) (descanso)`;
           pdf.setFont("helvetica", "bold");
           pdf.setFontSize(10);
@@ -449,12 +430,9 @@ export class ProcessedAttendanceComponent {
           pdf.setFont("helvetica", "normal");
           currentY += 12;
         }
-        // Continuamos al siguiente día
         continue;
       }
 
-      // Para días que no sean de descanso, usamos la lógica normal de generación de tabla.
-      // Se determina si se deben mostrar columnas de segunda comida
       const showSecondMeal = this.empleadosSemana.some((emp) => {
         const wh = emp.work_hours[dia.date] || {};
         return (
@@ -507,6 +485,10 @@ export class ProcessedAttendanceComponent {
           styles: { fontSize: 6, cellPadding: 1, textColor: 0 },
         },
         {
+          content: "Descripción",
+          styles: { fontSize: 6, cellPadding: 1, textColor: 0 },
+        }, // añadido
+        {
           content: "Empresa y Obra",
           styles: { fontSize: 6, cellPadding: 1, textColor: 0 },
         },
@@ -515,6 +497,7 @@ export class ProcessedAttendanceComponent {
           styles: { fontSize: 6, cellPadding: 1, textColor: 0 },
         }
       );
+
       const tableHeader = [
         [
           {
@@ -531,7 +514,6 @@ export class ProcessedAttendanceComponent {
         headerRow,
       ];
 
-      // Construir las filas de la tabla para el día normal
       const dataRows = this.empleadosSemana.map((emp) => {
         const wh = emp.work_hours[dia.date] || {};
         const entry = this.formatHour(wh.entry_time) || "--:--";
@@ -543,7 +525,6 @@ export class ProcessedAttendanceComponent {
           this.formatHour(wh.second_lunch_end_time) || "--:--";
         const exit = this.formatHour(wh.exit_time) || "--:--";
 
-        // Si hay incidencia (distinta de "Asistencia sin proyecto" y "N/A"), se dejan las horas en blanco
         let finalEntry = entry,
           finalLunchStart = lunchStart,
           finalLunchEnd = lunchEnd,
@@ -574,39 +555,26 @@ export class ProcessedAttendanceComponent {
             : []),
           finalExit,
           wh.incident || "N/A",
+          wh.description || "Sin descripción",
           wh.project_name || "No Asignado",
-          "", // Firma vacía
+          "",
         ];
       });
 
-      let colWidths: number[];
-      if (showSecondMeal) {
-        colWidths = [
-          tableWidth * 0.07,
-          tableWidth * 0.2,
-          tableWidth * 0.05,
-          tableWidth * 0.05,
-          tableWidth * 0.05,
-          tableWidth * 0.06,
-          tableWidth * 0.06,
-          tableWidth * 0.05,
-          tableWidth * 0.08,
-          tableWidth * 0.24,
-          tableWidth * 0.1,
-        ];
-      } else {
-        colWidths = [
-          tableWidth * 0.07,
-          tableWidth * 0.2,
-          tableWidth * 0.05,
-          tableWidth * 0.05,
-          tableWidth * 0.05,
-          tableWidth * 0.05,
-          tableWidth * 0.08,
-          tableWidth * 0.24,
-          tableWidth * 0.1,
-        ];
-      }
+      const baseCols = [
+        0.035,
+        0.2,
+        0.05,
+        0.05,
+        0.05,
+        ...(showSecondMeal ? [0.06, 0.06] : []),
+        0.05,
+        0.08,
+        0.1,
+        0.18,
+        0.1,
+      ];
+      const colWidths = baseCols.map((ratio) => tableWidth * ratio);
 
       if (currentY + 10 > pdf.internal.pageSize.getHeight()) {
         pdf.addPage();
@@ -629,7 +597,7 @@ export class ProcessedAttendanceComponent {
         columnStyles: colWidths.reduce((acc, width, index) => {
           acc[index] = { cellWidth: width };
           return acc;
-        }, {} as { [key: number]: { cellWidth: number } }),
+        }, {}),
       });
       currentY = (pdf as any).lastAutoTable.finalY + 2;
     }
