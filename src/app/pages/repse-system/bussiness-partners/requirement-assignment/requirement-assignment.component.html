@@ -1,1 +1,177 @@
-<p>requirement-assignment works!</p>
+<nb-card>
+  <nb-card-header>Asignación de requisitos de proveedores</nb-card-header>
+  <nb-card-body class="d-flex flex-column">
+    <div class="form-container">
+      <form [formGroup]="requirementsForm" (ngSubmit)="onSubmit()">
+        <div class="row mb-3">
+          <div class="col-md-6 mb-3 mb-sm-0">
+            <nb-select
+              formControlName="provider"
+              placeholder="Proveedor"
+              fullWidth
+            >
+              <nb-option
+                *ngFor="let provider of businessPartners"
+                [value]="provider.id"
+              >
+                {{ provider.name }}
+              </nb-option>
+            </nb-select>
+          </div>
+        </div>
+
+        <div class="row mb-3">
+          <div class="col-md-6 mb-3 mb-sm-0">
+            <nb-select
+              formControlName="documentType"
+              placeholder="Tipo de documento"
+              fullWidth
+            >
+              <nb-option *ngFor="let type of documentTypes" [value]="type.id"
+                >{{ type.name }}
+              </nb-option>
+            </nb-select>
+          </div>
+          <div class="col-md-6 d-flex align-items-center">
+            <nb-checkbox formControlName="isPeriodic"
+              >¿Es periódico?</nb-checkbox
+            >
+          </div>
+        </div>
+
+        <div class="row mb-3" *ngIf="requirementsForm.get('isPeriodic')?.value">
+          <div class="col-md-3 mb-3 mb-sm-0">
+            <nb-form-field>
+              <label for="periodAmount">Cantidad</label>
+              <input
+                nbInput
+                type="number"
+                formControlName="periodAmount"
+                placeholder="0"
+                min="1"
+              />
+            </nb-form-field>
+          </div>
+          <div class="col-md-3 mb-3 mb-sm-0">
+            <nb-form-field>
+              <label for="periodType"> Período </label>
+              <nb-select
+                formControlName="periodType"
+                placeholder="Tipo"
+                fullWidth
+              >
+                <nb-option *ngFor="let type of periodTypes" [value]="type">{{
+                  type
+                }}</nb-option>
+              </nb-select>
+            </nb-form-field>
+          </div>
+          <div class="col-md-6">
+            <nb-form-field>
+              <label for="startDate">Fecha de inicio</label>
+              <input
+                nbInput
+                type="date"
+                formControlName="startDate"
+                [min]="minDate.format('YYYY-MM-DD')"
+                readonly
+                (click)="forceDatePicker($event)"
+                (keydown)="preventManualInput($event)"
+                (paste)="preventManualInput($event)"
+                (input)="validateDate()"
+                class="no-manual-input"
+                fullWidth
+              />
+            </nb-form-field>
+          </div>
+        </div>
+
+        <div class="row mb-3">
+          <div class="col-12">
+            <h5>Formatos de archivo requeridos</h5>
+            <p class="text-muted small">
+              Seleccione los formatos aceptados y especifique la cantidad mínima
+              requerida para cada uno.
+            </p>
+
+            <div class="file-formats-container">
+              <div
+                *ngFor="let format of fileFormats; let i = index"
+                class="file-format-item mb-2"
+              >
+                <div class="d-flex col-12 col-sm-4 justify-content-between">
+                  <div class="d-flex py-2 align-items-center">
+                    <!-- usa el índice para el toggle -->
+                    <nb-checkbox
+                      [checked]="format.selected"
+                      (checkedChange)="onFormatToggle(i)"
+                    ></nb-checkbox>
+
+                    <span class="ml-2 mr-3">
+                      {{ format.name }} (.{{ format.extension }})
+                    </span>
+                  </div>
+
+                  <input
+                    *ngIf="format.selected"
+                    nbInput
+                    type="number"
+                    min="1"
+                    class="w-50"
+                    placeholder="Cantidad"
+                    [(ngModel)]="fileFormats[i].minQuantity"
+                    [ngModelOptions]="{ standalone: true }"
+                  />
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="col-12 col-sm-4 p-0">
+          <button
+            nbButton
+            type="submit"
+            [disabled]="!requirementsForm.valid"
+            status="primary"
+            fullWidth
+          >
+            Guardar Configuración
+          </button>
+        </div>
+      </form>
+    </div>
+
+    <hr />
+
+    <div *ngIf="requirements.length > 0">
+      <h4>Requisitos asignados a proveedores</h4>
+      <div class="table-responsive">
+        <table class="table" nbTable>
+          <thead>
+            <tr>
+              <th>Proveedor</th>
+              <th>Documento</th>
+              <th>Periódico</th>
+              <th>Periodicidad</th>
+              <th>Estado</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let req of requirements">
+              <td>{{ req.company_name }}</td>
+              <td>{{ req.documentType }}</td>
+              <td>{{ req.isPeriodic ? "Sí" : "No" }}</td>
+              <td>
+                <span *ngIf="req.isPeriodic">
+                  Cada {{ req.periodAmount }} {{ req.periodType }}
+                </span>
+              </td>
+              <td>{{ req.status }}</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </nb-card-body>
+</nb-card>
