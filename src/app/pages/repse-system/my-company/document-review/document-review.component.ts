@@ -1,17 +1,42 @@
 import { Component, OnInit } from "@angular/core";
 import { RejectionCommentComponent } from "../rejection-comment/rejection-comment.component";
-import {
-  DocumentService,
-  CompanyFile,
-  DocumentPeriod,
-  FileType,
-} from "../../../../services/repse/document.service";
+import { DocumentService } from "../../../../services/repse/document.service";
 import { NbDialogService, NbToastrService } from "@nebular/theme";
 
 interface PendingDocument extends CompanyFile {
   fileNames: string[];
   periodInfo?: DocumentPeriod;
   fileTypeInfo?: FileType;
+}
+
+interface CompanyFile {
+  file_id: number;
+  required_file_id: number;
+  file_path: string;
+  issue_date: string;
+  expiry_date: string | null;
+  user_id: number;
+  status: "pending" | "approved" | "rejected";
+  comment: string | null;
+  is_current: boolean;
+  uploaded_at: string;
+  period_id: number | null;
+  file_ext: string | null;
+}
+
+interface DocumentPeriod {
+  period_id: number;
+  required_file_id: number;
+  start_date: string;
+  end_date: string;
+  created_at: string;
+}
+
+interface FileType {
+  filetype_id: number;
+  nombre: string;
+  description: string;
+  is_active: boolean;
 }
 
 @Component({
@@ -40,15 +65,24 @@ export class DocumentReviewComponent implements OnInit {
       next: (files) => {
         this.pendingDocuments = files.map((file) => ({
           ...file,
-          fileNames: [file.file_path.split("/").pop() || "documento"],
+          fileNames: [file.file_path?.split("/").pop() || "documento"],
           periodInfo: file.period_id
-            ? this.documentService.getPeriodById(file.period_id)
+            ? {
+                period_id: file.period_id,
+                required_file_id: file.required_file_id,
+                start_date: file.start_date,
+                end_date: file.end_date,
+                created_at: "",
+              }
             : undefined,
-          // Aquí deberías obtener el fileTypeInfo basado en required_file_id
-          // Esto es un mock - en producción necesitarías un método para obtener esta relación
-          fileTypeInfo: this.documentService.getFileTypeByRequiredFileId(
-            file.required_file_id
-          ),
+          fileTypeInfo: file.file_type_name
+            ? {
+                filetype_id: 0,
+                nombre: file.file_type_name,
+                description: file.file_type_description,
+                is_active: true,
+              }
+            : undefined,
         }));
         this.loading = false;
       },
@@ -81,7 +115,12 @@ export class DocumentReviewComponent implements OnInit {
   }
 
   downloadDocument(fileId: number): void {
-    this.documentService.downloadDocument(fileId);
+    const doc = this.pendingDocuments.find((d) => d.file_id === fileId);
+    if (doc?.file_path) {
+      this.documentService.downloadFile(doc.file_path);
+    } else {
+      this.toastrService.warning("No se encontró la ruta del archivo", "Aviso");
+    }
   }
 
   approveDocument(fileId: number): void {

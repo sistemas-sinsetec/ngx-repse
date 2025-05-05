@@ -96,7 +96,7 @@ switch ($method) {
                    COUNT(cf.file_id) AS uploaded_count
               FROM document_periods p
               LEFT JOIN company_files cf
-                     ON cf.period_id = p.period_id
+                     ON cf.period_id = p.period_id AND cf.status = 'approved'
              WHERE p.required_file_id IN ($placeholders)
              GROUP BY p.period_id
              ORDER BY p.start_date
@@ -275,9 +275,9 @@ switch ($method) {
                 VALUES (?,?,?,?,?,?,?,?,?, 1)
             ");
             $ins->bind_param(
-                'iiisiisss',  // Nota el tipo adicional 'i' para assigned_by
+                'iiiisiiss',  // Nota el tipo adicional 'i' para assigned_by
                 $company_id,
-                $company_id,
+                $assigned_by,
                 $file_type_id,
                 $isPeriodicInt,
                 $periodicity_type,

@@ -32,10 +32,11 @@ interface TreeNode<T> {
 })
 export class DocumentUploadComponent {
   @ViewChild("downloadModal") downloadModal!: TemplateRef<any>;
+  @ViewChild("uploadModal") uploadModal!: TemplateRef<any>;
   @ViewChild("fileInput") fileInput: any;
 
   // Tabs
-  activeTab: "regular" | "late" = "regular";
+  activeTab: "Regular" | "Con retraso" | "Rechazados" = "Regular";
 
   // Data from dashboard endpoint
   requiredFiles: any[] = [];
@@ -51,6 +52,9 @@ export class DocumentUploadComponent {
   availableFormats: string[] = [];
   selectedFile: File | null = null;
 
+  //Rejected files
+  rejectedFiles: any[] = [];
+
   // Download modal
   fileNodes: TreeNode<FileNode>[] = [];
   selectedNodes: TreeNode<FileNode>[] = [];
@@ -58,6 +62,7 @@ export class DocumentUploadComponent {
   modalTitle = "";
   dialogRef!: NbDialogRef<any>;
   allColumns = ["select", "name", "actions"];
+  activeTabIndex: any;
 
   constructor(
     private documentService: DocumentService,
@@ -67,6 +72,7 @@ export class DocumentUploadComponent {
     private companyService: CompanyService
   ) {
     this.loadDocuments();
+    this.loadRejectedFiles();
   }
 
   // ── Load dashboard data ─────────────────────────────────────
@@ -98,6 +104,17 @@ export class DocumentUploadComponent {
     );
   }
 
+  getStatusLabel(status: string): string {
+    return (
+      {
+        complete: "Completo",
+        partial: "Parcial",
+        pending: "Pendiente",
+        overdue: "Atrasado",
+      }[status] || status
+    );
+  }
+
   getUploadProgress(file: any): string {
     if (file.current_period) {
       return `${file.current_period.uploaded_count}/${file.min_documents_needed}`;
@@ -111,30 +128,40 @@ export class DocumentUploadComponent {
   }
 
   prepareUpload(file: any): void {
-    this.activeTab = "regular";
+    this.activeTab = "Regular";
     this.selectedDocumentForUpload = file;
-    // pick the current period automatically
     this.selectedPeriod = file.current_period ?? null;
-    // formats available for regular upload are all codes
-    this.availableFormats = file.formats.map((f: any) => f.code);
-    this.selectedFormat = "";
-    // trigger file input
-    this.fileInput.nativeElement.click();
+    this.dialogRef = this.dialogService.open(this.uploadModal, {
+      dialogClass: "custom-modal",
+      closeOnBackdropClick: false,
+      autoFocus: true,
+    });
   }
 
   // ── File selection & upload (both tabs) ────────────────────
+  getUploadedCount(file: any, formatCode: string): number {
+    const period = file.current_period;
+    if (!period || !period.files) return 0;
+    return period.files.filter((f: any) => f.format_code === formatCode).length;
+  }
+
+  triggerFileInput(formatCode: string): void {
+    this.selectedFormat = formatCode;
+    this.fileInput.nativeElement.accept = `.${formatCode.toLowerCase()}`;
+    this.fileInput.nativeElement.click();
+  }
 
   onFileSelected(event: any): void {
     const f = event.target.files?.[0] as File;
     this.selectedFile = f || null;
     event.target.value = "";
-    if (this.activeTab === "regular" && this.selectedFile) {
+    if (this.activeTab === "Regular" && this.selectedFile) {
       this.uploadDocument();
     }
   }
 
   canSelectFile(): boolean {
-    if (this.activeTab === "late") {
+    if (this.activeTab === "Con retraso") {
       return !!(
         this.selectedDocument &&
         this.selectedPeriod &&
@@ -146,7 +173,7 @@ export class DocumentUploadComponent {
 
   canUpload(): boolean {
     if (!this.selectedFile) return false;
-    if (this.activeTab === "late") {
+    if (this.activeTab === "Con retraso") {
       return !!(
         this.selectedDocument &&
         this.selectedPeriod &&
@@ -167,18 +194,20 @@ export class DocumentUploadComponent {
     const fd = new FormData();
     fd.append("file", this.selectedFile as Blob);
     const reqId =
-      this.activeTab === "regular"
+      this.activeTab === "Regular"
         ? this.selectedDocumentForUpload.required_file_id
         : this.selectedDocument.required_file_id;
     const periodId =
-      this.activeTab === "late"
+      this.activeTab === "Con retraso"
         ? this.selectedPeriod.period_id
         : this.selectedPeriod?.period_id;
     fd.append("required_file_id", reqId.toString());
     fd.append("period_id", periodId?.toString() || "");
     fd.append(
       "format_code",
-      this.activeTab === "late" ? this.selectedFormat : ""
+      this.activeTab === "Con retraso"
+        ? this.selectedFormat
+        : this.selectedFormat
     );
 
     this.documentService.uploadFile(fd).subscribe({
@@ -186,6 +215,7 @@ export class DocumentUploadComponent {
         if (resp.success) {
           this.toastrService.success("Archivo subido correctamente", "Éxito");
           this.loadDocuments();
+          if (this.dialogRef) this.dialogRef.close();
           this.resetUploadForm();
         }
       },
@@ -207,13 +237,16 @@ export class DocumentUploadComponent {
 
   // ── Late tab: selecting document, period, format ────────────
 
-  onTabChange(tab: "regular" | "late"): void {
+  onTabChange(tab: "Regular" | "Con retraso" | "Rechazados"): void {
     this.activeTab = tab;
     this.resetUploadForm();
+    if (tab === "Rechazados") {
+      this.loadRejectedFiles();
+    }
   }
 
   selectForLateUpload(file: any): void {
-    this.activeTab = "late";
+    this.activeTab = "Con retraso";
     this.selectedDocument = file;
     this.loadAvailableFormats();
   }
@@ -226,6 +259,26 @@ export class DocumentUploadComponent {
     this.availableFormats = this.selectedDocument.formats.map(
       (f: any) => f.code
     );
+  }
+
+  loadRejectedFiles(): void {
+    this.documentService.getRejectedDocuments().subscribe({
+      next: (files) => {
+        this.rejectedFiles = files;
+      },
+      error: (err) => {
+        console.error("Error loading rejected files", err);
+      },
+    });
+  }
+
+  downloadDocument(fileId: number): void {
+    const file = this.rejectedFiles.find((f) => f.file_id === fileId);
+    if (file && file.file_path) {
+      this.documentService.downloadFile(file.file_path);
+    } else {
+      this.toastrService.warning("Archivo no encontrado", "Advertencia");
+    }
   }
 
   getIncompletePeriodicFiles(): any[] {
@@ -350,7 +403,7 @@ export class DocumentUploadComponent {
 
   getFileAccept(): string {
     // Si estamos en “Con retraso”, sólo el formato elegido
-    if (this.activeTab === "late") {
+    if (this.activeTab === "Con retraso") {
       return this.selectedFormat
         ? `.${this.selectedFormat.toLowerCase()}`
         : "*/*";
@@ -392,5 +445,22 @@ export class DocumentUploadComponent {
 
   private formatDate(dateString: string): string {
     return moment(dateString).format("DD/MM/YYYY");
+  }
+
+  acknowledgeDocument(fileId: number): void {
+    const body = new FormData();
+    body.append("action", "acknowledge");
+    body.append("file_id", fileId.toString());
+
+    this.documentService.acknowledgeDocument(fileId).subscribe({
+      next: () => {
+        this.toastrService.success("Documento eliminado", "Éxito");
+        this.loadDocuments();
+        this.loadRejectedFiles();
+      },
+      error: () => {
+        this.toastrService.danger("Error al eliminar el documento", "Error");
+      },
+    });
   }
 }
