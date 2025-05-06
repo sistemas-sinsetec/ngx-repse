@@ -138,4 +138,9 @@ export class DocumentService {
     body.append("file_id", fileId.toString());
     return this.http.post<any>(`${this.base}/company_files.php`, body);
   }
+
+  getFullCatalog(companyId: number): Observable<any> {
+    const params = new HttpParams().set("company_id", companyId.toString());
+    return this.http.get(`${this.base}/company_files_catalog.php`, { params });
+  }
 }

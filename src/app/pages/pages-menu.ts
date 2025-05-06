@@ -49,6 +49,15 @@ export const MENU_ITEMS: CustomMenuItem[] = [
               subSection: "Revision de documentos",
             },
           },
+          {
+            title: "Catálogo de documentos",
+            link: "/pages/repse-system/my-company/document-catalog",
+            hidden: false,
+            permission: {
+              section: "Sistema REPSE",
+              subSection: "Catalogo de documentos",
+            },
+          },
         ],
       },
       {

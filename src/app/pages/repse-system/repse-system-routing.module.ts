@@ -6,6 +6,7 @@ import { DocumentReviewComponent } from "./my-company/document-review/document-r
 import { RequirementsAssignmentComponent } from "./my-company/requirements-assignment/requirements-assignment.component";
 import { DocumentUploadComponent } from "./my-company/document-upload/document-upload.component";
 import { RequirementAssignmentComponent } from "./bussiness-partners/requirement-assignment/requirement-assignment.component";
+import { DocumentCatalogComponent } from "./my-company/document-catalog/document-catalog.component";
 
 const routes: Routes = [
   {
@@ -37,6 +38,15 @@ const routes: Routes = [
         data: {
           section: "Sistema REPSE",
           subSection: "Revision de documentos",
+        }, // Sección requerida para acceder
+      },
+      {
+        path: "my-company/document-catalog",
+        component: DocumentCatalogComponent,
+        canActivate: [authGuard],
+        data: {
+          section: "Sistema REPSE",
+          subSection: "Catalogo de documentos",
         }, // Sección requerida para acceder
       },
       {

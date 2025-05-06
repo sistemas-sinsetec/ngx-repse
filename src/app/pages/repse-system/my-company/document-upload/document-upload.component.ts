@@ -463,4 +463,10 @@ export class DocumentUploadComponent {
       },
     });
   }
+
+  get incompleteRequiredFilesCount(): number {
+    return this.requiredFiles
+      ? this.requiredFiles.filter((f) => f.status !== "complete").length
+      : 0;
+  }
 }

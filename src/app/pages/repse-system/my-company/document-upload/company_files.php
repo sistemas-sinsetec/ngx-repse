@@ -40,7 +40,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             if (file_exists($path)) {
                 unlink($path);
             }
-            $stmt = $mysqli->prepare("DELETE FROM company_files WHERE file_id = ?");
+
+            $stmt = $mysqli->prepare("UPDATE company_files SET file_path = '', is_current = 0, status = 'acknowledged' WHERE file_id = ?");
             $stmt->bind_param("i", $file_id);
             $stmt->execute();
             $stmt->close();
@@ -51,7 +52,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
         exit;
     }
-
 
     if (!isset($_FILES['file'])) {
         echo json_encode(['success' => false, 'error' => 'No file uploaded']);

@@ -169,6 +169,7 @@ export class PermissionsSectionsComponent implements OnInit {
         "Asignacion de requisitos de empresa",
         "Carga de documentos de empresa",
         "Revision de documentos",
+        "Catalogo de documentos",
         "Asignacion de requisitos de socios comerciales",
       ],
       "Control de proyectos": [

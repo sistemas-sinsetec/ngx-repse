@@ -1,14 +1,14 @@
-<div class="container mt-4">
+<div>
   <nb-card>
     <nb-card-header>
-      <h1 class="text-primary">Carga de Documentos REPSE</h1>
+      <h3>Carga de documentos de mi empresa</h3>
     </nb-card-header>
 
     <nb-card-body>
       <nb-tabset (changeTab)="onTabChange($event.tabTitle)">
         <nb-tab
           tabTitle="Regular"
-          [badgeText]="requiredFiles.length.toString()"
+          [badgeText]="incompleteRequiredFilesCount.toString()"
           badgeStatus="primary"
         >
           <ng-template nbTabContent>
@@ -161,7 +161,7 @@
             </table>
             <!-- Leyenda si no hay documentos rechazados -->
             <div *ngIf="rejectedFiles.length === 0" class="text-center mt-4">
-              <nb-alert status="info"> No hay documentos rechazados. </nb-alert>
+              <nb-alert status="info"> No hay documentos rechazados </nb-alert>
             </div>
           </ng-template>
         </nb-tab>
