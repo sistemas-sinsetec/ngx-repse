@@ -44,134 +44,10 @@ export interface FileStructure {
   }>;
 }
 
-// TEST
-export interface CompanyFile {
-  file_id: number;
-  required_file_id: number;
-  file_path: string;
-  issue_date: string;
-  expiry_date: string | null;
-  user_id: number;
-  status: "pending" | "approved" | "rejected";
-  comment: string | null;
-  is_current: boolean;
-  uploaded_at: string;
-  period_id: number | null;
-  file_ext: string | null;
-}
-// TEST
-export interface DocumentPeriod {
-  period_id: number;
-  required_file_id: number;
-  start_date: string;
-  end_date: string;
-  created_at: string;
-}
-// TEST
-export interface CompanyRequiredFile {
-  required_file_id: number;
-  company_id: number;
-  file_type_id: number;
-  is_periodic: boolean;
-  periodicity_type: string | null;
-  periodicity_count: number | null;
-  min_documents_needed: number;
-  start_date: string;
-  end_date: string;
-  is_active: boolean;
-}
-// TEST
-export interface FileType {
-  filetype_id: number;
-  nombre: string;
-  description: string;
-  is_active: boolean;
-}
-// TEST
-export interface RequiredFileFormat {
-  required_file_id: number;
-  format_code: string;
-  min_required: number;
-}
-//TEST
-export interface RequiredFileToType {
-  required_file_id: number;
-  file_type_id: number;
-}
-
 @Injectable({
   providedIn: "root",
 })
 export class DocumentService {
-  //TEST
-  private mockFiles: CompanyFile[] = [
-    {
-      file_id: 1,
-      required_file_id: 101,
-      file_path: "/documents/contrato.pdf",
-      issue_date: "2023-05-15",
-      expiry_date: "2023-11-15",
-      user_id: 1,
-      status: "pending",
-      comment: null,
-      is_current: true,
-      uploaded_at: "2023-05-16 09:30:22",
-      period_id: 1,
-      file_ext: "pdf",
-    },
-    {
-      file_id: 2,
-      required_file_id: 102,
-      file_path: "/documents/reporte.xml",
-      issue_date: "2023-05-10",
-      expiry_date: "2023-08-10",
-      user_id: 1,
-      status: "pending",
-      comment: null,
-      is_current: true,
-      uploaded_at: "2023-05-12 14:15:10",
-      period_id: 2,
-      file_ext: "xml",
-    },
-  ];
-  //TEST
-  private mockPeriods: DocumentPeriod[] = [
-    {
-      period_id: 1,
-      required_file_id: 27,
-      start_date: "2023-05-01",
-      end_date: "2023-05-31",
-      created_at: "2023-04-28 00:00:00",
-    },
-    {
-      period_id: 2,
-      required_file_id: 28,
-      start_date: "2023-05-01",
-      end_date: "2023-05-31",
-      created_at: "2023-04-28 00:00:00",
-    },
-  ];
-  //TEST
-  private mockFileTypes: FileType[] = [
-    {
-      filetype_id: 1,
-      nombre: "Contrato de Servicios",
-      description: "Documento contractual",
-      is_active: true,
-    },
-    {
-      filetype_id: 2,
-      nombre: "Reporte Mensual",
-      description: "Reporte de actividades",
-      is_active: true,
-    },
-  ];
-  //TEST
-  private mockRequiredFileTypes: RequiredFileToType[] = [
-    { required_file_id: 101, file_type_id: 1 },
-    { required_file_id: 102, file_type_id: 2 },
-  ];
-
   private base = environment.apiBaseUrl;
 
   constructor(private http: HttpClient) {}
@@ -222,53 +98,44 @@ export class DocumentService {
    * is the path returned by the API, relative to the base URL.
    */
   downloadFile(filePath: string): void {
-    const url = `${this.base}/${filePath}`;
+    const url = `${this.base}/../${filePath}`;
     window.open(url, "_blank");
   }
 
-  //TEST
-  getPendingDocuments(): Observable<CompanyFile[]> {
-    return of(this.mockFiles.filter((file) => file.status === "pending")).pipe(
-      delay(800)
-    );
+  getPendingDocuments(): Observable<any[]> {
+    const params = new HttpParams().set("status", "pending");
+    return this.http.get<any[]>(`${this.base}/company_files.php`, { params });
   }
-  //TEST
-  getPeriodById(periodId: number): DocumentPeriod | undefined {
-    return this.mockPeriods.find((p) => p.period_id === periodId);
+
+  getRejectedDocuments(): Observable<any[]> {
+    const params = new HttpParams().set("status", "rejected");
+    return this.http.get<any[]>(`${this.base}/company_files.php`, { params });
   }
-  //TEST
-  getFileTypeById(fileTypeId: number): FileType | undefined {
-    return this.mockFileTypes.find((ft) => ft.filetype_id === fileTypeId);
+
+  getAllDocuments(): Observable<any[]> {
+    const params = new HttpParams().set("status", "all");
+    return this.http.get<any[]>(`${this.base}/company_files.php`, { params });
   }
-  //TEST
+
   approveDocument(fileId: number): Observable<any> {
-    const file = this.mockFiles.find((f) => f.file_id === fileId);
-    if (file) file.status = "approved";
-    return of({ success: true }).pipe(delay(500));
+    const body = new FormData();
+    body.append("action", "approve");
+    body.append("file_id", fileId.toString());
+    return this.http.post<any>(`${this.base}/company_files.php`, body);
   }
-  //TEST
+
   rejectDocument(fileId: number, comment: string): Observable<any> {
-    const file = this.mockFiles.find((f) => f.file_id === fileId);
-    if (file) {
-      file.status = "rejected";
-      file.comment = comment;
-    }
-    return of({ success: true }).pipe(delay(500));
+    const body = new FormData();
+    body.append("action", "reject");
+    body.append("file_id", fileId.toString());
+    body.append("comment", comment);
+    return this.http.post<any>(`${this.base}/company_files.php`, body);
   }
-  //TEST
-  downloadDocument(fileId: number): void {
-    const file = this.mockFiles.find((f) => f.file_id === fileId);
-    if (file) {
-      console.log(`Descargando documento: ${file.file_path}`);
-      // Lógica real de descarga iría aquí
-    }
-  }
-  //test
-  getFileTypeByRequiredFileId(requiredFileId: number): FileType | undefined {
-    const relation = this.mockRequiredFileTypes.find(
-      (r) => r.required_file_id === requiredFileId
-    );
-    if (!relation) return undefined;
-    return this.getFileTypeById(relation.file_type_id);
+
+  acknowledgeDocument(fileId: number): Observable<any> {
+    const body = new FormData();
+    body.append("action", "acknowledge");
+    body.append("file_id", fileId.toString());
+    return this.http.post<any>(`${this.base}/company_files.php`, body);
   }
 }

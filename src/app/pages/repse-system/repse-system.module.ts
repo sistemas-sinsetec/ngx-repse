@@ -17,6 +17,7 @@ import {
   NbTagModule,
   NbAlertModule,
   NbTreeGridModule,
+  NbTabsetModule,
 } from "@nebular/theme";
 
 import { NbMomentDateModule } from "@nebular/moment";
@@ -28,8 +29,8 @@ import { DocumentUploadComponent } from "./my-company/document-upload/document-u
 import { DocumentReviewComponent } from "./my-company/document-review/document-review.component";
 import { DocumentService } from "../../services/repse/document.service";
 import { RejectionCommentComponent } from "./my-company/rejection-comment/rejection-comment.component";
-import { RequirementAssignmentComponent } from './bussiness-partners/requirement-assignment/requirement-assignment.component';
-import { CompaniesDocumentsViewComponent } from './bussiness-partners/companies-documents-view/companies-documents-view.component';
+import { RequirementAssignmentComponent } from "./bussiness-partners/requirement-assignment/requirement-assignment.component";
+import { CompaniesDocumentsViewComponent } from "./bussiness-partners/companies-documents-view/companies-documents-view.component";
 
 @NgModule({
   declarations: [
@@ -60,6 +61,7 @@ import { CompaniesDocumentsViewComponent } from './bussiness-partners/companies-
     NbDialogModule.forChild(),
     NbFormFieldModule,
     NbIconModule,
+    NbTabsetModule,
     NbTagModule,
     NbTreeGridModule,
   ],
