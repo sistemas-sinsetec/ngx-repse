@@ -8,7 +8,11 @@
       <nb-tabset (changeTab)="onTabChange($event.tabTitle)">
         <nb-tab
           tabTitle="Regular"
-          [badgeText]="incompleteRequiredFilesCount.toString()"
+          [badgeText]="
+            incompleteRequiredFilesCount > 0
+              ? incompleteRequiredFilesCount.toString()
+              : null
+          "
           badgeStatus="primary"
         >
           <ng-template nbTabContent>
@@ -466,8 +470,19 @@
                 size="small"
                 status="primary"
                 (click)="triggerFileInput(format.code)"
+                [disabled]="isUploading"
+                [nbSpinner]="isUploading"
               >
-                <nb-icon icon="upload-outline"></nb-icon> Subir
+                <!-- Si no está cargando -->
+                <nb-icon *ngIf="!isUploading" icon="upload-outline"></nb-icon>
+                <span *ngIf="!isUploading">Subir</span>
+                <!-- Si está cargando -->
+                <nb-icon
+                  *ngIf="isUploading"
+                  icon="upload-outline"
+                  class="opacity-0"
+                ></nb-icon>
+                <span *ngIf="isUploading" class="opacity-0">Subir</span>
               </button>
             </td>
           </tr>

@@ -42,6 +42,8 @@ export class DocumentUploadComponent {
   requiredFiles: any[] = [];
   loading = true;
 
+  isUploading = false;
+
   // Regular-tab upload
   selectedDocumentForUpload: any = null;
 
@@ -191,6 +193,8 @@ export class DocumentUploadComponent {
       );
       return;
     }
+    this.isUploading = true;
+
     const fd = new FormData();
     fd.append("file", this.selectedFile as Blob);
     const reqId =
@@ -222,6 +226,9 @@ export class DocumentUploadComponent {
       error: (err) => {
         console.error("Upload error", err);
         this.toastrService.danger("Error al subir el archivo", "Error");
+      },
+      complete: () => {
+        this.isUploading = false;
       },
     });
   }

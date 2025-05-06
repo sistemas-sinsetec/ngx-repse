@@ -18,6 +18,7 @@ import {
   NbAlertModule,
   NbTreeGridModule,
   NbTabsetModule,
+  NbSpinnerModule,
 } from "@nebular/theme";
 
 import { NbMomentDateModule } from "@nebular/moment";
@@ -31,7 +32,7 @@ import { DocumentService } from "../../services/repse/document.service";
 import { RejectionCommentComponent } from "./my-company/rejection-comment/rejection-comment.component";
 import { RequirementAssignmentComponent } from "./bussiness-partners/requirement-assignment/requirement-assignment.component";
 import { CompaniesDocumentsViewComponent } from "./bussiness-partners/companies-documents-view/companies-documents-view.component";
-import { DocumentCatalogComponent } from './my-company/document-catalog/document-catalog.component';
+import { DocumentCatalogComponent } from "./my-company/document-catalog/document-catalog.component";
 
 @NgModule({
   declarations: [
@@ -66,6 +67,7 @@ import { DocumentCatalogComponent } from './my-company/document-catalog/document
     NbTabsetModule,
     NbTagModule,
     NbTreeGridModule,
+    NbSpinnerModule,
   ],
   providers: [DocumentService],
 })
