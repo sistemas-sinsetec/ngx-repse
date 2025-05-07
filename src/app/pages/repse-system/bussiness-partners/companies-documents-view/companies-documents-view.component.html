@@ -1,1 +1,72 @@
-<p>companies-documents-view works!</p>
+<nb-card>
+  <nb-card-header>
+    <div class="d-flex justify-content-between align-items-center">
+      <span>Documentos de proveedores</span>
+      <div class="d-flex align-items-center w-50 justify-content-end">
+        <nb-select
+          [(selected)]="selectedProviderId"
+          (selectedChange)="onProviderChange()"
+          placeholder="Seleccionar proveedor"
+          class="mr-3 w-50"
+        >
+          <nb-option *ngFor="let provider of providers" [value]="provider.id">
+            {{ provider.name }}
+          </nb-option>
+        </nb-select>
+        <nb-form-field>
+          <nb-icon nbPrefix icon="search" pack="eva"></nb-icon>
+          <input
+            nbInput
+            placeholder="Buscar documento..."
+            [(ngModel)]="searchQuery"
+            (ngModelChange)="filterTree()"
+          />
+        </nb-form-field>
+      </div>
+    </div>
+  </nb-card-header>
+
+  <nb-card-body>
+    <div class="table-responsive">
+      <table [nbTreeGrid]="providerFiles" class="table w-100">
+        <tr nbTreeGridHeaderRow *nbTreeGridHeaderRowDef="columns"></tr>
+        <tr nbTreeGridRow *nbTreeGridRowDef="let row; columns: columns"></tr>
+
+        <ng-container [nbTreeGridColumnDef]="'name'">
+          <th nbTreeGridHeaderCell *nbTreeGridHeaderCellDef class="col-10">
+            Documento
+          </th>
+          <td nbTreeGridCell *nbTreeGridCellDef="let row">
+            <div [style.padding-left.px]="row.level * 20">
+              <nb-tree-grid-row-toggle
+                *ngIf="row.data.type !== 'file'"
+                [expanded]="row.expanded"
+              ></nb-tree-grid-row-toggle>
+              <nb-icon [icon]="getIcon(row.data.type)"></nb-icon>
+              {{ row.data.name }}
+            </div>
+          </td>
+        </ng-container>
+
+        <ng-container [nbTreeGridColumnDef]="'actions'">
+          <th nbTreeGridHeaderCell *nbTreeGridHeaderCellDef class="text-center">
+            Acciones
+          </th>
+          <td nbTreeGridCell *nbTreeGridCellDef="let row">
+            <div class="d-flex w-100 justify-content-center">
+              <button
+                *ngIf="row.data.type === 'file'"
+                nbButton
+                size="small"
+                status="primary"
+                (click)="downloadFile(row.data.path)"
+              >
+                <nb-icon icon="download-outline"></nb-icon>
+              </button>
+            </div>
+          </td>
+        </ng-container>
+      </table>
+    </div>
+  </nb-card-body>
+</nb-card>

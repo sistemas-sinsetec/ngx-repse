@@ -143,4 +143,14 @@ export class DocumentService {
     const params = new HttpParams().set("company_id", companyId.toString());
     return this.http.get(`${this.base}/company_files_catalog.php`, { params });
   }
+
+  getProviderFiles(assignedByCompanyId: number): Observable<any> {
+    const params = new HttpParams().set(
+      "assigned_by",
+      assignedByCompanyId.toString()
+    );
+    return this.http.get(`${this.base}/company_files_providers.php`, {
+      params,
+    });
+  }
 }

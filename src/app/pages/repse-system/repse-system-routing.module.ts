@@ -7,6 +7,7 @@ import { RequirementsAssignmentComponent } from "./my-company/requirements-assig
 import { DocumentUploadComponent } from "./my-company/document-upload/document-upload.component";
 import { RequirementAssignmentComponent } from "./bussiness-partners/requirement-assignment/requirement-assignment.component";
 import { DocumentCatalogComponent } from "./my-company/document-catalog/document-catalog.component";
+import { CompaniesDocumentsViewComponent } from "./bussiness-partners/companies-documents-view/companies-documents-view.component";
 
 const routes: Routes = [
   {
@@ -56,6 +57,15 @@ const routes: Routes = [
         data: {
           section: "Sistema REPSE",
           subSection: "Asignacion de requisitos de socios comerciales",
+        }, // Sección requerida para acceder
+      },
+      {
+        path: "bussiness-partners/companies-documents-view",
+        component: CompaniesDocumentsViewComponent,
+        canActivate: [authGuard],
+        data: {
+          section: "Sistema REPSE",
+          subSection: "Catalogo de documentos de socios comerciales",
         }, // Sección requerida para acceder
       },
     ],

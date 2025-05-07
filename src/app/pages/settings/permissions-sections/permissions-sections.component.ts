@@ -171,6 +171,7 @@ export class PermissionsSectionsComponent implements OnInit {
         "Revision de documentos",
         "Catalogo de documentos",
         "Asignacion de requisitos de socios comerciales",
+        "Catalogo de documentos de socios comerciales",
       ],
       "Control de proyectos": [
         "Asignacion de proyectos",
@@ -224,7 +225,7 @@ export class PermissionsSectionsComponent implements OnInit {
       ],
     };
 
-    //Las ven los clientes
+    //Las ven los proveedores
     const subSectionsProviderMap: { [key: string]: string[] } = {
       "Sistema REPSE": [
         "Carga de documentos de empresa",
@@ -242,7 +243,7 @@ export class PermissionsSectionsComponent implements OnInit {
       "Configuracion de sitio": [""],
       "Configuracion de usuarios": [""],
     };
-
+    //Las ven los clientes
     const subSectionsClientMap: { [key: string]: string[] } = {
       "Sistema REPSE": [""],
       "Control de proyectos": [""],

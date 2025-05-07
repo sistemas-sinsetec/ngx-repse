@@ -75,21 +75,12 @@ export const MENU_ITEMS: CustomMenuItem[] = [
             },
           },
           {
-            title: "Carga de documentos",
-            link: "/pages/repse-system/bussiness-partners/document-upload",
-            hidden: false,
-            permission: {
-              section: "Sistema REPSE",
-              subSection: "Carga de documentos de socios comerciales",
-            },
-          },
-          {
-            title: "Revisión de documentos",
+            title: "Catalogo de documentos",
             link: "/pages/repse-system/bussiness-partners/companies-documents-view",
             hidden: false,
             permission: {
               section: "Sistema REPSE",
-              subSection: "Vista de documentos de compañías",
+              subSection: "Catalogo de documentos de socios comerciales",
             },
           },
         ],
