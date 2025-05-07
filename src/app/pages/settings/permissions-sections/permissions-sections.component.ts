@@ -226,7 +226,11 @@ export class PermissionsSectionsComponent implements OnInit {
 
     //Las ven los clientes
     const subSectionsProviderMap: { [key: string]: string[] } = {
-      "Sistema REPSE": [],
+      "Sistema REPSE": [
+        "Carga de documentos de empresa",
+        "Revision de documentos",
+        "Catalogo de documentos",
+      ],
       "Control de proyectos": [""],
       Empleados: [""],
       Incidencias: [""],
@@ -314,15 +318,28 @@ export class PermissionsSectionsComponent implements OnInit {
     const companyId = this.companyService.selectedCompany.id;
     let selectedSubSections: string[] = [];
 
-    if (this.companyService.selectedCompany.Role === "proveedor") {
+    if (this.companyService.selectedCompany.role === "proveedor") {
       selectedSubSections = this.selectedSubSectionsProvider;
-    } else if (this.companyService.selectedCompany.Role === "cliente") {
+    } else if (this.companyService.selectedCompany.role === "cliente") {
       selectedSubSections = this.selectedSubSectionsClient;
     } else {
       selectedSubSections = this.selectedSubSections;
     }
 
-    // Validar si los permisos ya existen
+    selectedSubSections = selectedSubSections.filter(
+      (s) => s && s.trim() !== ""
+    );
+
+    const data = {
+      userId: this.selectedUserId,
+      section: this.selectedSection,
+      subSections: selectedSubSections,
+      companyId: companyId,
+    };
+
+    console.log("📦 Data enviada a API:", data);
+
+    // Validar permisos duplicados
     const existingPermissions = this.checkExistingPermissions(
       this.selectedSection,
       selectedSubSections
@@ -332,21 +349,15 @@ export class PermissionsSectionsComponent implements OnInit {
         `Los siguientes permisos ya existen: ${existingPermissions.join(", ")}`,
         "error"
       );
-      await loading.dismiss(); // Ocultar loading
-      return; // Detener el proceso si hay permisos duplicados
+      await loading.dismiss();
+      return;
     }
-
-    const data = {
-      userId: this.selectedUserId,
-      section: this.selectedSection,
-      subSections: selectedSubSections,
-      companyId: companyId,
-    };
 
     this.http
       .post(`${environment.apiBaseUrl}/addPermission.php`, data)
       .subscribe(
         async (response: any) => {
+          console.log("📥 Respuesta API:", response);
           if (response.success) {
             selectedSubSections.forEach((subSection: string) => {
               this.permissions.push({
