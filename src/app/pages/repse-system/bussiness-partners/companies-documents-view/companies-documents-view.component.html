@@ -8,6 +8,7 @@
           (selectedChange)="onProviderChange()"
           placeholder="Seleccionar proveedor"
           class="mr-3 w-50"
+          [disabled]="providers.length === 0"
         >
           <nb-option *ngFor="let provider of providers" [value]="provider.id">
             {{ provider.name }}
@@ -20,6 +21,7 @@
             placeholder="Buscar documento..."
             [(ngModel)]="searchQuery"
             (ngModelChange)="filterTree()"
+            [disabled]="!selectedProviderId || !treeData.length"
           />
         </nb-form-field>
       </div>
@@ -27,7 +29,38 @@
   </nb-card-header>
 
   <nb-card-body>
-    <div class="table-responsive">
+    <!-- Alerta cuando no hay proveedores cargados -->
+    <div *ngIf="providers.length === 0" class="text-center">
+      <nb-alert status="warning" class="mb-0">
+        No hay documentos cargados en el sistema
+      </nb-alert>
+    </div>
+
+    <!-- Alerta cuando no hay proveedor seleccionado -->
+    <div
+      *ngIf="providers.length > 0 && !selectedProviderId"
+      class="text-center"
+    >
+      <nb-alert status="info" class="mb-0">
+        Selecciona un proveedor para ver documentos
+      </nb-alert>
+    </div>
+
+    <!-- Alerta cuando proveedor seleccionado no tiene documentos -->
+    <div
+      *ngIf="selectedProviderId && treeData.length === 0"
+      class="text-center"
+    >
+      <nb-alert status="info" class="mb-0">
+        Este proveedor no tiene documentos disponibles
+      </nb-alert>
+    </div>
+
+    <!-- Tabla cuando hay proveedor y documentos -->
+    <div
+      *ngIf="selectedProviderId && treeData.length > 0"
+      class="table-responsive"
+    >
       <table [nbTreeGrid]="providerFiles" class="table w-100">
         <tr nbTreeGridHeaderRow *nbTreeGridHeaderRowDef="columns"></tr>
         <tr nbTreeGridRow *nbTreeGridRowDef="let row; columns: columns"></tr>

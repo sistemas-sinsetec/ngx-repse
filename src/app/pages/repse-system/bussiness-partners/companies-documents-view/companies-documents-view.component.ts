@@ -53,8 +53,13 @@ export class CompaniesDocumentsViewComponent implements OnInit {
     const selected = this.providers.find(
       (p) => p.id === this.selectedProviderId
     );
-    this.treeData = this.transformToTree(selected.catalog || []);
-    this.providerFiles = this.dataSourceBuilder.create(this.treeData);
+    if (selected && selected.catalog && selected.catalog.length) {
+      this.treeData = this.transformToTree(selected.catalog);
+      this.providerFiles = this.dataSourceBuilder.create(this.treeData);
+    } else {
+      this.treeData = [];
+      this.providerFiles = this.dataSourceBuilder.create([]);
+    }
   }
 
   transformToTree(data: any): TreeNode<CatalogNode>[] {

@@ -128,7 +128,15 @@
     <hr />
 
     <h4>Requisitos configurados</h4>
-    <div class="table-container flex-grow-1">
+    <!-- ALERTA cuando no hay requisitos configurados -->
+    <div *ngIf="requirements.length === 0" class="text-center">
+      <nb-alert status="info" class="mb-0">
+        No hay requisitos configurados actualmente
+      </nb-alert>
+    </div>
+
+    <!-- TABLA cuando sí hay requisitos -->
+    <div class="table-container flex-grow-1" *ngIf="requirements.length > 0">
       <div class="table-responsive">
         <table class="table" nbTable>
           <thead>

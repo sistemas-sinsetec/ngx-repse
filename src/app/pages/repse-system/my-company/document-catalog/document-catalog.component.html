@@ -1,7 +1,7 @@
 <nb-card>
   <nb-card-header class="d-flex justify-content-between align-items-center">
     <span>Catálogo de documentos de mi empresa</span>
-    <nb-form-field class="w-25">
+    <nb-form-field class="w-25" *ngIf="treeData && treeData.length > 0">
       <nb-icon nbPrefix icon="search" pack="eva"></nb-icon>
       <input
         nbInput
@@ -14,7 +14,7 @@
   </nb-card-header>
 
   <nb-card-body>
-    <div class="table-responsive">
+    <div class="table-responsive" *ngIf="treeData && treeData.length > 0">
       <table [nbTreeGrid]="dataSource" class="table w-100">
         <tr nbTreeGridHeaderRow *nbTreeGridHeaderRowDef="columns"></tr>
         <tr nbTreeGridRow *nbTreeGridRowDef="let row; columns: columns"></tr>
@@ -61,6 +61,12 @@
           </td>
         </ng-container>
       </table>
+    </div>
+
+    <div class="text-center" *ngIf="!treeData || treeData.length === 0">
+      <nb-alert status="info" class="mb-0">
+        No hay documentos en el catálogo
+      </nb-alert>
     </div>
   </nb-card-body>
 </nb-card>
