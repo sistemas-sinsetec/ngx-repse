@@ -54,13 +54,20 @@ export class DocumentCatalogComponent implements OnInit {
       expanded: true,
       children: docType.periodicities.map((periodicity: any) => ({
         data: {
-          name: `${periodicity.count ?? ""} ${periodicity.type ?? ""}`.trim(),
+          name:
+            periodicity.type === "sin periodicidad"
+              ? "Sin periodicidad"
+              : `${periodicity.count ?? ""} ${periodicity.type ?? ""}`.trim(),
+
           type: "periodicity",
         },
         expanded: true,
         children: periodicity.periods.map((period: any) => ({
           data: {
-            name: `${period.start_date} - ${period.end_date}`,
+            name: period.end_date
+              ? `${period.start_date} - ${period.end_date}`
+              : period.start_date,
+
             type: "period",
           },
           expanded: true,

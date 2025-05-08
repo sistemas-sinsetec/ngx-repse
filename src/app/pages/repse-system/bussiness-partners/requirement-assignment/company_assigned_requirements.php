@@ -273,9 +273,9 @@ switch ($method) {
             }
             $rf->close();
 
-            /* 4) Crear primer periodo (si aplica) ----------------------*/
+            /* 4) Crear primer periodo (para no periódicos también) */
+            $inicio = new DateTime($start_date);
             if ($isPeriodic) {
-                $inicio = new DateTime($start_date);
                 $cnt = $periodicity_count;
                 switch (strtolower($periodicity_type)) {
                     case 'días':
@@ -294,21 +294,24 @@ switch ($method) {
                         throw new Exception('Periodicidad no válida');
                 }
                 $fin = (clone $inicio)->add(new DateInterval($interval));
+            } else {
+                $fin = new DateTime('9999-12-31');
+            }
 
-                $p = $mysqli->prepare("
+            $p = $mysqli->prepare("
                 INSERT INTO document_periods
-                      (required_file_id, start_date, end_date, created_at)
+                    (required_file_id, start_date, end_date, created_at)
                 VALUES (?,?,?,NOW())
             ");
-                $p->bind_param(
-                    'iss',
-                    $required_file_id,
-                    $inicio->format('Y-m-d'),
-                    $fin->format('Y-m-d')
-                );
-                $p->execute();
-                $p->close();
-            }
+            $p->bind_param(
+                'iss',
+                $required_file_id,
+                $inicio->format('Y-m-d'),
+                $fin->format('Y-m-d')
+            );
+            $p->execute();
+            $p->close();
+
 
             /* 5) Commit ------------------------------------------------ */
             $mysqli->commit();

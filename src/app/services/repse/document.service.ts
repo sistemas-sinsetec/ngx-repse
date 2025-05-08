@@ -98,7 +98,7 @@ export class DocumentService {
    * is the path returned by the API, relative to the base URL.
    */
   downloadFile(filePath: string): void {
-    const url = `${this.base}/../${filePath}`;
+    const url = `${this.base}/../documents/${filePath}`;
     window.open(url, "_blank");
   }
 

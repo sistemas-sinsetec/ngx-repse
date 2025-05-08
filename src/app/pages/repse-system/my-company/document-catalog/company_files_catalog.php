@@ -42,6 +42,17 @@ while ($row = $result->fetch_assoc()) {
     $format = $row['file_ext'];
     $filePath = $row['file_path'];
 
+    if ($periodEnd === '9999-12-31') {
+        $periodStart = 'sin periodicidad';
+        $periodEnd = '';
+    }
+
+    if (!$periodicity || $periodicity === 'null' || $periodicity === '0') {
+        $periodicity = 'sin periodicidad';
+        $periodicityCount = '';
+    }
+
+
     if (!isset($catalog[$typeId])) {
         $catalog[$typeId] = [
             'name' => $typeName,

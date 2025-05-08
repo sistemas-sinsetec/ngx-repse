@@ -60,7 +60,7 @@
                       <td
                         class="d-none d-md-table-cell text-center align-middle"
                       >
-                        {{ file.deadline | date : "dd/MM/yyyy" }}
+                        {{ getDeadlineLabel(file) }}
                       </td>
                       <td class="align-middle text-center">
                         <nb-tag
@@ -152,28 +152,30 @@
                   <td class="text-center">{{ file.file_ext | uppercase }}</td>
                   <td>{{ file.comment }}</td>
                   <td>
-                    <button
-                      nbButton
-                      size="small"
-                      status="primary"
-                      (click)="downloadDocument(file.file_id)"
-                      class="mr-2"
-                    >
-                      <nb-icon icon="download-outline" class="mr-1"></nb-icon>
-                      Descargar
-                    </button>
-                    <button
-                      nbButton
-                      size="small"
-                      status="success"
-                      (click)="acknowledgeDocument(file.file_id)"
-                    >
-                      <nb-icon
-                        icon="checkmark-circle-2-outline"
-                        class="me-1"
-                      ></nb-icon>
-                      Enterado
-                    </button>
+                    <div class="d-flex justify-content-center">
+                      <button
+                        nbButton
+                        size="small"
+                        status="primary"
+                        (click)="downloadDocument(file.file_id)"
+                        class="mr-2"
+                      >
+                        <nb-icon icon="download-outline" class="mr-1"></nb-icon>
+                        Descargar
+                      </button>
+                      <button
+                        nbButton
+                        size="small"
+                        status="success"
+                        (click)="acknowledgeDocument(file.file_id)"
+                      >
+                        <nb-icon
+                          icon="checkmark-circle-2-outline"
+                          class="me-1"
+                        ></nb-icon>
+                        Enterado
+                      </button>
+                    </div>
                   </td>
                 </tr>
               </tbody>

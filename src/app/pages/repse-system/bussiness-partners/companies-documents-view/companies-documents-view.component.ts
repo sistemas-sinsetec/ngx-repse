@@ -68,13 +68,21 @@ export class CompaniesDocumentsViewComponent implements OnInit {
       expanded: true,
       children: docType.periodicities.map((periodicity: any) => ({
         data: {
-          name: `${periodicity.count ?? ""} ${periodicity.type ?? ""}`.trim(),
+          name:
+            !periodicity.type || periodicity.type === "sin periodicidad"
+              ? "Sin periodicidad"
+              : `${periodicity.count ?? ""} ${periodicity.type ?? ""}`.trim(),
           type: "periodicity",
         },
         expanded: true,
         children: periodicity.periods.map((period: any) => ({
           data: {
-            name: `${period.start_date} - ${period.end_date}`,
+            name:
+              period.start_date === "sin periodicidad" ||
+              period.end_date === "" ||
+              period.end_date === "9999-12-31"
+                ? "Sin periodicidad"
+                : `${period.start_date} - ${period.end_date}`,
             type: "period",
           },
           expanded: true,

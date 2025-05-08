@@ -476,4 +476,11 @@ export class DocumentUploadComponent {
       ? this.requiredFiles.filter((f) => f.status !== "complete").length
       : 0;
   }
+
+  getDeadlineLabel(file: any): string {
+    if (!file.deadline || file.deadline === "9999-12-31") {
+      return "Sin límite";
+    }
+    return moment(file.deadline).format("DD/MM/YYYY");
+  }
 }

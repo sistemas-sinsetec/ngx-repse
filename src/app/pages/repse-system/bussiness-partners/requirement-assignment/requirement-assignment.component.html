@@ -164,7 +164,11 @@
               <td>{{ req.isPeriodic ? "Sí" : "No" }}</td>
               <td>
                 <span *ngIf="req.isPeriodic">
-                  Cada {{ req.periodAmount }} {{ req.periodType }}
+                  {{
+                    !req.isPeriodic || req.periodType === null
+                      ? "Sin periodicidad"
+                      : "Cada " + req.periodAmount + " " + req.periodType
+                  }}
                 </span>
               </td>
               <td>{{ req.status }}</td>

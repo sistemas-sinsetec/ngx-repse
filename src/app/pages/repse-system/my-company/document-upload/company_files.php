@@ -3,12 +3,16 @@ header('Content-Type: application/json');
 require_once 'cors.php';
 require_once 'conexion.php';
 
-if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+// ⚠️ SOLO EN DESARROLLO → quitar en producción
+ini_set('display_errors', 1);
+ini_set('display_startup_errors', 1);
+error_reporting(E_ALL);
 
-    $action = $_POST['action'];
-    $file_id = intval($_POST['file_id']);
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    $action = $_POST['action'] ?? '';
 
     if ($action === 'approve') {
+        $file_id = intval($_POST['file_id']);
         $stmt = $mysqli->prepare("UPDATE company_files SET status = 'approved' WHERE file_id = ?");
         $stmt->bind_param("i", $file_id);
         $stmt->execute();
@@ -18,6 +22,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 
     if ($action === 'reject') {
+        $file_id = intval($_POST['file_id']);
         $comment = $_POST['comment'] ?? '';
         $stmt = $mysqli->prepare("UPDATE company_files SET status = 'rejected', comment = ? WHERE file_id = ?");
         $stmt->bind_param("si", $comment, $file_id);
@@ -28,6 +33,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 
     if ($action === 'acknowledge') {
+        $file_id = intval($_POST['file_id']);
         $stmt = $mysqli->prepare("SELECT file_path FROM company_files WHERE file_id = ?");
         $stmt->bind_param("i", $file_id);
         $stmt->execute();
@@ -36,16 +42,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $stmt->close();
 
         if ($file) {
-            $path = __DIR__ . '/../' . $file['file_path'];
+            $path = __DIR__ . '/../documents/' . $file['file_path'];
             if (file_exists($path)) {
                 unlink($path);
             }
-
             $stmt = $mysqli->prepare("UPDATE company_files SET file_path = '', is_current = 0, status = 'acknowledged' WHERE file_id = ?");
             $stmt->bind_param("i", $file_id);
             $stmt->execute();
             $stmt->close();
-
             echo json_encode(['success' => true]);
         } else {
             echo json_encode(['success' => false, 'error' => 'File not found']);
@@ -68,27 +72,77 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         exit;
     }
 
-    $stmt = $mysqli->prepare("SELECT company_id FROM company_required_files WHERE required_file_id = ?");
+    // Get company info and required file type name
+    $stmt = $mysqli->prepare("
+    SELECT c.id AS company_id, c.nameCompany AS company_name, ft.name AS required_file_name
+    FROM company_required_files crf
+    JOIN companies c ON crf.company_id = c.id
+    JOIN file_types ft ON crf.file_type_id = ft.file_type_id
+    WHERE crf.required_file_id = ?
+");
+
+    if (!$stmt) {
+        echo json_encode(['success' => false, 'error' => 'Prepare failed (company query): ' . $mysqli->error]);
+        exit;
+    }
+
     $stmt->bind_param("i", $required_file_id);
-    $stmt->execute();
+
+    if (!$stmt->execute()) {
+        echo json_encode(['success' => false, 'error' => 'Execute failed (company query): ' . $stmt->error]);
+        $stmt->close();
+        exit;
+    }
+
     $result = $stmt->get_result();
     $company = $result->fetch_assoc();
     $stmt->close();
 
     if (!$company) {
-        echo json_encode(['success' => false, 'error' => 'Invalid required_file_id']);
+        echo json_encode(['success' => false, 'error' => 'Invalid required_file_id or company not found']);
         exit;
     }
 
     $company_id = $company['company_id'];
+    $company_name = $company['company_name'] ?: 'UnknownCompany';
+    $required_file_name = $company['required_file_name'] ?: 'UnknownFile';
+    $company_name = preg_replace('/[^a-zA-Z0-9_-]/', '', str_replace(' ', '_', $company_name));
+    $required_file_name = preg_replace('/[^a-zA-Z0-9_-]/', '', str_replace(' ', '_', $required_file_name));
 
-    $base_dir = __DIR__ . "/../documents/$company_id/$required_file_id/$period_id/$format_code";
-    if (!file_exists($base_dir)) {
-        mkdir($base_dir, 0777, true);
+    // Get period info
+    $period_range = 'sin_periodicidad';
+    if ($period_id) {
+        $stmt = $mysqli->prepare("SELECT start_date, end_date FROM document_periods WHERE period_id = ?");
+        $stmt->bind_param("i", $period_id);
+        $stmt->execute();
+        $period = $stmt->get_result()->fetch_assoc();
+        $stmt->close();
+        if ($period) {
+            if ($period['end_date'] === '9999-12-31') {
+                $period_range = 'sin_periodicidad';
+            } else {
+                $period_range = $period['start_date'] . '_' . $period['end_date'];
+            }
+        }
     }
 
-    $file_ext = pathinfo($file['name'], PATHINFO_EXTENSION);
-    $file_name = uniqid() . "." . $file_ext;
+    $company_dir = "{$company_id}-{$company_name}";
+    $required_file_dir = "{$required_file_id}-{$required_file_name}";
+    $period_dir = $period_range;
+    $format_dir = $format_code;
+
+    $base_dir = __DIR__ . "/../documents/$company_dir/$required_file_dir/$period_dir/$format_dir";
+    if (!file_exists($base_dir)) {
+        if (!mkdir($base_dir, 0777, true)) {
+            echo json_encode(['success' => false, 'error' => 'Failed to create directory']);
+            exit;
+        }
+    }
+
+    // Build new file name
+    $file_ext = pathinfo($file['name'], PATHINFO_EXTENSION) ?: 'unknown';
+    $timestamp = date('Ymd\THis');
+    $file_name = "{$company_id}_{$required_file_id}_{$period_id}_{$timestamp}.{$file_ext}";
     $file_path = "$base_dir/$file_name";
 
     if (!move_uploaded_file($file['tmp_name'], $file_path)) {
@@ -96,15 +150,28 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         exit;
     }
 
-    $relative_path = "documents/$company_id/$required_file_id/$period_id/$format_code/$file_name";
-    $user_id = 1; // Sustituye por el usuario real (ej. $_SESSION['user_id'])
+    $relative_path = "$company_dir/$required_file_dir/$period_dir/$format_dir/$file_name";
+    $user_id = 1; // Replace with actual user ID if available
 
-    $stmt = $mysqli->prepare("
-        INSERT INTO company_files (file_path, issue_date, user_id, status, is_current, period_id)
-        VALUES (?, CURDATE(), ?, 'pending', 1, ?)
-    ");
+    $query = "
+    INSERT INTO company_files (file_path, issue_date, user_id, status, is_current, period_id)
+    VALUES (?, CURDATE(), ?, 'pending', 1, ?)
+";
+    $stmt = $mysqli->prepare($query);
+
+    if (!$stmt) {
+        echo json_encode(['success' => false, 'error' => 'Prepare failed: ' . $mysqli->error, 'query' => $query]);
+        exit;
+    }
+
     $stmt->bind_param("sii", $relative_path, $user_id, $period_id);
-    $stmt->execute();
+
+    if (!$stmt->execute()) {
+        echo json_encode(['success' => false, 'error' => 'Database insert failed: ' . $stmt->error]);
+        $stmt->close();
+        exit;
+    }
+
     $stmt->close();
 
     echo json_encode(['success' => true]);
