@@ -181,23 +181,24 @@ export class RequirementAssignmentComponent implements OnInit {
     const formValue = this.requirementsForm.value;
 
     // Asegúrate que los valores numéricos sean números
-    const payload = {
+    const payload: any = {
       company_id: Number(formValue.provider),
       assigned_by: Number(this.companyService.selectedCompany.id),
       file_type_id: Number(formValue.documentType),
       is_periodic: Boolean(formValue.isPeriodic),
-      periodicity_type: formValue.isPeriodic ? formValue.periodType : null,
-      periodicity_count: formValue.isPeriodic
-        ? Number(formValue.periodAmount)
-        : null,
       file_formats: this.fileFormats
         .filter((f) => f.selected)
         .map((f) => ({
           format_code: f.extension,
           min_quantity: Number(f.minQuantity),
         })),
-      start_date: formValue.startDate || null,
+      start_date: formValue.startDate || moment().format("YYYY-MM-DD"),
     };
+
+    if (formValue.isPeriodic) {
+      payload.periodicity_type = formValue.periodType;
+      payload.periodicity_count = Number(formValue.periodAmount);
+    }
 
     // Verifica que los formatos estén seleccionados
     if (payload.file_formats.length === 0) {
