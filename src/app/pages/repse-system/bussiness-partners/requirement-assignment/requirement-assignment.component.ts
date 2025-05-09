@@ -325,4 +325,26 @@ export class RequirementAssignmentComponent implements OnInit {
       format.minQuantity = 1;
     });
   }
+
+  getStatusColor(status: string): string {
+    return (
+      {
+        complete: "success",
+        partial: "warning",
+        pending: "info",
+        overdue: "danger",
+      }[status] || "basic"
+    );
+  }
+
+  getStatusLabel(status: string): string {
+    return (
+      {
+        complete: "Completo",
+        partial: "Parcial",
+        pending: "Pendiente",
+        overdue: "Atrasado",
+      }[status] || status
+    );
+  }
 }

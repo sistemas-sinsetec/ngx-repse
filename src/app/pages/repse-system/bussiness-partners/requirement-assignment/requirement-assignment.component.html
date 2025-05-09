@@ -148,7 +148,7 @@
       <h4>Requisitos asignados a proveedores</h4>
       <div class="table-responsive">
         <table class="table" nbTable>
-          <thead>
+          <thead class="text-center">
             <tr>
               <th>Proveedor</th>
               <th>Documento</th>
@@ -159,11 +159,13 @@
           </thead>
           <tbody>
             <tr *ngFor="let req of requirements">
-              <td>{{ req.company_name }}</td>
-              <td>{{ req.documentType }}</td>
-              <td>{{ req.isPeriodic ? "Sí" : "No" }}</td>
-              <td>
-                <span *ngIf="req.isPeriodic">
+              <td class="align-middle">{{ req.company_name }}</td>
+              <td class="align-middle">{{ req.documentType }}</td>
+              <td class="text-center align-middle">
+                {{ req.isPeriodic ? "Sí" : "No" }}
+              </td>
+              <td class="text-center align-middle">
+                <span>
                   {{
                     !req.isPeriodic || req.periodType === null
                       ? "Sin periodicidad"
@@ -171,7 +173,13 @@
                   }}
                 </span>
               </td>
-              <td>{{ req.status }}</td>
+              <td class="text-center">
+                <nb-tag
+                  appearance="outline"
+                  [status]="getStatusColor(req.status)"
+                  [text]="getStatusLabel(req.status)"
+                ></nb-tag>
+              </td>
             </tr>
           </tbody>
         </table>

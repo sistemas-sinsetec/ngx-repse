@@ -152,18 +152,18 @@
           </thead>
           <tbody>
             <tr *ngFor="let req of requirements">
-              <td>{{ req.documentType }}</td>
-              <td>
+              <td class="align-middle">{{ req.documentType }}</td>
+              <td class="align-middle">
                 {{ req.isActive ? "Sí" : "No" }}
               </td>
-              <td>{{ req.isPeriodic ? "Sí" : "No" }}</td>
-              <td>
+              <td class="align-middle">{{ req.isPeriodic ? "Sí" : "No" }}</td>
+              <td class="align-middle">
                 <span *ngIf="req.isPeriodic">
                   Cada {{ req.periodAmount }} {{ req.periodType }}
                 </span>
               </td>
-              <td>{{ req.minQuantity }}</td>
-              <td>{{ req.partnerCount }} socios</td>
+              <td class="align-middle">{{ req.minQuantity }}</td>
+              <td class="align-middle">{{ req.partnerCount }} socios</td>
               <td>
                 <button nbButton size="small" (click)="openPartnerModal(req)">
                   Gestionar Socios
