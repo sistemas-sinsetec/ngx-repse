@@ -108,7 +108,25 @@ switch ($method) {
         $pers = $persStmt->get_result()->fetch_all(MYSQLI_ASSOC);
         $persStmt->close();
 
-        // 4) armar estructura
+        // 4) conteos por formato
+        $sqlFmtCounts = "
+            SELECT dp.required_file_id, cf.file_ext AS format_code, COUNT(*) AS uploaded_count
+            FROM company_files cf
+            JOIN document_periods dp ON dp.period_id = cf.period_id
+            WHERE dp.required_file_id IN ($placeholders)
+            AND cf.status = 'approved'
+            GROUP BY dp.required_file_id, cf.file_ext
+        ";
+
+        $fmtCountsStmt = $mysqli->prepare($sqlFmtCounts)
+            or respond(500, ['error' => $mysqli->error]);
+        $fmtCountsStmt->bind_param(...refValues(array_merge([$types], $ids)));
+        $fmtCountsStmt->execute();
+        $fmtCounts = $fmtCountsStmt->get_result()->fetch_all(MYSQLI_ASSOC);
+        $fmtCountsStmt->close();
+
+
+        // 5) armar estructura
         $today = new DateTimeImmutable('today');
         $out = [];
 
@@ -123,17 +141,29 @@ switch ($method) {
             ];
         }
 
-        // 4-a formatos y sumatoria
+        // 5a) formatos y sumatoria
         foreach ($fmts as $f) {
             $doc = &$out[$f['required_file_id']];
             $doc['formats'][] = [
                 'code' => $f['code'],
                 'min_required' => (int) $f['min_required'],
+                'uploaded_count' => 0,  // ← nuevo campo
             ];
             $doc['min_documents_needed'] += (int) $f['min_required'];
         }
 
-        // 4-b periodos, deadline y periodo actual
+        // 5b) aplicar conteos por formato
+        foreach ($fmtCounts as $fc) {
+            $doc = &$out[$fc['required_file_id']];
+            foreach ($doc['formats'] as &$fmt) {
+                if ($fmt['code'] === $fc['format_code']) {
+                    $fmt['uploaded_count'] = (int) $fc['uploaded_count'];
+                    break;
+                }
+            }
+        }
+
+        // 5c periodos, deadline y periodo actual
         foreach ($pers as $p) {
             $doc = &$out[$p['required_file_id']];
             $period = [
@@ -153,7 +183,7 @@ switch ($method) {
             }
         }
 
-        // 4-c calcular estado
+        // 5d calcular estado general
         foreach ($out as &$doc) {
             $minPer = max($doc['min_documents_needed'], 1);
             $done = array_reduce(
@@ -204,17 +234,16 @@ switch ($method) {
             respond(400, ['error' => 'file_formats must be a non-empty array']);
         }
         foreach ($fileFormats as $idx => $ff) {
-            if (!isset($ff['format_code'], $ff['min_quantity'])) {
-                respond(400, [
-                    'error' =>
-                        "file_formats[$idx] needs format_code and min_quantity"
-                ]);
+            if (!isset($ff['format_code'], $ff['min_quantity'], $ff['expiry_visible'])) {
+                respond(400, ['error' => "file_formats[$idx] needs format_code, min_quantity, expiry_visible"]);
             }
             if ($ff['min_quantity'] < 1) {
-                respond(400, [
-                    'error' =>
-                        "file_formats[$idx].min_quantity must be ≥ 1"
-                ]);
+                respond(400, ['error' => "file_formats[$idx].min_quantity must be ≥ 1"]);
+            }
+            if (!$ff['expiry_visible']) {
+                if (!isset($ff['expiry_value'], $ff['expiry_unit'])) {
+                    respond(400, ['error' => "file_formats[$idx] missing expiry_value and expiry_unit when expiry_visible is false"]);
+                }
             }
         }
 
@@ -292,14 +321,18 @@ switch ($method) {
 
             /* 3) Detalle de formatos ----------------------------------- */
             $rf = $mysqli->prepare("
-            INSERT INTO required_file_formats
-                  (required_file_id, format_code, min_required)
-            VALUES (?,?,?)
-        ");
+                INSERT INTO required_file_formats
+                    (required_file_id, format_code, min_required, manual_expiry_visible, manual_expiry_value, manual_expiry_unit)
+                VALUES (?,?,?,?,?,?)
+            ");
             foreach ($fileFormats as $ff) {
                 $fmt = strtolower($ff['format_code']);
                 $min = (int) $ff['min_quantity'];
-                $rf->bind_param('isi', $required_file_id, $fmt, $min);
+                $expiryVisible = $ff['expiry_visible'] ? 1 : 0;
+                $expiryValue = $ff['expiry_value'] ?? null;
+                $expiryUnit = $ff['expiry_unit'] ?? null;
+
+                $rf->bind_param('isiiis', $required_file_id, $fmt, $min, $expiryVisible, $expiryValue, $expiryUnit);
                 $rf->execute();
             }
             $rf->close();
@@ -325,21 +358,25 @@ switch ($method) {
                         throw new Exception('Periodicidad no válida');
                 }
                 $fin = (clone $inicio)->add(new DateInterval($interval));
-
-                $p = $mysqli->prepare("
-                INSERT INTO document_periods
-                      (required_file_id, start_date, end_date, created_at)
-                VALUES (?,?,?,NOW())
-            ");
-                $p->bind_param(
-                    'iss',
-                    $required_file_id,
-                    $inicio->format('Y-m-d'),
-                    $fin->format('Y-m-d')
-                );
-                $p->execute();
-                $p->close();
+            } else {
+                $inicio = new DateTime($start_date);
+                $fin = new DateTime('9999-12-31');
             }
+
+            $p = $mysqli->prepare("
+            INSERT INTO document_periods
+                  (required_file_id, start_date, end_date, created_at)
+            VALUES (?,?,?,NOW())
+            ");
+            $p->bind_param(
+                'iss',
+                $required_file_id,
+                $inicio->format('Y-m-d'),
+                $fin->format('Y-m-d')
+            );
+            $p->execute();
+            $p->close();
+
 
             /* 5) Commit ------------------------------------------------ */
             $mysqli->commit();

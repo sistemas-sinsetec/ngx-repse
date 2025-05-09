@@ -35,7 +35,11 @@ interface FileFormat {
   extension: string;
   selected: boolean;
   minQuantity: number;
+  expiryVisible: boolean;
+  expiryValue?: number | null;
+  expiryUnit?: string | null;
 }
+
 interface Partner {
   id: number;
   name: string;
@@ -72,6 +76,7 @@ export class RequirementsAssignmentComponent implements OnInit {
   affiliationFilter = new FormControl("todos");
   allSelected = false;
   private dialogRef!: NbDialogRef<any>;
+  expiryUnits = ["días", "semanas", "meses", "años"];
 
   constructor(
     private fb: FormBuilder,
@@ -127,17 +132,17 @@ export class RequirementsAssignmentComponent implements OnInit {
     // this.loadFileFormats();
   }
 
+  availableFormats: { id: number; name: string; extension: string }[] = [];
+
   private loadFileFormats(): void {
     this.http
       .get<{ code: string; name: string; mime: string }[]>(this.fileFormatsUrl)
       .subscribe({
         next: (list) => {
-          this.fileFormats = list.map((f, i) => ({
-            id: i + 1, // o cualquier otra lógica
+          this.availableFormats = list.map((f, i) => ({
+            id: i + 1,
             name: f.name,
             extension: f.code,
-            selected: false,
-            minQuantity: 1,
           }));
         },
         error: (err) => console.error("Error cargando formatos", err),
@@ -187,6 +192,7 @@ export class RequirementsAssignmentComponent implements OnInit {
           minQuantity: cfg.min_documents_needed,
           partners: [], // aquí pones lo que necesites
           partnerCount: cfg.partner_count,
+          formats: cfg.formats,
         }));
       },
       error: (err) => console.error("Error cargando requisitos", err),
@@ -196,18 +202,39 @@ export class RequirementsAssignmentComponent implements OnInit {
   onSubmit(): void {
     if (this.requirementsForm.invalid) return;
 
+    if (this.fileFormats.length === 0) {
+      console.error("Debe agregar al menos un formato.");
+      return;
+    }
+
+    for (const f of this.fileFormats) {
+      if (!f.expiryVisible && (!f.expiryValue || !f.expiryUnit)) {
+        console.error(
+          `Formato ${f.name} requiere cantidad y unidad de vigencia.`
+        );
+        return;
+      }
+    }
+
     const f = this.requirementsForm.value;
     const companyId = this.companyService.selectedCompany.id;
     const assigned_by = this.companyService.selectedCompany.id;
     const startDate = f.startDate || "";
 
     // Obtener formatos seleccionados
-    const selectedFormats = this.fileFormats
-      .filter((f) => f.selected)
-      .map((f) => ({
-        format_code: f.extension, // «pdf», «xml», …
-        min_quantity: f.minQuantity, // el mínimo para este formato
-      }));
+    const selectedFormats = this.fileFormats.map((f) => {
+      const found = this.availableFormats.find(
+        (af) => af.extension === f.extension
+      );
+      return {
+        format_code: f.extension,
+        min_quantity: f.minQuantity,
+        expiry_visible: f.expiryVisible,
+        expiry_value: f.expiryValue,
+        expiry_unit: f.expiryUnit,
+        name: found ? found.name : "",
+      };
+    });
 
     const payload = {
       company_id: companyId,
@@ -443,5 +470,36 @@ export class RequirementsAssignmentComponent implements OnInit {
 
   closeModal(): void {
     this.dialogRef.close();
+  }
+
+  addFormat(): void {
+    if (this.fileFormats.length >= this.availableFormats.length) {
+      return;
+    }
+
+    this.fileFormats.push({
+      id: Date.now(),
+      name: "",
+      extension: "",
+      selected: true,
+      minQuantity: 1,
+      expiryVisible: true,
+      expiryValue: null,
+      expiryUnit: null,
+    });
+  }
+
+  removeFormat(index: number): void {
+    this.fileFormats.splice(index, 1);
+  }
+
+  getAvailableOptions(currentIndex: number) {
+    const selectedExtensions = this.fileFormats
+      .filter((_, idx) => idx !== currentIndex)
+      .map((f) => f.extension);
+
+    return this.availableFormats.filter(
+      (opt) => !selectedExtensions.includes(opt.extension)
+    );
   }
 }

@@ -27,7 +27,11 @@ interface FileFormat {
   extension: string;
   selected: boolean;
   minQuantity: number;
+  expiryVisible: boolean;
+  expiryValue?: number | null;
+  expiryUnit?: string | null;
 }
+
 interface Partner {
   id: number;
   name: string;
@@ -46,6 +50,7 @@ export class RequirementAssignmentComponent implements OnInit {
   minDate: moment.Moment;
   fileFormats: FileFormat[] = [];
   businessPartners: Partner[] = [];
+  expiryUnits = ["días", "semanas", "meses", "años"];
 
   documentTypes: { id: number; name: string }[] = [];
   periodTypes = ["semanas", "meses", "años"];
@@ -105,6 +110,7 @@ export class RequirementAssignmentComponent implements OnInit {
     this.loadAssignedRequirements();
     this.loadFileFormats();
     this.loadBusinessPartners();
+    this.fileFormats = [];
   }
 
   private loadFileFormats(): void {
@@ -113,11 +119,14 @@ export class RequirementAssignmentComponent implements OnInit {
       .subscribe({
         next: (list) => {
           this.fileFormats = list.map((f, i) => ({
-            id: i + 1, // o cualquier otra lógica
+            id: i + 1,
             name: f.name,
             extension: f.code,
             selected: false,
             minQuantity: 1,
+            expiryVisible: true,
+            expiryValue: null,
+            expiryUnit: null,
           }));
         },
         error: (err) => console.error("Error cargando formatos", err),
@@ -180,7 +189,6 @@ export class RequirementAssignmentComponent implements OnInit {
 
     const formValue = this.requirementsForm.value;
 
-    // Asegúrate que los valores numéricos sean números
     const payload: any = {
       company_id: Number(formValue.provider),
       assigned_by: Number(this.companyService.selectedCompany.id),
@@ -191,6 +199,9 @@ export class RequirementAssignmentComponent implements OnInit {
         .map((f) => ({
           format_code: f.extension,
           min_quantity: Number(f.minQuantity),
+          expiry_visible: f.expiryVisible,
+          expiry_value: f.expiryVisible ? null : f.expiryValue,
+          expiry_unit: f.expiryVisible ? null : f.expiryUnit,
         })),
       start_date: formValue.startDate || moment().format("YYYY-MM-DD"),
     };
@@ -200,22 +211,17 @@ export class RequirementAssignmentComponent implements OnInit {
       payload.periodicity_count = Number(formValue.periodAmount);
     }
 
-    // Verifica que los formatos estén seleccionados
     if (payload.file_formats.length === 0) {
       console.error("Debe seleccionar al menos un formato de archivo");
       return;
     }
 
     this.http.post(this.assignedRequirementsUrl, payload).subscribe({
-      next: (response: any) => {
-        // Actualizar la lista después de guardar
+      next: () => {
         this.loadAssignedRequirements();
         this.resetForm();
       },
-      error: (err) => {
-        console.error("Error guardando configuración:", err);
-        // Mostrar mensaje de error al usuario
-      },
+      error: (err) => console.error("Error guardando configuración:", err),
     });
   }
 
@@ -323,6 +329,9 @@ export class RequirementAssignmentComponent implements OnInit {
     this.fileFormats.forEach((format) => {
       format.selected = false;
       format.minQuantity = 1;
+      format.expiryVisible = true;
+      format.expiryValue = null;
+      format.expiryUnit = null;
     });
   }
 
@@ -346,5 +355,22 @@ export class RequirementAssignmentComponent implements OnInit {
         overdue: "Atrasado",
       }[status] || status
     );
+  }
+
+  addFormat(): void {
+    this.fileFormats.push({
+      id: Date.now(),
+      name: "",
+      extension: "",
+      minQuantity: 1,
+      selected: true,
+      expiryVisible: true,
+      expiryValue: null,
+      expiryUnit: null,
+    });
+  }
+
+  removeFormat(index: number): void {
+    this.fileFormats.splice(index, 1);
   }
 }

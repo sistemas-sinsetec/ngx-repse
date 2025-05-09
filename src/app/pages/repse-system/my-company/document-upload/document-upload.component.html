@@ -484,7 +484,10 @@
                 size="small"
                 status="primary"
                 (click)="triggerFileInput(format.code)"
-                [disabled]="isUploading"
+                [disabled]="
+                  isUploading ||
+                  isFormatComplete(selectedDocumentForUpload, format.code)
+                "
                 [nbSpinner]="isUploading"
               >
                 <!-- Si no está cargando -->

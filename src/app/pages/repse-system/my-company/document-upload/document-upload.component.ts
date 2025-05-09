@@ -83,7 +83,10 @@ export class DocumentUploadComponent {
     const companyId = this.companyService.selectedCompany.id;
     this.documentService.getRequiredFiles(companyId).subscribe({
       next: (files) => {
-        this.requiredFiles = files;
+        this.requiredFiles = files.map((file: any) => ({
+          ...file,
+          formats: file.formats || [],
+        }));
         this.loading = false;
       },
       error: (err) => {
@@ -142,9 +145,8 @@ export class DocumentUploadComponent {
 
   // ── File selection & upload (both tabs) ────────────────────
   getUploadedCount(file: any, formatCode: string): number {
-    const period = file.current_period;
-    if (!period || !period.files) return 0;
-    return period.files.filter((f: any) => f.format_code === formatCode).length;
+    const format = file.formats.find((f: any) => f.code === formatCode);
+    return format ? format.uploaded_count : 0;
   }
 
   triggerFileInput(formatCode: string): void {
@@ -482,5 +484,10 @@ export class DocumentUploadComponent {
       return "Sin límite";
     }
     return moment(file.deadline).format("DD/MM/YYYY");
+  }
+
+  isFormatComplete(file: any, formatCode: string): boolean {
+    const format = file.formats.find((f: any) => f.code === formatCode);
+    return format ? format.uploaded_count >= format.min_required : false;
   }
 }
