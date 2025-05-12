@@ -281,6 +281,8 @@ export class RequirementsAssignmentComponent implements OnInit {
             format.selected = false;
             format.minQuantity = 1;
           });
+
+          this.loadRequirements();
         },
         error: (err) => console.error("Error guardando configuración", err),
       });
