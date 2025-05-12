@@ -266,7 +266,10 @@ switch ($method) {
         $company_id = (int) $data['company_id'];
         $assigned_by = (int) $data['assigned_by'];
         $file_type_id = (int) $data['file_type_id'];
-        $start_date = $data['start_date'];                       // YYYY-MM-DD
+        if (!isset($data['start_date']) || !$data['start_date']) {
+            respond(400, ['error' => 'start_date is required and cannot be empty']);
+        }
+        $start_date = $data['start_date'];
         $end_date = $data['end_date'] ?? null;
         $periodicity_type = $isPeriodic ? $data['periodicity_type'] : null;
         $periodicity_count = $isPeriodic ? (int) $data['periodicity_count'] : null;

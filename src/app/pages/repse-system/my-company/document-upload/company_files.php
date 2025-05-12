@@ -3,11 +3,6 @@ header('Content-Type: application/json');
 require_once 'cors.php';
 require_once 'conexion.php';
 
-// ⚠️ SOLO EN DESARROLLO → quitar en producción
-ini_set('display_errors', 1);
-ini_set('display_startup_errors', 1);
-error_reporting(E_ALL);
-
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $action = $_POST['action'] ?? '';
 
@@ -155,6 +150,21 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     $issue_date = $_POST['issue_date'] ?? null;
     $expiry_date = $_POST['expiry_date'] ?? null;
+
+    // Validar que tengan formato YYYY-MM-DD
+    $validDateFormat = function ($date) {
+        return preg_match('/^\d{4}-\d{2}-\d{2}$/', $date);
+    };
+
+    if (!$issue_date || !$validDateFormat($issue_date)) {
+        echo json_encode(['success' => false, 'error' => 'Fecha de expedición inválida o faltante']);
+        exit;
+    }
+
+    if (!$expiry_date || !$validDateFormat($expiry_date)) {
+        echo json_encode(['success' => false, 'error' => 'Fecha de vigencia inválida o faltante']);
+        exit;
+    }
 
     $query = "
     INSERT INTO company_files (file_path, issue_date, expiry_date, user_id, status, is_current, period_id)

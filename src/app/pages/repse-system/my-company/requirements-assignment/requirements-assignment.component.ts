@@ -111,7 +111,7 @@ export class RequirementsAssignmentComponent implements OnInit {
           this.requirementsForm.patchValue({
             periodAmount: null,
             periodType: "semanas",
-            startDate: null,
+            startDate: moment().format("YYYY-MM-DD"),
           });
         }
 
@@ -216,7 +216,9 @@ export class RequirementsAssignmentComponent implements OnInit {
     const f = this.requirementsForm.value;
     const companyId = this.companyService.selectedCompany.id;
     const assigned_by = this.companyService.selectedCompany.id;
-    const startDate = f.startDate || "";
+    const startDate = f.startDate
+      ? moment(f.startDate).format("YYYY-MM-DD")
+      : moment().format("YYYY-MM-DD"); // <-- hoy si no hay fecha manual
 
     // Obtener formatos seleccionados
     const selectedFormats = this.fileFormats.map((f) => {
