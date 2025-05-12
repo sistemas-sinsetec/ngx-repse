@@ -97,29 +97,41 @@
             <div class="file-formats-container">
               <div
                 *ngFor="let format of fileFormats; let i = index"
-                class="file-format-item mb-2 border p-2 rounded"
+                class="mb-3 border p-3 rounded"
               >
+                <!-- Selección de formato -->
                 <div
-                  class="d-flex align-items-center justify-content-between mb-2"
+                  class="d-flex justify-content-between align-items-center mb-3"
                 >
-                  <span
-                    ><strong
-                      >{{ format.name }} (.{{ format.extension }})</strong
-                    ></span
-                  >
+                  <div class="d-flex align-items-center">
+                    <nb-select
+                      [(ngModel)]="format.extension"
+                      [ngModelOptions]="{ standalone: true }"
+                      placeholder="Seleccionar formato"
+                    >
+                      <nb-option
+                        *ngFor="let opt of getAvailableOptions(i)"
+                        [value]="opt.extension"
+                      >
+                        {{ opt.name }} ({{ opt.extension }})
+                      </nb-option>
+                    </nb-select>
+                  </div>
                   <button
                     nbButton
-                    size="tiny"
                     status="danger"
+                    size="small"
                     (click)="removeFormat(i)"
                   >
-                    Eliminar
+                    <nb-icon icon="close-outline" pack="eva"></nb-icon>
                   </button>
                 </div>
+
+                <!-- Campos de configuración -->
                 <div class="row">
-                  <div class="col-4">
+                  <div class="col-md-4 mb-4">
                     <nb-form-field>
-                      <label>Cantidad mínima</label>
+                      <label>Mínimo requerido</label>
                       <input
                         nbInput
                         type="number"
@@ -129,7 +141,8 @@
                       />
                     </nb-form-field>
                   </div>
-                  <div class="col-4">
+
+                  <div class="col-md-12 mb-2">
                     <nb-checkbox
                       [(ngModel)]="format.expiryVisible"
                       [ngModelOptions]="{ standalone: true }"
@@ -137,42 +150,50 @@
                       Fecha de vigencia visible en documento
                     </nb-checkbox>
                   </div>
-                </div>
-                <div class="row" *ngIf="!format.expiryVisible">
-                  <div class="col-4">
-                    <nb-form-field>
-                      <label>Cantidad</label>
+
+                  <div class="col-md-12 mb-2" *ngIf="!format.expiryVisible">
+                    <label class="text-muted small">
+                      Si el documento no muestra su vigencia, se calculará desde
+                      su fecha de expedición usando los siguientes valores:
+                    </label>
+                    <div class="d-flex">
                       <input
                         nbInput
                         type="number"
                         min="1"
                         [(ngModel)]="format.expiryValue"
                         [ngModelOptions]="{ standalone: true }"
+                        placeholder="Cantidad"
+                        class="mr-2"
                       />
-                    </nb-form-field>
-                  </div>
-                  <div class="col-4">
-                    <nb-form-field>
-                      <label>Unidad</label>
                       <nb-select
                         [(ngModel)]="format.expiryUnit"
                         [ngModelOptions]="{ standalone: true }"
+                        placeholder="Unidad"
                       >
                         <nb-option
                           *ngFor="let unit of expiryUnits"
                           [value]="unit"
-                          >{{ unit }}</nb-option
                         >
+                          {{ unit }}
+                        </nb-option>
                       </nb-select>
-                    </nb-form-field>
+                    </div>
                   </div>
                 </div>
               </div>
-            </div>
 
-            <button nbButton status="info" size="small" (click)="addFormat()">
-              Agregar Formato
-            </button>
+              <button
+                nbButton
+                type="button"
+                status="info"
+                size="small"
+                (click)="addFormat()"
+                [disabled]="fileFormats.length >= availableFormats.length"
+              >
+                + Agregar formato
+              </button>
+            </div>
           </div>
         </div>
 

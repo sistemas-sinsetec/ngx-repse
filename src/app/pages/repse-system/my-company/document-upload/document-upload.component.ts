@@ -6,7 +6,10 @@ import {
   NbTreeGridDataSourceBuilder,
   NbTreeGridDataSource,
 } from "@nebular/theme";
-import { DocumentService } from "../../../../services/repse/document.service";
+import {
+  DocumentService,
+  ParsedDocumentDates,
+} from "../../../../services/repse/document.service";
 import * as moment from "moment";
 import { CompanyService } from "../../../../services/company.service";
 
@@ -43,6 +46,9 @@ export class DocumentUploadComponent {
   loading = true;
 
   isUploading = false;
+
+  private tempIssueDate: Date | null = null;
+  private tempExpiryDate: Date | null = null;
 
   // Regular-tab upload
   selectedDocumentForUpload: any = null;
@@ -155,11 +161,77 @@ export class DocumentUploadComponent {
     this.fileInput.nativeElement.click();
   }
 
-  onFileSelected(event: any): void {
+  async onFileSelected(event: any): Promise<void> {
     const f = event.target.files?.[0] as File;
     this.selectedFile = f || null;
     event.target.value = "";
-    if (this.activeTab === "Regular" && this.selectedFile) {
+
+    if (!this.selectedFile || !this.selectedFormat) return;
+
+    const fileType = this.selectedDocumentForUpload?.name?.toLowerCase() || "";
+    const format = this.selectedFormat.toLowerCase();
+
+    if (fileType.includes("repse") && format === "pdf") {
+      const formatMeta = this.selectedDocumentForUpload.formats.find(
+        (f) => f.code === this.selectedFormat
+      );
+
+      console.log("→ Format meta:", formatMeta);
+      console.log("→ manual_expiry_value:", formatMeta?.manual_expiry_value);
+      console.log("→ manual_expiry_unit:", formatMeta?.manual_expiry_unit);
+
+      const expiryOffset = {
+        value: formatMeta?.manual_expiry_value,
+        unit: formatMeta?.manual_expiry_unit,
+      };
+
+      if (!formatMeta?.manual_expiry_value || !formatMeta?.manual_expiry_unit) {
+        this.toastrService.warning(
+          `El formato "${this.selectedFormat}" no tiene configurada una vigencia (manual_expiry_value / manual_expiry_unit).`,
+          "Configuración faltante"
+        );
+        return;
+      }
+
+      const issueAndExpiry = await this.documentService.extractRepseDates(
+        this.selectedFile,
+        expiryOffset
+      );
+
+      this.tempIssueDate = issueAndExpiry.issueDate || null;
+      this.tempExpiryDate = issueAndExpiry.expiryDate || null;
+
+      const result = await this.documentService.validateRepsePdf(
+        this.selectedFile,
+        expiryOffset,
+        this.selectedDocumentForUpload?.current_period
+      );
+
+      if (!result.valid) {
+        this.toastrService.warning(
+          result.message || "Archivo no válido",
+          "Advertencia"
+        );
+        return;
+      }
+
+      if (result.warning) {
+        this.toastrService.info(result.warning, "Atención");
+      }
+
+      const currentPeriod = this.selectedDocumentForUpload.current_period;
+      const periodEnd = new Date(currentPeriod?.end_date);
+
+      if (issueAndExpiry.expiryDate && issueAndExpiry.expiryDate < periodEnd) {
+        this.toastrService.warning(
+          "El documento expirará antes de que termine el período actual",
+          "Archivo no válido"
+        );
+        return;
+      }
+    }
+
+    if (this.activeTab === "Regular") {
       this.uploadDocument();
     }
   }
@@ -187,33 +259,67 @@ export class DocumentUploadComponent {
     return !!this.selectedDocumentForUpload;
   }
 
-  uploadDocument(): void {
-    if (!this.canUpload()) {
+  async uploadDocument(): Promise<void> {
+    if (!this.canUpload() || !this.selectedFile) {
       this.toastrService.warning(
         "Complete todos los campos requeridos",
         "Advertencia"
       );
       return;
     }
-    this.isUploading = true;
 
+    const file = this.selectedFile;
+    const fileName = file.name.toLowerCase();
+    const fileExt = fileName.split(".").pop();
+    const fileTypeName = this.selectedDocument?.name?.toLowerCase();
+
+    // Verificar si es REPSE y PDF
+    if (fileTypeName?.includes("repse") && fileExt === "pdf") {
+      const formatConfig = this.selectedDocument.formats.find(
+        (f: any) => f.code.toLowerCase() === "pdf"
+      );
+
+      const expiryOffset = {
+        value: formatConfig?.manual_expiry_value || 0,
+        unit: formatConfig?.manual_expiry_unit || "años",
+      };
+
+      const result = await this.documentService.extractRepseDates(
+        file,
+        expiryOffset
+      );
+
+      if (!result.issueDate || !result.expiryDate) {
+        this.toastrService.danger(
+          "No se pudo leer la fecha de expedición del REPSE.",
+          "Error"
+        );
+        return;
+      }
+    }
+
+    // Subida normal
+    this.isUploading = true;
     const fd = new FormData();
-    fd.append("file", this.selectedFile as Blob);
-    const reqId =
-      this.activeTab === "Regular"
-        ? this.selectedDocumentForUpload.required_file_id
-        : this.selectedDocument.required_file_id;
-    const periodId =
-      this.activeTab === "Con retraso"
-        ? this.selectedPeriod.period_id
-        : this.selectedPeriod?.period_id;
-    fd.append("required_file_id", reqId.toString());
-    fd.append("period_id", periodId?.toString() || "");
+    fd.append("file", file);
+
+    const selectedDoc = this.selectedDocumentForUpload ?? this.selectedDocument;
+    const selectedPeriod = this.selectedPeriod;
+
     fd.append(
-      "format_code",
-      this.activeTab === "Con retraso"
-        ? this.selectedFormat
-        : this.selectedFormat
+      "required_file_id",
+      selectedDoc?.required_file_id.toString() || ""
+    );
+    fd.append("period_id", selectedPeriod?.period_id.toString() || "");
+    fd.append("format_code", this.selectedFormat);
+
+    fd.append(
+      "issue_date",
+      this.tempIssueDate?.toISOString().split("T")[0] || ""
+    );
+    fd.append(
+      "expiry_date",
+      this.tempExpiryDate?.toISOString().split("T")[0] || ""
     );
 
     this.documentService.uploadFile(fd).subscribe({
@@ -225,8 +331,7 @@ export class DocumentUploadComponent {
           this.resetUploadForm();
         }
       },
-      error: (err) => {
-        console.error("Upload error", err);
+      error: () => {
         this.toastrService.danger("Error al subir el archivo", "Error");
       },
       complete: () => {
@@ -242,6 +347,8 @@ export class DocumentUploadComponent {
     this.selectedPeriod = null;
     this.selectedFormat = "";
     this.availableFormats = [];
+    this.tempIssueDate = null;
+    this.tempExpiryDate = null;
   }
 
   // ── Late tab: selecting document, period, format ────────────

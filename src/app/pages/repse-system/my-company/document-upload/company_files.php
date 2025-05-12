@@ -153,10 +153,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $relative_path = "$company_dir/$required_file_dir/$period_dir/$format_dir/$file_name";
     $user_id = 1; // Replace with actual user ID if available
 
+    $issue_date = $_POST['issue_date'] ?? null;
+    $expiry_date = $_POST['expiry_date'] ?? null;
+
     $query = "
-    INSERT INTO company_files (file_path, issue_date, user_id, status, is_current, period_id)
-    VALUES (?, CURDATE(), ?, 'pending', 1, ?)
-";
+    INSERT INTO company_files (file_path, issue_date, expiry_date, user_id, status, is_current, period_id)
+    VALUES (?, ?, ?, ?, 'pending', 1, ?)
+    ";
     $stmt = $mysqli->prepare($query);
 
     if (!$stmt) {
@@ -164,7 +167,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         exit;
     }
 
-    $stmt->bind_param("sii", $relative_path, $user_id, $period_id);
+    $stmt->bind_param("sssii", $relative_path, $issue_date, $expiry_date, $user_id, $period_id);
 
     if (!$stmt->execute()) {
         echo json_encode(['success' => false, 'error' => 'Database insert failed: ' . $stmt->error]);

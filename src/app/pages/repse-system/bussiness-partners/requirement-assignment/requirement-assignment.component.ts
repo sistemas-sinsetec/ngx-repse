@@ -49,6 +49,7 @@ export class RequirementAssignmentComponent implements OnInit {
   requirements: Requirement[] = [];
   minDate: moment.Moment;
   fileFormats: FileFormat[] = [];
+  availableFormats: { id: number; name: string; extension: string }[] = [];
   businessPartners: Partner[] = [];
   expiryUnits = ["días", "semanas", "meses", "años"];
 
@@ -118,16 +119,13 @@ export class RequirementAssignmentComponent implements OnInit {
       .get<{ code: string; name: string; mime: string }[]>(this.fileFormatsUrl)
       .subscribe({
         next: (list) => {
-          this.fileFormats = list.map((f, i) => ({
+          this.availableFormats = list.map((f, i) => ({
             id: i + 1,
             name: f.name,
             extension: f.code,
-            selected: false,
-            minQuantity: 1,
-            expiryVisible: true,
-            expiryValue: null,
-            expiryUnit: null,
           }));
+          // Opcional: limpiar si es nuevo proveedor
+          this.fileFormats = [];
         },
         error: (err) => console.error("Error cargando formatos", err),
       });
@@ -372,5 +370,14 @@ export class RequirementAssignmentComponent implements OnInit {
 
   removeFormat(index: number): void {
     this.fileFormats.splice(index, 1);
+  }
+
+  getAvailableOptions(currentIndex: number) {
+    const selectedExtensions = this.fileFormats
+      .filter((_, idx) => idx !== currentIndex)
+      .map((f) => f.extension);
+    return this.availableFormats.filter(
+      (opt) => !selectedExtensions.includes(opt.extension)
+    );
   }
 }

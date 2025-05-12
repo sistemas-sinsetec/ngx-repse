@@ -261,16 +261,22 @@ switch ($method) {
 
             /* 3) Detalle de formatos ----------------------------------- */
             $rf = $mysqli->prepare("
-            INSERT INTO required_file_formats
-                  (required_file_id, format_code, min_required)
-            VALUES (?,?,?)
-        ");
+                INSERT INTO required_file_formats
+                        (required_file_id, format_code, min_required, manual_expiry_visible, manual_expiry_value, manual_expiry_unit)
+                VALUES (?,?,?,?,?,?)
+            ");
+
             foreach ($fileFormats as $ff) {
                 $fmt = strtolower($ff['format_code']);
                 $min = (int) $ff['min_quantity'];
-                $rf->bind_param('isi', $required_file_id, $fmt, $min);
+                $visible = isset($ff['expiry_visible']) ? (int) $ff['expiry_visible'] : 1;
+                $value = $ff['expiry_value'] ?? null;
+                $unit = $ff['expiry_unit'] ?? null;
+
+                $rf->bind_param('isiiis', $required_file_id, $fmt, $min, $visible, $value, $unit);
                 $rf->execute();
             }
+
             $rf->close();
 
             /* 4) Crear primer periodo (para no periódicos también) */

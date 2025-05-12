@@ -2,6 +2,50 @@ import { Injectable } from "@angular/core";
 import { HttpClient, HttpParams } from "@angular/common/http";
 import { Observable } from "rxjs";
 import { environment } from "../../../environments/environment";
+import * as pdfjsLib from "pdfjs-dist/legacy/build/pdf";
+import pdfjsWorker from "pdfjs-dist/legacy/build/pdf.worker.entry";
+import * as moment from "moment";
+
+pdfjsLib.GlobalWorkerOptions.workerSrc = pdfjsWorker;
+
+export interface ParsedDocumentDates {
+  issueDate: Date | null;
+  expiryDate: Date | null;
+}
+
+const meses: Record<string, number> = {
+  enero: 0,
+  febrero: 1,
+  marzo: 2,
+  abril: 3,
+  mayo: 4,
+  junio: 5,
+  julio: 6,
+  agosto: 7,
+  septiembre: 8,
+  octubre: 9,
+  noviembre: 10,
+  diciembre: 11,
+};
+
+function calculateExpiry(baseDate: Date, value: number, unit: string): Date {
+  const result = new Date(baseDate);
+  switch (unit.toLowerCase()) {
+    case "dias":
+      result.setDate(result.getDate() + value);
+      break;
+    case "semanas":
+      result.setDate(result.getDate() + value * 7);
+      break;
+    case "meses":
+      result.setMonth(result.getMonth() + value);
+      break;
+    case "años":
+      result.setFullYear(result.getFullYear() + value);
+      break;
+  }
+  return result;
+}
 
 export interface RequiredFile {
   required_file_id: number;
@@ -151,5 +195,110 @@ export class DocumentService {
     return this.http.get(`${this.base}/company_files_providers.php`, {
       params,
     });
+  }
+
+  // ─────────────── VALIDACIÓN PDF ───────────────
+
+  async parsePDFForRepse(
+    file: File,
+    expiryOffset: { value: number; unit: string }
+  ): Promise<ParsedDocumentDates> {
+    const arrayBuffer = await file.arrayBuffer();
+    const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
+
+    let textContent = "";
+    for (let i = 1; i <= pdf.numPages; i++) {
+      const page = await pdf.getPage(i);
+      const content = await page.getTextContent();
+      textContent += content.items.map((item: any) => item.str).join(" ");
+    }
+
+    const match = textContent.match(
+      /ciudad de méxico a\s+([a-zñ]+)\s+(\d{1,2})\s+de\s+([a-zñ]+)\s+del\s+(\d{4})/i
+    );
+
+    let issueDate: Date | null = null;
+    if (match) {
+      const dia = parseInt(match[2]);
+      const mes = match[3].toLowerCase();
+      const anio = parseInt(match[4]);
+
+      const mesIndex = meses[mes];
+      if (!isNaN(dia) && !isNaN(anio) && mesIndex !== undefined) {
+        issueDate = new Date(anio, mesIndex, dia);
+      }
+    }
+
+    const expiryDate = issueDate
+      ? calculateExpiry(issueDate, expiryOffset.value, expiryOffset.unit)
+      : null;
+
+    return { issueDate, expiryDate };
+  }
+
+  async validateRepsePdf(
+    file: File,
+    expiryConfig: { value: number; unit: string },
+    currentPeriod?: { start_date: string; end_date: string }
+  ): Promise<{ valid: boolean; message?: string; warning?: string }> {
+    const { issueDate, expiryDate } = await this.extractRepseDates(
+      file,
+      expiryConfig
+    );
+
+    if (!issueDate || !expiryDate) {
+      return {
+        valid: false,
+        message: "No se pudo obtener la fecha de expedición del documento.",
+      };
+    }
+
+    if (!currentPeriod) {
+      return { valid: true };
+    }
+
+    const periodStart = moment(currentPeriod.start_date);
+    const periodEnd = moment(currentPeriod.end_date);
+    const exp = moment(expiryDate);
+
+    console.log("→ Fecha de expedición:", issueDate);
+    console.log("→ Vigencia calculada:", expiryDate);
+    console.log(
+      "→ Periodo actual:",
+      periodStart.format("DD/MM/YYYY"),
+      "-",
+      periodEnd.format("DD/MM/YYYY")
+    );
+
+    if (exp.isBefore(periodStart)) {
+      return {
+        valid: false,
+        message: `La vigencia del documento (${exp.format(
+          "DD/MM/YYYY"
+        )}) no cubre el periodo actual.`,
+      };
+    }
+
+    if (exp.isBefore(periodEnd)) {
+      return {
+        valid: true,
+        warning: `El documento vencerá durante este periodo (${exp.format(
+          "DD/MM/YYYY"
+        )}).`,
+      };
+    }
+
+    return { valid: true };
+  }
+
+  private formatDate(date: Date): string {
+    return moment(date).format("DD/MM/YYYY");
+  }
+
+  async extractRepseDates(
+    file: File,
+    expiryOffset: { value: number; unit: string }
+  ): Promise<ParsedDocumentDates> {
+    return this.parsePDFForRepse(file, expiryOffset);
   }
 }
