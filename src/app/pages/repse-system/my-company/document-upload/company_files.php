@@ -151,19 +151,21 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $issue_date = $_POST['issue_date'] ?? null;
     $expiry_date = $_POST['expiry_date'] ?? null;
 
+    $today = date('Y-m-d');
     // Validar que tengan formato YYYY-MM-DD
     $validDateFormat = function ($date) {
         return preg_match('/^\d{4}-\d{2}-\d{2}$/', $date);
     };
 
+    // Usar la fecha de fin del periodo como default si no se proporciona
+    $period_end = $period['end_date'] ?? $today;
+
     if (!$issue_date || !$validDateFormat($issue_date)) {
-        echo json_encode(['success' => false, 'error' => 'Fecha de expedición inválida o faltante']);
-        exit;
+        $issue_date = $today;
     }
 
     if (!$expiry_date || !$validDateFormat($expiry_date)) {
-        echo json_encode(['success' => false, 'error' => 'Fecha de vigencia inválida o faltante']);
-        exit;
+        $expiry_date = $period_end;
     }
 
     $query = "

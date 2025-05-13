@@ -313,14 +313,10 @@ export class DocumentUploadComponent {
     fd.append("period_id", selectedPeriod?.period_id.toString() || "");
     fd.append("format_code", this.selectedFormat);
 
-    fd.append(
-      "issue_date",
-      this.tempIssueDate?.toISOString().split("T")[0] || ""
-    );
-    fd.append(
-      "expiry_date",
-      this.tempExpiryDate?.toISOString().split("T")[0] || ""
-    );
+    if (this.tempIssueDate && this.tempExpiryDate) {
+      fd.append("issue_date", this.tempIssueDate.toISOString().split("T")[0]);
+      fd.append("expiry_date", this.tempExpiryDate.toISOString().split("T")[0]);
+    }
 
     this.documentService.uploadFile(fd).subscribe({
       next: (resp: any) => {
