@@ -277,10 +277,7 @@ export class RequirementsAssignmentComponent implements OnInit {
           });
 
           // Resetear los formatos
-          this.fileFormats.forEach((format) => {
-            format.selected = false;
-            format.minQuantity = 1;
-          });
+          this.fileFormats = [];
 
           this.loadRequirements();
         },
@@ -502,5 +499,43 @@ export class RequirementsAssignmentComponent implements OnInit {
     return this.availableFormats.filter(
       (opt) => !selectedExtensions.includes(opt.extension)
     );
+  }
+
+  onExpiryVisibleChange(format: FileFormat): void {
+    if (format.expiryVisible) {
+      // Si se activa la casilla, resetea los valores manuales
+      format.expiryValue = null;
+      format.expiryUnit = null;
+    }
+  }
+
+  isFormValid(): boolean {
+    // 1. Validar que el formulario reactivo esté válido
+    if (this.requirementsForm.invalid) return false;
+
+    // 2. Validar que haya al menos un formato
+    if (this.fileFormats.length === 0) return false;
+
+    // 3. Validar cada formato
+    for (const format of this.fileFormats) {
+      // 3.1 El formato debe tener una extensión seleccionada
+      if (!format.extension || format.extension.trim() === "") {
+        return false;
+      }
+
+      // 3.2 Si la vigencia NO es visible, debe tener cantidad y unidad válidas
+      if (!format.expiryVisible) {
+        const hasValidValue = format.expiryValue && format.expiryValue > 0;
+        const hasValidUnit =
+          format.expiryUnit && format.expiryUnit.trim() !== "";
+
+        if (!hasValidValue || !hasValidUnit) {
+          return false;
+        }
+      }
+    }
+
+    // Si pasa todo, es válido
+    return true;
   }
 }

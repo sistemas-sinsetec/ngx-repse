@@ -146,6 +146,7 @@
                     <nb-checkbox
                       [(ngModel)]="format.expiryVisible"
                       [ngModelOptions]="{ standalone: true }"
+                      (checkedChange)="onExpiryVisibleChange(format)"
                     >
                       Fecha de vigencia visible en documento
                     </nb-checkbox>
@@ -201,7 +202,7 @@
           <button
             nbButton
             type="submit"
-            [disabled]="!requirementsForm.valid"
+            [disabled]="!isFormValid()"
             status="primary"
             fullWidth
           >
