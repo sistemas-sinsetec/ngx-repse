@@ -49,11 +49,18 @@ function calculateExpiry(baseDate: Date, value: number, unit: string): Date {
 
 export interface RequiredFile {
   required_file_id: number;
+  company_id: number;
   name: string;
   is_periodic: number;
   periodicity_type: string | null;
   periodicity_count: number | null;
-  formats: { code: string; min_required: number }[];
+  formats: {
+    code: string;
+    min_required: number;
+    uploaded_count?: number;
+    manual_expiry_value?: number | null;
+    manual_expiry_unit?: string | null;
+  }[];
   min_documents_needed: number;
   periods: Array<{
     period_id: number;
@@ -69,6 +76,8 @@ export interface RequiredFile {
     uploaded_count: number;
   } | null;
   status: "pending" | "partial" | "complete" | "overdue";
+  assigned_by: number;
+  company_name?: string;
 }
 
 export interface FileStructure {

@@ -15,111 +15,230 @@
           badgeStatus="primary"
         >
           <ng-template nbTabContent>
-            <h2>Documentos Requeridos</h2>
-            <p class="mb-4">
-              Lista de documentos que deben ser cargados para los periodos
-              actuales.
-            </p>
-
             <nb-alert *ngIf="loading" status="info"
               >Cargando documentos...</nb-alert
             >
 
             <div *ngIf="!loading">
-              <div *ngIf="requiredFiles.length === 0" class="text-center">
+              <!-- LEYENDA CUANDO NO HAY ASIGNACIONES -->
+              <div
+                *ngIf="
+                  assignedByMe.length === 0 && assignedByOthers.length === 0
+                "
+                class="text-center"
+              >
                 <nb-alert status="info" class="mb-0">
                   No hay documentos requeridos configurados actualmente
                 </nb-alert>
               </div>
-              <div *ngIf="requiredFiles.length > 0" class="table-responsive">
-                <table class="table table-striped table-bordered">
-                  <thead class="thead-light text-center">
-                    <tr>
-                      <th>Documento</th>
-                      <th class="d-none d-sm-table-cell">Periodicidad</th>
-                      <th class="d-none d-md-table-cell">Fecha límite</th>
-                      <th>Estado</th>
-                      <th>Progreso</th>
-                      <th>Acciones</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    <tr *ngFor="let file of requiredFiles">
-                      <td class="align-middle">{{ file.name }}</td>
-                      <td
-                        class="d-none d-sm-table-cell text-center align-middle"
-                      >
-                        {{
-                          file.is_periodic
-                            ? file.periodicity_count +
-                              " " +
-                              file.periodicity_type
-                            : "No periódico"
-                        }}
-                      </td>
-                      <td
-                        class="d-none d-md-table-cell text-center align-middle"
-                      >
-                        {{ getDeadlineLabel(file) }}
-                      </td>
-                      <td class="align-middle text-center">
-                        <nb-tag
-                          appearance="outline"
-                          [status]="getStatusColor(file.status)"
-                          [text]="getStatusLabel(file.status)"
-                        ></nb-tag>
-                      </td>
-                      <td class="text-center align-middle">
-                        {{ getUploadProgress(file) }}
-                      </td>
-                      <td>
-                        <input
-                          #fileInput
-                          type="file"
-                          style="display: none"
-                          (change)="onFileSelected($event)"
-                        />
-                        <div class="d-flex flex-wrap align-items-center gap-1">
-                          <button
-                            nbButton
-                            fullWidth
-                            size="small"
-                            status="primary"
-                            (click)="prepareUpload(file)"
-                            [disabled]="file.status === 'complete'"
-                            class="d-flex align-items-center"
+
+              <!-- ASIGNACIONES HECHAS POR MI EMPRESA -->
+              <div *ngIf="assignedByMe.length > 0">
+                <h3>Documentos asignados por mi empresa</h3>
+                <div class="table-responsive">
+                  <table class="table table-striped table-bordered">
+                    <thead class="thead-light text-center">
+                      <tr>
+                        <th>Documento</th>
+                        <th class="d-none d-sm-table-cell">Periodicidad</th>
+                        <th class="d-none d-md-table-cell">Fecha límite</th>
+                        <th>Estado</th>
+                        <th>Progreso</th>
+                        <th>Acciones</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <tr *ngFor="let file of assignedByMe">
+                        <td class="align-middle">{{ file.name }}</td>
+                        <td
+                          class="d-none d-sm-table-cell text-center align-middle"
+                        >
+                          {{
+                            file.is_periodic
+                              ? file.periodicity_count +
+                                " " +
+                                file.periodicity_type
+                              : "No periódico"
+                          }}
+                        </td>
+                        <td
+                          class="d-none d-md-table-cell text-center align-middle"
+                        >
+                          {{ getDeadlineLabel(file) }}
+                        </td>
+                        <td class="align-middle text-center">
+                          <nb-tag
+                            appearance="outline"
+                            [status]="getStatusColor(file.status)"
+                            [text]="getStatusLabel(file.status)"
+                          ></nb-tag>
+                        </td>
+                        <td class="text-center align-middle">
+                          {{ getUploadProgress(file) }}
+                        </td>
+                        <td>
+                          <div
+                            class="d-flex flex-wrap align-items-center gap-1"
                           >
-                            <nb-icon
-                              icon="upload-outline"
-                              class="mr-1"
-                            ></nb-icon>
-                            <span>{{
-                              file.status === "pending" ? "Subir" : "Nuevo"
-                            }}</span>
-                          </button>
-                          <button
-                            nbButton
-                            fullWidth
-                            outline
-                            size="small"
-                            [status]="
-                              file.status === 'pending' ? 'success' : 'basic'
-                            "
-                            [disabled]="!file.hasFiles"
-                            (click)="openDownloadModal(file)"
-                            class="d-flex align-items-center mt-2"
-                          >
-                            <nb-icon
-                              icon="download-outline"
-                              class="mr-1"
-                            ></nb-icon>
-                            <span>Descargar</span>
-                          </button>
-                        </div>
-                      </td>
-                    </tr>
-                  </tbody>
-                </table>
+                            <button
+                              nbButton
+                              fullWidth
+                              size="small"
+                              status="primary"
+                              (click)="prepareUpload(file)"
+                              [disabled]="file.status === 'complete'"
+                              class="d-flex align-items-center"
+                            >
+                              <nb-icon
+                                icon="upload-outline"
+                                class="mr-1"
+                              ></nb-icon>
+                              <span>{{
+                                file.status === "pending" ? "Subir" : "Nuevo"
+                              }}</span>
+                            </button>
+                            <button
+                              nbButton
+                              fullWidth
+                              outline
+                              size="small"
+                              [status]="
+                                file.status === 'pending' ? 'success' : 'basic'
+                              "
+                              [disabled]="!file.hasFiles"
+                              (click)="openDownloadModal(file)"
+                              class="d-flex align-items-center mt-2"
+                            >
+                              <nb-icon
+                                icon="download-outline"
+                                class="mr-1"
+                              ></nb-icon>
+                              <span>Descargar</span>
+                            </button>
+                          </div>
+                        </td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+
+              <!-- ASIGNACIONES HECHAS POR OTRAS EMPRESAS -->
+              <div *ngIf="assignedByOthers.length > 0">
+                <h3>Documentos asignados por otras empresas</h3>
+                <div class="d-flex align-items-center mb-2">
+                  <span class="mr-2">Filtrar por empresa:</span>
+                  <nb-select [(selected)]="selectedExternalCompanyId">
+                    <nb-option value="all">Todas</nb-option>
+                    <nb-option
+                      *ngFor="let group of assignedByOthers"
+                      [value]="group.company_id"
+                    >
+                      {{ group.company }}
+                    </nb-option>
+                  </nb-select>
+                </div>
+
+                <div *ngFor="let group of assignedByOthers">
+                  <div
+                    *ngIf="
+                      selectedExternalCompanyId === 'all' ||
+                      selectedExternalCompanyId === group.company_id
+                    "
+                  >
+                    <label class="mt-4">Empresa: {{ group.company }}</label>
+                    <div class="table-responsive">
+                      <table class="table table-striped table-bordered">
+                        <thead class="thead-light text-center">
+                          <tr>
+                            <th>Documento</th>
+                            <th class="d-none d-sm-table-cell">Periodicidad</th>
+                            <th class="d-none d-md-table-cell">Fecha límite</th>
+                            <th>Estado</th>
+                            <th>Progreso</th>
+                            <th>Acciones</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          <tr *ngFor="let file of group.files">
+                            <td class="align-middle">{{ file.name }}</td>
+                            <td
+                              class="d-none d-sm-table-cell text-center align-middle"
+                            >
+                              {{
+                                file.is_periodic
+                                  ? file.periodicity_count +
+                                    " " +
+                                    file.periodicity_type
+                                  : "No periódico"
+                              }}
+                            </td>
+                            <td
+                              class="d-none d-md-table-cell text-center align-middle"
+                            >
+                              {{ getDeadlineLabel(file) }}
+                            </td>
+                            <td class="align-middle text-center">
+                              <nb-tag
+                                appearance="outline"
+                                [status]="getStatusColor(file.status)"
+                                [text]="getStatusLabel(file.status)"
+                              ></nb-tag>
+                            </td>
+                            <td class="text-center align-middle">
+                              {{ getUploadProgress(file) }}
+                            </td>
+                            <td>
+                              <div
+                                class="d-flex flex-wrap align-items-center gap-1"
+                              >
+                                <button
+                                  nbButton
+                                  fullWidth
+                                  size="small"
+                                  status="primary"
+                                  (click)="prepareUpload(file)"
+                                  [disabled]="file.status === 'complete'"
+                                  class="d-flex align-items-center"
+                                >
+                                  <nb-icon
+                                    icon="upload-outline"
+                                    class="mr-1"
+                                  ></nb-icon>
+                                  <span>{{
+                                    file.status === "pending"
+                                      ? "Subir"
+                                      : "Nuevo"
+                                  }}</span>
+                                </button>
+                                <button
+                                  nbButton
+                                  fullWidth
+                                  outline
+                                  size="small"
+                                  [status]="
+                                    file.status === 'pending'
+                                      ? 'success'
+                                      : 'basic'
+                                  "
+                                  [disabled]="!file.hasFiles"
+                                  (click)="openDownloadModal(file)"
+                                  class="d-flex align-items-center mt-2"
+                                >
+                                  <nb-icon
+                                    icon="download-outline"
+                                    class="mr-1"
+                                  ></nb-icon>
+                                  <span>Descargar</span>
+                                </button>
+                              </div>
+                            </td>
+                          </tr>
+                        </tbody>
+                      </table>
+                    </div>
+                  </div>
+                </div>
               </div>
             </div>
           </ng-template>
@@ -287,13 +406,6 @@
                       {{ selectedFile.name }}
                     </span>
                   </div>
-                  <input
-                    #fileInput
-                    type="file"
-                    style="display: none"
-                    (change)="onFileSelected($event)"
-                    [disabled]="!canSelectFile()"
-                  />
                 </div>
 
                 <div class="col-12">
@@ -311,6 +423,16 @@
           </ng-template>
         </nb-tab>
       </nb-tabset>
+
+      <!-- Input de archivo oculto -->
+      <input
+        #fileInput
+        type="file"
+        style="display: none"
+        (change)="onFileSelected($event)"
+        [accept]="getFileAccept()"
+        [disabled]="!canSelectFile()"
+      />
     </nb-card-body>
   </nb-card>
 </div>

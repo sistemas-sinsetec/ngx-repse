@@ -43,19 +43,23 @@ switch ($method) {
         // 1) documentos activos
         $docsStmt = $mysqli->prepare("
             SELECT crf.required_file_id,
-                   ft.name,
-                   crf.is_periodic,
-                   crf.periodicity_type,
-                   crf.periodicity_count,
-                    (SELECT COUNT(*)
-              FROM required_file_visibilities v
-             WHERE v.required_file_id = crf.required_file_id
-               AND v.is_visible = 1
-           ) AS partner_count
-              FROM company_required_files crf
-              JOIN file_types ft ON ft.file_type_id = crf.file_type_id
-             WHERE crf.company_id = ?
-               AND crf.is_active  = 1
+                crf.assigned_by,
+                crf.company_id,
+                companies.nameCompany AS company_name,
+                ft.name,
+                crf.is_periodic,
+                crf.periodicity_type,
+                crf.periodicity_count,
+                (SELECT COUNT(*)
+                    FROM required_file_visibilities v
+                    WHERE v.required_file_id = crf.required_file_id
+                    AND v.is_visible = 1
+                ) AS partner_count
+            FROM company_required_files crf
+            JOIN file_types ft ON ft.file_type_id = crf.file_type_id
+            LEFT JOIN companies ON companies.id = crf.assigned_by
+            WHERE crf.company_id = ?
+            AND crf.is_active  = 1
         ") or respond(500, ['error' => $mysqli->error]);
         $docsStmt->bind_param('i', $companyId);
         $docsStmt->execute();

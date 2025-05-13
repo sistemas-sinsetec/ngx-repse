@@ -43,6 +43,12 @@ export class DocumentUploadComponent {
 
   // Data from dashboard endpoint
   requiredFiles: any[] = [];
+
+  assignedByMe: any[] = [];
+  assignedByOthers: { company_id: number; company: string; files: any[] }[] =
+    [];
+  selectedExternalCompanyId: string | number = "all";
+
   loading = true;
 
   isUploading = false;
@@ -86,13 +92,41 @@ export class DocumentUploadComponent {
   // ── Load dashboard data ─────────────────────────────────────
   loadDocuments(): void {
     this.loading = true;
-    const companyId = this.companyService.selectedCompany.id;
-    this.documentService.getRequiredFiles(companyId).subscribe({
+    const myCompanyId = Number(this.companyService.selectedCompany.id);
+
+    this.documentService.getRequiredFiles(myCompanyId).subscribe({
       next: (files) => {
-        this.requiredFiles = files.map((file: any) => ({
-          ...file,
-          formats: file.formats || [],
-        }));
+        // Forzar tipo numérico para evitar errores por comparación estricta
+        const myCompanyFiles = files.filter(
+          (f) => Number(f.company_id) === myCompanyId
+        );
+
+        // Asignados por mi empresa
+        this.assignedByMe = myCompanyFiles.filter(
+          (f) => Number(f.assigned_by) === myCompanyId
+        );
+
+        // Asignados por otras empresas
+        const grouped: {
+          [key: number]: { company_id: number; company: string; files: any[] };
+        } = {};
+
+        myCompanyFiles.forEach((file) => {
+          const assignedBy = Number(file.assigned_by);
+          if (assignedBy !== myCompanyId) {
+            if (!grouped[assignedBy]) {
+              grouped[assignedBy] = {
+                company_id: assignedBy,
+                company: file.company_name || `Empresa ${assignedBy}`,
+                files: [],
+              };
+            }
+            grouped[assignedBy].files.push(file);
+          }
+        });
+
+        this.assignedByOthers = Object.values(grouped);
+
         this.loading = false;
       },
       error: (err) => {
