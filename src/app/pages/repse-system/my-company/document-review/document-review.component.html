@@ -29,14 +29,19 @@
           </td>
           <td class="text-center">
             {{
-              doc.expiry_date
+              doc.expiry_date && doc.expiry_date !== "9999-12-31"
                 ? (doc.expiry_date | date : "dd/MM/yyyy")
                 : "No aplica"
             }}
           </td>
           <td class="text-center">
-            {{ doc.periodInfo?.start_date | date : "dd/MM/yyyy" }} -
-            {{ doc.periodInfo?.end_date | date : "dd/MM/yyyy" }}
+            {{
+              doc.periodInfo?.end_date === "9999-12-31"
+                ? "Sin periodicidad"
+                : (doc.periodInfo?.start_date | date : "dd/MM/yyyy") +
+                  " - " +
+                  (doc.periodInfo?.end_date | date : "dd/MM/yyyy")
+            }}
           </td>
           <td class="text-center">
             {{ doc.uploaded_at | date : "dd/MM/yyyy HH:mm" }}

@@ -611,9 +611,18 @@ export class DocumentUploadComponent {
   }
 
   get incompleteRequiredFilesCount(): number {
-    return this.requiredFiles
-      ? this.requiredFiles.filter((f) => f.status !== "complete").length
-      : 0;
+    const myIncomplete = this.assignedByMe.filter(
+      (file) => file.status !== "complete"
+    ).length;
+
+    const othersIncomplete = this.assignedByOthers.reduce((total, group) => {
+      const count = group.files.filter(
+        (file) => file.status !== "complete"
+      ).length;
+      return total + count;
+    }, 0);
+
+    return myIncomplete + othersIncomplete;
   }
 
   getDeadlineLabel(file: any): string {
