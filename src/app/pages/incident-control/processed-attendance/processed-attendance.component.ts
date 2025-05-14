@@ -369,7 +369,7 @@ export class ProcessedAttendanceComponent {
             const wh = emp.work_hours[dia.date] || {};
             return [
               emp.employee_code?.toString() || "",
-              `${emp.first_name} ${emp.middle_name || ""} ${emp.last_name}`,
+              `${emp.first_name} ${emp.last_name} ${emp.middle_name || ""}`,
               this.formatHour(wh.entry_time) || "--:--",
               this.formatHour(wh.lunch_start_time) || "--:--",
               this.formatHour(wh.lunch_end_time) || "--:--",
@@ -552,7 +552,7 @@ export class ProcessedAttendanceComponent {
 
         return [
           emp.employee_code?.toString() || "",
-          `${emp.first_name} ${emp.middle_name || ""} ${emp.last_name}`,
+          `${emp.first_name} ${emp.last_name} ${emp.middle_name || ""}`,
           finalEntry,
           finalLunchStart,
           finalLunchEnd,
