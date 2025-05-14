@@ -140,4 +140,21 @@ export class DocumentCatalogComponent implements OnInit {
       }[type] || "file-outline"
     );
   }
+
+  getLevelClass(level: number): string {
+    switch (level) {
+      case 0:
+        return "level-type";
+      case 1:
+        return "level-periodicity";
+      case 2:
+        return "level-period";
+      case 3:
+        return "level-format";
+      case 4:
+        return "level-file";
+      default:
+        return "";
+    }
+  }
 }
