@@ -1,17 +1,23 @@
-<nb-card class="p-4 shadow-sm">
+<nb-card>
   <!-- Título Principal -->
   <nb-card-header>
-    <span class="title">Gestión de Asistencia Semanal</span>
+    <div class="d-flex justify-content-between align-items-center">
+      <span class="title">Gestión de Asistencia Semanal</span>
+      <!-- Botón para ver Listas Semanales Procesadas -->
+      <button nbButton status="info" (click)="openProcessedListsModal()">
+        Listas Semanales Procesadas
+      </button>
+    </div>
   </nb-card-header>
   <nb-card-body>
     <!-- Selector de Semana Confirmada -->
-    <div class="mb-4 d-flex row">
+    <div class="col-md-5 col-sm-12 mb-3 mb-sm-3 px-0">
       <nb-select
         id="weekSelector"
         [(ngModel)]="selectedWeek"
         (ngModelChange)="onWeekChange($event)"
-        placeholder="Seleccionar semana confirmada"
-        class="col-12 col-sm-6"
+        placeholder="Seleccionar semana procesada"
+        class="full-width"
       >
         <nb-option *ngFor="let week of processedWeeks" [value]="week">
           Semana {{ week.week_number }}
@@ -20,18 +26,6 @@
           </span>
         </nb-option>
       </nb-select>
-
-      <!-- Botón para ver Listas Semanales Procesadas -->
-      <div class="col-md-4 col-sm-12 button-col">
-        <button
-          nbButton
-          status="info"
-          fullWidth
-          (click)="openProcessedListsModal()"
-        >
-          Listas Semanales Procesadas
-        </button>
-      </div>
     </div>
 
     <!-- Tabla de Asistencia de la Semana Confirmada -->
@@ -142,7 +136,7 @@
         <button
           nbButton
           (click)="generatePDF()"
-          status="primary"
+          status="success"
           class="px-4 mr-4"
         >
           <nb-icon icon="printer-outline" class="me-2"></nb-icon> Imprimir
@@ -151,7 +145,7 @@
           nbButton
           (change)="onFileSelected($event)"
           (click)="uploadPDF()"
-          status="success"
+          status="primary"
           class="px-4"
         >
           <nb-icon icon="cloud-upload-outline" class="me-2"></nb-icon> Subir PDF

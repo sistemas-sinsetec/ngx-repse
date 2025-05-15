@@ -13,11 +13,15 @@ import {
 import { AuthService } from "../../../services/auth.service";
 import { CompanyService } from "../../../services/company.service";
 import { PeriodService } from "../../../services/period.service";
-import * as moment from "moment";
 import { ProcessedListDialogComponent } from "../processed-list-dialog/processed-list-dialog.component";
 import { LoadingController, AlertController } from "@ionic/angular";
 import { CustomToastrService } from "../../../services/custom-toastr.service";
 import { environment } from "../../../../environments/environment";
+
+import jsPDF from "jspdf";
+import * as moment from "moment";
+import autoTable from "jspdf-autotable";
+
 @Component({
   selector: "ngx-process-weekly-lists",
   templateUrl: "./process-weekly-lists.component.html",
@@ -125,7 +129,6 @@ export class ProcessWeeklyListsComponent {
     }
   }
 
-  // Cargar los empleados y sus horas de trabajo para la semana seleccionada
   // Cargar los empleados y sus horas de trabajo para la semana seleccionada
   async loadEmployeesForWeek() {
     if (!this.selectedWeek || !this.companyService.selectedCompany) return;
@@ -250,6 +253,152 @@ export class ProcessWeeklyListsComponent {
     );
   }
 
+  generatePDF(): void {
+    const pdf = new jsPDF("l", "mm", "a4");
+    const pageWidth = pdf.internal.pageSize.getWidth();
+    const marginLeft = 5;
+    const marginRight = 5;
+    const tableWidth = pageWidth - (marginLeft + marginRight);
+    let currentY = 5;
+
+    for (const dia of this.diasSemana) {
+      const showSecondMeal = this.empleadosSemana.some((emp) => {
+        const wh = emp.work_hours[dia.date] || {};
+        return wh.second_lunch_start_time || wh.second_lunch_end_time;
+      });
+
+      const headerRow: any[] = [
+        { content: "Código", styles: { fontSize: 6 } },
+        { content: "Empleado", styles: { fontSize: 6 } },
+        { content: "Entrada", styles: { fontSize: 6 } },
+        { content: "Entrada C", styles: { fontSize: 6 } },
+        { content: "Salida C", styles: { fontSize: 6 } },
+      ];
+
+      if (showSecondMeal) {
+        headerRow.push(
+          { content: "Entrada 2da C", styles: { fontSize: 6 } },
+          { content: "Salida 2da C", styles: { fontSize: 6 } }
+        );
+      }
+
+      headerRow.push(
+        { content: "Salida", styles: { fontSize: 6 } },
+        { content: "Incidencia", styles: { fontSize: 6 } },
+        { content: "Descripción", styles: { fontSize: 6 } },
+        { content: "Empresa y Obra", styles: { fontSize: 6 } },
+        { content: "Firma", styles: { fontSize: 6 } }
+      );
+
+      const tableHeader = [
+        [
+          {
+            content: `Lista de Asistencia para ${dia.display} (${dia.date})`,
+            colSpan: headerRow.length,
+            styles: {
+              halign: "center",
+              fontSize: 7,
+              fillColor: [220, 220, 220],
+            },
+          },
+        ],
+        headerRow,
+      ];
+
+      const dataRows = this.empleadosSemana.map((emp) => {
+        const wh = emp.work_hours[dia.date] || {};
+        const entry = this.formatHour(wh.entry_time) || "--:--";
+        const lunchStart = this.formatHour(wh.lunch_start_time) || "--:--";
+        const lunchEnd = this.formatHour(wh.lunch_end_time) || "--:--";
+        const secondLunchStart =
+          this.formatHour(wh.second_lunch_start_time) || "--:--";
+        const secondLunchEnd =
+          this.formatHour(wh.second_lunch_end_time) || "--:--";
+        const exit = this.formatHour(wh.exit_time) || "--:--";
+
+        let finalEntry = entry,
+          finalLunchStart = lunchStart,
+          finalLunchEnd = lunchEnd,
+          finalSecondLunchStart = secondLunchStart,
+          finalSecondLunchEnd = secondLunchEnd,
+          finalExit = exit;
+
+        if (
+          wh.incident &&
+          wh.incident !== "Asistencia sin proyecto" &&
+          wh.incident !== "N/A"
+        ) {
+          finalEntry =
+            finalLunchStart =
+            finalLunchEnd =
+            finalSecondLunchStart =
+            finalSecondLunchEnd =
+            finalExit =
+              "";
+        }
+
+        return [
+          emp.employee_code?.toString() || "",
+          `${emp.first_name} ${emp.last_name} ${emp.middle_name || ""}`,
+          finalEntry,
+          finalLunchStart,
+          finalLunchEnd,
+          ...(showSecondMeal
+            ? [finalSecondLunchStart, finalSecondLunchEnd]
+            : []),
+          finalExit,
+          wh.incident || "N/A",
+          wh.description || "Sin descripción",
+          wh.project_name || "No Asignado",
+          "",
+        ];
+      });
+
+      const baseCols = [
+        0.035,
+        0.2,
+        0.05,
+        0.05,
+        0.05,
+        ...(showSecondMeal ? [0.06, 0.06] : []),
+        0.05,
+        0.08,
+        0.1,
+        0.18,
+        0.1,
+      ];
+      const colWidths = baseCols.map((ratio) => tableWidth * ratio);
+
+      if (currentY + 10 > pdf.internal.pageSize.getHeight()) {
+        pdf.addPage();
+        currentY = 5;
+      }
+
+      autoTable(pdf, {
+        head: tableHeader,
+        body: dataRows,
+        startY: currentY,
+        margin: { left: marginLeft, right: marginRight },
+        styles: { fontSize: 5, cellPadding: 1, textColor: 0 },
+        headStyles: {
+          fillColor: [220, 220, 220],
+          halign: "center",
+          cellPadding: 1,
+          textColor: 0,
+        },
+        theme: "grid",
+        columnStyles: colWidths.reduce((acc, width, i) => {
+          acc[i] = { cellWidth: width };
+          return acc;
+        }, {}),
+      });
+
+      currentY = (pdf as any).lastAutoTable.finalY + 2;
+    }
+
+    pdf.save(`asistencia-semana-${this.selectedWeek?.week_number || "X"}.pdf`);
+  }
+
   formatHour(hour: string): string | null {
     if (!hour || hour === "00:00:00") {
       return null; // Devuelve null si la hora es '00:00:00' o está vacía
@@ -338,5 +487,13 @@ export class ProcessWeeklyListsComponent {
     return this.selectedWeek.payroll_period?.end_date
       ? moment(this.selectedWeek.payroll_period?.end_date).format("LL")
       : "No disponible";
+  }
+
+  openProcessedListsModal() {
+    this.dialogService.open(ProcessedListDialogComponent, {
+      context: {},
+      closeOnBackdropClick: true, // Permitir el cierre al hacer clic fuera del modal
+      hasScroll: true,
+    });
   }
 }

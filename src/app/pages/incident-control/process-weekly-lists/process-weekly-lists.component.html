@@ -1,35 +1,36 @@
-<div class="container mt-4">
-  <!-- Selector de Semana Confirmada -->
-  <nb-card class="m-2 p-4">
-    <nb-card-header>
+<!-- Selector de Semana Confirmada -->
+<nb-card>
+  <nb-card-header>
+    <div class="d-flex justify-content-between align-items-center">
       <span class="title">Semanas Procesadas</span>
-    </nb-card-header>
+      <!-- Botón para ver Listas Semanales Procesadas -->
 
-    <div>
-      <div class="row mt-3">
-        <!-- Selector de Semana Confirmada -->
-        <div class="col-md-8 col-sm-12 mb-3 mb-sm-3">
-          <nb-select
-            [(selected)]="selectedWeek"
-            (selectedChange)="onWeekChange($event)"
-            placeholder="Seleccionar semana confirmada"
-            class="full-width"
+      <button nbButton status="info" (click)="openProcessedListsModal()">
+        Listas Semanales Procesadas
+      </button>
+    </div>
+  </nb-card-header>
+  <nb-card-body>
+    <!-- Selector de Semana Confirmada -->
+    <div class="col-md-5 col-sm-12 mb-3 mb-sm-3 px-0">
+      <nb-select
+        [(selected)]="selectedWeek"
+        (selectedChange)="onWeekChange($event)"
+        placeholder="Seleccionar semana confirmada"
+        class="full-width"
+      >
+        <nb-option *ngFor="let week of confirmedWeeks" [value]="week">
+          Semana {{ week.week_number }}
+          <span
+            *ngIf="
+              week?.payroll_period?.start_date && week?.payroll_period?.end_date
+            "
           >
-            <nb-option *ngFor="let week of confirmedWeeks" [value]="week">
-              Semana {{ week.week_number }}
-              <span
-                *ngIf="
-                  week?.payroll_period?.start_date &&
-                  week?.payroll_period?.end_date
-                "
-              >
-                ({{ week.payroll_period.start_date }} -
-                {{ week.payroll_period.end_date }})
-              </span>
-            </nb-option>
-          </nb-select>
-        </div>
-      </div>
+            ({{ week.payroll_period.start_date }} -
+            {{ week.payroll_period.end_date }})
+          </span>
+        </nb-option>
+      </nb-select>
     </div>
 
     <!-- Tabla de Asistencia de la Semana Confirmada -->
@@ -107,6 +108,16 @@
       <div class="row pl-3 pl-sm-4">
         <button
           nbButton
+          status="success"
+          size="medium"
+          (click)="generatePDF()"
+          class="mb-2 mb-sm-2 mr-2"
+        >
+          <nb-icon icon="printer-outline" class="me-2"></nb-icon> Imprimir
+        </button>
+
+        <button
+          nbButton
           status="primary"
           size="medium"
           [disabled]="isButtonDisabled"
@@ -126,5 +137,5 @@
         </button>
       </div>
     </div>
-  </nb-card>
-</div>
+  </nb-card-body>
+</nb-card>

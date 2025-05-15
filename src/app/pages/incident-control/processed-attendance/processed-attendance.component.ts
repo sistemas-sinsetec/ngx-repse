@@ -608,7 +608,7 @@ export class ProcessedAttendanceComponent {
       currentY = (pdf as any).lastAutoTable.finalY + 2;
     }
 
-    pdf.save("asistencia-semanal.pdf");
+    pdf.save(`asistencia-semana-${this.selectedWeek?.week_number || "X"}.pdf`);
     loading.dismiss();
   }
 

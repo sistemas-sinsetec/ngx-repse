@@ -471,6 +471,7 @@ export const MENU_ITEMS: CustomMenuItem[] = [
         title: "App",
         icon: "smartphone-outline",
         requiredLevel: ["adminS"], // Asegúrate de que esta propiedad esté definida
+        permission: { section: "Configuracion de sitio" },
         children: [
           {
             title: "Secciones visibles de empresas",
@@ -479,10 +480,18 @@ export const MENU_ITEMS: CustomMenuItem[] = [
           {
             title: "Empresas registradas",
             link: "/pages/settings/site/companies-info",
+            permission: {
+              section: "Configuracion de sitio",
+              subSection: "Empresas registradas en la página",
+            },
           },
           {
             title: "Registrar empresas",
             link: "/pages/settings/site/reg-company",
+            permission: {
+              section: "Configuracion de sitio",
+              subSection: "Registrar empresas",
+            },
           },
           {
             title: "Confirmar solicitudes premium",
