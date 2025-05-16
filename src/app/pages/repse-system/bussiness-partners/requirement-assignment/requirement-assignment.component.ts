@@ -1,4 +1,5 @@
-import { Component, OnInit } from "@angular/core";
+import { Component, OnInit, TemplateRef, ViewChild } from "@angular/core";
+import { NbDialogRef, NbDialogService } from "@nebular/theme";
 import { FormBuilder, FormGroup, Validators } from "@angular/forms";
 import { HttpClient, HttpParams } from "@angular/common/http";
 import { map } from "rxjs/operators";
@@ -61,10 +62,15 @@ export class RequirementAssignmentComponent implements OnInit {
   private bpUrl = `${environment.apiBaseUrl}/getBusinessPartner.php`;
   private fileFormatsUrl = `${environment.apiBaseUrl}/file_formats.php`;
 
+  @ViewChild("confirmOverrideModal")
+  confirmOverrideModalTemplate!: TemplateRef<any>;
+  overrideDialogRef!: NbDialogRef<any>;
+
   constructor(
     private fb: FormBuilder,
     private http: HttpClient,
-    private companyService: CompanyService
+    private companyService: CompanyService,
+    private dialogService: NbDialogService
   ) {
     this.minDate = moment();
 
@@ -186,6 +192,34 @@ export class RequirementAssignmentComponent implements OnInit {
     if (this.requirementsForm.invalid) return;
 
     const formValue = this.requirementsForm.value;
+    const existing = this.requirements.find(
+      (r) =>
+        r.documentType ===
+          this.documentTypes.find((d) => d.id === formValue.documentType)
+            ?.name &&
+        r.company_name ===
+          this.businessPartners.find((p) => p.id === formValue.provider)
+            ?.name &&
+        r.isActive
+    );
+
+    if (existing) {
+      this.overrideDialogRef = this.dialogService.open(
+        this.confirmOverrideModalTemplate,
+        {
+          context: {
+            name: existing.documentType,
+          },
+        }
+      );
+      return;
+    }
+
+    this.submitRequirement();
+  }
+
+  submitRequirement(): void {
+    const formValue = this.requirementsForm.value;
 
     const payload: any = {
       company_id: Number(formValue.provider),
@@ -209,18 +243,19 @@ export class RequirementAssignmentComponent implements OnInit {
       payload.periodicity_count = Number(formValue.periodAmount);
     }
 
-    if (payload.file_formats.length === 0) {
-      console.error("Debe seleccionar al menos un formato de archivo");
-      return;
-    }
-
     this.http.post(this.assignedRequirementsUrl, payload).subscribe({
       next: () => {
         this.loadAssignedRequirements();
         this.resetForm();
+        this.overrideDialogRef?.close();
       },
       error: (err) => console.error("Error guardando configuración:", err),
     });
+  }
+
+  confirmOverrideAndSubmit(): void {
+    this.overrideDialogRef?.close();
+    this.submitRequirement();
   }
 
   logSelectedDate(): void {
@@ -357,8 +392,8 @@ export class RequirementAssignmentComponent implements OnInit {
       minQuantity: 1,
       selected: true,
       expiryVisible: true,
-      expiryValue: null,
-      expiryUnit: null,
+      expiryValue: 1,
+      expiryUnit: "días",
     });
   }
 
@@ -377,7 +412,9 @@ export class RequirementAssignmentComponent implements OnInit {
 
   onExpiryVisibleChange(format: FileFormat): void {
     if (format.expiryVisible) {
-      // Si se activa la casilla, resetea los valores manuales
+      format.expiryValue = 1;
+      format.expiryUnit = "días";
+    } else {
       format.expiryValue = null;
       format.expiryUnit = null;
     }

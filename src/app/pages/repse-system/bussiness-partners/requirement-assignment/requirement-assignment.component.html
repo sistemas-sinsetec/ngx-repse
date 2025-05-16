@@ -166,6 +166,7 @@
                         [ngModelOptions]="{ standalone: true }"
                         placeholder="Cantidad"
                         class="mr-2"
+                        style="width: 80px"
                       />
                       <nb-select
                         [(ngModel)]="format.expiryUnit"
@@ -257,3 +258,35 @@
     </div>
   </nb-card-body>
 </nb-card>
+
+<ng-template #confirmOverrideModal let-data>
+  <nb-card>
+    <nb-card-header>¿Estás seguro que deseas continuar?</nb-card-header>
+    <nb-card-body>
+      <p>
+        Ya existe un requisito activo para
+        <strong>{{ data.name }}</strong> en este proveedor.
+      </p>
+      <p>
+        Si continúas, se desactivará el requisito anterior y se activará la
+        nueva configuración.
+      </p>
+      <p class="mb-0">
+        Los archivos ya subidos con la configuración anterior no se perderán.
+      </p>
+    </nb-card-body>
+    <nb-card-footer class="d-flex justify-content-end">
+      <button
+        nbButton
+        status="basic"
+        (click)="overrideDialogRef.close()"
+        class="mr-3"
+      >
+        Cancelar
+      </button>
+      <button nbButton status="primary" (click)="confirmOverrideAndSubmit()">
+        Continuar
+      </button>
+    </nb-card-footer>
+  </nb-card>
+</ng-template>

@@ -5,7 +5,7 @@ import {
   FormGroup,
   Validators,
 } from "@angular/forms";
-import { NbDialogRef, NbDialogService } from "@nebular/theme";
+import { NbDialogRef, NbDialogService, NbToastrService } from "@nebular/theme";
 import { HttpClient, HttpParams } from "@angular/common/http";
 import { forkJoin, Observable } from "rxjs";
 import { map } from "rxjs/operators";
@@ -65,6 +65,9 @@ export class RequirementsAssignmentComponent implements OnInit {
   private fileFormatsUrl = `${environment.apiBaseUrl}/file_formats.php`;
 
   @ViewChild("partnerModal") partnerModalTemplate!: TemplateRef<any>;
+  @ViewChild("confirmOverrideModal")
+  confirmOverrideModalTemplate!: TemplateRef<any>;
+
   selectedRequirement!: Requirement;
   allPartners: Partner[] = [];
   filteredPartners: Partner[] = [];
@@ -73,11 +76,13 @@ export class RequirementsAssignmentComponent implements OnInit {
   affiliationFilter = new FormControl("todos");
   allSelected = false;
   private dialogRef!: NbDialogRef<any>;
+  overrideDialogRef!: NbDialogRef<any>;
   expiryUnits = ["días", "semanas", "meses", "años"];
 
   constructor(
     private fb: FormBuilder,
     private dialogService: NbDialogService,
+    private toastrService: NbToastrService,
     private http: HttpClient,
     private companyService: CompanyService
   ) {
@@ -214,13 +219,37 @@ export class RequirementsAssignmentComponent implements OnInit {
     }
 
     const f = this.requirementsForm.value;
+    const documentTypeId = f.documentType;
+    const existing = this.requirements.find(
+      (r) =>
+        r.documentType ===
+          this.documentTypes.find((d) => d.id === documentTypeId)?.name &&
+        r.isActive
+    );
+
+    if (existing) {
+      this.overrideDialogRef = this.dialogService.open(
+        this.confirmOverrideModalTemplate,
+        {
+          context: {
+            name: existing.documentType,
+          },
+        }
+      );
+      return;
+    }
+
+    this.submitRequirement();
+  }
+
+  submitRequirement(): void {
+    const f = this.requirementsForm.value;
     const companyId = this.companyService.selectedCompany.id;
     const assigned_by = this.companyService.selectedCompany.id;
     const startDate = f.startDate
       ? moment(f.startDate).format("YYYY-MM-DD")
-      : moment().format("YYYY-MM-DD"); // <-- hoy si no hay fecha manual
+      : moment().format("YYYY-MM-DD");
 
-    // Obtener formatos seleccionados
     const selectedFormats = this.fileFormats.map((f) => {
       const found = this.availableFormats.find(
         (af) => af.extension === f.extension
@@ -276,13 +305,23 @@ export class RequirementsAssignmentComponent implements OnInit {
             periodType: "semanas",
           });
 
-          // Resetear los formatos
           this.fileFormats = [];
 
           this.loadRequirements();
+          this.toastrService.success(
+            "La nueva configuración ha sido guardada correctamente.",
+            "Requisito creado"
+          );
+
+          this.overrideDialogRef?.close();
         },
         error: (err) => console.error("Error guardando configuración", err),
       });
+  }
+
+  confirmOverrideAndSubmit(): void {
+    this.overrideDialogRef?.close();
+    this.submitRequirement();
   }
 
   logSelectedDate(): void {
@@ -482,8 +521,8 @@ export class RequirementsAssignmentComponent implements OnInit {
       selected: true,
       minQuantity: 1,
       expiryVisible: true,
-      expiryValue: null,
-      expiryUnit: null,
+      expiryValue: 1,
+      expiryUnit: "días",
     });
   }
 
@@ -503,7 +542,9 @@ export class RequirementsAssignmentComponent implements OnInit {
 
   onExpiryVisibleChange(format: FileFormat): void {
     if (format.expiryVisible) {
-      // Si se activa la casilla, resetea los valores manuales
+      format.expiryValue = 1;
+      format.expiryUnit = "días";
+    } else {
       format.expiryValue = null;
       format.expiryUnit = null;
     }
