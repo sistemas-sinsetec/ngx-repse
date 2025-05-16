@@ -299,7 +299,7 @@ switch ($method) {
                     default:
                         throw new Exception('Periodicidad no válida');
                 }
-                $fin = (clone $inicio)->add(new DateInterval($interval));
+                $fin = (clone $inicio)->add(new DateInterval($interval))->sub(new DateInterval('P1D'));
             } else {
                 $fin = new DateTime('9999-12-31');
             }

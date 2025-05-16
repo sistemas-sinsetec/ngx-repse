@@ -55,7 +55,7 @@ while ($config = $resultConfigs->fetch_assoc()) {
                 continue; // Tipo inválido
         }
 
-        $nuevaFin = (clone $nuevaInicio)->add(new DateInterval($interval));
+        $nuevaFin = (clone $nuevaInicio)->add($interval)->sub(new DateInterval('P1D'));
 
         // 4. Verificar si ya existe ese periodo
         $stmtCheck = $mysqli->prepare("
