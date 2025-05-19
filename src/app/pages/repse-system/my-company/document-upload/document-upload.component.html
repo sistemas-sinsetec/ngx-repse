@@ -93,9 +93,7 @@
                                 icon="upload-outline"
                                 class="mr-1"
                               ></nb-icon>
-                              <span>{{
-                                file.status === "pending" ? "Subir" : "Nuevo"
-                              }}</span>
+                              <span>Subir</span>
                             </button>
                             <button
                               nbButton
@@ -111,7 +109,7 @@
                                 icon="download-outline"
                                 class="mr-1"
                               ></nb-icon>
-                              <span>Descargar ZIP</span>
+                              <span>Descargar</span>
                             </button>
                           </div>
                         </td>
@@ -203,11 +201,7 @@
                                     icon="upload-outline"
                                     class="mr-1"
                                   ></nb-icon>
-                                  <span>{{
-                                    file.status === "pending"
-                                      ? "Subir"
-                                      : "Nuevo"
-                                  }}</span>
+                                  <span>Subir </span>
                                 </button>
                                 <button
                                   nbButton
@@ -436,16 +430,15 @@
 <ng-template #uploadModal let-ref="dialogRef">
   <nb-card class="mx-auto">
     <nb-card-header>
-      Subir Archivos - {{ selectedDocumentForUpload.name }}
-      <button
-        nbButton
-        ghost
-        size="small"
-        class="float-right"
-        (click)="closeUploadModal()"
-      >
-        <nb-icon icon="close-outline"></nb-icon>
-      </button>
+      <div class="d-flex justify-content-between align-items-center">
+        <span class="mr-4">
+          Subir Archivos - {{ selectedDocumentForUpload.name }}
+        </span>
+
+        <button nbButton ghost size="small" (click)="closeUploadModal()">
+          <nb-icon icon="close-outline"></nb-icon>
+        </button>
+      </div>
     </nb-card-header>
     <nb-card-body>
       <table class="table table-striped">
@@ -464,28 +457,31 @@
             </td>
 
             <td>
-              <button
-                nbButton
-                size="small"
-                status="primary"
-                (click)="triggerFileInput(format.code)"
-                [disabled]="
-                  isUploading ||
-                  isFormatComplete(selectedDocumentForUpload, format.code)
-                "
-                [nbSpinner]="isUploading"
-              >
-                <!-- Si no está cargando -->
-                <nb-icon *ngIf="!isUploading" icon="upload-outline"></nb-icon>
-                <span *ngIf="!isUploading">Subir</span>
-                <!-- Si está cargando -->
-                <nb-icon
-                  *ngIf="isUploading"
-                  icon="upload-outline"
-                  class="opacity-0"
-                ></nb-icon>
-                <span *ngIf="isUploading" class="opacity-0">Subir</span>
-              </button>
+              <div class="d-flex justify-content-center">
+                <button
+                  nbButton
+                  size="small"
+                  status="primary"
+                  outline
+                  (click)="triggerFileInput(format.code)"
+                  [disabled]="
+                    isUploading ||
+                    isFormatComplete(selectedDocumentForUpload, format.code)
+                  "
+                  [nbSpinner]="isUploading"
+                >
+                  <!-- Si no está cargando -->
+                  <nb-icon *ngIf="!isUploading" icon="upload-outline"></nb-icon>
+                  <!-- <span *ngIf="!isUploading">Subir</span> -->
+                  <!-- Si está cargando -->
+                  <nb-icon
+                    *ngIf="isUploading"
+                    icon="upload-outline"
+                    class="opacity-0"
+                  ></nb-icon>
+                  <!-- <span *ngIf="isUploading" class="opacity-0">Subir</span> -->
+                </button>
+              </div>
             </td>
           </tr>
         </tbody>
@@ -495,12 +491,11 @@
       <div class="d-flex justify-content-end">
         <button
           nbButton
-          status="warning"
-          outline
+          status="primary"
           *ngIf="selectedDocumentForUpload"
           (click)="openPreviewModal()"
         >
-          Revisar Archivos Cargados
+          Revisar ({{ previewFiles.length }})
         </button>
       </div>
     </nb-card-footer>
@@ -533,21 +528,26 @@
         </thead>
         <tbody>
           <tr *ngFor="let file of previewFiles">
-            <td>{{ file.name }}</td>
-            <td class="text-center">
+            <td class="align-middle">
+              {{ file.name }}
+            </td>
+            <td class="align-middle">
               {{ file.uploaded_at | date : "dd/MM/yyyy HH:mm" }}
             </td>
             <td class="text-center">
               <button
                 nbButton
+                outline
                 size="small"
                 status="primary"
                 (click)="downloadPreviewFile(file)"
+                class="mr-2"
               >
                 <nb-icon icon="download-outline"></nb-icon>
               </button>
               <button
                 nbButton
+                outline
                 size="small"
                 status="danger"
                 (click)="deletePreviewFile(file)"
@@ -566,11 +566,11 @@
       <div class="d-flex justify-content-end">
         <button
           nbButton
-          status="success"
+          status="primary"
           [disabled]="previewFiles.length === 0"
           (click)="confirmUploadSubmit()"
         >
-          Enviar a revisión ({{ previewFiles.length }})
+          Confirmar ({{ previewFiles.length }})
         </button>
       </div>
     </nb-card-footer>

@@ -179,12 +179,13 @@ export class DocumentUploadComponent {
     return `${totalDone}/${needed}`;
   }
 
-  prepareUpload(file: any): void {
+  async prepareUpload(file: any): Promise<void> {
     this.activeTab = "Regular";
     this.selectedDocumentForUpload = file;
     this.selectedPeriod = file.current_period ?? null;
 
     this.updateUploadProgress(file);
+    await this.loadUploadedFilesForPreview();
 
     this.dialogRefUpload = this.dialogService.open(this.uploadModal, {
       dialogClass: "custom-modal",
@@ -611,6 +612,39 @@ export class DocumentUploadComponent {
         },
         error: () => {
           this.toastrService.danger("No se pudo calcular el progreso", "Error");
+        },
+      });
+  }
+
+  private async loadUploadedFilesForPreview(): Promise<void> {
+    const doc = this.selectedDocumentForUpload;
+    if (!doc?.required_file_id || !doc?.current_period?.period_id) return;
+
+    this.documentService
+      .getUploadedFiles(doc.required_file_id, doc.current_period.period_id, [
+        "uploaded",
+      ])
+      .subscribe({
+        next: (files) => {
+          this.previewFiles = files.map((f: any) => ({
+            name: f.file_path.split("/").pop(),
+            path: f.file_path,
+            uploaded_at: f.uploaded_at,
+            format: f.file_ext.toLowerCase(),
+            required_file_id: f.required_file_id,
+          }));
+
+          const counts: Record<string, number> = {};
+          for (const file of this.previewFiles) {
+            counts[file.format] = (counts[file.format] || 0) + 1;
+          }
+
+          for (const fmt of doc.formats) {
+            fmt.temp_uploaded_count = counts[fmt.code.toLowerCase()] || 0;
+          }
+        },
+        error: () => {
+          this.toastrService.danger("Error al cargar archivos", "Error");
         },
       });
   }

@@ -10,16 +10,18 @@ if ($company_id <= 0) {
     exit;
 }
 
-// Consulta con filtro por company_id
+// Consulta con filtro por company_id e inclusión del asignador
 $stmt = $mysqli->prepare("
     SELECT ft.file_type_id, ft.name AS file_type_name,
            crf.required_file_id, crf.periodicity_type, crf.periodicity_count,
            dp.period_id, dp.start_date, dp.end_date,
-           cf.file_id, cf.file_path, cf.file_ext
+           cf.file_id, cf.file_path, cf.file_ext,
+           crf.assigned_by, c.nameCompany AS assigning_company_name
     FROM company_files cf
     LEFT JOIN document_periods dp ON cf.period_id = dp.period_id
     LEFT JOIN company_required_files crf ON dp.required_file_id = crf.required_file_id
     LEFT JOIN file_types ft ON crf.file_type_id = ft.file_type_id
+    LEFT JOIN companies c ON crf.assigned_by = c.id
     WHERE crf.company_id = ? AND cf.status = 'approved'
     ORDER BY ft.file_type_id, crf.required_file_id, dp.start_date, cf.file_ext
 ");
@@ -32,7 +34,18 @@ $catalog = [];
 
 while ($row = $result->fetch_assoc()) {
     $typeId = $row['file_type_id'];
-    $typeName = $row['file_type_name'];
+    $assignedBy = intval($row['assigned_by']);
+    $assigningCompany = $row['assigning_company_name'] ?? null;
+
+    // Agregar nombre de empresa asignadora si es distinta a la actual
+    if ($assignedBy !== $company_id && $assigningCompany) {
+        $typeKey = $typeId . '-' . $assignedBy;
+        $typeName = $row['file_type_name'] . ' (' . $assigningCompany . ')';
+    } else {
+        $typeKey = $typeId;
+        $typeName = $row['file_type_name'];
+    }
+
     $reqId = $row['required_file_id'];
     $periodicity = $row['periodicity_type'];
     $periodicityCount = $row['periodicity_count'];
@@ -52,41 +65,45 @@ while ($row = $result->fetch_assoc()) {
         $periodicityCount = '';
     }
 
-
-    if (!isset($catalog[$typeId])) {
-        $catalog[$typeId] = [
+    // Nivel 1: Tipo de documento
+    if (!isset($catalog[$typeKey])) {
+        $catalog[$typeKey] = [
             'name' => $typeName,
             'periodicities' => [],
         ];
     }
 
+    // Nivel 2: Periodicidad
     $periodicityKey = $reqId;
-    if (!isset($catalog[$typeId]['periodicities'][$periodicityKey])) {
-        $catalog[$typeId]['periodicities'][$periodicityKey] = [
+    if (!isset($catalog[$typeKey]['periodicities'][$periodicityKey])) {
+        $catalog[$typeKey]['periodicities'][$periodicityKey] = [
             'type' => $periodicity,
             'count' => $periodicityCount,
             'periods' => [],
         ];
     }
 
+    // Nivel 3: Periodo
     $periodKey = $periodId;
-    if (!isset($catalog[$typeId]['periodicities'][$periodicityKey]['periods'][$periodKey])) {
-        $catalog[$typeId]['periodicities'][$periodicityKey]['periods'][$periodKey] = [
+    if (!isset($catalog[$typeKey]['periodicities'][$periodicityKey]['periods'][$periodKey])) {
+        $catalog[$typeKey]['periodicities'][$periodicityKey]['periods'][$periodKey] = [
             'start_date' => $periodStart,
             'end_date' => $periodEnd,
             'formats' => [],
         ];
     }
 
+    // Nivel 4: Formato
     $formatKey = $format;
-    if (!isset($catalog[$typeId]['periodicities'][$periodicityKey]['periods'][$periodKey]['formats'][$formatKey])) {
-        $catalog[$typeId]['periodicities'][$periodicityKey]['periods'][$periodKey]['formats'][$formatKey] = [
+    if (!isset($catalog[$typeKey]['periodicities'][$periodicityKey]['periods'][$periodKey]['formats'][$formatKey])) {
+        $catalog[$typeKey]['periodicities'][$periodicityKey]['periods'][$periodKey]['formats'][$formatKey] = [
             'code' => $format,
             'files' => [],
         ];
     }
 
-    $catalog[$typeId]['periodicities'][$periodicityKey]['periods'][$periodKey]['formats'][$formatKey]['files'][] = [
+    // Nivel 5: Archivo
+    $catalog[$typeKey]['periodicities'][$periodicityKey]['periods'][$periodKey]['formats'][$formatKey]['files'][] = [
         'file_path' => $filePath,
     ];
 }
