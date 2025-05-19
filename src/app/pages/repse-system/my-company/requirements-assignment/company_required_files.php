@@ -88,7 +88,8 @@ switch ($method) {
             or respond(500, ['error' => $mysqli->error]);
         // bind dynamic
         $types = str_repeat('i', count($ids));
-        $fmtsStmt->bind_param(...refValues(array_merge([$types], $ids)));
+        $bindArgs1 = array_merge([$types], $ids);
+        $fmtsStmt->bind_param(...refValues($bindArgs1));
         $fmtsStmt->execute();
         $fmts = $fmtsStmt->get_result()->fetch_all(MYSQLI_ASSOC);
         $fmtsStmt->close();
@@ -109,7 +110,8 @@ switch ($method) {
         ";
         $persStmt = $mysqli->prepare($sqlPers)
             or respond(500, ['error' => $mysqli->error]);
-        $persStmt->bind_param(...refValues(array_merge([$types], $ids)));
+        $bindArgs2 = array_merge([$types], $ids);
+        $persStmt->bind_param(...refValues($bindArgs2));
         $persStmt->execute();
         $pers = $persStmt->get_result()->fetch_all(MYSQLI_ASSOC);
         $persStmt->close();
@@ -126,7 +128,8 @@ switch ($method) {
 
         $fmtCountsStmt = $mysqli->prepare($sqlFmtCounts)
             or respond(500, ['error' => $mysqli->error]);
-        $fmtCountsStmt->bind_param(...refValues(array_merge([$types], $ids)));
+        $bindArgs3 = array_merge([$types], $ids);
+        $fmtCountsStmt->bind_param(...refValues($bindArgs3));
         $fmtCountsStmt->execute();
         $fmtCounts = $fmtCountsStmt->get_result()->fetch_all(MYSQLI_ASSOC);
         $fmtCountsStmt->close();

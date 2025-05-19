@@ -169,6 +169,10 @@ export class DocumentService {
     return this.http.get<any[]>(`${this.base}/company_files.php`, { params });
   }
 
+  submitUploads(body: FormData): Observable<any> {
+    return this.http.post(`${this.base}/company_files.php`, body);
+  }
+
   approveDocument(fileId: number): Observable<any> {
     const body = new FormData();
     body.append("action", "approve");
@@ -184,11 +188,51 @@ export class DocumentService {
     return this.http.post<any>(`${this.base}/company_files.php`, body);
   }
 
+  getUploadedFiles(
+    requiredFileId: number,
+    periodId: number,
+    statuses: string[] = ["uploaded", "pending", "approved", "rejected"]
+  ): Observable<any[]> {
+    const params = new HttpParams()
+      .set("required_file_id", requiredFileId.toString())
+      .set("period_id", periodId.toString())
+      .set("status", statuses.join(","));
+    return this.http.get<any[]>(`${this.base}/company_files.php`, { params });
+  }
+
+  deleteUploadedFile(filePath: string): Observable<any> {
+    const body = new FormData();
+    body.append("action", "delete_uploaded");
+    body.append("file_path", filePath);
+    return this.http.post<any>(`${this.base}/company_files.php`, body);
+  }
+
+  submitUploadedFiles(
+    requiredFileId: number,
+    periodId: number
+  ): Observable<any> {
+    const body = new FormData();
+    body.append("action", "submit_uploaded");
+    body.append("required_file_id", requiredFileId.toString());
+    body.append("period_id", periodId.toString());
+    return this.http.post<any>(`${this.base}/company_files.php`, body);
+  }
+
   acknowledgeDocument(fileId: number): Observable<any> {
     const body = new FormData();
     body.append("action", "acknowledge");
     body.append("file_id", fileId.toString());
     return this.http.post<any>(`${this.base}/company_files.php`, body);
+  }
+
+  downloadApprovedZip(requiredFileId: number): void {
+    const url = `${this.base}/company_files_download_complete.php?required_file_id=${requiredFileId}`;
+    const fileName = `documentos_completos_${requiredFileId}.zip`;
+
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = fileName;
+    a.click();
   }
 
   getFullCatalog(companyId: number): Observable<any> {

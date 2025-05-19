@@ -34,15 +34,21 @@ interface TreeNode<T> {
   styleUrls: ["./document-upload.component.scss"],
 })
 export class DocumentUploadComponent {
-  @ViewChild("downloadModal") downloadModal!: TemplateRef<any>;
   @ViewChild("uploadModal") uploadModal!: TemplateRef<any>;
   @ViewChild("fileInput") fileInput: any;
+  @ViewChild("previewModal") previewModal!: TemplateRef<any>;
 
   // Tabs
   activeTab: "Regular" | "Con retraso" | "Rechazados" = "Regular";
 
   // Data from dashboard endpoint
   requiredFiles: any[] = [];
+  previewFiles: {
+    name: string;
+    path: string;
+    uploaded_at: string;
+    format: string;
+  }[] = [];
 
   assignedByMe: any[] = [];
   assignedByOthers: { company_id: number; company: string; files: any[] }[] =
@@ -70,11 +76,12 @@ export class DocumentUploadComponent {
   rejectedFiles: any[] = [];
 
   // Download modal
-  fileNodes: TreeNode<FileNode>[] = [];
+
   selectedNodes: TreeNode<FileNode>[] = [];
   treeGridDataSource!: NbTreeGridDataSource<FileNode>;
   modalTitle = "";
   dialogRef!: NbDialogRef<any>;
+  dialogRefUpload!: NbDialogRef<any>;
   allColumns = ["select", "name", "actions"];
   activeTabIndex: any;
 
@@ -176,7 +183,10 @@ export class DocumentUploadComponent {
     this.activeTab = "Regular";
     this.selectedDocumentForUpload = file;
     this.selectedPeriod = file.current_period ?? null;
-    this.dialogRef = this.dialogService.open(this.uploadModal, {
+
+    this.updateUploadProgress(file);
+
+    this.dialogRefUpload = this.dialogService.open(this.uploadModal, {
       dialogClass: "custom-modal",
       closeOnBackdropClick: false,
       autoFocus: true,
@@ -196,78 +206,114 @@ export class DocumentUploadComponent {
   }
 
   async onFileSelected(event: any): Promise<void> {
-    const f = event.target.files?.[0] as File;
-    this.selectedFile = f || null;
+    const files: File[] = Array.from(event.target.files);
     event.target.value = "";
 
-    if (!this.selectedFile || !this.selectedFormat) return;
+    const selectedDoc = this.selectedDocumentForUpload ?? this.selectedDocument;
+    const format = selectedDoc.formats.find(
+      (f) => f.code === this.selectedFormat
+    );
+    const currentCount = format?.uploaded_count || 0;
+    const max = format?.min_required || 1;
+    const remaining = max - currentCount;
 
-    const fileType = this.selectedDocumentForUpload?.name?.toLowerCase() || "";
-    const format = this.selectedFormat.toLowerCase();
-
-    if (fileType.includes("repse") && format === "pdf") {
-      const formatMeta = this.selectedDocumentForUpload.formats.find(
-        (f) => f.code === this.selectedFormat
+    if (files.length > remaining) {
+      this.toastrService.warning(
+        `Solo se permiten ${remaining} archivo(s) más para este formato.`
       );
+      return;
+    }
 
-      console.log("→ Format meta:", formatMeta);
-      console.log("→ manual_expiry_value:", formatMeta?.manual_expiry_value);
-      console.log("→ manual_expiry_unit:", formatMeta?.manual_expiry_unit);
+    for (let i = 0; i < Math.min(remaining, files.length); i++) {
+      await this.uploadSingleFile(files[i]);
+      const fmt = selectedDoc.formats.find(
+        (f: any) => f.code === this.selectedFormat
+      );
+      if (fmt) {
+        fmt.temp_uploaded_count = (fmt.temp_uploaded_count || 0) + 1;
+      }
+    }
+
+    // Actualizar solo el documento que estás viendo
+    this.updateUploadProgress(
+      this.selectedDocumentForUpload ?? this.selectedDocument
+    );
+
+    this.selectedFile = files[0];
+  }
+
+  async uploadSingleFile(file: File): Promise<void> {
+    const fileName = file.name.toLowerCase();
+    const fileExt = fileName.split(".").pop();
+    const selectedDoc = this.selectedDocumentForUpload ?? this.selectedDocument;
+    const fileTypeName = selectedDoc?.name?.toLowerCase();
+
+    if (fileTypeName?.includes("repse") && fileExt === "pdf") {
+      const formatConfig = selectedDoc.formats.find(
+        (f: any) => f.code.toLowerCase() === "pdf"
+      );
 
       const expiryOffset = {
-        value: formatMeta?.manual_expiry_value,
-        unit: formatMeta?.manual_expiry_unit,
+        value: formatConfig?.manual_expiry_value || 0,
+        unit: formatConfig?.manual_expiry_unit || "años",
       };
 
-      if (!formatMeta?.manual_expiry_value || !formatMeta?.manual_expiry_unit) {
-        this.toastrService.warning(
-          `El formato "${this.selectedFormat}" no tiene configurada una vigencia (manual_expiry_value / manual_expiry_unit).`,
-          "Configuración faltante"
-        );
-        return;
-      }
-
-      const issueAndExpiry = await this.documentService.extractRepseDates(
-        this.selectedFile,
-        expiryOffset
-      );
-
-      this.tempIssueDate = issueAndExpiry.issueDate || null;
-      this.tempExpiryDate = issueAndExpiry.expiryDate || null;
-
-      const result = await this.documentService.validateRepsePdf(
-        this.selectedFile,
+      const validation = await this.documentService.validateRepsePdf(
+        file,
         expiryOffset,
-        this.selectedDocumentForUpload?.current_period
+        this.selectedPeriod
       );
 
-      if (!result.valid) {
-        this.toastrService.warning(
-          result.message || "Archivo no válido",
-          "Advertencia"
+      if (!validation.valid) {
+        this.toastrService.danger(
+          validation.message || "Documento inválido",
+          "Error"
         );
         return;
       }
 
-      if (result.warning) {
-        this.toastrService.info(result.warning, "Atención");
-      }
-
-      const currentPeriod = this.selectedDocumentForUpload.current_period;
-      const periodEnd = new Date(currentPeriod?.end_date);
-
-      if (issueAndExpiry.expiryDate && issueAndExpiry.expiryDate < periodEnd) {
-        this.toastrService.warning(
-          "El documento expirará antes de que termine el período actual",
-          "Archivo no válido"
-        );
+      if (validation.warning) {
+        this.toastrService.warning(validation.warning, "Advertencia");
         return;
       }
+
+      const { issueDate, expiryDate } =
+        await this.documentService.extractRepseDates(file, expiryOffset);
+
+      if (issueDate) this.tempIssueDate = issueDate;
+      if (expiryDate) this.tempExpiryDate = expiryDate;
     }
 
-    if (this.activeTab === "Regular") {
-      this.uploadDocument();
-    }
+    const fd = new FormData();
+    fd.append("file", file);
+
+    const selectedPeriod = this.selectedPeriod;
+
+    fd.append(
+      "required_file_id",
+      selectedDoc?.required_file_id.toString() || ""
+    );
+    fd.append("period_id", selectedPeriod?.period_id.toString() || "");
+    fd.append("format_code", this.selectedFormat);
+
+    this.isUploading = true;
+
+    return new Promise((resolve) => {
+      this.documentService.uploadFile(fd).subscribe({
+        next: () => {
+          this.toastrService.success("Archivo cargado", file.name);
+          if (selectedDoc) {
+            this.updateUploadProgress(selectedDoc);
+          }
+          resolve();
+        },
+        error: () => {
+          this.toastrService.danger("Error al subir archivo", file.name);
+          resolve();
+        },
+        complete: () => (this.isUploading = false),
+      });
+    });
   }
 
   canSelectFile(): boolean {
@@ -305,11 +351,14 @@ export class DocumentUploadComponent {
     const file = this.selectedFile;
     const fileName = file.name.toLowerCase();
     const fileExt = fileName.split(".").pop();
-    const fileTypeName = this.selectedDocument?.name?.toLowerCase();
 
-    // Verificar si es REPSE y PDF
+    const selectedDoc = this.selectedDocumentForUpload ?? this.selectedDocument;
+    const selectedPeriod = this.selectedPeriod;
+    const fileTypeName = selectedDoc?.name?.toLowerCase();
+
+    // Validación REPSE
     if (fileTypeName?.includes("repse") && fileExt === "pdf") {
-      const formatConfig = this.selectedDocument.formats.find(
+      const formatConfig = selectedDoc.formats.find(
         (f: any) => f.code.toLowerCase() === "pdf"
       );
 
@@ -318,28 +367,35 @@ export class DocumentUploadComponent {
         unit: formatConfig?.manual_expiry_unit || "años",
       };
 
-      const result = await this.documentService.extractRepseDates(
+      const validation = await this.documentService.validateRepsePdf(
         file,
-        expiryOffset
+        expiryOffset,
+        selectedPeriod
       );
 
-      if (!result.issueDate || !result.expiryDate) {
+      if (!validation.valid) {
         this.toastrService.danger(
-          "No se pudo leer la fecha de expedición del REPSE.",
+          validation.message || "Documento inválido",
           "Error"
         );
         return;
       }
+
+      if (validation.warning) {
+        this.toastrService.warning(validation.warning, "Advertencia");
+      }
+
+      const { issueDate, expiryDate } =
+        await this.documentService.extractRepseDates(file, expiryOffset);
+
+      if (issueDate) this.tempIssueDate = issueDate;
+      if (expiryDate) this.tempExpiryDate = expiryDate;
     }
 
-    // Subida normal
+    // Subida
     this.isUploading = true;
     const fd = new FormData();
     fd.append("file", file);
-
-    const selectedDoc = this.selectedDocumentForUpload ?? this.selectedDocument;
-    const selectedPeriod = this.selectedPeriod;
-
     fd.append(
       "required_file_id",
       selectedDoc?.required_file_id.toString() || ""
@@ -434,119 +490,6 @@ export class DocumentUploadComponent {
     );
   }
 
-  // ── Download modal ───────────────────────────────────────────
-
-  openDownloadModal(file: any): void {
-    this.modalTitle = `Documentos disponibles - ${file.name}`;
-    this.documentService
-      .getFileStructure(file.required_file_id, file.current_period?.period_id)
-      .subscribe((structure) => {
-        this.fileNodes = this.transformToTreeNodes(structure);
-        this.treeGridDataSource = this.dataSourceBuilder.create(this.fileNodes);
-        this.selectedNodes = [];
-        this.dialogRef = this.dialogService.open(this.downloadModal, {
-          context: { fileStructure: structure },
-          dialogClass: "custom-modal",
-          closeOnBackdropClick: false,
-          autoFocus: true,
-        });
-      });
-  }
-
-  transformToTreeNodes(structure: any): TreeNode<FileNode>[] {
-    return structure.periods.map((period: any) => ({
-      data: {
-        name: `${period.start_date} - ${period.end_date}`,
-        type: "period",
-      },
-      expanded: true,
-      children: period.formats.map((fmt: any) => ({
-        data: { name: fmt.code, type: "format" },
-        expanded: true,
-        children: fmt.files.map((f: any) => ({
-          data: {
-            name: f.file_path.split("/").pop(),
-            type: "file",
-            path: f.file_path,
-          },
-        })),
-      })),
-    }));
-  }
-
-  getIconForType(type: string): string {
-    return {
-      period: "calendar-outline",
-      format: "folder-outline",
-      file: "file-text-outline",
-    }[type]!;
-  }
-
-  // Selection in tree
-  toggleSelection(node: TreeNode<FileNode>): void {
-    if (node.data.type !== "file") return;
-    const id = node.data.path;
-    const idx = this.selectedNodes.findIndex((n) => n.data.path === id);
-    if (idx >= 0) this.selectedNodes.splice(idx, 1);
-    else this.selectedNodes.push(node);
-  }
-
-  isSelected(node: TreeNode<FileNode>): boolean {
-    return this.selectedNodes.some((n) => n.data.path === node.data.path);
-  }
-
-  get allSelected(): boolean {
-    const total = this.countFileNodes(this.fileNodes);
-    return this.selectedNodes.length === total && total > 0;
-  }
-
-  get someSelected(): boolean {
-    const total = this.countFileNodes(this.fileNodes);
-    return this.selectedNodes.length > 0 && this.selectedNodes.length < total;
-  }
-
-  toggleAllSelection(): void {
-    if (this.allSelected) this.selectedNodes = [];
-    else this.collectAllFileNodes(this.fileNodes, this.selectedNodes);
-  }
-
-  private collectAllFileNodes(
-    nodes: TreeNode<FileNode>[],
-    coll: TreeNode<FileNode>[]
-  ): void {
-    nodes.forEach((n) => {
-      if (n.data.type === "file") coll.push(n);
-      if (n.children) this.collectAllFileNodes(n.children, coll);
-    });
-  }
-
-  private countFileNodes(nodes: TreeNode<FileNode>[]): number {
-    let c = 0;
-    nodes.forEach((n) => {
-      if (n.data.type === "file") c++;
-      if (n.children) c += this.countFileNodes(n.children);
-    });
-    return c;
-  }
-
-  downloadSingleFile(node: TreeNode<FileNode>): void {
-    if (node.data.type === "file" && node.data.path) {
-      this.documentService.downloadFile(node.data.path);
-    }
-  }
-
-  downloadSelected(): void {
-    this.selectedNodes.forEach((n) => {
-      if (n.data.type === "file" && n.data.path) {
-        this.documentService.downloadFile(n.data.path);
-      }
-    });
-    this.toastrService.success(
-      `Descargando ${this.selectedNodes.length} archivos`,
-      "Éxito"
-    );
-  }
-
   getFileAccept(): string {
     // Si estamos en “Con retraso”, sólo el formato elegido
     if (this.activeTab === "Con retraso") {
@@ -564,17 +507,17 @@ export class DocumentUploadComponent {
       .join(",");
   }
 
-  getNodePadding(node: any): number {
-    // Nivel 0 (period): 12px
-    // Nivel 1 (format): 32px
-    // Nivel 2 (file): 52px
-    return node.level * 20 + 12;
-  }
-
   closeModal(): void {
     if (this.dialogRef) {
       this.dialogRef.close();
       this.dialogRef = null!;
+    }
+  }
+
+  closeUploadModal(): void {
+    if (this.dialogRefUpload) {
+      this.dialogRefUpload.close();
+      this.dialogRefUpload = null!;
     }
   }
 
@@ -634,6 +577,134 @@ export class DocumentUploadComponent {
 
   isFormatComplete(file: any, formatCode: string): boolean {
     const format = file.formats.find((f: any) => f.code === formatCode);
-    return format ? format.uploaded_count >= format.min_required : false;
+    if (!format) return false;
+
+    const currentCount = format.temp_uploaded_count || 0;
+    return currentCount >= format.min_required;
+  }
+
+  private updateUploadProgress(doc: any): void {
+    if (!doc?.required_file_id || !doc?.current_period?.period_id) return;
+
+    this.documentService
+      .getUploadedFiles(doc.required_file_id, doc.current_period.period_id, [
+        "uploaded",
+        "pending",
+        "approved",
+        "rejected",
+      ])
+      .subscribe({
+        next: (files) => {
+          const counts: Record<string, number> = {};
+
+          for (const f of files) {
+            const ext = (f.file_ext || "").toLowerCase();
+
+            if (f.required_file_id === doc.required_file_id) {
+              counts[ext] = (counts[ext] || 0) + 1;
+            }
+          }
+
+          for (const fmt of doc.formats) {
+            fmt.temp_uploaded_count = counts[fmt.code.toLowerCase()] || 0;
+          }
+        },
+        error: () => {
+          this.toastrService.danger("No se pudo calcular el progreso", "Error");
+        },
+      });
+  }
+
+  openPreviewModal(): void {
+    const doc = this.selectedDocumentForUpload;
+
+    if (!doc?.required_file_id || !doc?.current_period?.period_id) {
+      this.toastrService.warning(
+        "No se encontró información del documento",
+        "Error"
+      );
+      return;
+    }
+
+    this.documentService
+      .getUploadedFiles(doc.required_file_id, doc.current_period.period_id, [
+        "uploaded",
+      ])
+      .subscribe({
+        next: (files) => {
+          this.previewFiles = files.map((f: any) => ({
+            name: f.file_path.split("/").pop(),
+            path: f.file_path,
+            uploaded_at: f.uploaded_at,
+            format: f.file_ext.toLowerCase(),
+            required_file_id: f.required_file_id,
+          }));
+
+          const counts: Record<string, number> = {};
+          for (const file of this.previewFiles) {
+            counts[file.format] = (counts[file.format] || 0) + 1;
+          }
+
+          for (const fmt of doc.formats) {
+            fmt.temp_uploaded_count = counts[fmt.code.toLowerCase()] || 0;
+          }
+
+          this.dialogRef = this.dialogService.open(this.previewModal, {
+            dialogClass: "custom-modal",
+            closeOnBackdropClick: false,
+          });
+        },
+        error: () => {
+          this.toastrService.danger(
+            "Error al cargar archivos cargados",
+            "Error"
+          );
+        },
+      });
+  }
+
+  downloadPreviewFile(file: any): void {
+    if (file?.path) {
+      this.documentService.downloadFile(file.path);
+    } else {
+      this.toastrService.warning("Ruta inválida del archivo", "Aviso");
+    }
+  }
+
+  downloadZip(requiredFileId: number): void {
+    this.documentService.downloadApprovedZip(requiredFileId);
+  }
+
+  deletePreviewFile(file: any): void {
+    this.documentService.deleteUploadedFile(file.path).subscribe({
+      next: () => {
+        this.toastrService.success("Archivo eliminado", "Éxito");
+        this.previewFiles = this.previewFiles.filter(
+          (f) => f.path !== file.path
+        );
+        this.updateUploadProgress(this.selectedDocumentForUpload);
+      },
+      error: () => {
+        this.toastrService.danger("No se pudo eliminar el archivo", "Error");
+      },
+    });
+  }
+
+  confirmUploadSubmit(): void {
+    const doc = this.selectedDocumentForUpload;
+    if (!doc?.required_file_id || !doc?.current_period?.period_id) return;
+
+    this.documentService
+      .submitUploadedFiles(doc.required_file_id, doc.current_period.period_id)
+      .subscribe({
+        next: () => {
+          this.toastrService.success("Archivos enviados a revisión", "Éxito");
+          this.closeModal();
+          this.loadDocuments();
+        },
+        error: () => {
+          this.toastrService.danger("Error al enviar archivos", "Error");
+        },
+      });
   }
 }

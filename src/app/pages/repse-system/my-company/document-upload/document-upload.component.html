@@ -102,18 +102,16 @@
                               fullWidth
                               outline
                               size="small"
-                              [status]="
-                                file.status === 'pending' ? 'success' : 'basic'
-                              "
-                              [disabled]="!file.hasFiles"
-                              (click)="openDownloadModal(file)"
+                              status="success"
+                              [disabled]="file.status !== 'complete'"
+                              (click)="downloadZip(file.required_file_id)"
                               class="d-flex align-items-center mt-2"
                             >
                               <nb-icon
                                 icon="download-outline"
                                 class="mr-1"
                               ></nb-icon>
-                              <span>Descargar</span>
+                              <span>Descargar ZIP</span>
                             </button>
                           </div>
                         </td>
@@ -216,20 +214,16 @@
                                   fullWidth
                                   outline
                                   size="small"
-                                  [status]="
-                                    file.status === 'pending'
-                                      ? 'success'
-                                      : 'basic'
-                                  "
-                                  [disabled]="!file.hasFiles"
-                                  (click)="openDownloadModal(file)"
+                                  status="success"
+                                  [disabled]="file.status !== 'complete'"
+                                  (click)="downloadZip(file.required_file_id)"
                                   class="d-flex align-items-center mt-2"
                                 >
                                   <nb-icon
                                     icon="download-outline"
                                     class="mr-1"
                                   ></nb-icon>
-                                  <span>Descargar</span>
+                                  <span>Descargar ZIP</span>
                                 </button>
                               </div>
                             </td>
@@ -428,6 +422,7 @@
       <input
         #fileInput
         type="file"
+        multiple
         style="display: none"
         (change)="onFileSelected($event)"
         [accept]="getFileAccept()"
@@ -437,136 +432,7 @@
   </nb-card>
 </div>
 
-<!-- Modal para descargar archivos -->
-<ng-template #downloadModal let-ref="dialogRef">
-  <nb-card class="custom-dialog mx-auto">
-    <nb-card-header>
-      {{ modalTitle }}
-      <button
-        nbButton
-        ghost
-        size="small"
-        class="float-right"
-        (click)="closeModal()"
-      >
-        <nb-icon icon="close-outline"></nb-icon>
-      </button>
-    </nb-card-header>
-    <nb-card-body class="p-0">
-      <div class="table-responsive">
-        <table [nbTreeGrid]="treeGridDataSource" class="table mb-0">
-          <tr nbTreeGridHeaderRow *nbTreeGridHeaderRowDef="allColumns"></tr>
-          <tr
-            nbTreeGridRow
-            *nbTreeGridRowDef="let row; columns: allColumns"
-          ></tr>
-
-          <!-- Columna de selección -->
-          <ng-container [nbTreeGridColumnDef]="'select'">
-            <th
-              nbTreeGridHeaderCell
-              *nbTreeGridHeaderCellDef
-              class="text-center col-2 col-sm-1"
-            >
-              <nb-checkbox
-                [checked]="allSelected"
-                [indeterminate]="someSelected"
-                (checkedChange)="toggleAllSelection()"
-              >
-              </nb-checkbox>
-            </th>
-            <td
-              nbTreeGridCell
-              *nbTreeGridCellDef="let row"
-              class="text-center p-2"
-            >
-              <nb-checkbox
-                *ngIf="row.data.type === 'file'"
-                [checked]="isSelected(row)"
-                (checkedChange)="toggleSelection(row)"
-              >
-              </nb-checkbox>
-            </td>
-          </ng-container>
-
-          <!-- Columna principal  -->
-          <ng-container [nbTreeGridColumnDef]="'name'">
-            <th
-              nbTreeGridHeaderCell
-              *nbTreeGridHeaderCellDef
-              class="col-8 col-sm-9"
-            >
-              Documento
-            </th>
-            <td nbTreeGridCell *nbTreeGridCellDef="let row">
-              <div
-                class="d-flex align-items-center"
-                [style.padding-left.px]="getNodePadding(row)"
-              >
-                <nb-tree-grid-row-toggle
-                  [expanded]="row.expanded"
-                  *ngIf="row.data.type !== 'file'"
-                  class="me-2"
-                >
-                </nb-tree-grid-row-toggle>
-                <nb-icon
-                  [icon]="getIconForType(row.data.type)"
-                  class="me-2"
-                ></nb-icon>
-                <span class="text-truncate">{{ row.data.name }}</span>
-              </div>
-            </td>
-          </ng-container>
-
-          <!-- Columna de acciones ancho mínimo) -->
-          <ng-container [nbTreeGridColumnDef]="'actions'">
-            <th
-              nbTreeGridHeaderCell
-              *nbTreeGridHeaderCellDef
-              class="text-center col-2 col-sm-2"
-            >
-              Acciones
-            </th>
-            <td
-              nbTreeGridCell
-              *nbTreeGridCellDef="let row"
-              class="text-center w-10"
-            >
-              <button
-                *ngIf="row.data.type === 'file'"
-                nbButton
-                size="small"
-                status="primary"
-                class="my-1"
-                (click)="downloadSingleFile(row)"
-              >
-                <nb-icon icon="download-outline"></nb-icon>
-              </button>
-            </td>
-          </ng-container>
-        </table>
-      </div>
-    </nb-card-body>
-    <nb-card-footer class="d-flex justify-content-between align-items-center">
-      <div>
-        <span class="text-muted">
-          {{ selectedNodes.length }} archivos seleccionados
-        </span>
-      </div>
-      <div>
-        <button
-          nbButton
-          status="success"
-          [disabled]="selectedNodes.length === 0"
-          (click)="downloadSelected()"
-        >
-          Descargar selección ({{ selectedNodes.length }})
-        </button>
-      </div>
-    </nb-card-footer>
-  </nb-card>
-</ng-template>
-
+<!-- Modal para subir archivos -->
 <ng-template #uploadModal let-ref="dialogRef">
   <nb-card class="mx-auto">
     <nb-card-header>
@@ -576,7 +442,7 @@
         ghost
         size="small"
         class="float-right"
-        (click)="closeModal()"
+        (click)="closeUploadModal()"
       >
         <nb-icon icon="close-outline"></nb-icon>
       </button>
@@ -594,12 +460,9 @@
           <tr *ngFor="let format of selectedDocumentForUpload.formats">
             <td class="text-center">{{ format.code }}</td>
             <td class="text-center">
-              {{
-                getUploadedCount(selectedDocumentForUpload, format.code) +
-                  "/" +
-                  format.min_required
-              }}
+              {{ format.temp_uploaded_count || 0 }}/{{ format.min_required }}
             </td>
+
             <td>
               <button
                 nbButton
@@ -628,5 +491,88 @@
         </tbody>
       </table>
     </nb-card-body>
+    <nb-card-footer>
+      <div class="d-flex justify-content-end">
+        <button
+          nbButton
+          status="warning"
+          outline
+          *ngIf="selectedDocumentForUpload"
+          (click)="openPreviewModal()"
+        >
+          Revisar Archivos Cargados
+        </button>
+      </div>
+    </nb-card-footer>
+  </nb-card>
+</ng-template>
+
+<!-- Modal de previsualización de archivos cargados -->
+<ng-template #previewModal let-ref="dialogRef">
+  <nb-card class="mx-auto custom-modal">
+    <nb-card-header>
+      Previsualizar archivos cargados
+      <button
+        nbButton
+        ghost
+        size="small"
+        class="float-right"
+        (click)="closeModal()"
+      >
+        <nb-icon icon="close-outline"></nb-icon>
+      </button>
+    </nb-card-header>
+    <nb-card-body>
+      <table class="table table-hover">
+        <thead>
+          <tr class="text-center">
+            <th>Archivo</th>
+            <th>Fecha de carga</th>
+            <th>Acciones</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let file of previewFiles">
+            <td>{{ file.name }}</td>
+            <td class="text-center">
+              {{ file.uploaded_at | date : "dd/MM/yyyy HH:mm" }}
+            </td>
+            <td class="text-center">
+              <button
+                nbButton
+                size="small"
+                status="primary"
+                (click)="downloadPreviewFile(file)"
+              >
+                <nb-icon icon="download-outline"></nb-icon>
+              </button>
+              <button
+                nbButton
+                size="small"
+                status="danger"
+                (click)="deletePreviewFile(file)"
+              >
+                <nb-icon icon="trash-2-outline"></nb-icon>
+              </button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+      <div *ngIf="previewFiles.length === 0" class="text-center mt-3">
+        <nb-alert status="info">No hay archivos cargados aún.</nb-alert>
+      </div>
+    </nb-card-body>
+    <nb-card-footer class="text-end">
+      <div class="d-flex justify-content-end">
+        <button
+          nbButton
+          status="success"
+          [disabled]="previewFiles.length === 0"
+          (click)="confirmUploadSubmit()"
+        >
+          Enviar a revisión ({{ previewFiles.length }})
+        </button>
+      </div>
+    </nb-card-footer>
   </nb-card>
 </ng-template>
