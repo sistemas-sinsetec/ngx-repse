@@ -56,7 +56,6 @@
                 nbInput
                 type="date"
                 formControlName="startDate"
-                [min]="minDate.format('YYYY-MM-DD')"
                 readonly
                 (click)="forceDatePicker($event)"
                 (keydown)="preventManualInput($event)"
@@ -70,8 +69,72 @@
         </div>
 
         <div class="row mb-3">
+          <!-- Generación manual de periodos -->
+          <div class="col-6" *ngIf="showManualPeriodOptions()">
+            <div>
+              <nb-checkbox
+                [(ngModel)]="manualGeneration.automatic"
+                [ngModelOptions]="{ standalone: true }"
+                (checkedChange)="onAutoGenerationChange($event)"
+                [checked]="true"
+              >
+                Generar periodos automáticamente
+              </nb-checkbox>
+            </div>
+
+            <div class="mt-2 pr-0" *ngIf="!manualGeneration.automatic">
+              <nb-form-field>
+                <label>Cantidad de periodos a generar</label>
+                <input
+                  nbInput
+                  fullWidth
+                  type="number"
+                  min="1"
+                  [(ngModel)]="manualGeneration.count"
+                  (ngModelChange)="generatePeriodPreview()"
+                  [ngModelOptions]="{ standalone: true }"
+                  placeholder="Ej. 5"
+                />
+                <div
+                  *ngIf="previewGeneratedPeriods.length"
+                  class="mt-2 small text-muted"
+                >
+                  <strong>Periodos que se generarían:</strong>
+                  <span *ngFor="let p of periodSegments.first">
+                    ({{ p.start }} al {{ p.end }}),
+                  </span>
+
+                  <span
+                    *ngIf="periodSegments.middle.length"
+                    [nbTooltip]="middlePeriodsTooltip"
+                    tooltipTrigger="hover"
+                    class="text-primary"
+                    style="cursor: pointer"
+                  >
+                    ...
+                  </span>
+
+                  <span *ngIf="periodSegments.last">
+                    , ({{ periodSegments.last.start }} al
+                    {{ periodSegments.last.end }})
+                  </span>
+                </div>
+              </nb-form-field>
+            </div>
+
+            <div
+              class="col-12"
+              *ngIf="manualValidationError"
+              style="color: red"
+            >
+              {{ manualValidationError }}
+            </div>
+          </div>
+        </div>
+
+        <div class="row mb-3">
           <div class="col-12">
-            <h5>Formatos de archivo requeridos</h5>
+            <h5 class="my-2">Formatos de archivo requeridos</h5>
             <p class="text-muted small">
               Seleccione los formatos aceptados y especifique la cantidad mínima
               requerida para cada uno.
@@ -171,6 +234,7 @@
 
               <button
                 nbButton
+                outline
                 type="button"
                 status="info"
                 size="small"
@@ -218,8 +282,8 @@
               <th>Periódico</th>
               <th>Periodicidad</th>
               <th>Cant. Mínima</th>
-              <th>Socios</th>
-              <th>Acciones</th>
+              <!-- <th>Socios</th> -->
+              <!-- <th>Acciones</th> -->
             </tr>
           </thead>
           <tbody>
@@ -235,12 +299,12 @@
                 </span>
               </td>
               <td class="align-middle">{{ req.minQuantity }}</td>
-              <td class="align-middle">{{ req.partnerCount }} socios</td>
-              <td>
+              <!-- <td class="align-middle">{{ req.partnerCount }} socios</td> -->
+              <!-- <td>
                 <button nbButton size="small" (click)="openPartnerModal(req)">
                   Gestionar Socios
                 </button>
-              </td>
+              </td> -->
             </tr>
           </tbody>
         </table>

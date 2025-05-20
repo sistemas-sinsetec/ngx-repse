@@ -288,37 +288,136 @@ switch ($method) {
         /* ── Transacción ──────────────────────────────────────────────── */
         $mysqli->begin_transaction();
         try {
+            // Verificar si hay traslape con otras configuraciones activas del mismo documento
+            $check = $mysqli->prepare("
+                SELECT dp.start_date, dp.end_date
+                FROM document_periods dp
+                JOIN company_required_files crf ON crf.required_file_id = dp.required_file_id
+                WHERE crf.company_id = ?
+                AND crf.file_type_id = ?
+                AND crf.is_active = 1
+            ");
+            $check->bind_param('ii', $company_id, $file_type_id);
+            $check->execute();
+            $res = $check->get_result();
+            $check->close();
+
+            $new_periods = [];
+            $preview_start = new DateTime($start_date);
+            $cnt = $periodicity_count;
+
+            switch (strtolower($periodicity_type)) {
+                case 'días':
+                    $interval = new DateInterval("P{$cnt}D");
+                    break;
+                case 'semanas':
+                    $interval = new DateInterval("P" . ($cnt * 7) . "D");
+                    break;
+                case 'meses':
+                    $interval = new DateInterval("P{$cnt}M");
+                    break;
+                case 'años':
+                    $interval = new DateInterval("P{$cnt}Y");
+                    break;
+                default:
+                    respond(400, ['error' => 'Periodicidad no válida']);
+            }
+
+            $manual = $data['manual_generation'] ?? false;
+            if ($manual) {
+                $rangeStart = new DateTime($data['manual_range']['start_date']);
+                $rangeEnd = isset($data['manual_range']['end_date']) ? new DateTime($data['manual_range']['end_date']) : null;
+                $maxCount = isset($data['manual_range']['period_count']) ? (int) $data['manual_range']['period_count'] : null;
+
+                $currentStart = clone $rangeStart;
+                $generated = 0;
+
+                while (true) {
+                    $currentEnd = (clone $currentStart)->add($interval)->sub(new DateInterval('P1D'));
+
+                    if ($rangeEnd && $currentStart > $rangeEnd)
+                        break;
+                    if ($maxCount && $generated >= $maxCount)
+                        break;
+
+                    $new_periods[] = ['start' => $currentStart, 'end' => $currentEnd];
+                    $currentStart = (clone $currentEnd)->modify('+1 day');
+                    $generated++;
+                }
+            } else {
+                $currentEnd = (clone $preview_start)->add($interval)->sub(new DateInterval('P1D'));
+                $new_periods[] = ['start' => $preview_start, 'end' => $currentEnd];
+            }
+
+            // Validar traslapes
+            while ($row = $res->fetch_assoc()) {
+                $exist_start = new DateTime($row['start_date']);
+                $exist_end = new DateTime($row['end_date']);
+
+                foreach ($new_periods as $np) {
+                    if (
+                        ($np['start'] <= $exist_end) &&
+                        ($np['end'] >= $exist_start)
+                    ) {
+                        respond(409, ['error' => 'Conflicto con otros periodos activos para este documento.']);
+                    }
+                }
+            }
+
             /* 1) Desactivar versión anterior --------------------------- */
             $off = $mysqli->prepare("
-            UPDATE company_required_files
-               SET is_active = 0,
-                   end_date  = IF(end_date IS NULL OR end_date > ?,
-                                   DATE_SUB(?, INTERVAL 1 DAY),
-                                   end_date)
-             WHERE company_id   = ?
-               AND file_type_id = ?
-               AND is_active    = 1
-        ");
+                UPDATE company_required_files
+                SET is_active = 0,
+                    end_date  = IF(end_date IS NULL OR end_date > ?,
+                                    DATE_SUB(?, INTERVAL 1 DAY),
+                                    end_date)
+                WHERE company_id   = ?
+                AND file_type_id = ?
+                AND is_active = 1
+                AND start_date <= ?
+            ");
             $off->bind_param(
-                'ssii',
+                'sssii',
+                $start_date,
                 $start_date,
                 $start_date,
                 $company_id,
                 $file_type_id
             );
+
             $off->execute();
             $off->close();
 
             /* 2) Insertar cabecera ------------------------------------- */
+            $isActiveNew = 1;
+
+            $check = $mysqli->prepare("
+                SELECT COUNT(*) as count
+                FROM company_required_files
+                WHERE company_id = ?
+                AND file_type_id = ?
+                AND is_active = 1
+                AND start_date > ?
+            ");
+            $check->bind_param('iis', $company_id, $file_type_id, $start_date);
+            $check->execute();
+            $check->bind_result($futureCount);
+            $check->fetch();
+            $check->close();
+
+            if ($futureCount > 0) {
+                $isActiveNew = 0;
+            }
+
             $ins = $mysqli->prepare("
                 INSERT INTO company_required_files
                     (company_id, assigned_by, file_type_id, is_periodic,
                     periodicity_type, periodicity_count,
                     min_documents_needed, start_date, end_date, is_active)
-                VALUES (?,?,?,?,?,?,?,?,?, 1)
+                VALUES (?,?,?,?,?,?,?,?,?,?)
             ");
             $ins->bind_param(
-                'iiiisiiss',  // Nota el tipo adicional 'i' para assigned_by
+                'iiiisiissi',
                 $company_id,
                 $assigned_by,
                 $file_type_id,
@@ -327,7 +426,8 @@ switch ($method) {
                 $periodicity_count,
                 $min_docs,
                 $start_date,
-                $end_date
+                $end_date,
+                $isActiveNew
             );
             $ins->execute();
             $required_file_id = $ins->insert_id;
@@ -351,59 +451,136 @@ switch ($method) {
             }
             $rf->close();
 
-            /* 4) Crear primer periodo (si aplica) ----------------------*/
+            /* 4) Crear periodos según rango o cantidad manual (si aplica) ---------- */
+            $periodsToInsert = [];
+
             if ($isPeriodic) {
                 $inicio = new DateTime($start_date);
                 $cnt = $periodicity_count;
                 switch (strtolower($periodicity_type)) {
                     case 'días':
-                        $interval = "P{$cnt}D";
+                        $interval = new DateInterval("P{$cnt}D");
                         break;
                     case 'semanas':
-                        $interval = "P{$cnt}W";
+                        $interval = new DateInterval("P" . ($cnt * 7) . "D");
                         break;
                     case 'meses':
-                        $interval = "P{$cnt}M";
+                        $interval = new DateInterval("P{$cnt}M");
                         break;
                     case 'años':
-                        $interval = "P{$cnt}Y";
+                        $interval = new DateInterval("P{$cnt}Y");
                         break;
                     default:
                         throw new Exception('Periodicidad no válida');
                 }
-                $fin = (clone $inicio)->add(new DateInterval($interval))->sub(new DateInterval('P1D'));
+
+                $manual = $data['manual_generation'] ?? false;
+                if ($manual) {
+                    $rangeStart = new DateTime($data['manual_range']['start_date']);
+                    $rangeEnd = isset($data['manual_range']['end_date']) ? new DateTime($data['manual_range']['end_date']) : null;
+                    $maxCount = isset($data['manual_range']['period_count']) ? (int) $data['manual_range']['period_count'] : null;
+
+                    $currentStart = clone $rangeStart;
+                    $generated = 0;
+
+                    while (true) {
+                        $currentEnd = (clone $currentStart)->add($interval)->sub(new DateInterval('P1D'));
+
+                        if ($rangeEnd && $currentStart > $rangeEnd)
+                            break;
+                        if ($maxCount && $generated >= $maxCount)
+                            break;
+
+                        $periodsToInsert[] = [
+                            'start' => $currentStart->format('Y-m-d'),
+                            'end' => $currentEnd->format('Y-m-d'),
+                        ];
+
+                        $currentStart = (clone $currentEnd)->modify('+1 day');
+                        $generated++;
+                    }
+                } else {
+                    // Generar todos los periodos posibles desde el inicio hasta hoy
+                    $today = new DateTimeImmutable('today');
+                    $currentStart = clone $inicio;
+
+                    while ($currentStart < $today) {
+                        $currentEnd = (clone $currentStart)->add($interval)->sub(new DateInterval('P1D'));
+
+                        if ($currentStart > $today) {
+                            break;
+                        }
+
+                        $periodsToInsert[] = [
+                            'start' => $currentStart->format('Y-m-d'),
+                            'end' => $currentEnd->format('Y-m-d'),
+                        ];
+
+                        $currentStart = (clone $currentEnd)->modify('+1 day');
+                    }
+                }
             } else {
-                $inicio = new DateTime($start_date);
-                $fin = new DateTime('9999-12-31');
+                $periodsToInsert[] = [
+                    'start' => $start_date,
+                    'end' => '9999-12-31',
+                ];
             }
 
+            /* ✅ Validar que no se traslapen periodos existentes */
+            if (!empty($periodsToInsert)) {
+                $checkSql = "
+                    SELECT start_date, end_date
+                    FROM document_periods
+                    WHERE required_file_id IN (
+                        SELECT required_file_id
+                        FROM company_required_files
+                        WHERE company_id = ? AND file_type_id = ?
+                    )
+                ";
+                $checkStmt = $mysqli->prepare($checkSql);
+                $checkStmt->bind_param('ii', $company_id, $file_type_id);
+                $checkStmt->execute();
+                $existingPeriods = $checkStmt->get_result()->fetch_all(MYSQLI_ASSOC);
+                $checkStmt->close();
+
+                foreach ($periodsToInsert as $newPeriod) {
+                    $newStart = new DateTime($newPeriod['start']);
+                    $newEnd = new DateTime($newPeriod['end']);
+
+                    foreach ($existingPeriods as $existing) {
+                        $existStart = new DateTime($existing['start_date']);
+                        $existEnd = new DateTime($existing['end_date']);
+
+                        if ($newStart <= $existEnd && $newEnd >= $existStart) {
+                            $mysqli->rollback();
+                            respond(400, [
+                                'error' => 'Los periodos generados se traslapan con una configuración existente del mismo documento.'
+                            ]);
+                        }
+                    }
+                }
+            }
+
+            /* 5) Insertar periodos ------------------------------------------------- */
             $p = $mysqli->prepare("
-            INSERT INTO document_periods
-                  (required_file_id, start_date, end_date, created_at)
-            VALUES (?,?,?,NOW())
+                INSERT INTO document_periods
+                    (required_file_id, start_date, end_date, created_at)
+                VALUES (?,?,?,NOW())
             ");
-            $p->bind_param(
-                'iss',
-                $required_file_id,
-                $inicio->format('Y-m-d'),
-                $fin->format('Y-m-d')
-            );
-            $p->execute();
+            foreach ($periodsToInsert as $period) {
+                $p->bind_param('iss', $required_file_id, $period['start'], $period['end']);
+                $p->execute();
+            }
             $p->close();
 
-
-            /* 5) Commit ------------------------------------------------ */
-            $mysqli->commit();
-            respond(201, [
-                'success' => true,
-                'required_file_id' => $required_file_id,
-                'min_documents' => $min_docs
-            ]);
 
         } catch (Throwable $e) {
             $mysqli->rollback();
             respond(500, ['error' => $e->getMessage()]);
         }
+
+        $mysqli->commit();
+        respond(200, ['success' => true, 'required_file_id' => $required_file_id]);
 
     /*──────────────────────────────────────────────────────────────────────*/
     default:

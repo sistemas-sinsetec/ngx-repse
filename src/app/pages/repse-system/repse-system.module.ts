@@ -19,6 +19,7 @@ import {
   NbTreeGridModule,
   NbTabsetModule,
   NbSpinnerModule,
+  NbTooltipModule,
 } from "@nebular/theme";
 
 import { NbMomentDateModule } from "@nebular/moment";
@@ -66,6 +67,7 @@ import { DocumentCatalogComponent } from "./my-company/document-catalog/document
     NbIconModule,
     NbTabsetModule,
     NbTagModule,
+    NbTooltipModule,
     NbTreeGridModule,
     NbSpinnerModule,
   ],

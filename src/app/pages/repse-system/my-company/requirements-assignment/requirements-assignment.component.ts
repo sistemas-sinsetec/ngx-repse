@@ -12,6 +12,7 @@ import { map } from "rxjs/operators";
 import { environment } from "../../../../../environments/environment";
 import { CompanyService } from "../../../../services/company.service";
 import * as moment from "moment";
+import { combineLatest } from "rxjs";
 
 interface Requirement {
   id: number;
@@ -54,6 +55,12 @@ export class RequirementsAssignmentComponent implements OnInit {
   requirements: Requirement[] = [];
   minDate: moment.Moment;
   fileFormats: FileFormat[] = [];
+  manualGeneration = {
+    automatic: true,
+    count: null as number | null,
+  };
+
+  manualValidationError: string | null = null;
 
   documentTypes: { id: number; name: string }[] = [];
   periodTypes = ["semanas", "meses", "años"];
@@ -78,6 +85,8 @@ export class RequirementsAssignmentComponent implements OnInit {
   private dialogRef!: NbDialogRef<any>;
   overrideDialogRef!: NbDialogRef<any>;
   expiryUnits = ["días", "semanas", "meses", "años"];
+
+  previewGeneratedPeriods: { start: string; end: string }[] = [];
 
   constructor(
     private fb: FormBuilder,
@@ -130,8 +139,16 @@ export class RequirementsAssignmentComponent implements OnInit {
     this.loadDocumentTypes();
     this.loadRequirements();
     this.loadFileFormats();
-    // Podrías cargar los formatos desde el servicio si los tienes allí
-    // this.loadFileFormats();
+
+    combineLatest([
+      this.requirementsForm.get("startDate")!.valueChanges,
+      this.requirementsForm.get("periodAmount")!.valueChanges,
+      this.requirementsForm.get("periodType")!.valueChanges,
+    ]).subscribe(() => {
+      if (!this.manualGeneration.automatic) {
+        this.generatePeriodPreview();
+      }
+    });
   }
 
   availableFormats: { id: number; name: string; extension: string }[] = [];
@@ -205,15 +222,28 @@ export class RequirementsAssignmentComponent implements OnInit {
     if (this.requirementsForm.invalid) return;
 
     if (this.fileFormats.length === 0) {
+      this.manualValidationError = null;
       console.error("Debe agregar al menos un formato.");
       return;
     }
 
     for (const f of this.fileFormats) {
       if (!f.expiryVisible && (!f.expiryValue || !f.expiryUnit)) {
+        this.manualValidationError = null;
         console.error(
           `Formato ${f.name} requiere cantidad y unidad de vigencia.`
         );
+        return;
+      }
+    }
+
+    // Validaciones adicionales para generación manual
+    this.manualValidationError = null;
+    if (!this.manualGeneration.automatic) {
+      const count = this.manualGeneration.count;
+      if (!count || count < 1) {
+        this.manualValidationError =
+          "Debes indicar una cantidad válida de periodos.";
         return;
       }
     }
@@ -227,7 +257,7 @@ export class RequirementsAssignmentComponent implements OnInit {
         r.isActive
     );
 
-    if (existing) {
+    if (existing && !this.isNewPeriodBefore(existing)) {
       this.overrideDialogRef = this.dialogService.open(
         this.confirmOverrideModalTemplate,
         {
@@ -264,7 +294,7 @@ export class RequirementsAssignmentComponent implements OnInit {
       };
     });
 
-    const payload = {
+    const payload: any = {
       company_id: companyId,
       assigned_by: assigned_by,
       file_type_id: f.documentType,
@@ -275,6 +305,15 @@ export class RequirementsAssignmentComponent implements OnInit {
       start_date: startDate,
       end_date: "",
     };
+
+    // Si se indicó generación manual
+    if (!this.manualGeneration.automatic) {
+      payload.manual_generation = true;
+      payload.manual_range = {
+        start_date: startDate,
+        period_count: this.manualGeneration.count,
+      };
+    }
 
     this.http
       .post<{ success: boolean; required_file_id: number }>(
@@ -307,6 +346,11 @@ export class RequirementsAssignmentComponent implements OnInit {
 
           this.fileFormats = [];
 
+          this.manualGeneration = {
+            automatic: true,
+            count: null,
+          };
+
           this.loadRequirements();
           this.toastrService.success(
             "La nueva configuración ha sido guardada correctamente.",
@@ -315,8 +359,95 @@ export class RequirementsAssignmentComponent implements OnInit {
 
           this.overrideDialogRef?.close();
         },
-        error: (err) => console.error("Error guardando configuración", err),
+        error: (err) => {
+          const errorMsg =
+            err?.error?.error ||
+            "Ocurrió un error al guardar la configuración.";
+          this.toastrService.danger(errorMsg, "Error");
+          console.error("Error guardando configuración", err);
+        },
       });
+  }
+
+  onAutoGenerationChange(isAutomatic: boolean): void {
+    this.manualGeneration.automatic = isAutomatic;
+
+    if (isAutomatic) {
+      this.manualGeneration.count = null;
+      this.previewGeneratedPeriods = [];
+    } else {
+      this.generatePeriodPreview();
+    }
+  }
+
+  generatePeriodPreview(): void {
+    this.previewGeneratedPeriods = [];
+
+    const f = this.requirementsForm.value;
+    const count = this.manualGeneration.count;
+    if (!count || count < 1) return;
+
+    const periodAmount = f.periodAmount;
+    const periodType = f.periodType;
+    const startRaw = f.startDate;
+
+    if (!periodAmount || !periodType || !startRaw) return;
+
+    const start = moment(startRaw).startOf("day");
+    let interval: moment.Duration;
+
+    switch (periodType.toLowerCase()) {
+      case "días":
+        interval = moment.duration(periodAmount, "days");
+        break;
+      case "semanas":
+        interval = moment.duration(periodAmount * 7, "days");
+        break;
+      case "meses":
+        interval = moment.duration(periodAmount, "months");
+        break;
+      case "años":
+        interval = moment.duration(periodAmount, "years");
+        break;
+      default:
+        return;
+    }
+
+    let currentStart = start.clone();
+    for (let i = 0; i < count; i++) {
+      const currentEnd = currentStart.clone().add(interval).subtract(1, "day");
+      this.previewGeneratedPeriods.push({
+        start: currentStart.format("YYYY/MM/DD"),
+        end: currentEnd.format("YYYY/MM/DD"),
+      });
+      currentStart = currentEnd.clone().add(1, "day");
+    }
+  }
+
+  get periodSegments() {
+    const periods = this.previewGeneratedPeriods;
+    if (periods.length === 0) return { first: [], middle: [], last: null };
+
+    if (periods.length <= 4) {
+      return { first: periods, middle: [], last: null };
+    }
+
+    const first = periods.slice(0, 2);
+    const middle = periods.slice(2, -1);
+    const last = periods[periods.length - 1];
+
+    return { first, middle, last };
+  }
+
+  get middlePeriodsTooltip(): string {
+    return this.periodSegments.middle
+      .map((p) => `(${p.start} al ${p.end})`)
+      .join(", ");
+  }
+
+  private isNewPeriodBefore(existing: Requirement): boolean {
+    const newStart = this.requirementsForm.get("startDate")?.value;
+    return moment(newStart).isBefore(existing.startDate, "day");
   }
 
   confirmOverrideAndSubmit(): void {
@@ -370,14 +501,13 @@ export class RequirementsAssignmentComponent implements OnInit {
   }
 
   validateDate(): void {
-    const selectedDate = this.requirementsForm.get("startDate")?.value;
-    const minDate = this.minDate.format("YYYY-MM-DD");
+    //TODO: Eliminar esta función del workflow
+  }
 
-    if (selectedDate && selectedDate < minDate) {
-      // Si la fecha es menor al mínimo, la resetea
-      this.requirementsForm.get("startDate")?.setValue(minDate);
-      console.warn("Fecha no válida. Se ajustó al mínimo permitido.");
-    }
+  showManualPeriodOptions(): boolean {
+    const start = this.requirementsForm.get("startDate")?.value;
+    if (!start) return false;
+    return moment(start).isBefore(moment(), "day");
   }
 
   toggleActive(req: Requirement): void {
