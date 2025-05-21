@@ -19,6 +19,7 @@
         placeholder="Seleccionar semana procesada"
         class="full-width"
       >
+        <!--hola-->
         <nb-option *ngFor="let week of processedWeeks" [value]="week">
           Semana {{ week.week_number }}
           <span *ngIf="week?.start_date && week?.end_date">
