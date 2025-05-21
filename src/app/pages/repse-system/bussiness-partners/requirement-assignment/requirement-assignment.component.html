@@ -30,15 +30,18 @@
           <tbody>
             <tr *ngFor="let req of requirements">
               <td class="align-middle">{{ req.company_name }}</td>
-              <td class="align-middle">{{ req.documentType }}</td>
+              <td class="align-middle">{{ req.name }}</td>
               <td class="text-center align-middle">
-                {{ req.isPeriodic ? "Sí" : "No" }}
+                {{ req.is_periodic ? "Sí" : "No" }}
               </td>
               <td class="text-center align-middle">
                 {{
-                  !req.isPeriodic || req.periodType === null
+                  !req.is_periodic || req.periodicity_type === null
                     ? "Sin periodicidad"
-                    : "Cada " + req.periodAmount + " " + req.periodType
+                    : "Cada " +
+                      req.periodicity_count +
+                      " " +
+                      req.periodicity_type
                 }}
               </td>
               <td class="text-center">

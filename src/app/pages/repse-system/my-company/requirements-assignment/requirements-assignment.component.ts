@@ -1,10 +1,5 @@
 import { Component, OnInit, TemplateRef, ViewChild } from "@angular/core";
-import {
-  FormBuilder,
-  FormControl,
-  FormGroup,
-  Validators,
-} from "@angular/forms";
+import { FormControl } from "@angular/forms";
 import { NbDialogRef, NbDialogService, NbToastrService } from "@nebular/theme";
 import { HttpClient, HttpParams } from "@angular/common/http";
 import { forkJoin, Observable } from "rxjs";
@@ -12,28 +7,11 @@ import { map } from "rxjs/operators";
 import { environment } from "../../../../../environments/environment";
 import { CompanyService } from "../../../../services/company.service";
 import * as moment from "moment";
-import { combineLatest } from "rxjs";
-
-interface Requirement {
-  id: number;
-  documentType: string;
-  isActive: boolean;
-  isPeriodic: boolean;
-  periodAmount?: number;
-  periodType?: string;
-  startDate?: moment.Moment;
-  minQuantity: number;
-  partners: string[];
-  partnerCount: number;
-  formats?: any[];
-}
-
-interface Partner {
-  id: number;
-  name: string;
-  affiliation: string;
-  selected: boolean;
-}
+import {
+  Requirement,
+  Partner,
+  DocumentService,
+} from "../../../../services/repse/document.service";
 
 @Component({
   selector: "ngx-requirements-assignment",
@@ -60,95 +38,42 @@ export class RequirementsAssignmentComponent implements OnInit {
   dialogRef!: NbDialogRef<any>;
   overrideDialogRef!: NbDialogRef<any>;
 
-  private fileTypesUrl = `${environment.apiBaseUrl}/file_types.php`;
-  private reqFilesUrl = `${environment.apiBaseUrl}/company_required_files.php`;
-  private visibUrl = `${environment.apiBaseUrl}/required_file_visibilities.php`;
-  private bpUrl = `${environment.apiBaseUrl}/getBusinessPartner.php`;
-  private fileFormatsUrl = `${environment.apiBaseUrl}/file_formats.php`;
-
   constructor(
-    private http: HttpClient,
     private dialogService: NbDialogService,
     private toastrService: NbToastrService,
-    private companyService: CompanyService
+    private companyService: CompanyService,
+    private documentService: DocumentService
   ) {}
 
   ngOnInit(): void {
     this.companyId = this.companyService.selectedCompany.id;
-    this.loadDocumentTypes();
-    this.loadFileFormats();
+    this.documentService.getDocumentTypes().subscribe({
+      next: (types) => (this.documentTypes = types),
+      error: (err) => console.error("Error cargando tipos de documento", err),
+    });
+
+    this.documentService.getAvailableFormats().subscribe({
+      next: (formats) => (this.availableFormats = formats),
+      error: (err) => console.error("Error cargando formatos", err),
+    });
+
     this.loadRequirements();
   }
 
-  public loadRequirements(): void {
-    const params = new HttpParams().set(
-      "company_id",
-      this.companyId.toString()
-    );
-
-    this.http.get<any[]>(this.reqFilesUrl, { params }).subscribe({
-      next: (configs) => {
-        this.requirements = configs.map((cfg) => ({
-          id: cfg.required_file_id,
-          documentType: cfg.name,
-          isActive: true,
-          isPeriodic: cfg.is_periodic === 1,
-          periodAmount: cfg.periodicity_count,
-          periodType: cfg.periodicity_type,
-          startDate: cfg.current_period
-            ? moment(cfg.current_period.start_date)
-            : undefined,
-          minQuantity: cfg.min_documents_needed,
-          partners: [],
-          partnerCount: cfg.partner_count,
-          formats: cfg.formats,
-        }));
-      },
+  loadRequirements(): void {
+    this.documentService.getCompanyRequirements(this.companyId).subscribe({
+      next: (reqs) => (this.requirements = reqs),
       error: (err) => console.error("Error cargando requisitos", err),
     });
   }
 
-  private loadDocumentTypes(): void {
-    this.http.get<any[]>(this.fileTypesUrl).subscribe({
-      next: (types) => {
-        this.documentTypes = types
-          .filter((t) => Number(t.is_active) === 1)
-          .map((t) => ({
-            id: Number(t.file_type_id),
-            name: t.name,
-          }));
-      },
-      error: (err) => console.error("Error cargando tipos de documento", err),
-    });
-  }
-
-  private loadFileFormats(): void {
-    this.http
-      .get<{ code: string; name: string; mime: string }[]>(this.fileFormatsUrl)
-      .subscribe({
-        next: (list) => {
-          this.availableFormats = list.map((f, i) => ({
-            id: i + 1,
-            name: f.name,
-            extension: f.code,
-          }));
-        },
-        error: (err) => console.error("Error cargando formatos", err),
-      });
-  }
-
-  /** ▼▼▼ Funciones para visibilidad de socios ▼▼▼ */
+  /*  Funciones para visibilidad de socios  */
 
   openPartnerModal(req: Requirement): void {
     this.selectedRequirement = req;
 
-    const vis$ = this.http.get<
-      { visibility_id: number; provider_id: number; is_visible: number }[]
-    >(this.visibUrl, {
-      params: new HttpParams().set("required_file_id", req.id.toString()),
-    });
-
-    const bp$ = this.loadBusinessPartners();
+    const vis$ = this.documentService.getVisibilities(req.id);
+    const bp$ = this.documentService.getBusinessPartners(this.companyId);
 
     forkJoin([bp$, vis$]).subscribe({
       next: ([partners, vis]) => {
@@ -171,23 +96,6 @@ export class RequirementsAssignmentComponent implements OnInit {
       error: (err) =>
         console.error("Error cargando socios o visibilidades", err),
     });
-  }
-
-  private loadBusinessPartners(): Observable<Partner[]> {
-    const params = new HttpParams().set(
-      "association_id",
-      this.companyId.toString()
-    );
-    return this.http.get<any[]>(this.bpUrl, { params }).pipe(
-      map((list) =>
-        list.map((p) => ({
-          id: +p.businessPartnerId,
-          name: p.nameCompany,
-          affiliation: p.roleName,
-          selected: false,
-        }))
-      )
-    );
   }
 
   filterPartners(): void {
@@ -228,20 +136,15 @@ export class RequirementsAssignmentComponent implements OnInit {
     );
 
     toAdd.forEach((p) => {
-      this.http
-        .post(this.visibUrl, {
-          required_file_id: this.selectedRequirement.id,
-          provider_id: p.id,
-          is_visible: 1,
-        })
+      this.documentService
+        .addVisibility(this.selectedRequirement.id, p.id)
         .subscribe();
     });
 
     toRemove.forEach((id) => {
-      const params = new HttpParams()
-        .set("required_file_id", this.selectedRequirement.id.toString())
-        .set("provider_id", id.toString());
-      this.http.delete(this.visibUrl, { params }).subscribe();
+      this.documentService
+        .removeVisibility(this.selectedRequirement.id, id)
+        .subscribe();
     });
 
     this.selectedRequirement.partnerCount = this.allPartners.filter(
