@@ -34,6 +34,7 @@ import { RejectionCommentComponent } from "./my-company/rejection-comment/reject
 import { RequirementAssignmentComponent } from "./bussiness-partners/requirement-assignment/requirement-assignment.component";
 import { CompaniesDocumentsViewComponent } from "./bussiness-partners/companies-documents-view/companies-documents-view.component";
 import { DocumentCatalogComponent } from "./my-company/document-catalog/document-catalog.component";
+import { RequirementAssignmentFormComponent } from './shared/requirement-assignment-form/requirement-assignment-form.component';
 
 @NgModule({
   declarations: [
@@ -45,6 +46,7 @@ import { DocumentCatalogComponent } from "./my-company/document-catalog/document
     RequirementAssignmentComponent,
     CompaniesDocumentsViewComponent,
     DocumentCatalogComponent,
+    RequirementAssignmentFormComponent,
   ],
   imports: [
     CommonModule,

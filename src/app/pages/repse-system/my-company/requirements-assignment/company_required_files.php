@@ -504,7 +504,7 @@ switch ($method) {
                     $today = new DateTimeImmutable('today');
                     $currentStart = clone $inicio;
 
-                    while ($currentStart < $today) {
+                    while ($currentStart <= $today) {
                         $currentEnd = (clone $currentStart)->add($interval)->sub(new DateInterval('P1D'));
 
                         if ($currentStart > $today) {

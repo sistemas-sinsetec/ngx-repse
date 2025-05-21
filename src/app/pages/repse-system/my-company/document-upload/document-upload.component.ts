@@ -101,7 +101,7 @@ export class DocumentUploadComponent {
     this.loading = true;
     const myCompanyId = Number(this.companyService.selectedCompany.id);
 
-    this.documentService.getRequiredFiles(myCompanyId).subscribe({
+    this.documentService.getOwnRequiredFiles(myCompanyId).subscribe({
       next: (files) => {
         // Forzar tipo numérico para evitar errores por comparación estricta
         const myCompanyFiles = files.filter(

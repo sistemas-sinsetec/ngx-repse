@@ -107,12 +107,24 @@ export class DocumentService {
   /**
    * GET dashboard of required files for a company.
    */
-  getRequiredFiles(companyId: number): Observable<RequiredFile[]> {
+  getOwnRequiredFiles(companyId: number): Observable<RequiredFile[]> {
     const params = new HttpParams().set("company_id", companyId.toString());
     return this.http.get<RequiredFile[]>(
       `${this.base}/company_required_files.php`,
       { params }
     );
+  }
+
+  getAssignedRequiredFiles(assignedById: number): Observable<RequiredFile[]> {
+    const params = new HttpParams().set("assigned_by", assignedById.toString());
+    return this.http.get<RequiredFile[]>(
+      `${this.base}/company_required_files.php`,
+      { params }
+    );
+  }
+
+  saveRequiredFile(data: any): Observable<any> {
+    return this.http.post(`${this.base}/company_required_files.php`, data);
   }
 
   /**

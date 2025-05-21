@@ -1,0 +1,271 @@
+<form [formGroup]="form" (ngSubmit)="submit()">
+  <!-- Selector de proveedor (solo si es para socios comerciales) -->
+  <div class="row mb-3" *ngIf="!isForCompany">
+    <div class="col-md-6">
+      <nb-select formControlName="provider" placeholder="Proveedor" fullWidth>
+        <nb-option *ngFor="let provider of providers" [value]="provider.id">
+          {{ provider.name }}
+        </nb-option>
+      </nb-select>
+    </div>
+  </div>
+
+  <!-- Documento + ¿Periódico? -->
+  <div class="row mb-3">
+    <div class="col-md-6 mb-3 mb-sm-0">
+      <nb-select
+        formControlName="documentType"
+        placeholder="Tipo de documento"
+        fullWidth
+      >
+        <nb-option *ngFor="let type of documentTypes" [value]="type.id">
+          {{ type.name }}
+        </nb-option>
+      </nb-select>
+    </div>
+    <div class="col-md-6 d-flex align-items-center">
+      <nb-checkbox formControlName="isPeriodic">¿Es periódico?</nb-checkbox>
+    </div>
+  </div>
+
+  <!-- Periodicidad -->
+  <div class="row mb-3" *ngIf="form.get('isPeriodic')?.value">
+    <div class="col-md-3 mb-3">
+      <nb-form-field>
+        <label>Cantidad</label>
+        <input
+          nbInput
+          type="number"
+          formControlName="periodAmount"
+          placeholder="0"
+          min="1"
+        />
+      </nb-form-field>
+    </div>
+    <div class="col-md-3 mb-3">
+      <nb-form-field>
+        <label>Período</label>
+        <nb-select formControlName="periodType" placeholder="Tipo" fullWidth>
+          <nb-option *ngFor="let type of periodTypes" [value]="type">{{
+            type
+          }}</nb-option>
+        </nb-select>
+      </nb-form-field>
+    </div>
+    <div class="col-md-6 mb-3">
+      <nb-form-field>
+        <label>Fecha de inicio</label>
+        <input
+          nbInput
+          type="date"
+          formControlName="startDate"
+          readonly
+          (click)="forceDatePicker($event)"
+          (keydown)="preventManualInput($event)"
+          (paste)="preventManualInput($event)"
+          class="no-manual-input"
+          fullWidth
+        />
+      </nb-form-field>
+    </div>
+  </div>
+
+  <!-- Opciones manuales -->
+  <div class="row mb-3" *ngIf="showManualPeriodOptions()">
+    <div class="col-md-6">
+      <nb-checkbox
+        [(ngModel)]="manualGeneration.automatic"
+        [ngModelOptions]="{ standalone: true }"
+        (checkedChange)="onAutoGenerationChange($event)"
+      >
+        Generar periodos automáticamente
+      </nb-checkbox>
+
+      <div class="mt-2" *ngIf="!manualGeneration.automatic">
+        <nb-form-field>
+          <label>Cantidad de periodos a generar</label>
+          <input
+            nbInput
+            type="number"
+            min="1"
+            [(ngModel)]="manualGeneration.count"
+            (ngModelChange)="generatePeriodPreview()"
+            [ngModelOptions]="{ standalone: true }"
+            placeholder="Ej. 5"
+          />
+        </nb-form-field>
+
+        <div
+          *ngIf="previewGeneratedPeriods.length"
+          class="mt-2 small text-muted"
+        >
+          <strong>Periodos que se generarían:</strong>
+          <span *ngFor="let p of periodSegments.first">
+            ({{ p.start }} al {{ p.end }}),
+          </span>
+
+          <span
+            *ngIf="periodSegments.middle.length"
+            [nbTooltip]="middlePeriodsTooltip"
+            tooltipTrigger="hover"
+            class="text-primary"
+            style="cursor: pointer"
+          >
+            ...
+          </span>
+
+          <span *ngIf="periodSegments.last">
+            , ({{ periodSegments.last.start }} al {{ periodSegments.last.end }})
+          </span>
+        </div>
+      </div>
+
+      <div *ngIf="manualValidationError" class="text-danger mt-2">
+        {{ manualValidationError }}
+      </div>
+    </div>
+  </div>
+
+  <!-- Formatos de archivo -->
+  <div class="row mb-3">
+    <div class="col-12">
+      <h5 class="my-2">Formatos de archivo requeridos</h5>
+      <p class="text-muted small">
+        Seleccione los formatos aceptados y especifique la cantidad mínima
+        requerida para cada uno.
+      </p>
+
+      <div class="file-formats-container">
+        <div
+          *ngFor="let format of fileFormats; let i = index"
+          class="mb-3 border p-3 rounded"
+        >
+          <div class="d-flex justify-content-between align-items-center mb-3">
+            <nb-select
+              [(ngModel)]="format.extension"
+              [ngModelOptions]="{ standalone: true }"
+              placeholder="Seleccionar formato"
+            >
+              <nb-option
+                *ngFor="let opt of getAvailableOptions(i)"
+                [value]="opt.extension"
+              >
+                {{ opt.name }} ({{ opt.extension }})
+              </nb-option>
+            </nb-select>
+            <button
+              nbButton
+              status="danger"
+              size="small"
+              (click)="removeFormat(i)"
+            >
+              <nb-icon icon="close-outline" pack="eva"></nb-icon>
+            </button>
+          </div>
+
+          <div class="row">
+            <div class="col-md-4 mb-3">
+              <nb-form-field>
+                <label>Mínimo requerido</label>
+                <input
+                  nbInput
+                  type="number"
+                  min="1"
+                  [(ngModel)]="format.minQuantity"
+                  [ngModelOptions]="{ standalone: true }"
+                />
+              </nb-form-field>
+            </div>
+
+            <div class="col-md-12 mb-2">
+              <nb-checkbox
+                [(ngModel)]="format.expiryVisible"
+                [ngModelOptions]="{ standalone: true }"
+                (checkedChange)="onExpiryVisibleChange(format)"
+              >
+                Fecha de vigencia visible en documento
+              </nb-checkbox>
+            </div>
+
+            <div class="col-md-12 mb-2" *ngIf="!format.expiryVisible">
+              <label class="text-muted small"
+                >Cálculo de vigencia desde fecha de expedición:</label
+              >
+              <div class="d-flex">
+                <input
+                  nbInput
+                  type="number"
+                  min="1"
+                  [(ngModel)]="format.expiryValue"
+                  [ngModelOptions]="{ standalone: true }"
+                  placeholder="1"
+                  class="mr-2"
+                  style="width: 80px"
+                />
+                <nb-select
+                  [(ngModel)]="format.expiryUnit"
+                  [ngModelOptions]="{ standalone: true }"
+                  placeholder="días"
+                >
+                  <nb-option *ngFor="let unit of expiryUnits" [value]="unit">{{
+                    unit
+                  }}</nb-option>
+                </nb-select>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <button
+          nbButton
+          outline
+          type="button"
+          status="info"
+          size="small"
+          (click)="addFormat()"
+          [disabled]="fileFormats.length >= availableFormats.length"
+        >
+          <nb-icon icon="plus-outline"></nb-icon> Agregar formato
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Botón de envío -->
+  <div class="row">
+    <div class="col-md-4">
+      <button
+        nbButton
+        type="submit"
+        [disabled]="!isFormValid()"
+        status="primary"
+        fullWidth
+      >
+        Guardar configuración
+      </button>
+    </div>
+  </div>
+</form>
+
+<ng-template #overrideModal>
+  <nb-card>
+    <nb-card-header>¿Reemplazar configuración existente?</nb-card-header>
+    <nb-card-body>
+      Ya existe una configuración activa para este documento. Si continúas, se
+      desactivará la anterior.
+    </nb-card-body>
+    <nb-card-footer class="d-flex justify-content-end">
+      <button
+        nbButton
+        status="basic"
+        (click)="overrideRef.close()"
+        class="mr-2"
+      >
+        Cancelar
+      </button>
+      <button nbButton status="primary" (click)="proceedWithOverride()">
+        Continuar
+      </button>
+    </nb-card-footer>
+  </nb-card>
+</ng-template>
