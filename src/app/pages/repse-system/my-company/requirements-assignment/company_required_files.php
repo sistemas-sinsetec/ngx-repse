@@ -35,14 +35,21 @@ switch ($method) {
     /*  GET  /api/company_required_files.php?company_id=#                   */
     /*──────────────────────────────────────────────────────────────────────*/
     case 'GET':
-        if (!isset($_GET['company_id'])) {
-            respond(400, ['error' => 'company_id parameter is required']);
-        }
-        $companyId = (int) $_GET['company_id'];
+        $where = "";
+        $bindValue = null;
 
-        // 1) documentos activos
+        if (isset($_GET['assigned_by'])) {
+            $bindValue = (int) $_GET['assigned_by'];
+            $where = "crf.assigned_by = ? AND crf.company_id != crf.assigned_by";
+        } elseif (isset($_GET['company_id'])) {
+            $bindValue = (int) $_GET['company_id'];
+            $where = "crf.company_id = ?";
+        } else {
+            respond(400, ['error' => 'company_id or assigned_by parameter is required']);
+        }
+
         $docsStmt = $mysqli->prepare("
-            SELECT crf.required_file_id,
+        SELECT crf.required_file_id,
                 crf.assigned_by,
                 crf.company_id,
                 companies.nameCompany AS company_name,
@@ -57,11 +64,12 @@ switch ($method) {
                 ) AS partner_count
             FROM company_required_files crf
             JOIN file_types ft ON ft.file_type_id = crf.file_type_id
-            LEFT JOIN companies ON companies.id = crf.assigned_by
-            WHERE crf.company_id = ?
-            AND crf.is_active  = 1
+            LEFT JOIN companies ON companies.id = crf.company_id
+            WHERE $where
+            AND crf.is_active = 1
         ") or respond(500, ['error' => $mysqli->error]);
-        $docsStmt->bind_param('i', $companyId);
+
+        $docsStmt->bind_param('i', $bindValue);
         $docsStmt->execute();
         $docs = $docsStmt->get_result()->fetch_all(MYSQLI_ASSOC);
         $docsStmt->close();

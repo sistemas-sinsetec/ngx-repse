@@ -5,6 +5,7 @@ import { environment } from "../../../environments/environment";
 import * as pdfjsLib from "pdfjs-dist/legacy/build/pdf";
 import pdfjsWorker from "pdfjs-dist/legacy/build/pdf.worker.entry";
 import * as moment from "moment";
+import { map } from "rxjs/operators";
 
 pdfjsLib.GlobalWorkerOptions.workerSrc = pdfjsWorker;
 
@@ -80,6 +81,11 @@ export interface RequiredFile {
   company_name?: string;
 }
 
+export interface AssignedRequiredFile extends RequiredFile {
+  partner_count: number;
+  company_name?: string;
+}
+
 export interface FileStructure {
   periods: Array<{
     name: string;
@@ -95,6 +101,26 @@ export interface FileStructure {
     }>;
   }>;
 }
+export interface Requirement {
+  id: number;
+  documentType: string;
+  isActive: boolean;
+  isPeriodic: boolean;
+  periodAmount?: number;
+  periodType?: string;
+  startDate?: moment.Moment;
+  minQuantity: number;
+  partners: string[];
+  partnerCount: number;
+  formats?: any[];
+}
+
+export interface Partner {
+  id: number;
+  name: string;
+  affiliation: string;
+  selected: boolean;
+}
 
 @Injectable({
   providedIn: "root",
@@ -104,9 +130,107 @@ export class DocumentService {
 
   constructor(private http: HttpClient) {}
 
+  getCompanyRequirements(companyId: number): Observable<Requirement[]> {
+    const params = new HttpParams().set("company_id", companyId.toString());
+    return this.http
+      .get<any[]>(`${this.base}/company_required_files.php`, { params })
+      .pipe(
+        map((configs) =>
+          configs.map((cfg) => ({
+            id: cfg.required_file_id,
+            documentType: cfg.name,
+            isActive: true,
+            isPeriodic: cfg.is_periodic === 1,
+            periodAmount: cfg.periodicity_count,
+            periodType: cfg.periodicity_type,
+            startDate: cfg.current_period
+              ? moment(cfg.current_period.start_date)
+              : undefined,
+            minQuantity: cfg.min_documents_needed,
+            partners: [],
+            partnerCount: cfg.partner_count,
+            formats: cfg.formats,
+          }))
+        )
+      );
+  }
+
+  getDocumentTypes(): Observable<{ id: number; name: string }[]> {
+    return this.http
+      .get<any[]>(`${this.base}/file_types.php`)
+      .pipe(
+        map((types) =>
+          types
+            .filter((t) => Number(t.is_active) === 1)
+            .map((t) => ({ id: Number(t.file_type_id), name: t.name }))
+        )
+      );
+  }
+
+  getAvailableFormats(): Observable<
+    { id: number; name: string; extension: string }[]
+  > {
+    return this.http.get<any[]>(`${this.base}/file_formats.php`).pipe(
+      map((formats) =>
+        formats.map((f, i) => ({
+          id: i + 1,
+          name: f.name,
+          extension: f.code,
+        }))
+      )
+    );
+  }
+
+  getBusinessPartners(companyId: number): Observable<Partner[]> {
+    const params = new HttpParams().set("association_id", companyId.toString());
+    return this.http
+      .get<any[]>(`${this.base}/getBusinessPartner.php`, { params })
+      .pipe(
+        map((list) =>
+          list.map((p) => ({
+            id: +p.businessPartnerId,
+            name: p.nameCompany,
+            affiliation: p.roleName,
+            selected: false,
+          }))
+        )
+      );
+  }
+
+  getVisibilities(requiredFileId: number): Observable<any[]> {
+    const params = new HttpParams().set(
+      "required_file_id",
+      requiredFileId.toString()
+    );
+    return this.http.get<any[]>(`${this.base}/required_file_visibilities.php`, {
+      params,
+    });
+  }
+
+  addVisibility(requiredFileId: number, providerId: number): Observable<any> {
+    return this.http.post(`${this.base}/required_file_visibilities.php`, {
+      required_file_id: requiredFileId,
+      provider_id: providerId,
+      is_visible: 1,
+    });
+  }
+
+  removeVisibility(
+    requiredFileId: number,
+    providerId: number
+  ): Observable<any> {
+    const params = new HttpParams()
+      .set("required_file_id", requiredFileId.toString())
+      .set("provider_id", providerId.toString());
+    return this.http.delete(`${this.base}/required_file_visibilities.php`, {
+      params,
+    });
+  }
+
   /**
    * GET dashboard of required files for a company.
    */
+
   getOwnRequiredFiles(companyId: number): Observable<RequiredFile[]> {
     const params = new HttpParams().set("company_id", companyId.toString());
     return this.http.get<RequiredFile[]>(
@@ -115,9 +239,11 @@ export class DocumentService {
     );
   }
 
-  getAssignedRequiredFiles(assignedById: number): Observable<RequiredFile[]> {
+  getAssignedRequiredFiles(
+    assignedById: number
+  ): Observable<AssignedRequiredFile[]> {
     const params = new HttpParams().set("assigned_by", assignedById.toString());
-    return this.http.get<RequiredFile[]>(
+    return this.http.get<AssignedRequiredFile[]>(
       `${this.base}/company_required_files.php`,
       { params }
     );
@@ -127,9 +253,6 @@ export class DocumentService {
     return this.http.post(`${this.base}/company_required_files.php`, data);
   }
 
-  /**
-   * GET the structure of uploaded files (tree) for download modal.
-   */
   getFileStructure(
     requiredFileId: number,
     periodId?: number
@@ -146,10 +269,6 @@ export class DocumentService {
     });
   }
 
-  /**
-   * POST upload a file. Expects a FormData containing:
-   *   file, required_file_id, period_id, format_code
-   */
   uploadFile(formData: FormData): Observable<{ success: boolean }> {
     return this.http.post<{ success: boolean }>(
       `${this.base}/company_files.php`,
@@ -157,10 +276,6 @@ export class DocumentService {
     );
   }
 
-  /**
-   * Download a file by opening a new window/tab. Assumes `filePath`
-   * is the path returned by the API, relative to the base URL.
-   */
   downloadFile(filePath: string): void {
     const url = `${this.base}/../documents/${filePath}`;
     window.open(url, "_blank");
