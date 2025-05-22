@@ -172,8 +172,19 @@ export class RequirementAssignmentFormComponent implements OnInit {
         this.formSubmitted.emit();
       },
       error: (err) => {
-        const msg = err?.error?.error || "Error al guardar la configuración.";
+        const serverError = err?.error?.error;
+        const lastDate = err?.error?.last_movement_date;
+
+        let msg = serverError || "Error al guardar la configuración.";
+
+        if (lastDate) {
+          msg += ` Última fecha registrada: ${lastDate}`;
+        }
+
         this.toast(msg, "danger");
+
+        //const msg = err?.error?.error || "Error al guardar la configuración.";
+        // this.toast(msg, "danger");
       },
     });
   }

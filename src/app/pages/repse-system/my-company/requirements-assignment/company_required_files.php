@@ -330,7 +330,6 @@ switch ($method) {
                 default:
                     respond(400, ['error' => 'Periodicidad no válida']);
             }
-
             $manual = $data['manual_generation'] ?? false;
             if ($manual) {
                 $rangeStart = new DateTime($data['manual_range']['start_date']);
@@ -358,20 +357,29 @@ switch ($method) {
             }
 
             // Validar traslapes
+           $lastEnDate = null;
+
             while ($row = $res->fetch_assoc()) {
                 $exist_start = new DateTime($row['start_date']);
                 $exist_end = new DateTime($row['end_date']);
+
+                //GUARDADO
+               if (is_null($lastEnDate)    || $exist_end > $lastEnDate){
+                $lastEnDate = $exist_end;
+               }
 
                 foreach ($new_periods as $np) {
                     if (
                         ($np['start'] <= $exist_end) &&
                         ($np['end'] >= $exist_start)
                     ) {
-                        respond(409, ['error' => 'Conflicto con otros periodos activos para este documento.']);
-                    }
+                        respond(409, ['error' => 'Conflicto con otros periodos activos para este documento', 
+                    'last_movement_date' => $lastEnDate->format('Y-m-d')]);
                 }
-            }
 
+                }
+
+                }
             /* 1) Desactivar versión anterior --------------------------- */
             $off = $mysqli->prepare("
                 UPDATE company_required_files
@@ -594,6 +602,5 @@ switch ($method) {
     default:
         respond(405, ['error' => 'Method not allowed']);
 }
-
 $mysqli->close();
 ?>
