@@ -190,7 +190,14 @@ export class RequirementAssignmentFormComponent implements OnInit {
   }
 
   toast(message: string, status: "success" | "danger" | "info" | "warning") {
-    this.toastService.show(message, "Error", {
+    const titleMap: { [key: string]: string } = {
+      success: "Éxito",
+      danger: "Error",
+      info: "Información",
+      warning: "Advertencia",
+    };
+
+    this.toastService.show(message, titleMap[status] || "Mensaje", {
       status,
       duration: 5000,
       icon: "alert-circle-outline",
