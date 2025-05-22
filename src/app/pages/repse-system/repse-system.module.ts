@@ -35,6 +35,7 @@ import { RequirementAssignmentComponent } from "./bussiness-partners/requirement
 import { CompaniesDocumentsViewComponent } from "./bussiness-partners/companies-documents-view/companies-documents-view.component";
 import { DocumentCatalogComponent } from "./my-company/document-catalog/document-catalog.component";
 import { RequirementAssignmentFormComponent } from './shared/requirement-assignment-form/requirement-assignment-form.component';
+import { DocumentTreeComponent } from './shared/document-tree/document-tree.component';
 
 @NgModule({
   declarations: [
@@ -47,6 +48,7 @@ import { RequirementAssignmentFormComponent } from './shared/requirement-assignm
     CompaniesDocumentsViewComponent,
     DocumentCatalogComponent,
     RequirementAssignmentFormComponent,
+    DocumentTreeComponent,
   ],
   imports: [
     CommonModule,
