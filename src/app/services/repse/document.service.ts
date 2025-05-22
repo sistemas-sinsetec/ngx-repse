@@ -362,19 +362,26 @@ export class DocumentService {
     a.click();
   }
 
-  getFullCatalog(companyId: number): Observable<any> {
-    const params = new HttpParams().set("company_id", companyId.toString());
-    return this.http.get(`${this.base}/company_files_catalog.php`, { params });
+  getCompanyFiles(
+    companyId: number,
+    status: string = "approved"
+  ): Observable<any> {
+    const params = new HttpParams()
+      .set("mode", "catalog")
+      .set("company_id", companyId.toString())
+      .set("status", status);
+    return this.http.get(`${this.base}/company_files_tree.php`, { params });
   }
 
-  getProviderFiles(assignedByCompanyId: number): Observable<any> {
-    const params = new HttpParams().set(
-      "assigned_by",
-      assignedByCompanyId.toString()
-    );
-    return this.http.get(`${this.base}/company_files_providers.php`, {
-      params,
-    });
+  getProviderFiles(
+    assignedByCompanyId: number,
+    status: string = "approved"
+  ): Observable<any> {
+    const params = new HttpParams()
+      .set("mode", "providers")
+      .set("company_id", assignedByCompanyId.toString())
+      .set("status", status);
+    return this.http.get(`${this.base}/company_files_tree.php`, { params });
   }
 
   // ─────────────── VALIDACIÓN PDF ───────────────

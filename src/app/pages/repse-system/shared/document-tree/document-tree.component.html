@@ -1,0 +1,58 @@
+<div class="table-responsive" *ngIf="treeData && treeData.length > 0">
+  <table [nbTreeGrid]="dataSource" class="table w-100">
+    <tr nbTreeGridHeaderRow *nbTreeGridHeaderRowDef="columns"></tr>
+    <tr nbTreeGridRow *nbTreeGridRowDef="let row; columns: columns"></tr>
+
+    <!-- Columna: Nombre -->
+    <ng-container [nbTreeGridColumnDef]="'name'">
+      <th nbTreeGridHeaderCell *nbTreeGridHeaderCellDef class="col-10">
+        Documento
+      </th>
+      <td nbTreeGridCell *nbTreeGridCellDef="let row">
+        <div
+          class="d-flex align-items-center"
+          [style.padding-left.px]="row.level * 20"
+        >
+          <nb-tree-grid-row-toggle
+            *ngIf="row.data.type !== 'file'"
+            [expanded]="row.expanded"
+            class="me-2"
+          ></nb-tree-grid-row-toggle>
+          <nb-icon
+            [icon]="getIcon(row.data.type)"
+            class="me-2"
+            [ngClass]="getLevelClass(row.level)"
+          ></nb-icon>
+          <span [ngClass]="getLevelClass(row.level)">{{ row.data.name }}</span>
+        </div>
+      </td>
+    </ng-container>
+
+    <!-- Columna: Acciones -->
+    <ng-container [nbTreeGridColumnDef]="'actions'">
+      <th nbTreeGridHeaderCell *nbTreeGridHeaderCellDef class="text-center">
+        Acciones
+      </th>
+      <td nbTreeGridCell *nbTreeGridCellDef="let row">
+        <div class="d-flex w-100 justify-content-center">
+          <button
+            *ngIf="row.data.type === 'file'"
+            nbButton
+            size="small"
+            status="primary"
+            (click)="downloadFile(row.data.path)"
+          >
+            <nb-icon icon="download-outline"></nb-icon>
+          </button>
+        </div>
+      </td>
+    </ng-container>
+  </table>
+</div>
+
+<!-- Mensaje si no hay datos -->
+<div class="text-center" *ngIf="!treeData || treeData.length === 0">
+  <nb-alert status="info" class="mb-0">
+    No hay documentos en el catálogo
+  </nb-alert>
+</div>
