@@ -26,6 +26,23 @@ export class DocumentTreeComponent implements OnChanges {
   @Input() catalog: any[] = [];
   @Input() searchQuery: string = "";
 
+  getIconClass(type: string): string {
+    switch (type) {
+      case "type":
+        return "level-type";
+      case "periodicity":
+        return "level-periodicity";
+      case "period":
+        return "level-period";
+      case "format":
+        return "level-format";
+      case "file":
+        return "level-file";
+      default:
+        return "";
+    }
+  }
+
   columns = ["name", "actions"];
   dataSource: NbTreeGridDataSource<CatalogNode>;
   treeData: TreeNode<CatalogNode>[] = [];
