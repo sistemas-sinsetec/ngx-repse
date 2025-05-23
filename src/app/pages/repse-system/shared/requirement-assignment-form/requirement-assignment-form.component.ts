@@ -115,18 +115,21 @@ export class RequirementAssignmentFormComponent implements OnInit {
       assigned_by: this.assignedByCompanyId,
       file_type_id: f.documentType,
       is_periodic: f.isPeriodic,
-      periodicity_type: f.periodType,
-      periodicity_count: f.periodAmount,
       start_date: f.startDate || moment().format("YYYY-MM-DD"),
       file_formats: this.buildFormatPayload(),
     };
 
-    if (!this.manualGeneration.automatic) {
-      payload.manual_generation = true;
-      payload.manual_range = {
-        start_date: payload.start_date,
-        period_count: this.manualGeneration.count,
-      };
+    if (f.isPeriodic) {
+      payload.periodicity_type = f.periodType;
+      payload.periodicity_count = f.periodAmount;
+
+      if (!this.manualGeneration.automatic) {
+        payload.manual_generation = true;
+        payload.manual_range = {
+          start_date: payload.start_date,
+          period_count: this.manualGeneration.count,
+        };
+      }
     }
 
     // Verificar si ya hay una configuración previa

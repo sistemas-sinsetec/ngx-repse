@@ -453,9 +453,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
 
     $mysqli->query("
         UPDATE company_files
-        SET status = 'expired'
+        SET status = 'expired', is_expired = 1
         WHERE coverage_status = 'partial'
         AND expiry_date < CURDATE()
+        AND is_expired = 0
         AND status IN ('approved', 'pending')
     ");
 

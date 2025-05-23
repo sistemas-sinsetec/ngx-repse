@@ -57,6 +57,8 @@ switch ($method) {
                 crf.is_periodic,
                 crf.periodicity_type,
                 crf.periodicity_count,
+                crf.start_date,
+                crf.end_date,
                 (SELECT COUNT(*)
                     FROM required_file_visibilities v
                     WHERE v.required_file_id = crf.required_file_id
@@ -312,48 +314,50 @@ switch ($method) {
 
             $new_periods = [];
             $preview_start = new DateTime($start_date);
-            $cnt = $periodicity_count;
 
-            switch (strtolower($periodicity_type)) {
-                case 'días':
-                    $interval = new DateInterval("P{$cnt}D");
-                    break;
-                case 'semanas':
-                    $interval = new DateInterval("P" . ($cnt * 7) . "D");
-                    break;
-                case 'meses':
-                    $interval = new DateInterval("P{$cnt}M");
-                    break;
-                case 'años':
-                    $interval = new DateInterval("P{$cnt}Y");
-                    break;
-                default:
-                    respond(400, ['error' => 'Periodicidad no válida']);
-            }
-            $manual = $data['manual_generation'] ?? false;
-            if ($manual) {
-                $rangeStart = new DateTime($data['manual_range']['start_date']);
-                $rangeEnd = isset($data['manual_range']['end_date']) ? new DateTime($data['manual_range']['end_date']) : null;
-                $maxCount = isset($data['manual_range']['period_count']) ? (int) $data['manual_range']['period_count'] : null;
-
-                $currentStart = clone $rangeStart;
-                $generated = 0;
-
-                while (true) {
-                    $currentEnd = (clone $currentStart)->add($interval)->sub(new DateInterval('P1D'));
-
-                    if ($rangeEnd && $currentStart > $rangeEnd)
+            if ($isPeriodic) {
+                $cnt = $periodicity_count;
+                switch (strtolower($periodicity_type)) {
+                    case 'días':
+                        $interval = new DateInterval("P{$cnt}D");
                         break;
-                    if ($maxCount && $generated >= $maxCount)
+                    case 'semanas':
+                        $interval = new DateInterval("P" . ($cnt * 7) . "D");
                         break;
-
-                    $new_periods[] = ['start' => $currentStart, 'end' => $currentEnd];
-                    $currentStart = (clone $currentEnd)->modify('+1 day');
-                    $generated++;
+                    case 'meses':
+                        $interval = new DateInterval("P{$cnt}M");
+                        break;
+                    case 'años':
+                        $interval = new DateInterval("P{$cnt}Y");
+                        break;
+                    default:
+                        respond(400, ['error' => 'Periodicidad no válida']);
                 }
-            } else {
-                $currentEnd = (clone $preview_start)->add($interval)->sub(new DateInterval('P1D'));
-                $new_periods[] = ['start' => $preview_start, 'end' => $currentEnd];
+                $manual = $data['manual_generation'] ?? false;
+                if ($manual) {
+                    $rangeStart = new DateTime($data['manual_range']['start_date']);
+                    $rangeEnd = isset($data['manual_range']['end_date']) ? new DateTime($data['manual_range']['end_date']) : null;
+                    $maxCount = isset($data['manual_range']['period_count']) ? (int) $data['manual_range']['period_count'] : null;
+
+                    $currentStart = clone $rangeStart;
+                    $generated = 0;
+
+                    while (true) {
+                        $currentEnd = (clone $currentStart)->add($interval)->sub(new DateInterval('P1D'));
+
+                        if ($rangeEnd && $currentStart > $rangeEnd)
+                            break;
+                        if ($maxCount && $generated >= $maxCount)
+                            break;
+
+                        $new_periods[] = ['start' => $currentStart, 'end' => $currentEnd];
+                        $currentStart = (clone $currentEnd)->modify('+1 day');
+                        $generated++;
+                    }
+                } else {
+                    $currentEnd = (clone $preview_start)->add($interval)->sub(new DateInterval('P1D'));
+                    $new_periods[] = ['start' => $preview_start, 'end' => $currentEnd];
+                }
             }
 
             // Validar traslapes
@@ -384,13 +388,29 @@ switch ($method) {
             }
             /* 1) Desactivar versión anterior --------------------------- */
             $startDateObj = new DateTimeImmutable($start_date);
-            $today = new DateTimeImmutable('today');
             $isActiveNew = 1;
 
-            // Si la nueva configuración está en el pasado (estrictamente antes de hoy), no debe activarse
-            if ($startDateObj < $today) {
+            // Verificar si existe una configuración activa más reciente
+            $checkFuture = $mysqli->prepare("
+                SELECT 1
+                FROM company_required_files
+                WHERE company_id = ?
+                AND file_type_id = ?
+                AND is_active = 1
+                AND start_date > ?
+                LIMIT 1
+            ");
+            $start_date_str = $startDateObj->format('Y-m-d');
+            $checkFuture->bind_param('iis', $company_id, $file_type_id, $start_date_str);
+            $checkFuture->execute();
+            $checkFuture->store_result();
+
+            if ($checkFuture->num_rows > 0) {
+                // Ya hay una más reciente activa, entonces esta nueva debe quedar inactiva
                 $isActiveNew = 0;
             }
+            $checkFuture->close();
+
 
             if ($isActiveNew) {
 
@@ -545,26 +565,42 @@ switch ($method) {
                         // 2. Generar periodos desde el inicio hasta antes del primer periodo existente
                         $currentStart = clone $inicio;
 
-                        while (true) {
+                        if (!$limitDate) {
+                            // No hay periodos existentes → generar solo uno
                             $currentEnd = (clone $currentStart)->add($interval)->sub(new DateInterval('P1D'));
-
-                            if ($limitDate && $currentStart >= $limitDate) {
-                                break;
-                            }
-
                             $periodsToInsert[] = [
                                 'start' => $currentStart->format('Y-m-d'),
                                 'end' => $currentEnd->format('Y-m-d'),
                             ];
+                        } else {
+                            // Generar periodos automáticamente hasta antes del primer periodo existente
+                            $iterationLimit = 1000;
+                            $iterationCount = 0;
 
-                            $nextStart = (clone $currentEnd)->modify('+1 day');
+                            while (true) {
+                                if (++$iterationCount > $iterationLimit) {
+                                    $mysqli->rollback();
+                                    respond(500, ['error' => 'Error interno: generación automática sin límite']);
+                                }
 
-                            if ($limitDate && $nextStart >= $limitDate) {
-                                break;
+                                $currentEnd = (clone $currentStart)->add($interval)->sub(new DateInterval('P1D'));
+
+                                if ($currentStart >= $limitDate)
+                                    break;
+
+                                $periodsToInsert[] = [
+                                    'start' => $currentStart->format('Y-m-d'),
+                                    'end' => $currentEnd->format('Y-m-d'),
+                                ];
+
+                                $nextStart = (clone $currentEnd)->modify('+1 day');
+                                if ($nextStart >= $limitDate)
+                                    break;
+
+                                $currentStart = $nextStart;
                             }
-
-                            $currentStart = $nextStart;
                         }
+
                     }
                 }
             } else {
