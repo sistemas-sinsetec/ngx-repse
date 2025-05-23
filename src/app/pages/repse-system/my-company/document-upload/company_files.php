@@ -427,6 +427,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
 
     $required_file_id = isset($_GET['required_file_id']) ? intval($_GET['required_file_id']) : null;
     $period_id = isset($_GET['period_id']) ? intval($_GET['period_id']) : null;
+    $period_coverage = $_GET['period_coverage'] ?? null;
+    $is_expired = isset($_GET['is_expired']) ? intval($_GET['is_expired']) : null;
 
     $where = [];
     $params = [];
@@ -451,10 +453,22 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
         $params[] = $period_id;
     }
 
+    if ($period_coverage !== null) {
+        $where[] = "cf.period_coverage = ?";
+        $types .= 's';
+        $params[] = $period_coverage;
+    }
+
+    if ($is_expired !== null) {
+        $where[] = "cf.is_expired = ?";
+        $types .= 'i';
+        $params[] = $is_expired;
+    }
+
     $mysqli->query("
         UPDATE company_files
-        SET status = 'expired', is_expired = 1
-        WHERE coverage_status = 'partial'
+        SET is_expired = 1
+        WHERE period_coverage = 'partial'
         AND expiry_date < CURDATE()
         AND is_expired = 0
         AND status IN ('approved', 'pending')

@@ -627,18 +627,20 @@ export class DocumentUploadComponent {
   }
 
   checkExpiringDocuments(): void {
-    const warningThreshold = 7; // días antes de expirar para mostrar aviso
-    const repseThreshold = 90; // REPSE: 3 meses antes
-    const now = moment();
-
-    this.documentService.getAllDocuments().subscribe({
-      next: (files) => {
-        files.forEach((file) => {
-          if (file.period_coverage === "partial" && file.expiry_date) {
+    this.documentService
+      .getFilteredDocuments({
+        status: "all",
+        period_coverage: "partial",
+        is_expired: 0,
+      })
+      .subscribe({
+        next: (files) => {
+          const now = moment();
+          files.forEach((file) => {
+            if (!file.expiry_date) return;
             const expiry = moment(file.expiry_date);
             const daysLeft = expiry.diff(now, "days");
 
-            // Mostrar vencido
             if (expiry.isBefore(now)) {
               this.toastrService.warning(
                 `El archivo de "${
@@ -646,14 +648,11 @@ export class DocumentUploadComponent {
                 }" ha vencido (${expiry.format("DD/MM/YYYY")}).`,
                 "Archivo vencido"
               );
-            }
-            // Mostrar próximo a vencer
-            else {
-              const threshold = file.file_type_name
+            } else {
+              const isRepse = file.file_type_name
                 ?.toLowerCase()
-                .includes("repse")
-                ? repseThreshold
-                : warningThreshold;
+                .includes("repse");
+              const threshold = isRepse ? 90 : 7;
 
               if (daysLeft <= threshold) {
                 this.toastrService.info(
@@ -664,13 +663,12 @@ export class DocumentUploadComponent {
                 );
               }
             }
-          }
-        });
-      },
-      error: () => {
-        this.toastrService.danger("Error al verificar vencimientos", "Error");
-      },
-    });
+          });
+        },
+        error: () => {
+          this.toastrService.danger("Error al verificar vencimientos", "Error");
+        },
+      });
   }
 
   // ── Archivos rechazados ───────────────────────────────

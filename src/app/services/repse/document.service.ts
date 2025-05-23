@@ -294,6 +294,41 @@ export class DocumentService {
     return this.http.get<any[]>(`${this.base}/company_files.php`, { params });
   }
 
+  getFilteredDocuments(filters: {
+    status?: string;
+    period_coverage?: string;
+    company_id?: number;
+    required_file_id?: number;
+    is_expired?: number;
+  }): Observable<any[]> {
+    let params = new HttpParams();
+
+    if (filters.status) {
+      params = params.set("status", filters.status);
+    }
+
+    if (filters.period_coverage) {
+      params = params.set("period_coverage", filters.period_coverage);
+    }
+
+    if (filters.company_id) {
+      params = params.set("company_id", filters.company_id.toString());
+    }
+
+    if (filters.required_file_id) {
+      params = params.set(
+        "required_file_id",
+        filters.required_file_id.toString()
+      );
+    }
+
+    if (filters.is_expired !== undefined) {
+      params = params.set("is_expired", filters.is_expired.toString());
+    }
+
+    return this.http.get<any[]>(`${this.base}/company_files.php`, { params });
+  }
+
   submitUploads(body: FormData): Observable<any> {
     return this.http.post(`${this.base}/company_files.php`, body);
   }
