@@ -383,49 +383,42 @@ switch ($method) {
 
             }
             /* 1) Desactivar versión anterior --------------------------- */
-            $off = $mysqli->prepare("
-                UPDATE company_required_files
-                SET is_active = 0,
-                    end_date  = IF(end_date IS NULL OR end_date > ?,
-                                    DATE_SUB(?, INTERVAL 1 DAY),
-                                    end_date)
-                WHERE company_id   = ?
-                AND file_type_id = ?
-                AND is_active = 1
-                AND start_date <= ?
-            ");
-            $off->bind_param(
-                'ssiis',
-                $start_date, // Para IF(end_date > ?)
-                $start_date, // Para DATE_SUB(?)
-                $company_id,
-                $file_type_id,
-                $start_date // Para asegurar que sea anterior estrictamente
-            );
-
-            $off->execute();
-            $off->close();
-
-            /* 2) Insertar cabecera ------------------------------------- */
+            $startDateObj = new DateTimeImmutable($start_date);
+            $today = new DateTimeImmutable('today');
             $isActiveNew = 1;
 
-            $check = $mysqli->prepare("
-                SELECT COUNT(*) as count
-                FROM company_required_files
-                WHERE company_id = ?
-                AND file_type_id = ?
-                AND is_active = 1
-                AND start_date > ?
-            ");
-            $check->bind_param('iis', $company_id, $file_type_id, $start_date);
-            $check->execute();
-            $check->bind_result($futureCount);
-            $check->fetch();
-            $check->close();
-
-            if ($futureCount > 0) {
+            // Si la nueva configuración está en el pasado (estrictamente antes de hoy), no debe activarse
+            if ($startDateObj < $today) {
                 $isActiveNew = 0;
             }
+
+            if ($isActiveNew) {
+
+                $off = $mysqli->prepare("
+                    UPDATE company_required_files
+                    SET is_active = 0,
+                        end_date  = IF(end_date IS NULL OR end_date > ?,
+                                        DATE_SUB(?, INTERVAL 1 DAY),
+                                        end_date)
+                    WHERE company_id   = ?
+                    AND file_type_id = ?
+                    AND is_active = 1
+                    AND start_date <= ?
+                ");
+                $off->bind_param(
+                    'ssiis',
+                    $start_date, // Para IF(end_date > ?)
+                    $start_date, // Para DATE_SUB(?)
+                    $company_id,
+                    $file_type_id,
+                    $start_date // Para asegurar que sea anterior estrictamente
+                );
+
+                $off->execute();
+                $off->close();
+            }
+            /* 2) Insertar cabecera ------------------------------------- */
+
 
             $ins = $mysqli->prepare("
                 INSERT INTO company_required_files
@@ -518,23 +511,60 @@ switch ($method) {
                         $generated++;
                     }
                 } else {
-                    // Generar todos los periodos posibles desde el inicio hasta hoy
+                    $startDateObj = new DateTimeImmutable($start_date);
                     $today = new DateTimeImmutable('today');
-                    $currentStart = clone $inicio;
 
-                    while ($currentStart <= $today) {
+                    // Si la fecha está en el futuro o es hoy, generar solo un periodo
+                    if ($startDateObj >= $today) {
+                        $currentStart = clone $inicio;
                         $currentEnd = (clone $currentStart)->add($interval)->sub(new DateInterval('P1D'));
-
-                        if ($currentStart > $today) {
-                            break;
-                        }
 
                         $periodsToInsert[] = [
                             'start' => $currentStart->format('Y-m-d'),
                             'end' => $currentEnd->format('Y-m-d'),
                         ];
+                    } else {
+                        // ───── Generar periodos automáticamente hasta antes del primer periodo existente ─────
 
-                        $currentStart = (clone $currentEnd)->modify('+1 day');
+                        // 1. Obtener la fecha de inicio más temprana ya existente para ese requisito
+                        $firstPeriodSql = "
+                            SELECT MIN(dp.start_date) AS first_start
+                            FROM document_periods dp
+                            JOIN company_required_files crf ON crf.required_file_id = dp.required_file_id
+                            WHERE crf.company_id = ? AND crf.file_type_id = ?
+                        ";
+                        $firstStmt = $mysqli->prepare($firstPeriodSql);
+                        $firstStmt->bind_param('ii', $company_id, $file_type_id);
+                        $firstStmt->execute();
+                        $firstStmt->bind_result($firstPeriodStartRaw);
+                        $firstStmt->fetch();
+                        $firstStmt->close();
+
+                        $limitDate = $firstPeriodStartRaw ? new DateTime($firstPeriodStartRaw) : null;
+
+                        // 2. Generar periodos desde el inicio hasta antes del primer periodo existente
+                        $currentStart = clone $inicio;
+
+                        while (true) {
+                            $currentEnd = (clone $currentStart)->add($interval)->sub(new DateInterval('P1D'));
+
+                            if ($limitDate && $currentStart >= $limitDate) {
+                                break;
+                            }
+
+                            $periodsToInsert[] = [
+                                'start' => $currentStart->format('Y-m-d'),
+                                'end' => $currentEnd->format('Y-m-d'),
+                            ];
+
+                            $nextStart = (clone $currentEnd)->modify('+1 day');
+
+                            if ($limitDate && $nextStart >= $limitDate) {
+                                break;
+                            }
+
+                            $currentStart = $nextStart;
+                        }
                     }
                 }
             } else {
