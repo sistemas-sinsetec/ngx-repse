@@ -23,6 +23,7 @@ export class RequirementsAssignmentComponent implements OnInit {
   requirements: Requirement[] = [];
   documentTypes: { id: number; name: string }[] = [];
   availableFormats: { id: number; name: string; extension: string }[] = [];
+  lastUpdated?: moment.Moment;
 
   @ViewChild("partnerModal") partnerModalTemplate!: TemplateRef<any>;
   @ViewChild("confirmOverrideModal")
@@ -59,10 +60,18 @@ export class RequirementsAssignmentComponent implements OnInit {
 
     this.loadRequirements();
   }
+  /*repuesta de la tabal de requisitos configurados (fecha) */
 
+  // requirements-assignment.component.ts
   loadRequirements(): void {
     this.documentService.getCompanyRequirements(this.companyId).subscribe({
-      next: (reqs) => (this.requirements = reqs),
+      next: (reqs) => {
+        this.requirements = reqs.map((req) => ({
+          ...req,
+          startDate: new Date(req.startDate),
+          // Mapear endDate
+        }));
+      },
       error: (err) => console.error("Error cargando requisitos", err),
     });
   }

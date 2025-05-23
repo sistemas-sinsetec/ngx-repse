@@ -24,6 +24,7 @@
     <!-- TABLA cuando sí hay requisitos -->
     <div class="table-container flex-grow-1" *ngIf="requirements.length > 0">
       <div class="table-responsive">
+        <!-- Elimina la columna de endDate -->
         <table class="table" nbTable>
           <thead>
             <tr>
@@ -32,29 +33,27 @@
               <th>Periódico</th>
               <th>Periodicidad</th>
               <th>Cant. Mínima</th>
-              <!-- <th>Socios</th> -->
-              <!-- <th>Acciones</th> -->
+              <th>Fecha de inicio</th>
+              <!-- <th>Fecha de fin</th> -->
+              <!-- Eliminar esta columna -->
             </tr>
           </thead>
           <tbody>
             <tr *ngFor="let req of requirements">
-              <td class="align-middle">{{ req.documentType }}</td>
-              <td class="align-middle">
-                {{ req.isActive ? "Sí" : "No" }}
-              </td>
-              <td class="align-middle">{{ req.isPeriodic ? "Sí" : "No" }}</td>
-              <td class="align-middle">
+              <td>{{ req.documentType }}</td>
+              <td>{{ req.isActive ? "Sí" : "No" }}</td>
+              <td>{{ req.isPeriodic ? "Sí" : "No" }}</td>
+              <td>
                 <span *ngIf="req.isPeriodic">
                   Cada {{ req.periodAmount }} {{ req.periodType }}
                 </span>
               </td>
-              <td class="align-middle">{{ req.minQuantity }}</td>
-              <!-- <td class="align-middle">{{ req.partnerCount }} socios</td> -->
-              <!-- <td>
-                <button nbButton size="small" (click)="openPartnerModal(req)">
-                  Gestionar Socios
-                </button>
-              </td> -->
+              <td>{{ req.minQuantity }}</td>
+              <td>
+                {{ req.startDate | date : "dd/MM/yyyy" : "UTC" }}
+              </td>
+              <!-- <td>... </td> -->
+              <!-- Eliminar esta celda -->
             </tr>
           </tbody>
         </table>
