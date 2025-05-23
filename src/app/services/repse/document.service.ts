@@ -108,7 +108,7 @@ export interface Requirement {
   isPeriodic: boolean;
   periodAmount?: number;
   periodType?: string;
-  startDate?: moment.Moment;
+  startDate?: Date;
   minQuantity: number;
   partners: string[];
   partnerCount: number;
@@ -143,9 +143,7 @@ export class DocumentService {
             isPeriodic: cfg.is_periodic === 1,
             periodAmount: cfg.periodicity_count,
             periodType: cfg.periodicity_type,
-            startDate: cfg.current_period
-              ? moment(cfg.current_period.start_date)
-              : undefined,
+            startDate: moment.utc(cfg.start_date).toDate(),
             minQuantity: cfg.min_documents_needed,
             partners: [],
             partnerCount: cfg.partner_count,
