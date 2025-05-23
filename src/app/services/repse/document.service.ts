@@ -279,21 +279,6 @@ export class DocumentService {
     window.open(url, "_blank");
   }
 
-  getPendingDocuments(): Observable<any[]> {
-    const params = new HttpParams().set("status", "pending");
-    return this.http.get<any[]>(`${this.base}/company_files.php`, { params });
-  }
-
-  getRejectedDocuments(): Observable<any[]> {
-    const params = new HttpParams().set("status", "rejected");
-    return this.http.get<any[]>(`${this.base}/company_files.php`, { params });
-  }
-
-  getAllDocuments(): Observable<any[]> {
-    const params = new HttpParams().set("status", "all");
-    return this.http.get<any[]>(`${this.base}/company_files.php`, { params });
-  }
-
   getFilteredDocuments(filters: {
     status?: string;
     period_coverage?: string;

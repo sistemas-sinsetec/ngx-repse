@@ -138,14 +138,16 @@ export class DocumentUploadComponent {
   }
 
   loadRejectedFiles(): void {
-    this.documentService.getRejectedDocuments().subscribe({
-      next: (files) => {
-        this.rejectedFiles = files;
-      },
-      error: (err) => {
-        console.error("Error loading rejected files", err);
-      },
-    });
+    this.documentService
+      .getFilteredDocuments({ status: "rejected" })
+      .subscribe({
+        next: (files) => {
+          this.rejectedFiles = files;
+        },
+        error: (err) => {
+          console.error("Error loading rejected files", err);
+        },
+      });
   }
 
   // ── Tabs  ──────────────────────────────────────────────────

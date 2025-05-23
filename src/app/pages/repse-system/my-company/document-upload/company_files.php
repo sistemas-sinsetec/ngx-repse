@@ -420,8 +420,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 }
 
 if ($_SERVER['REQUEST_METHOD'] === 'GET') {
-
-
     $statusParam = $_GET['status'] ?? 'pending';
     $statuses = explode(',', $statusParam);
 
@@ -492,6 +490,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
     }
 
     $stmt = $mysqli->prepare($sql);
+
     if ($types) {
         $stmt->bind_param($types, ...$params);
     }

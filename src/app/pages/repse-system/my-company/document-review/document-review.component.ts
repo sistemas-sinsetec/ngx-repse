@@ -61,7 +61,7 @@ export class DocumentReviewComponent implements OnInit {
 
   loadPendingDocuments(): void {
     this.loading = true;
-    this.documentService.getPendingDocuments().subscribe({
+    this.documentService.getFilteredDocuments({ status: "pending" }).subscribe({
       next: (files) => {
         this.pendingDocuments = files.map((file) => ({
           ...file,
