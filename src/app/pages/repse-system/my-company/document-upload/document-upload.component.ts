@@ -3,15 +3,11 @@ import {
   NbDialogService,
   NbDialogRef,
   NbToastrService,
-  NbTreeGridDataSourceBuilder,
   NbTreeGridDataSource,
 } from "@nebular/theme";
-import {
-  DocumentService,
-  ParsedDocumentDates,
-} from "../../../../services/repse/document.service";
-import * as moment from "moment";
+import { DocumentService } from "../../../../services/repse/document.service";
 import { CompanyService } from "../../../../services/company.service";
+import * as moment from "moment";
 
 interface FileNode {
   name: string;
@@ -38,11 +34,22 @@ export class DocumentUploadComponent {
   @ViewChild("fileInput") fileInput: any;
   @ViewChild("previewModal") previewModal!: TemplateRef<any>;
 
-  // Tabs
+  // Tabs y estado
   activeTab: "Regular" | "Con retraso" | "Rechazados" = "Regular";
+  activeTabIndex: any;
+  loading = true;
+  isUploading = false;
 
-  // Data from dashboard endpoint
+  // Datos del dashboard
   requiredFiles: any[] = [];
+  assignedByMe: any[] = [];
+  assignedByOthers: { company_id: number; company: string; files: any[] }[] =
+    [];
+  selectedExternalCompanyId: string | number = "all";
+
+  // Documentos
+  rejectedFiles: any[] = [];
+  reviewFiles: any[] = [];
   previewFiles: {
     name: string;
     path: string;
@@ -50,53 +57,40 @@ export class DocumentUploadComponent {
     format: string;
   }[] = [];
 
-  assignedByMe: any[] = [];
-  assignedByOthers: { company_id: number; company: string; files: any[] }[] =
-    [];
-  selectedExternalCompanyId: string | number = "all";
-
-  loading = true;
-
-  isUploading = false;
-
-  private tempIssueDate: Date | null = null;
-  private tempExpiryDate: Date | null = null;
-
-  // Regular-tab upload
+  // Subida regular
   selectedDocumentForUpload: any = null;
+  dialogRefUpload!: NbDialogRef<any>;
 
-  // Late-tab selection
+  // Subida con retraso
   selectedDocument: any = null;
   selectedPeriod: any = null;
   selectedFormat: string = "";
   availableFormats: string[] = [];
   selectedFile: File | null = null;
 
-  //Rejected files
-  rejectedFiles: any[] = [];
-
-  // Download modal
-
+  // Modal preview
+  dialogRef!: NbDialogRef<any>;
+  modalTitle = "";
   selectedNodes: TreeNode<FileNode>[] = [];
   treeGridDataSource!: NbTreeGridDataSource<FileNode>;
-  modalTitle = "";
-  dialogRef!: NbDialogRef<any>;
-  dialogRefUpload!: NbDialogRef<any>;
   allColumns = ["select", "name", "actions"];
-  activeTabIndex: any;
+
+  // Fechas REPSE
+  private tempIssueDate: Date | null = null;
+  private tempExpiryDate: Date | null = null;
 
   constructor(
     private documentService: DocumentService,
     private dialogService: NbDialogService,
     private toastrService: NbToastrService,
-    private dataSourceBuilder: NbTreeGridDataSourceBuilder<FileNode>,
     private companyService: CompanyService
   ) {
     this.loadDocuments();
     this.loadRejectedFiles();
+    this.checkExpiringDocuments();
   }
 
-  // ── Load dashboard data ─────────────────────────────────────
+  // ── Carga inicial ───────────────────────────────────────────
   loadDocuments(): void {
     this.loading = true;
     const myCompanyId = Number(this.companyService.selectedCompany.id);
@@ -143,62 +137,44 @@ export class DocumentUploadComponent {
     });
   }
 
-  // ── Helpers for the Regular table ──────────────────────────
-
-  getStatusColor(status: string): string {
-    return (
-      {
-        complete: "success",
-        partial: "warning",
-        pending: "info",
-        overdue: "danger",
-      }[status] || "basic"
-    );
-  }
-
-  getStatusLabel(status: string): string {
-    return (
-      {
-        complete: "Completo",
-        partial: "Parcial",
-        pending: "Pendiente",
-        overdue: "Atrasado",
-      }[status] || status
-    );
-  }
-
-  getUploadProgress(file: any): string {
-    if (file.current_period) {
-      return `${file.current_period.uploaded_count}/${file.min_documents_needed}`;
-    }
-    const totalDone = file.periods.reduce(
-      (sum: number, p: any) => sum + p.uploaded_count,
-      0
-    );
-    const needed = file.min_documents_needed * file.periods.length || 1;
-    return `${totalDone}/${needed}`;
-  }
-
-  async prepareUpload(file: any): Promise<void> {
-    this.activeTab = "Regular";
-    this.selectedDocumentForUpload = file;
-    this.selectedPeriod = file.current_period ?? null;
-
-    this.updateUploadProgress(file);
-    await this.loadUploadedFilesForPreview();
-
-    this.dialogRefUpload = this.dialogService.open(this.uploadModal, {
-      dialogClass: "custom-modal",
-      closeOnBackdropClick: false,
-      autoFocus: true,
+  loadRejectedFiles(): void {
+    this.documentService.getRejectedDocuments().subscribe({
+      next: (files) => {
+        this.rejectedFiles = files;
+      },
+      error: (err) => {
+        console.error("Error loading rejected files", err);
+      },
     });
   }
 
-  // ── File selection & upload (both tabs) ────────────────────
-  getUploadedCount(file: any, formatCode: string): number {
-    const format = file.formats.find((f: any) => f.code === formatCode);
-    return format ? format.uploaded_count : 0;
+  // ── Tabs  ──────────────────────────────────────────────────
+
+  onTabChange(tab: "Regular" | "Con retraso" | "Rechazados"): void {
+    this.activeTab = tab;
+    this.resetUploadForm();
+    if (tab === "Rechazados") {
+      this.loadRejectedFiles();
+    }
   }
+
+  selectForLateUpload(file: any): void {
+    this.activeTab = "Con retraso";
+    this.selectedDocument = file;
+    this.loadAvailableFormats();
+  }
+
+  loadAvailableFormats(): void {
+    if (!this.selectedDocument) {
+      this.availableFormats = [];
+      return;
+    }
+    this.availableFormats = this.selectedDocument.formats.map(
+      (f: any) => f.code
+    );
+  }
+
+  // ── Subida de archivos ────────────────────────────────
 
   triggerFileInput(formatCode: string): void {
     this.selectedFormat = formatCode;
@@ -249,47 +225,66 @@ export class DocumentUploadComponent {
     const selectedDoc = this.selectedDocumentForUpload ?? this.selectedDocument;
     const fileTypeName = selectedDoc?.name?.toLowerCase();
 
+    const selectedPeriod = this.selectedPeriod;
+    let issueDate: Date | null = null;
+    let expiryDate: Date | null = null;
+
+    // ── 1. Obtener fechas ──
     if (fileTypeName?.includes("repse") && fileExt === "pdf") {
       const formatConfig = selectedDoc.formats.find(
         (f: any) => f.code.toLowerCase() === "pdf"
       );
-
       const expiryOffset = {
         value: formatConfig?.manual_expiry_value || 0,
         unit: formatConfig?.manual_expiry_unit || "años",
       };
 
-      const validation = await this.documentService.validateRepsePdf(
+      const extracted = await this.documentService.extractRepseDates(
         file,
-        expiryOffset,
-        this.selectedPeriod
+        expiryOffset
       );
+      issueDate = extracted.issueDate;
+      expiryDate = extracted.expiryDate;
+    }
 
-      if (!validation.valid) {
+    if (!expiryDate && selectedPeriod) {
+      expiryDate = new Date(selectedPeriod.end_date);
+      issueDate = new Date();
+    }
+
+    // Guardar en estado
+    this.tempIssueDate = issueDate;
+    this.tempExpiryDate = expiryDate;
+
+    // ── 2. Validar cobertura ──
+    if (selectedPeriod && expiryDate) {
+      const periodStart = moment(selectedPeriod.start_date);
+      const periodEnd = moment(selectedPeriod.end_date);
+      const exp = moment(expiryDate);
+
+      if (exp.isBefore(periodStart)) {
         this.toastrService.danger(
-          validation.message || "Documento inválido",
-          "Error"
+          `La vigencia del documento (${exp.format(
+            "DD/MM/YYYY"
+          )}) no cubre el inicio del periodo.`,
+          "Vigencia inválida"
         );
         return;
       }
 
-      if (validation.warning) {
-        this.toastrService.warning(validation.warning, "Advertencia");
-        return;
+      if (exp.isBefore(periodEnd)) {
+        this.toastrService.warning(
+          `La vigencia del documento (${exp.format(
+            "DD/MM/YYYY"
+          )}) no cubre completamente el periodo.`,
+          "Advertencia"
+        );
       }
-
-      const { issueDate, expiryDate } =
-        await this.documentService.extractRepseDates(file, expiryOffset);
-
-      if (issueDate) this.tempIssueDate = issueDate;
-      if (expiryDate) this.tempExpiryDate = expiryDate;
     }
 
+    // ── 3. Subir ──
     const fd = new FormData();
     fd.append("file", file);
-
-    const selectedPeriod = this.selectedPeriod;
-
     fd.append(
       "required_file_id",
       selectedDoc?.required_file_id.toString() || ""
@@ -297,15 +292,23 @@ export class DocumentUploadComponent {
     fd.append("period_id", selectedPeriod?.period_id.toString() || "");
     fd.append("format_code", this.selectedFormat);
 
+    if (issueDate)
+      fd.append("issue_date", issueDate.toISOString().split("T")[0]);
+    if (expiryDate)
+      fd.append("expiry_date", expiryDate.toISOString().split("T")[0]);
+
     this.isUploading = true;
 
     return new Promise((resolve) => {
       this.documentService.uploadFile(fd).subscribe({
-        next: () => {
+        next: async () => {
           this.toastrService.success("Archivo cargado", file.name);
           if (selectedDoc) {
             this.updateUploadProgress(selectedDoc);
           }
+          await this.loadFilesForReview(); // para botón de revisión
+          await this.loadConfirmedFiles(); // para tabla y progreso por formato
+
           resolve();
         },
         error: () => {
@@ -317,30 +320,8 @@ export class DocumentUploadComponent {
     });
   }
 
-  canSelectFile(): boolean {
-    if (this.activeTab === "Con retraso") {
-      return !!(
-        this.selectedDocument &&
-        this.selectedPeriod &&
-        this.selectedFormat
-      );
-    }
-    return !!this.selectedDocumentForUpload;
-  }
-
-  canUpload(): boolean {
-    if (!this.selectedFile) return false;
-    if (this.activeTab === "Con retraso") {
-      return !!(
-        this.selectedDocument &&
-        this.selectedPeriod &&
-        this.selectedFormat
-      );
-    }
-    return !!this.selectedDocumentForUpload;
-  }
-
   async uploadDocument(): Promise<void> {
+    //pestaña con retraso
     if (!this.canUpload() || !this.selectedFile) {
       this.toastrService.warning(
         "Complete todos los campos requeridos",
@@ -352,48 +333,66 @@ export class DocumentUploadComponent {
     const file = this.selectedFile;
     const fileName = file.name.toLowerCase();
     const fileExt = fileName.split(".").pop();
-
     const selectedDoc = this.selectedDocumentForUpload ?? this.selectedDocument;
     const selectedPeriod = this.selectedPeriod;
     const fileTypeName = selectedDoc?.name?.toLowerCase();
 
-    // Validación REPSE
+    let issueDate: Date | null = null;
+    let expiryDate: Date | null = null;
+
+    // ── 1. Fechas ──
     if (fileTypeName?.includes("repse") && fileExt === "pdf") {
       const formatConfig = selectedDoc.formats.find(
         (f: any) => f.code.toLowerCase() === "pdf"
       );
-
       const expiryOffset = {
         value: formatConfig?.manual_expiry_value || 0,
         unit: formatConfig?.manual_expiry_unit || "años",
       };
 
-      const validation = await this.documentService.validateRepsePdf(
+      const extracted = await this.documentService.extractRepseDates(
         file,
-        expiryOffset,
-        selectedPeriod
+        expiryOffset
       );
+      issueDate = extracted.issueDate;
+      expiryDate = extracted.expiryDate;
+    }
 
-      if (!validation.valid) {
+    if (!expiryDate && selectedPeriod) {
+      expiryDate = new Date(selectedPeriod.end_date);
+      issueDate = new Date();
+    }
+
+    this.tempIssueDate = issueDate;
+    this.tempExpiryDate = expiryDate;
+
+    // ── 2. Validar vigencia ──
+    if (selectedPeriod && expiryDate) {
+      const periodStart = moment(selectedPeriod.start_date);
+      const periodEnd = moment(selectedPeriod.end_date);
+      const exp = moment(expiryDate);
+
+      if (exp.isBefore(periodStart)) {
         this.toastrService.danger(
-          validation.message || "Documento inválido",
-          "Error"
+          `La vigencia del documento (${exp.format(
+            "DD/MM/YYYY"
+          )}) no cubre el inicio del periodo.`,
+          "Vigencia inválida"
         );
         return;
       }
 
-      if (validation.warning) {
-        this.toastrService.warning(validation.warning, "Advertencia");
+      if (exp.isBefore(periodEnd)) {
+        this.toastrService.warning(
+          `La vigencia del documento (${exp.format(
+            "DD/MM/YYYY"
+          )}) no cubre completamente el periodo.`,
+          "Advertencia"
+        );
       }
-
-      const { issueDate, expiryDate } =
-        await this.documentService.extractRepseDates(file, expiryOffset);
-
-      if (issueDate) this.tempIssueDate = issueDate;
-      if (expiryDate) this.tempExpiryDate = expiryDate;
     }
 
-    // Subida
+    // ── 3. Subida ──
     this.isUploading = true;
     const fd = new FormData();
     fd.append("file", file);
@@ -404,10 +403,10 @@ export class DocumentUploadComponent {
     fd.append("period_id", selectedPeriod?.period_id.toString() || "");
     fd.append("format_code", this.selectedFormat);
 
-    if (this.tempIssueDate && this.tempExpiryDate) {
-      fd.append("issue_date", this.tempIssueDate.toISOString().split("T")[0]);
-      fd.append("expiry_date", this.tempExpiryDate.toISOString().split("T")[0]);
-    }
+    if (issueDate)
+      fd.append("issue_date", issueDate.toISOString().split("T")[0]);
+    if (expiryDate)
+      fd.append("expiry_date", expiryDate.toISOString().split("T")[0]);
 
     this.documentService.uploadFile(fd).subscribe({
       next: (resp: any) => {
@@ -427,6 +426,8 @@ export class DocumentUploadComponent {
     });
   }
 
+  // ── Limpieza ──────────────────────────────────────────
+
   resetUploadForm(): void {
     this.selectedFile = null;
     this.selectedDocumentForUpload = null;
@@ -438,74 +439,61 @@ export class DocumentUploadComponent {
     this.tempExpiryDate = null;
   }
 
-  // ── Late tab: selecting document, period, format ────────────
+  // ── Modal de subida y preview ─────────────────────────
 
-  onTabChange(tab: "Regular" | "Con retraso" | "Rechazados"): void {
-    this.activeTab = tab;
-    this.resetUploadForm();
-    if (tab === "Rechazados") {
-      this.loadRejectedFiles();
-    }
-  }
+  async prepareUpload(file: any): Promise<void> {
+    this.activeTab = "Regular";
+    this.selectedDocumentForUpload = file;
+    this.selectedPeriod = file.current_period ?? null;
 
-  selectForLateUpload(file: any): void {
-    this.activeTab = "Con retraso";
-    this.selectedDocument = file;
-    this.loadAvailableFormats();
-  }
+    this.updateUploadProgress(file);
+    await this.loadFilesForReview(); // para botón de revisión
+    await this.loadConfirmedFiles(); // para tabla y progreso por formato
 
-  loadAvailableFormats(): void {
-    if (!this.selectedDocument) {
-      this.availableFormats = [];
-      return;
-    }
-    this.availableFormats = this.selectedDocument.formats.map(
-      (f: any) => f.code
-    );
-  }
-
-  loadRejectedFiles(): void {
-    this.documentService.getRejectedDocuments().subscribe({
-      next: (files) => {
-        this.rejectedFiles = files;
-      },
-      error: (err) => {
-        console.error("Error loading rejected files", err);
-      },
+    this.dialogRefUpload = this.dialogService.open(this.uploadModal, {
+      dialogClass: "custom-modal",
+      closeOnBackdropClick: false,
+      autoFocus: true,
     });
   }
 
-  downloadDocument(fileId: number): void {
-    const file = this.rejectedFiles.find((f) => f.file_id === fileId);
-    if (file && file.file_path) {
-      this.documentService.downloadFile(file.file_path);
-    } else {
-      this.toastrService.warning("Archivo no encontrado", "Advertencia");
-    }
-  }
+  openPreviewModal(): void {
+    const doc = this.selectedDocumentForUpload;
 
-  getIncompletePeriodicFiles(): any[] {
-    return this.requiredFiles.filter(
-      (f) =>
-        f.is_periodic && f.status !== "complete" && f.current_period != null
-    );
-  }
-
-  getFileAccept(): string {
-    // Si estamos en “Con retraso”, sólo el formato elegido
-    if (this.activeTab === "Con retraso") {
-      return this.selectedFormat
-        ? `.${this.selectedFormat.toLowerCase()}`
-        : "*/*";
+    if (!doc?.required_file_id || !doc?.current_period?.period_id) {
+      this.toastrService.warning(
+        "No se encontró información del documento",
+        "Error"
+      );
+      return;
     }
 
-    // En “Regular”, toma todos los códigos de formato disponibles
-    if (!this.selectedDocumentForUpload) {
-      return "*/*";
-    }
-    return this.selectedDocumentForUpload.formats
-      .map((f: any) => `.${f.code.toLowerCase()}`)
-      .join(",");
+    this.documentService
+      .getUploadedFiles(doc.required_file_id, doc.current_period.period_id, [
+        "uploaded",
+      ])
+      .subscribe({
+        next: (files) => {
+          this.previewFiles = files.map((f: any) => ({
+            name: f.file_path.split("/").pop(),
+            path: f.file_path,
+            uploaded_at: f.uploaded_at,
+            format: f.file_ext.toLowerCase(),
+            required_file_id: f.required_file_id,
+          }));
+
+          this.dialogRef = this.dialogService.open(this.previewModal, {
+            dialogClass: "custom-modal",
+            closeOnBackdropClick: false,
+          });
+        },
+        error: () => {
+          this.toastrService.danger(
+            "Error al cargar archivos cargados",
+            "Error"
+          );
+        },
+      });
   }
 
   closeModal(): void {
@@ -522,21 +510,163 @@ export class DocumentUploadComponent {
     }
   }
 
-  getIncompletePeriods(): any[] {
-    if (!this.selectedDocument) return [];
+  // ── Archivos subidos (preview y eliminación) ──────────
 
-    const now = moment().startOf("day");
-    return this.selectedDocument.periods.filter(
-      (p: any) =>
-        moment(p.end_date).isBefore(now, "day") &&
-        p.uploaded_count < this.selectedDocument.min_documents_needed
-    );
+  loadFilesForReview(): void {
+    const doc = this.selectedDocumentForUpload;
+    if (!doc?.required_file_id || !doc?.current_period?.period_id) return;
+
+    this.documentService
+      .getUploadedFiles(doc.required_file_id, doc.current_period.period_id, [
+        "uploaded",
+      ])
+      .subscribe({
+        next: (files) => {
+          this.reviewFiles = files.map((f: any) => ({
+            name: f.file_path.split("/").pop(),
+            path: f.file_path,
+            uploaded_at: f.uploaded_at,
+            format: f.file_ext.toLowerCase(),
+            required_file_id: f.required_file_id,
+          }));
+        },
+        error: () => {
+          this.toastrService.danger(
+            "Error al cargar archivos para revisión",
+            "Error"
+          );
+        },
+      });
   }
 
-  private formatDate(dateString: string): string {
-    return moment(dateString).format("DD/MM/YYYY");
+  loadConfirmedFiles(): void {
+    const doc = this.selectedDocumentForUpload;
+    if (!doc?.required_file_id || !doc?.current_period?.period_id) return;
+
+    this.documentService
+      .getUploadedFiles(doc.required_file_id, doc.current_period.period_id, [
+        "pending",
+        "approved",
+      ])
+      .subscribe({
+        next: (files) => {
+          const counts: Record<string, number> = {};
+          this.previewFiles = files.map((f: any) => {
+            const ext = f.file_ext?.toLowerCase() || "";
+            counts[ext] = (counts[ext] || 0) + 1;
+            return {
+              name: f.file_path.split("/").pop(),
+              path: f.file_path,
+              uploaded_at: f.uploaded_at,
+              format: ext,
+              required_file_id: f.required_file_id,
+            };
+          });
+
+          // Actualizar el contador por formato
+          for (const fmt of doc.formats) {
+            fmt.temp_uploaded_count = counts[fmt.code.toLowerCase()] || 0;
+          }
+        },
+        error: () => {
+          this.toastrService.danger(
+            "Error al cargar archivos cargados",
+            "Error"
+          );
+        },
+      });
   }
 
+  downloadPreviewFile(file: any): void {
+    if (file?.path) {
+      this.documentService.downloadFile(file.path);
+    } else {
+      this.toastrService.warning("Ruta inválida del archivo", "Aviso");
+    }
+  }
+  deletePreviewFile(file: any): void {
+    this.documentService.deleteUploadedFile(file.path).subscribe({
+      next: () => {
+        this.toastrService.success("Archivo eliminado", "Éxito");
+        this.reviewFiles = this.reviewFiles.filter((f) => f.path !== file.path);
+        if (this.reviewFiles.length === 0) {
+          this.closeModal();
+          this.toastrService.info(
+            "Ya no hay archivos para revisar",
+            "Revisión vacía"
+          );
+        }
+        this.updateUploadProgress(this.selectedDocumentForUpload);
+      },
+      error: () => {
+        this.toastrService.danger("No se pudo eliminar el archivo", "Error");
+      },
+    });
+  }
+  confirmUploadSubmit(): void {
+    const doc = this.selectedDocumentForUpload;
+    if (!doc?.required_file_id || !doc?.current_period?.period_id) return;
+
+    this.documentService
+      .submitUploadedFiles(doc.required_file_id, doc.current_period.period_id)
+      .subscribe({
+        next: () => {
+          this.toastrService.success("Archivos enviados a revisión", "Éxito");
+          this.closeModal();
+          this.loadFilesForReview(); // para botón de revisión
+          this.loadConfirmedFiles(); // para tabla y progreso por formato
+
+          this.updateUploadProgress(this.selectedDocumentForUpload);
+
+          this.loadDocuments();
+        },
+        error: () => {
+          this.toastrService.danger("Error al enviar archivos", "Error");
+        },
+      });
+  }
+
+  checkExpiringDocuments(): void {
+    const warningThresholdDays = 10;
+    const now = moment();
+
+    const allDocs = [
+      ...this.assignedByMe,
+      ...this.assignedByOthers.flatMap((x) => x.files),
+    ];
+
+    allDocs.forEach((doc) => {
+      const files = doc?.current_period?.files || [];
+      files.forEach((file: any) => {
+        if (file.coverage_status === "parcial" && file.expiry_date) {
+          const expiry = moment(file.expiry_date);
+          if (expiry.isBefore(now)) {
+            this.toastrService.warning(
+              `El archivo para "${doc.name}" ha vencido. Se requiere uno nuevo.`,
+              "Archivo vencido"
+            );
+          } else if (expiry.diff(now, "days") <= warningThresholdDays) {
+            this.toastrService.info(
+              `El archivo para "${doc.name}" vence pronto (${expiry.format(
+                "DD/MM/YYYY"
+              )}).`,
+              "Vencimiento cercano"
+            );
+          }
+        }
+      });
+    });
+  }
+
+  // ── Archivos rechazados ───────────────────────────────
+  downloadDocument(fileId: number): void {
+    const file = this.rejectedFiles.find((f) => f.file_id === fileId);
+    if (file && file.file_path) {
+      this.documentService.downloadFile(file.file_path);
+    } else {
+      this.toastrService.warning("Archivo no encontrado", "Advertencia");
+    }
+  }
   acknowledgeDocument(fileId: number): void {
     const body = new FormData();
     body.append("action", "acknowledge");
@@ -554,19 +684,28 @@ export class DocumentUploadComponent {
     });
   }
 
-  get incompleteRequiredFilesCount(): number {
-    const myIncomplete = this.assignedByMe.filter(
-      (file) => file.status !== "complete"
-    ).length;
+  // ── Helpers de visualización ──────────────────────────
 
-    const othersIncomplete = this.assignedByOthers.reduce((total, group) => {
-      const count = group.files.filter(
-        (file) => file.status !== "complete"
-      ).length;
-      return total + count;
-    }, 0);
+  getStatusColor(status: string): string {
+    return (
+      {
+        complete: "success",
+        partial: "warning",
+        pending: "info",
+        overdue: "danger",
+      }[status] || "basic"
+    );
+  }
 
-    return myIncomplete + othersIncomplete;
+  getStatusLabel(status: string): string {
+    return (
+      {
+        complete: "Completo",
+        partial: "Parcial",
+        pending: "Pendiente",
+        overdue: "Atrasado",
+      }[status] || status
+    );
   }
 
   getDeadlineLabel(file: any): string {
@@ -576,12 +715,16 @@ export class DocumentUploadComponent {
     return moment(file.deadline).format("DD/MM/YYYY");
   }
 
-  isFormatComplete(file: any, formatCode: string): boolean {
-    const format = file.formats.find((f: any) => f.code === formatCode);
-    if (!format) return false;
-
-    const currentCount = format.temp_uploaded_count || 0;
-    return currentCount >= format.min_required;
+  getUploadProgress(file: any): string {
+    if (file.current_period) {
+      return `${file.current_period.uploaded_count}/${file.min_documents_needed}`;
+    }
+    const totalDone = file.periods.reduce(
+      (sum: number, p: any) => sum + p.uploaded_count,
+      0
+    );
+    const needed = file.min_documents_needed * file.periods.length || 1;
+    return `${totalDone}/${needed}`;
   }
 
   private updateUploadProgress(doc: any): void {
@@ -616,129 +759,90 @@ export class DocumentUploadComponent {
       });
   }
 
-  private async loadUploadedFilesForPreview(): Promise<void> {
-    const doc = this.selectedDocumentForUpload;
-    if (!doc?.required_file_id || !doc?.current_period?.period_id) return;
+  getIncompletePeriodicFiles(): any[] {
+    return this.requiredFiles.filter(
+      (f) =>
+        f.is_periodic && f.status !== "complete" && f.current_period != null
+    );
+  }
+  getFileAccept(): string {
+    // Si estamos en “Con retraso”, sólo el formato elegido
+    if (this.activeTab === "Con retraso") {
+      return this.selectedFormat
+        ? `.${this.selectedFormat.toLowerCase()}`
+        : "*/*";
+    }
 
-    this.documentService
-      .getUploadedFiles(doc.required_file_id, doc.current_period.period_id, [
-        "uploaded",
-      ])
-      .subscribe({
-        next: (files) => {
-          this.previewFiles = files.map((f: any) => ({
-            name: f.file_path.split("/").pop(),
-            path: f.file_path,
-            uploaded_at: f.uploaded_at,
-            format: f.file_ext.toLowerCase(),
-            required_file_id: f.required_file_id,
-          }));
+    // En “Regular”, toma todos los códigos de formato disponibles
+    if (!this.selectedDocumentForUpload) {
+      return "*/*";
+    }
+    return this.selectedDocumentForUpload.formats
+      .map((f: any) => `.${f.code.toLowerCase()}`)
+      .join(",");
+  }
+  getIncompletePeriods(): any[] {
+    if (!this.selectedDocument) return [];
 
-          const counts: Record<string, number> = {};
-          for (const file of this.previewFiles) {
-            counts[file.format] = (counts[file.format] || 0) + 1;
-          }
-
-          for (const fmt of doc.formats) {
-            fmt.temp_uploaded_count = counts[fmt.code.toLowerCase()] || 0;
-          }
-        },
-        error: () => {
-          this.toastrService.danger("Error al cargar archivos", "Error");
-        },
-      });
+    const now = moment().startOf("day");
+    return this.selectedDocument.periods.filter(
+      (p: any) =>
+        moment(p.end_date).isBefore(now, "day") &&
+        p.uploaded_count < this.selectedDocument.min_documents_needed
+    );
   }
 
-  openPreviewModal(): void {
-    const doc = this.selectedDocumentForUpload;
+  isFormatComplete(file: any, formatCode: string): boolean {
+    const format = file.formats.find((f: any) => f.code === formatCode);
+    if (!format) return false;
 
-    if (!doc?.required_file_id || !doc?.current_period?.period_id) {
-      this.toastrService.warning(
-        "No se encontró información del documento",
-        "Error"
+    const currentCount = format.temp_uploaded_count || 0;
+    return currentCount >= format.min_required;
+  }
+
+  canSelectFile(): boolean {
+    if (this.activeTab === "Con retraso") {
+      return !!(
+        this.selectedDocument &&
+        this.selectedPeriod &&
+        this.selectedFormat
       );
-      return;
     }
-
-    this.documentService
-      .getUploadedFiles(doc.required_file_id, doc.current_period.period_id, [
-        "uploaded",
-      ])
-      .subscribe({
-        next: (files) => {
-          this.previewFiles = files.map((f: any) => ({
-            name: f.file_path.split("/").pop(),
-            path: f.file_path,
-            uploaded_at: f.uploaded_at,
-            format: f.file_ext.toLowerCase(),
-            required_file_id: f.required_file_id,
-          }));
-
-          const counts: Record<string, number> = {};
-          for (const file of this.previewFiles) {
-            counts[file.format] = (counts[file.format] || 0) + 1;
-          }
-
-          for (const fmt of doc.formats) {
-            fmt.temp_uploaded_count = counts[fmt.code.toLowerCase()] || 0;
-          }
-
-          this.dialogRef = this.dialogService.open(this.previewModal, {
-            dialogClass: "custom-modal",
-            closeOnBackdropClick: false,
-          });
-        },
-        error: () => {
-          this.toastrService.danger(
-            "Error al cargar archivos cargados",
-            "Error"
-          );
-        },
-      });
+    return !!this.selectedDocumentForUpload;
+  }
+  canUpload(): boolean {
+    if (!this.selectedFile) return false;
+    if (this.activeTab === "Con retraso") {
+      return !!(
+        this.selectedDocument &&
+        this.selectedPeriod &&
+        this.selectedFormat
+      );
+    }
+    return !!this.selectedDocumentForUpload;
   }
 
-  downloadPreviewFile(file: any): void {
-    if (file?.path) {
-      this.documentService.downloadFile(file.path);
-    } else {
-      this.toastrService.warning("Ruta inválida del archivo", "Aviso");
-    }
+  getUploadedCount(file: any, formatCode: string): number {
+    const format = file.formats.find((f: any) => f.code === formatCode);
+    return format ? format.uploaded_count : 0;
+  }
+
+  get incompleteRequiredFilesCount(): number {
+    const myIncomplete = this.assignedByMe.filter(
+      (file) => file.status !== "complete"
+    ).length;
+
+    const othersIncomplete = this.assignedByOthers.reduce((total, group) => {
+      const count = group.files.filter(
+        (file) => file.status !== "complete"
+      ).length;
+      return total + count;
+    }, 0);
+
+    return myIncomplete + othersIncomplete;
   }
 
   downloadZip(requiredFileId: number): void {
     this.documentService.downloadApprovedZip(requiredFileId);
-  }
-
-  deletePreviewFile(file: any): void {
-    this.documentService.deleteUploadedFile(file.path).subscribe({
-      next: () => {
-        this.toastrService.success("Archivo eliminado", "Éxito");
-        this.previewFiles = this.previewFiles.filter(
-          (f) => f.path !== file.path
-        );
-        this.updateUploadProgress(this.selectedDocumentForUpload);
-      },
-      error: () => {
-        this.toastrService.danger("No se pudo eliminar el archivo", "Error");
-      },
-    });
-  }
-
-  confirmUploadSubmit(): void {
-    const doc = this.selectedDocumentForUpload;
-    if (!doc?.required_file_id || !doc?.current_period?.period_id) return;
-
-    this.documentService
-      .submitUploadedFiles(doc.required_file_id, doc.current_period.period_id)
-      .subscribe({
-        next: () => {
-          this.toastrService.success("Archivos enviados a revisión", "Éxito");
-          this.closeModal();
-          this.loadDocuments();
-        },
-        error: () => {
-          this.toastrService.danger("Error al enviar archivos", "Error");
-        },
-      });
   }
 }

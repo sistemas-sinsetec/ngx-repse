@@ -43,7 +43,7 @@
                         <th class="d-none d-sm-table-cell">Periodicidad</th>
                         <th class="d-none d-md-table-cell">Fecha límite</th>
                         <th>Estado</th>
-                        <th>Progreso</th>
+                        <th>Progreso del periodo</th>
                         <th>Acciones</th>
                       </tr>
                     </thead>
@@ -151,7 +151,7 @@
                             <th class="d-none d-sm-table-cell">Periodicidad</th>
                             <th class="d-none d-md-table-cell">Fecha límite</th>
                             <th>Estado</th>
-                            <th>Progreso</th>
+                            <th>Progreso del periodo</th>
                             <th>Acciones</th>
                           </tr>
                         </thead>
@@ -445,7 +445,7 @@
         <thead>
           <tr>
             <th class="text-center">Formato</th>
-            <th class="text-center">Progreso</th>
+            <th class="text-center">Archivos subidos</th>
             <th class="text-center">Acción</th>
           </tr>
         </thead>
@@ -494,8 +494,9 @@
           status="primary"
           *ngIf="selectedDocumentForUpload"
           (click)="openPreviewModal()"
+          [disabled]="reviewFiles.length === 0"
         >
-          Revisar ({{ previewFiles.length }})
+          Revisar ({{ reviewFiles.length }})
         </button>
       </div>
     </nb-card-footer>
@@ -518,7 +519,7 @@
       </button>
     </nb-card-header>
     <nb-card-body>
-      <table class="table table-hover">
+      <table class="table table-hover" *ngIf="reviewFiles.length > 0">
         <thead>
           <tr class="text-center">
             <th>Archivo</th>
@@ -527,7 +528,7 @@
           </tr>
         </thead>
         <tbody>
-          <tr *ngFor="let file of previewFiles">
+          <tr *ngFor="let file of reviewFiles">
             <td class="align-middle">
               {{ file.name }}
             </td>
@@ -558,7 +559,7 @@
           </tr>
         </tbody>
       </table>
-      <div *ngIf="previewFiles.length === 0" class="text-center mt-3">
+      <div *ngIf="reviewFiles.length === 0" class="text-center mt-3">
         <nb-alert status="info">No hay archivos cargados aún.</nb-alert>
       </div>
     </nb-card-body>
@@ -567,10 +568,10 @@
         <button
           nbButton
           status="primary"
-          [disabled]="previewFiles.length === 0"
+          [disabled]="reviewFiles.length === 0"
           (click)="confirmUploadSubmit()"
         >
-          Confirmar ({{ previewFiles.length }})
+          Confirmar ({{ reviewFiles.length }})
         </button>
       </div>
     </nb-card-footer>

@@ -7,6 +7,43 @@ ini_set('display_errors', 1);
 ini_set('display_startup_errors', 1);
 error_reporting(E_ALL);
 
+function safe_prepare($mysqli, $query, $error_context = '')
+{
+    $stmt = $mysqli->prepare($query);
+    if (!$stmt) {
+        echo json_encode([
+            'success' => false,
+            'error' => "Prepare failed ($error_context): " . $mysqli->error
+        ]);
+        exit;
+    }
+    return $stmt;
+}
+
+function safe_execute($stmt, $error_context = '')
+{
+    if (!$stmt->execute()) {
+        echo json_encode([
+            'success' => false,
+            'error' => "Execute failed ($error_context): " . $stmt->error
+        ]);
+        $stmt->close();
+        exit;
+    }
+}
+
+function bind_and_execute($stmt, $types, ...$params)
+{
+    if (!$stmt->bind_param($types, ...$params)) {
+        echo json_encode([
+            'success' => false,
+            'error' => 'bind_param failed: ' . $stmt->error
+        ]);
+        exit;
+    }
+    safe_execute($stmt);
+}
+
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $action = $_POST['action'] ?? '';
 
@@ -15,17 +52,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $period_id = intval($_POST['period_id']);
         $format_code = trim($_POST['format_code']);
 
-        $stmt = $mysqli->prepare("
-            SELECT cf.file_id, cf.file_path 
+        $stmt = safe_prepare(
+            $mysqli,
+            "SELECT cf.file_id, cf.file_path 
             FROM company_files cf
             JOIN document_periods dp ON cf.period_id = dp.period_id
-            WHERE dp.required_file_id = ? AND cf.period_id = ? AND cf.file_ext = ? AND cf.status = 'uploaded'
-        ");
+            WHERE dp.required_file_id = ? AND cf.period_id = ? AND cf.file_ext = ? AND cf.status = 'uploaded'",
+            'submit_uploads select'
+        );
 
-        $stmt->bind_param("iis", $required_file_id, $period_id, $format_code);
-        $stmt->execute();
+        bind_and_execute($stmt, "iis", $required_file_id, $period_id, $format_code);
+
         $result = $stmt->get_result();
-
         while ($row = $result->fetch_assoc()) {
             $oldPath = __DIR__ . '/../documents/' . $row['file_path'];
             $newPath = str_replace('/cargados/', '/subidos/', $oldPath);
@@ -39,9 +77,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             }
 
             $newRelativePath = str_replace('/cargados/', '/subidos/', $row['file_path']);
-            $update = $mysqli->prepare("UPDATE company_files SET file_path = ?, status = 'pending' WHERE file_id = ?");
-            $update->bind_param("si", $newRelativePath, $row['file_id']);
-            $update->execute();
+
+            $update = safe_prepare($mysqli, "UPDATE company_files SET file_path = ?, status = 'pending' WHERE file_id = ?", 'submit_uploads update');
+            bind_and_execute($update, "si", $newRelativePath, $row['file_id']);
             $update->close();
         }
 
@@ -54,9 +92,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $file_id = intval($_POST['file_id']);
 
         // Obtener la ruta actual
-        $stmt = $mysqli->prepare("SELECT file_path FROM company_files WHERE file_id = ?");
-        $stmt->bind_param("i", $file_id);
-        $stmt->execute();
+        $stmt = safe_prepare($mysqli, "SELECT file_path FROM company_files WHERE file_id = ?", 'approve select');
+        bind_and_execute($stmt, "i", $file_id);
+
         $result = $stmt->get_result();
         $file = $result->fetch_assoc();
         $stmt->close();
@@ -89,9 +127,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $newRelativePath = str_replace('/subidos/', '/aprobados/', $file['file_path']);
 
         // Actualizar DB
-        $stmt = $mysqli->prepare("UPDATE company_files SET file_path = ?, status = 'approved' WHERE file_id = ?");
-        $stmt->bind_param("si", $newRelativePath, $file_id);
-        $stmt->execute();
+        $stmt = safe_prepare($mysqli, "UPDATE company_files SET file_path = ?, status = 'approved' WHERE file_id = ?", 'approve update');
+        bind_and_execute($stmt, "si", $newRelativePath, $file_id);
         $stmt->close();
 
         echo json_encode(['success' => true]);
@@ -103,9 +140,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $comment = $_POST['comment'] ?? '';
 
         // Obtener la ruta actual
-        $stmt = $mysqli->prepare("SELECT file_path FROM company_files WHERE file_id = ?");
-        $stmt->bind_param("i", $file_id);
-        $stmt->execute();
+        $stmt = safe_prepare($mysqli, "SELECT file_path FROM company_files WHERE file_id = ?", 'reject select');
+        bind_and_execute($stmt, "i", $file_id);
+
         $result = $stmt->get_result();
         $file = $result->fetch_assoc();
         $stmt->close();
@@ -138,9 +175,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $newRelativePath = str_replace('/subidos/', '/rechazados/', $file['file_path']);
 
         // Actualizar DB
-        $stmt = $mysqli->prepare("UPDATE company_files SET file_path = ?, status = 'rejected', comment = ? WHERE file_id = ?");
-        $stmt->bind_param("ssi", $newRelativePath, $comment, $file_id);
-        $stmt->execute();
+        $stmt = safe_prepare($mysqli, "UPDATE company_files SET file_path = ?, status = 'rejected', comment = ? WHERE file_id = ?", 'reject update');
+        bind_and_execute($stmt, "ssi", $newRelativePath, $comment, $file_id);
         $stmt->close();
 
         echo json_encode(['success' => true]);
@@ -149,9 +185,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     if ($action === 'acknowledge') {
         $file_id = intval($_POST['file_id']);
-        $stmt = $mysqli->prepare("SELECT file_path FROM company_files WHERE file_id = ?");
-        $stmt->bind_param("i", $file_id);
-        $stmt->execute();
+        $stmt = safe_prepare($mysqli, "SELECT file_path FROM company_files WHERE file_id = ?", 'acknowledge select');
+        bind_and_execute($stmt, "i", $file_id);
+
         $result = $stmt->get_result();
         $file = $result->fetch_assoc();
         $stmt->close();
@@ -161,10 +197,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             if (file_exists($path)) {
                 unlink($path);
             }
-            $stmt = $mysqli->prepare("UPDATE company_files SET file_path = '', is_current = 0, status = 'acknowledged' WHERE file_id = ?");
-            $stmt->bind_param("i", $file_id);
-            $stmt->execute();
+            $stmt = safe_prepare($mysqli, "UPDATE company_files SET file_path = '', is_current = 0, status = 'acknowledged' WHERE file_id = ?", 'acknowledge update');
+            bind_and_execute($stmt, "i", $file_id);
             $stmt->close();
+
             echo json_encode(['success' => true]);
         } else {
             echo json_encode(['success' => false, 'error' => 'File not found']);
@@ -181,9 +217,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
 
         // Buscar el archivo en la base de datos
-        $stmt = $mysqli->prepare("SELECT file_id FROM company_files WHERE file_path = ? AND status IN ('uploaded', 'pending')");
-        $stmt->bind_param("s", $file_path);
-        $stmt->execute();
+        $stmt = safe_prepare($mysqli, "SELECT file_id FROM company_files WHERE file_path = ? AND status IN ('uploaded', 'pending')", 'delete select');
+        bind_and_execute($stmt, "s", $file_path);
+
         $result = $stmt->get_result();
         $file = $result->fetch_assoc();
         $stmt->close();
@@ -200,9 +236,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
 
         // Eliminar registro
-        $stmt = $mysqli->prepare("DELETE FROM company_files WHERE file_id = ?");
-        $stmt->bind_param("i", $file['file_id']);
-        $stmt->execute();
+        $stmt = safe_prepare($mysqli, "DELETE FROM company_files WHERE file_id = ?", 'delete delete');
+        bind_and_execute($stmt, "i", $file['file_id']);
         $stmt->close();
 
         echo json_encode(['success' => true]);
@@ -213,20 +248,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $required_file_id = intval($_POST['required_file_id']);
         $period_id = intval($_POST['period_id']);
 
-        $stmt = $mysqli->prepare("
+        $stmt = safe_prepare($mysqli, "
             SELECT cf.file_id, cf.file_path 
             FROM company_files cf
             JOIN document_periods dp ON cf.period_id = dp.period_id
             WHERE dp.required_file_id = ? AND cf.period_id = ? AND cf.status = 'uploaded'
-        ");
-
-        if (!$stmt) {
-            echo json_encode(['success' => false, 'error' => 'Prepare failed: ' . $mysqli->error]);
-            exit;
-        }
-
-        $stmt->bind_param("ii", $required_file_id, $period_id);
-        $stmt->execute();
+        ", 'submit_uploaded select');
+        bind_and_execute($stmt, "ii", $required_file_id, $period_id);
         $result = $stmt->get_result();
 
         while ($row = $result->fetch_assoc()) {
@@ -251,9 +279,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             }
 
             $newRelativePath = str_replace('/cargados/', '/subidos/', $row['file_path']);
-            $update = $mysqli->prepare("UPDATE company_files SET file_path = ?, status = 'pending' WHERE file_id = ?");
-            $update->bind_param("si", $newRelativePath, $row['file_id']);
-            $update->execute();
+            $update = safe_prepare($mysqli, "UPDATE company_files SET file_path = ?, status = 'pending' WHERE file_id = ?", 'submit_uploaded update');
+            bind_and_execute($update, "si", $newRelativePath, $row['file_id']);
             $update->close();
         }
 
@@ -279,26 +306,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 
     // Get company info and required file type name
-    $stmt = $mysqli->prepare("
-    SELECT c.id AS company_id, c.nameCompany AS company_name, ft.name AS required_file_name
-    FROM company_required_files crf
-    JOIN companies c ON crf.company_id = c.id
-    JOIN file_types ft ON crf.file_type_id = ft.file_type_id
-    WHERE crf.required_file_id = ?
-");
-
-    if (!$stmt) {
-        echo json_encode(['success' => false, 'error' => 'Prepare failed (company query): ' . $mysqli->error]);
-        exit;
-    }
-
-    $stmt->bind_param("i", $required_file_id);
-
-    if (!$stmt->execute()) {
-        echo json_encode(['success' => false, 'error' => 'Execute failed (company query): ' . $stmt->error]);
-        $stmt->close();
-        exit;
-    }
+    $stmt = safe_prepare($mysqli, "
+        SELECT c.id AS company_id, c.nameCompany AS company_name, ft.name AS required_file_name
+        FROM company_required_files crf
+        JOIN companies c ON crf.company_id = c.id
+        JOIN file_types ft ON crf.file_type_id = ft.file_type_id
+        WHERE crf.required_file_id = ?
+    ", 'company query');
+    bind_and_execute($stmt, "i", $required_file_id);
 
     $result = $stmt->get_result();
     $company = $result->fetch_assoc();
@@ -318,9 +333,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     // Get period info
     $period_range = 'sin_periodicidad';
     if ($period_id) {
-        $stmt = $mysqli->prepare("SELECT start_date, end_date FROM document_periods WHERE period_id = ?");
-        $stmt->bind_param("i", $period_id);
-        $stmt->execute();
+        $stmt = safe_prepare($mysqli, "SELECT start_date, end_date FROM document_periods WHERE period_id = ?", 'period query');
+        bind_and_execute($stmt, "i", $period_id);
         $period = $stmt->get_result()->fetch_assoc();
         $stmt->close();
         if ($period) {
@@ -380,24 +394,23 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $expiry_date = $period_end;
     }
 
-    $query = "
-    INSERT INTO company_files (file_path, issue_date, expiry_date, user_id, status, is_current, period_id)
-    VALUES (?, ?, ?, ?, 'uploaded', 1, ?)
-    ";
-    $stmt = $mysqli->prepare($query);
-
-    if (!$stmt) {
-        echo json_encode(['success' => false, 'error' => 'Prepare failed: ' . $mysqli->error, 'query' => $query]);
-        exit;
+    // Determinar period_coverage del archivo respecto al periodo
+    $period_coverage = 'none';
+    if ($expiry_date < $period['start_date']) {
+        $period_coverage = 'none';
+    } elseif ($expiry_date >= $period['end_date']) {
+        $period_coverage = 'full';
+    } else {
+        $period_coverage = 'partial';
     }
 
-    $stmt->bind_param("sssii", $relative_path, $issue_date, $expiry_date, $user_id, $period_id);
+    $is_expired = ($expiry_date < date('Y-m-d')) ? 1 : 0;
 
-    if (!$stmt->execute()) {
-        echo json_encode(['success' => false, 'error' => 'Database insert failed: ' . $stmt->error]);
-        $stmt->close();
-        exit;
-    }
+    $stmt = safe_prepare($mysqli, "
+        INSERT INTO company_files (file_path, issue_date, expiry_date, user_id, status, is_current, period_id, period_coverage, is_expired)
+        VALUES (?, ?, ?, ?, 'uploaded', 1, ?, ?, ?)
+    ", 'file insert');
+    bind_and_execute($stmt, "sssissi", $relative_path, $issue_date, $expiry_date, $user_id, $period_id, $period_coverage, $is_expired);
 
     $stmt->close();
 
@@ -407,6 +420,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 }
 
 if ($_SERVER['REQUEST_METHOD'] === 'GET') {
+
+
     $statusParam = $_GET['status'] ?? 'pending';
     $statuses = explode(',', $statusParam);
 
@@ -436,9 +451,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
         $params[] = $period_id;
     }
 
+    $mysqli->query("
+        UPDATE company_files
+        SET status = 'expired'
+        WHERE coverage_status = 'partial'
+        AND expiry_date < CURDATE()
+        AND status IN ('approved', 'pending')
+    ");
+
     $sql = "
         SELECT cf.file_id, cf.file_path, cf.issue_date, cf.expiry_date, 
                cf.user_id, cf.status, cf.comment, cf.is_current, cf.uploaded_at, cf.period_id,
+               cf.period_coverage, cf.is_expired,
                dp.start_date, dp.end_date, dp.required_file_id,
                ft.name AS file_type_name, ft.description AS file_type_description,
                cf.file_ext
@@ -467,8 +491,5 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
     $stmt->close();
     exit;
 }
-
-
-
 
 echo json_encode(['success' => false, 'error' => 'Invalid request']);
