@@ -357,29 +357,31 @@ switch ($method) {
             }
 
             // Validar traslapes
-           $lastEnDate = null;
+            $lastEnDate = null;
 
             while ($row = $res->fetch_assoc()) {
                 $exist_start = new DateTime($row['start_date']);
                 $exist_end = new DateTime($row['end_date']);
 
                 //GUARDADO
-               if (is_null($lastEnDate)    || $exist_end > $lastEnDate){
-                $lastEnDate = $exist_end;
-               }
+                if (is_null($lastEnDate) || $exist_end > $lastEnDate) {
+                    $lastEnDate = $exist_end;
+                }
 
                 foreach ($new_periods as $np) {
                     if (
                         ($np['start'] <= $exist_end) &&
                         ($np['end'] >= $exist_start)
                     ) {
-                        respond(409, ['error' => 'Conflicto con otros periodos activos para este documento', 
-                    'last_movement_date' => $lastEnDate->format('Y-m-d')]);
-                }
+                        respond(409, [
+                            'error' => 'Conflicto con otros periodos activos para este documento',
+                            'last_movement_date' => $lastEnDate->format('Y-m-d')
+                        ]);
+                    }
 
                 }
 
-                }
+            }
             /* 1) Desactivar versión anterior --------------------------- */
             $off = $mysqli->prepare("
                 UPDATE company_required_files
@@ -393,12 +395,12 @@ switch ($method) {
                 AND start_date <= ?
             ");
             $off->bind_param(
-                'sssii',
-                $start_date,
-                $start_date,
-                $start_date,
+                'ssiis',
+                $start_date, // Para IF(end_date > ?)
+                $start_date, // Para DATE_SUB(?)
                 $company_id,
-                $file_type_id
+                $file_type_id,
+                $start_date // Para asegurar que sea anterior estrictamente
             );
 
             $off->execute();
