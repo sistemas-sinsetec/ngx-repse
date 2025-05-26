@@ -3,6 +3,7 @@ import { CompanyService } from "../../../../services/company.service";
 import * as moment from "moment";
 import { DocumentService } from "../../../../services/repse/document.service";
 import { DatePipe } from "@angular/common"; //Importar DatePipe y agregarlo a los providers del componente
+
 import {
   AssignedRequiredFile,
   Partner,
@@ -21,8 +22,31 @@ export class RequirementAssignmentComponent implements OnInit {
 
   constructor(
     private companyService: CompanyService,
-    private documentService: DocumentService
+    private documentService: DocumentService,
+    private datePipe: DatePipe // Añadir esto
   ) {}
+  // indificacion de mas de +10
+  // Añadir esta función pública para que sea accesible desde el HTML
+  public isExtremeFutureDate(dateString: string): boolean {
+    if (!dateString) return false;
+
+    // Usando moment.js para mejor manejo de zonas horarias
+    const date = new Date(dateString);
+    const threshold = new Date();
+    threshold.setFullYear(threshold.getFullYear() + 10);
+
+    return date > threshold;
+  }
+  // En el componente
+  getFormattedEndDate(endDate: string): string {
+    if (!endDate) return "-";
+
+    if (this.isExtremeFutureDate(endDate)) {
+      return "N/A";
+    }
+
+    return this.datePipe.transform(endDate, "dd/MM/yyyy") || "-";
+  }
 
   get companyId(): number {
     return this.companyService.selectedCompany.id;
