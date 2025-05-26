@@ -2,6 +2,7 @@ import { Component, OnInit } from "@angular/core";
 import { CompanyService } from "../../../../services/company.service";
 import * as moment from "moment";
 import { DocumentService } from "../../../../services/repse/document.service";
+import { DatePipe } from "@angular/common"; //Importar DatePipe y agregarlo a los providers del componente
 import {
   AssignedRequiredFile,
   Partner,
@@ -10,6 +11,7 @@ import {
   selector: "ngx-requirement-assignment",
   templateUrl: "./requirement-assignment.component.html",
   styleUrls: ["./requirement-assignment.component.scss"],
+  providers: [DatePipe], //Añadir esto en el decorador
 })
 export class RequirementAssignmentComponent implements OnInit {
   businessPartners: Partner[] = [];

@@ -16,3 +16,16 @@
   /* Deshabilita selección de texto */
   user-select: none !important;
 }
+
+.table {
+  text-align: center; // Centra todo el contenido por defecto
+
+  td {
+    text-align: center;
+
+    // Excepción: si el contenido es exactamente "Registro REPSE", alínealo a la izquierda
+    &:contains("Registro REPSE") {
+      text-align: left !important;
+    }
+  }
+}

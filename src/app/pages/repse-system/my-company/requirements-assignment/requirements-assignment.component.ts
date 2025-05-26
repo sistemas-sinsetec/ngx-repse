@@ -20,6 +20,7 @@ import {
 })
 export class RequirementsAssignmentComponent implements OnInit {
   companyId!: number;
+
   requirements: Requirement[] = [];
   documentTypes: { id: number; name: string }[] = [];
   availableFormats: { id: number; name: string; extension: string }[] = [];
@@ -69,6 +70,7 @@ export class RequirementsAssignmentComponent implements OnInit {
         this.requirements = reqs.map((req) => ({
           ...req,
           startDate: new Date(req.startDate),
+          endDate: req.endDate,
           // Mapear endDate
         }));
       },
