@@ -78,6 +78,7 @@ export class DocumentUploadComponent {
   // Fechas REPSE
   private tempIssueDate: Date | null = null;
   private tempExpiryDate: Date | null = null;
+  // Nuevo conjunto para rastrear notificaciones
 
   constructor(
     private documentService: DocumentService,
@@ -650,8 +651,16 @@ export class DocumentUploadComponent {
                 }" ha vencido (${expiry.format("DD/MM/YYYY")}).`,
                 "Archivo vencido"
               );
+<<<<<<< HEAD
             } else {
               const isRepse = file.file_type_name
+=======
+              // Marcar como notificado
+            }
+            // Mostrar próximo a vencer
+            else {
+              const threshold = file.file_type_name
+>>>>>>> testingchanges
                 ?.toLowerCase()
                 .includes("repse");
               const threshold = isRepse ? 90 : 7;

@@ -66,7 +66,7 @@ export class DocumentTreeComponent implements OnChanges {
   transformToTree(data: any): TreeNode<CatalogNode>[] {
     return data.map((docType: any) => ({
       data: { name: docType.name, type: "type" },
-      expanded: true,
+      expanded: false, // Cambiado de true a false
       children: docType.periodicities.map((periodicity: any) => ({
         data: {
           name:
@@ -75,7 +75,7 @@ export class DocumentTreeComponent implements OnChanges {
               : `${periodicity.count ?? ""} ${periodicity.type ?? ""}`.trim(),
           type: "periodicity",
         },
-        expanded: true,
+        expanded: false, // Cambiado de true a false
         children: periodicity.periods.map((period: any) => ({
           data: {
             name:
@@ -86,10 +86,10 @@ export class DocumentTreeComponent implements OnChanges {
                 : `${period.start_date} - ${period.end_date}`,
             type: "period",
           },
-          expanded: true,
+          expanded: false, // Cambiado de true a false
           children: period.formats.map((fmt: any) => ({
             data: { name: fmt.code?.toUpperCase() || "", type: "format" },
-            expanded: true,
+            expanded: false, // Cambiado de true a false
             children: fmt.files.map((file: any) => ({
               data: {
                 name: file.file_path?.split("/").pop() || "",
