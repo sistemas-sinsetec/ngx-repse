@@ -78,6 +78,7 @@ export class DocumentUploadComponent {
   // Fechas REPSE
   private tempIssueDate: Date | null = null;
   private tempExpiryDate: Date | null = null;
+  // Nuevo conjunto para rastrear notificaciones
 
   constructor(
     private documentService: DocumentService,
@@ -646,6 +647,7 @@ export class DocumentUploadComponent {
                 }" ha vencido (${expiry.format("DD/MM/YYYY")}).`,
                 "Archivo vencido"
               );
+              // Marcar como notificado
             }
             // Mostrar próximo a vencer
             else {
