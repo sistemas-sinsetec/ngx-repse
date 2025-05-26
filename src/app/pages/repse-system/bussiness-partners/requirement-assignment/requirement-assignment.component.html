@@ -42,7 +42,7 @@
                 {{ req.name }}
               </td>
 
-              <!-- Periódico (centrado) -->
+              <!-- Periódico centrado -->
               <td class="text-center align-middle">
                 {{ req.is_periodic ? "Sí" : "No" }}
               </td>
@@ -79,7 +79,10 @@
               <td class="text-center align-middle">
                 {{
                   req.current_period?.end_date
-                    ? (req.current_period.end_date | date : "dd/MM/yyyy")
+                    ? (req.current_period.end_date | date : "dd/MM/yyyy") ===
+                      "31/12/9999"
+                      ? "N/A"
+                      : (req.current_period.end_date | date : "dd/MM/yyyy")
                     : "-"
                 }}
               </td>
