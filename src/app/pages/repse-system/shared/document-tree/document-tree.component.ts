@@ -62,7 +62,7 @@ export class DocumentTreeComponent implements OnChanges {
       this.filterTree();
     }
   }
-  // a entrar solo se puede abrir cuando se hace click a los objetivos
+  //actualizacion de caltalogo de documento
   transformToTree(data: any): TreeNode<CatalogNode>[] {
     return data.map((docType: any) => ({
       data: { name: docType.name, type: "type" },
