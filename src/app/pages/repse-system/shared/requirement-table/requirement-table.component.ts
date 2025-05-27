@@ -18,7 +18,7 @@ export class RequirementTableComponent {
 
   getFormattedDate(date: string | Date | null | undefined): string {
     if (!date) return "-";
-    const parsed = moment(date);
+    const parsed = moment.utc(date);
     if (!parsed.isValid()) return "-";
 
     return this.isExtremeFutureDate(parsed)
