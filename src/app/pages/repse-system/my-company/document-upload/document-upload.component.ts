@@ -100,12 +100,12 @@ export class DocumentUploadComponent {
       next: (files) => {
         // Forzar tipo numérico para evitar errores por comparación estricta
         const myCompanyFiles = files.filter(
-          (f) => Number(f.company_id) === myCompanyId
+          (f) => Number(f.companyId) === myCompanyId
         );
 
         // Asignados por mi empresa
         this.assignedByMe = myCompanyFiles.filter(
-          (f) => Number(f.assigned_by) === myCompanyId
+          (f) => Number(f.assignedBy) === myCompanyId
         );
 
         // Asignados por otras empresas
@@ -114,12 +114,12 @@ export class DocumentUploadComponent {
         } = {};
 
         myCompanyFiles.forEach((file) => {
-          const assignedBy = Number(file.assigned_by);
+          const assignedBy = Number(file.assignedBy);
           if (assignedBy !== myCompanyId) {
             if (!grouped[assignedBy]) {
               grouped[assignedBy] = {
                 company_id: assignedBy,
-                company: file.company_name || `Empresa ${assignedBy}`,
+                company: file.companyName || `Empresa ${assignedBy}`,
                 files: [],
               };
             }
@@ -226,7 +226,7 @@ export class DocumentUploadComponent {
     const fileName = file.name.toLowerCase();
     const fileExt = fileName.split(".").pop();
     const selectedDoc = this.selectedDocumentForUpload ?? this.selectedDocument;
-    const fileTypeName = selectedDoc?.name?.toLowerCase();
+    const fileTypeName = selectedDoc?.documentType?.toLowerCase();
 
     const selectedPeriod = this.selectedPeriod;
     let issueDate: Date | null = null;
@@ -288,11 +288,21 @@ export class DocumentUploadComponent {
     // ── 3. Subir ──
     const fd = new FormData();
     fd.append("file", file);
-    fd.append(
-      "required_file_id",
-      selectedDoc?.required_file_id.toString() || ""
-    );
-    fd.append("period_id", selectedPeriod?.period_id.toString() || "");
+    fd.append("required_file_id", selectedDoc?.id.toString() || "");
+    const periodId =
+      this.selectedDocumentForUpload?.currentPeriod?.period_id ||
+      this.selectedPeriod?.period_id;
+
+    if (!periodId) {
+      this.toastrService.danger(
+        "No se encontró el periodo actual para este documento",
+        "Error"
+      );
+      return;
+    }
+
+    fd.append("period_id", periodId?.toString() || "");
+
     fd.append("format_code", this.selectedFormat);
 
     if (issueDate)
@@ -338,7 +348,7 @@ export class DocumentUploadComponent {
     const fileExt = fileName.split(".").pop();
     const selectedDoc = this.selectedDocumentForUpload ?? this.selectedDocument;
     const selectedPeriod = this.selectedPeriod;
-    const fileTypeName = selectedDoc?.name?.toLowerCase();
+    const fileTypeName = selectedDoc?.documentType?.toLowerCase();
 
     let issueDate: Date | null = null;
     let expiryDate: Date | null = null;
@@ -399,10 +409,7 @@ export class DocumentUploadComponent {
     this.isUploading = true;
     const fd = new FormData();
     fd.append("file", file);
-    fd.append(
-      "required_file_id",
-      selectedDoc?.required_file_id.toString() || ""
-    );
+    fd.append("required_file_id", selectedDoc?.id.toString() || "");
     fd.append("period_id", selectedPeriod?.period_id.toString() || "");
     fd.append("format_code", this.selectedFormat);
 
@@ -447,7 +454,7 @@ export class DocumentUploadComponent {
   async prepareUpload(file: any): Promise<void> {
     this.activeTab = "Regular";
     this.selectedDocumentForUpload = file;
-    this.selectedPeriod = file.current_period ?? null;
+    this.selectedPeriod = file.currentPeriod ?? null;
 
     this.updateUploadProgress(file);
     await this.loadFilesForReview(); // para botón de revisión
@@ -463,7 +470,7 @@ export class DocumentUploadComponent {
   openPreviewModal(): void {
     const doc = this.selectedDocumentForUpload;
 
-    if (!doc?.required_file_id || !doc?.current_period?.period_id) {
+    if (!doc?.id || !doc?.currentPeriod?.period_id) {
       this.toastrService.warning(
         "No se encontró información del documento",
         "Error"
@@ -472,9 +479,7 @@ export class DocumentUploadComponent {
     }
 
     this.documentService
-      .getUploadedFiles(doc.required_file_id, doc.current_period.period_id, [
-        "uploaded",
-      ])
+      .getUploadedFiles(doc.id, doc.currentPeriod.period_id, ["uploaded"])
       .subscribe({
         next: (files) => {
           this.previewFiles = files.map((f: any) => ({
@@ -482,7 +487,7 @@ export class DocumentUploadComponent {
             path: f.file_path,
             uploaded_at: f.uploaded_at,
             format: f.file_ext.toLowerCase(),
-            required_file_id: f.required_file_id,
+            required_file_id: f.id,
           }));
 
           this.dialogRef = this.dialogService.open(this.previewModal, {
@@ -517,12 +522,10 @@ export class DocumentUploadComponent {
 
   loadFilesForReview(): void {
     const doc = this.selectedDocumentForUpload;
-    if (!doc?.required_file_id || !doc?.current_period?.period_id) return;
+    if (!doc?.id || !doc?.currentPeriod?.period_id) return;
 
     this.documentService
-      .getUploadedFiles(doc.required_file_id, doc.current_period.period_id, [
-        "uploaded",
-      ])
+      .getUploadedFiles(doc.id, doc.currentPeriod.period_id, ["uploaded"])
       .subscribe({
         next: (files) => {
           this.reviewFiles = files.map((f: any) => ({
@@ -530,7 +533,7 @@ export class DocumentUploadComponent {
             path: f.file_path,
             uploaded_at: f.uploaded_at,
             format: f.file_ext.toLowerCase(),
-            required_file_id: f.required_file_id,
+            required_file_id: f.id,
           }));
         },
         error: () => {
@@ -544,10 +547,10 @@ export class DocumentUploadComponent {
 
   loadConfirmedFiles(): void {
     const doc = this.selectedDocumentForUpload;
-    if (!doc?.required_file_id || !doc?.current_period?.period_id) return;
+    if (!doc?.id || !doc?.currentPeriod?.period_id) return;
 
     this.documentService
-      .getUploadedFiles(doc.required_file_id, doc.current_period.period_id, [
+      .getUploadedFiles(doc.id, doc.currentPeriod.period_id, [
         "pending",
         "approved",
       ])
@@ -562,7 +565,7 @@ export class DocumentUploadComponent {
               path: f.file_path,
               uploaded_at: f.uploaded_at,
               format: ext,
-              required_file_id: f.required_file_id,
+              required_file_id: f.id,
             };
           });
 
@@ -608,10 +611,10 @@ export class DocumentUploadComponent {
   }
   confirmUploadSubmit(): void {
     const doc = this.selectedDocumentForUpload;
-    if (!doc?.required_file_id || !doc?.current_period?.period_id) return;
+    if (!doc?.id || !doc?.currentPeriod?.period_id) return;
 
     this.documentService
-      .submitUploadedFiles(doc.required_file_id, doc.current_period.period_id)
+      .submitUploadedFiles(doc.id, doc.currentPeriod.period_id)
       .subscribe({
         next: () => {
           this.toastrService.success("Archivos enviados a revisión", "Éxito");
@@ -737,22 +740,22 @@ export class DocumentUploadComponent {
   }
 
   getUploadProgress(file: any): string {
-    if (file.current_period) {
-      return `${file.current_period.uploaded_count}/${file.min_documents_needed}`;
+    if (file.currentPeriod) {
+      return `${file.currentPeriod.uploaded_count}/${file.minQuantity}`;
     }
     const totalDone = file.periods.reduce(
       (sum: number, p: any) => sum + p.uploaded_count,
       0
     );
-    const needed = file.min_documents_needed * file.periods.length || 1;
+    const needed = file.minQuantity * file.periods.length || 1;
     return `${totalDone}/${needed}`;
   }
 
   private updateUploadProgress(doc: any): void {
-    if (!doc?.required_file_id || !doc?.current_period?.period_id) return;
+    if (!doc?.id || !doc?.currentPeriod?.period_id) return;
 
     this.documentService
-      .getUploadedFiles(doc.required_file_id, doc.current_period.period_id, [
+      .getUploadedFiles(doc.id, doc.currentPeriod.period_id, [
         "uploaded",
         "pending",
         "approved",
@@ -765,7 +768,7 @@ export class DocumentUploadComponent {
           for (const f of files) {
             const ext = (f.file_ext || "").toLowerCase();
 
-            if (f.required_file_id === doc.required_file_id) {
+            if (f.id === doc.id) {
               counts[ext] = (counts[ext] || 0) + 1;
             }
           }
@@ -782,8 +785,7 @@ export class DocumentUploadComponent {
 
   getIncompletePeriodicFiles(): any[] {
     return this.requiredFiles.filter(
-      (f) =>
-        f.is_periodic && f.status !== "complete" && f.current_period != null
+      (f) => f.is_periodic && f.status !== "complete" && f.currentPeriod != null
     );
   }
   getFileAccept(): string {
@@ -802,6 +804,7 @@ export class DocumentUploadComponent {
       .map((f: any) => `.${f.code.toLowerCase()}`)
       .join(",");
   }
+
   getIncompletePeriods(): any[] {
     if (!this.selectedDocument) return [];
 
@@ -809,7 +812,7 @@ export class DocumentUploadComponent {
     return this.selectedDocument.periods.filter(
       (p: any) =>
         moment(p.end_date).isBefore(now, "day") &&
-        p.uploaded_count < this.selectedDocument.min_documents_needed
+        p.uploaded_count < this.selectedDocument.minQuantity
     );
   }
 

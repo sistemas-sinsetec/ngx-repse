@@ -10,65 +10,13 @@
         (formSubmitted)="loadRequirements()"
       ></ngx-requirement-assignment-form>
     </div>
-
     <hr />
-
     <h4>Requisitos configurados</h4>
-    <!-- ALERTA cuando no hay requisitos configurados -->
-    <div *ngIf="requirements.length === 0" class="text-center">
-      <nb-alert status="info" class="mb-0">
-        No hay requisitos configurados actualmente
-      </nb-alert>
-    </div>
-
-    <!-- TABLA cuando sí hay requisitos -->
-    <div class="table-container flex-grow-1" *ngIf="requirements.length > 0">
-      <div class="table-responsive">
-        <!-- Elimina la columna de endDate -->
-        <table class="table table-borderless">
-          <thead>
-            <tr>
-              <th>Documento</th>
-              <th>Activo</th>
-              <th>Periódico</th>
-              <th>Periodicidad</th>
-              <th>Cant. Mínima</th>
-              <th>Fecha de inicio</th>
-              <th>Fecha de final</th>
-              <!-- Eliminar esta columna -->
-            </tr>
-          </thead>
-          <tbody>
-            <tr *ngFor="let req of requirements">
-              <td
-                [ngClass]="
-                  req.documentType === 'Registro REPSE'
-                    ? 'text-left'
-                    : 'text-center'
-                "
-              >
-                {{ req.documentType }}
-              </td>
-
-              <td>{{ req.isActive ? "Sí" : "No" }}</td>
-              <td>{{ req.isPeriodic ? "Sí" : "No" }}</td>
-              <td>
-                <span *ngIf="req.isPeriodic">
-                  Cada {{ req.periodAmount }} {{ req.periodType }}
-                </span>
-              </td>
-              <td>{{ req.minQuantity }}</td>
-              <td>
-                {{ req.startDate | date : "dd/MM/yyyy" : "UTC" }}
-              </td>
-              <td>{{ req.endDate | date : "dd/MM/yyyy" : "UTC" }}</td>
-
-              <!-- Eliminar esta celda -->
-            </tr>
-          </tbody>
-        </table>
-      </div>
-    </div>
+    <!-- TABLA DE REQUISITOS -->
+    <ngx-requirement-table
+      [requirements]="requirements"
+      [isForCompany]="true"
+    ></ngx-requirement-table>
   </nb-card-body>
 </nb-card>
 

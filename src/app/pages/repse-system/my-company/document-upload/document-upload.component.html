@@ -49,15 +49,13 @@
                     </thead>
                     <tbody>
                       <tr *ngFor="let file of assignedByMe">
-                        <td class="align-middle">{{ file.name }}</td>
+                        <td class="align-middle">{{ file.documentType }}</td>
                         <td
                           class="d-none d-sm-table-cell text-center align-middle"
                         >
                           {{
                             file.is_periodic
-                              ? file.periodicity_count +
-                                " " +
-                                file.periodicity_type
+                              ? file.periodAmount + " " + file.periodType
                               : "No periódico"
                           }}
                         </td>
@@ -102,7 +100,7 @@
                               size="small"
                               status="success"
                               [disabled]="file.status !== 'complete'"
-                              (click)="downloadZip(file.required_file_id)"
+                              (click)="downloadZip(file.id)"
                               class="d-flex align-items-center mt-2"
                             >
                               <nb-icon
@@ -157,15 +155,15 @@
                         </thead>
                         <tbody>
                           <tr *ngFor="let file of group.files">
-                            <td class="align-middle">{{ file.name }}</td>
+                            <td class="align-middle">
+                              {{ file.documentType }}
+                            </td>
                             <td
                               class="d-none d-sm-table-cell text-center align-middle"
                             >
                               {{
                                 file.is_periodic
-                                  ? file.periodicity_count +
-                                    " " +
-                                    file.periodicity_type
+                                  ? file.periodAmount + " " + file.periodType
                                   : "No periódico"
                               }}
                             </td>
@@ -210,7 +208,7 @@
                                   size="small"
                                   status="success"
                                   [disabled]="file.status !== 'complete'"
-                                  (click)="downloadZip(file.required_file_id)"
+                                  (click)="downloadZip(file.id)"
                                   class="d-flex align-items-center mt-2"
                                 >
                                   <nb-icon
@@ -324,7 +322,7 @@
                       *ngFor="let file of getIncompletePeriodicFiles()"
                       [value]="file"
                     >
-                      {{ file.name }}
+                      {{ file.documentType }}
                     </nb-option>
                   </nb-select>
                 </div>
@@ -432,7 +430,7 @@
     <nb-card-header>
       <div class="d-flex justify-content-between align-items-center">
         <span class="mr-4">
-          Subir Archivos - {{ selectedDocumentForUpload.name }}
+          Subir Archivos - {{ selectedDocumentForUpload.documentType }}
         </span>
 
         <button nbButton ghost size="small" (click)="closeUploadModal()">

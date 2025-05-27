@@ -48,13 +48,17 @@ function calculateExpiry(baseDate: Date, value: number, unit: string): Date {
   return result;
 }
 
-export interface RequiredFile {
-  required_file_id: number;
-  company_id: number;
-  name: string;
-  is_periodic: number;
-  periodicity_type: string | null;
-  periodicity_count: number | null;
+export interface BaseRequiredFile {
+  id: number;
+  companyId: number;
+  assignedBy: number;
+  documentType: string;
+  isPeriodic: boolean;
+  periodAmount?: number;
+  periodType?: string;
+  startDate: Date;
+  endDate: Date | null;
+  minQuantity: number;
   formats: {
     code: string;
     min_required: number;
@@ -62,7 +66,10 @@ export interface RequiredFile {
     manual_expiry_value?: number | null;
     manual_expiry_unit?: string | null;
   }[];
-  min_documents_needed: number;
+  companyName?: string;
+}
+
+export interface RequiredFileView extends BaseRequiredFile {
   periods: Array<{
     period_id: number;
     start_date: string;
@@ -70,20 +77,22 @@ export interface RequiredFile {
     uploaded_count: number;
   }>;
   deadline: string | null;
-  current_period: {
+  currentPeriod: {
     period_id: number;
     start_date: string;
     end_date: string;
     uploaded_count: number;
   } | null;
   status: "pending" | "partial" | "complete" | "overdue";
-  assigned_by: number;
-  company_name?: string;
 }
 
-export interface AssignedRequiredFile extends RequiredFile {
-  partner_count: number;
-  company_name?: string;
+export interface AssignedRequiredFileView extends RequiredFileView {
+  partnerCount: number;
+}
+
+export interface RequirementForm extends BaseRequiredFile {
+  partners: string[];
+  partnerCount: number;
 }
 
 export interface FileStructure {
@@ -101,26 +110,32 @@ export interface FileStructure {
     }>;
   }>;
 }
-export interface Requirement {
-  id: number;
-  documentType: string;
-  isActive: boolean;
-  isPeriodic: boolean;
-  periodAmount?: number;
-  periodType?: string;
-  startDate?: Date;
-  endDate: Date;
-  minQuantity: number;
-  partners: string[];
-  partnerCount: number;
-  formats?: any[];
-}
 
 export interface Partner {
   id: number;
   name: string;
   affiliation: string;
   selected: boolean;
+}
+function mapToRequiredFileView(file: any): RequiredFileView {
+  return {
+    id: file.required_file_id,
+    companyId: file.company_id,
+    assignedBy: file.assigned_by,
+    documentType: file.name,
+    isPeriodic: file.is_periodic === 1,
+    periodAmount: file.periodicity_count,
+    periodType: file.periodicity_type,
+    startDate: new Date(file.start_date),
+    endDate: file.end_date ? new Date(file.end_date) : null,
+    minQuantity: file.min_documents_needed,
+    formats: file.formats,
+    periods: file.periods,
+    deadline: file.deadline,
+    currentPeriod: file.current_period,
+    status: file.status,
+    companyName: file.company_name ?? undefined,
+  };
 }
 
 @Injectable({
@@ -131,26 +146,19 @@ export class DocumentService {
 
   constructor(private http: HttpClient) {}
 
-  getCompanyRequirements(companyId: number): Observable<Requirement[]> {
+  getCompanyRequirements(companyId: number): Observable<RequirementForm[]> {
     const params = new HttpParams().set("company_id", companyId.toString());
     return this.http
       .get<any[]>(`${this.base}/company_required_files.php`, { params })
       .pipe(
-        map((configs) =>
-          configs.map((cfg) => ({
-            id: cfg.required_file_id,
-            documentType: cfg.name,
-            isActive: true,
-            isPeriodic: cfg.is_periodic === 1,
-            periodAmount: cfg.periodicity_count,
-            periodType: cfg.periodicity_type,
-            startDate: moment.utc(cfg.start_date).toDate(),
-            endDate: cfg.end_date ? moment.utc(cfg.end_date).toDate() : null,
-            minQuantity: cfg.min_documents_needed,
-            partners: [],
-            partnerCount: cfg.partner_count,
-            formats: cfg.formats,
-          }))
+        map((files) =>
+          files.map(
+            (f): RequirementForm => ({
+              ...mapToRequiredFileView(f),
+              partners: [],
+              partnerCount: f.partner_count,
+            })
+          )
         )
       );
   }
@@ -231,22 +239,27 @@ export class DocumentService {
    * GET dashboard of required files for a company.
    */
 
-  getOwnRequiredFiles(companyId: number): Observable<RequiredFile[]> {
+  getOwnRequiredFiles(companyId: number): Observable<RequiredFileView[]> {
     const params = new HttpParams().set("company_id", companyId.toString());
-    return this.http.get<RequiredFile[]>(
-      `${this.base}/company_required_files.php`,
-      { params }
-    );
+    return this.http
+      .get<any[]>(`${this.base}/company_required_files.php`, { params })
+      .pipe(map((files) => files.map(mapToRequiredFileView)));
   }
 
   getAssignedRequiredFiles(
     assignedById: number
-  ): Observable<AssignedRequiredFile[]> {
+  ): Observable<AssignedRequiredFileView[]> {
     const params = new HttpParams().set("assigned_by", assignedById.toString());
-    return this.http.get<AssignedRequiredFile[]>(
-      `${this.base}/company_required_files.php`,
-      { params }
-    );
+    return this.http
+      .get<any[]>(`${this.base}/company_required_files.php`, { params })
+      .pipe(
+        map((files) =>
+          files.map((f) => ({
+            ...mapToRequiredFileView(f),
+            partnerCount: f.partner_count,
+          }))
+        )
+      );
   }
 
   saveRequiredFile(data: any): Observable<any> {
