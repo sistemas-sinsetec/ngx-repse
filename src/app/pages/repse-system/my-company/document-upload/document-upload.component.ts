@@ -651,19 +651,16 @@ export class DocumentUploadComponent {
                 }" ha vencido (${expiry.format("DD/MM/YYYY")}).`,
                 "Archivo vencido"
               );
-<<<<<<< HEAD
-            } else {
-              const isRepse = file.file_type_name
-=======
+
               // Marcar como notificado
             }
             // Mostrar próximo a vencer
             else {
-              const threshold = file.file_type_name
->>>>>>> testingchanges
+              let threshold = file.file_type_name;
+              const isRepse = file.file_type_name
                 ?.toLowerCase()
                 .includes("repse");
-              const threshold = isRepse ? 90 : 7;
+              threshold = isRepse ? 90 : 7;
 
               if (daysLeft <= threshold) {
                 this.toastrService.info(
