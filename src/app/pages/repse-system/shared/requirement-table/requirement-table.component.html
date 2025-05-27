@@ -42,10 +42,7 @@
         </td>
 
         <td class="text-center align-middle">
-          {{
-            req.startDate || req.current_period?.start_date
-              | date : "dd/MM/yyyy"
-          }}
+          {{ getFormattedDate(req.startDate) }}
         </td>
 
         <td class="text-center align-middle">

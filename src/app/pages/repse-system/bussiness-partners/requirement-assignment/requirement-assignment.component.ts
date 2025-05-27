@@ -62,27 +62,32 @@ export class RequirementAssignmentComponent implements OnInit {
       error: (err) => console.error("Error cargando formatos", err),
     });
 
-    this.loadAssignedRequirements();
-    this.loadBusinessPartners();
-  }
-
-  loadAssignedRequirements(): void {
-    this.documentService.getAssignedRequiredFiles(this.companyId).subscribe({
-      next: (configs) => {
-        this.requirements = configs;
-      },
-      error: (err) => console.error("Error cargando requisitos", err),
-    });
-  }
-
-  loadBusinessPartners(): void {
     this.documentService.getBusinessPartners(this.companyId).subscribe({
       next: (partners) => {
         this.businessPartners = partners.filter(
           (p) => p.affiliation.toLowerCase() === "proveedor"
         );
+        this.loadAssignedRequirements(); // ← Se mueve aquí
       },
       error: (err) => console.error("Error cargando proveedores", err),
+    });
+  }
+
+  loadAssignedRequirements(): void {
+    this.documentService.getAssignedRequiredFiles(this.companyId).subscribe({
+      next: (configs) => {
+        // Si ya cargaron los partners, podemos hacer el merge aquí
+        this.requirements = configs.map((req) => {
+          const matchingPartner = this.businessPartners.find(
+            (p) => Number(p.id) === Number(req.companyId)
+          );
+          return {
+            ...req,
+            company_name: matchingPartner?.name || `Empresa ${req.companyId}`,
+          };
+        });
+      },
+      error: (err) => console.error("Error cargando requisitos", err),
     });
   }
 
