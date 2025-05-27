@@ -1,14 +1,11 @@
 import { Component, OnInit, TemplateRef, ViewChild } from "@angular/core";
 import { FormControl } from "@angular/forms";
-import { NbDialogRef, NbDialogService, NbToastrService } from "@nebular/theme";
-import { HttpClient, HttpParams } from "@angular/common/http";
-import { forkJoin, Observable } from "rxjs";
-import { map } from "rxjs/operators";
-import { environment } from "../../../../../environments/environment";
+import { NbDialogRef, NbDialogService } from "@nebular/theme";
+import { forkJoin } from "rxjs";
 import { CompanyService } from "../../../../services/company.service";
 import * as moment from "moment";
 import {
-  Requirement,
+  RequirementForm,
   Partner,
   DocumentService,
 } from "../../../../services/repse/document.service";
@@ -21,7 +18,7 @@ import {
 export class RequirementsAssignmentComponent implements OnInit {
   companyId!: number;
 
-  requirements: Requirement[] = [];
+  requirements: RequirementForm[] = [];
   documentTypes: { id: number; name: string }[] = [];
   availableFormats: { id: number; name: string; extension: string }[] = [];
   lastUpdated?: moment.Moment;
@@ -30,7 +27,7 @@ export class RequirementsAssignmentComponent implements OnInit {
   @ViewChild("confirmOverrideModal")
   confirmOverrideModalTemplate!: TemplateRef<any>;
 
-  selectedRequirement!: Requirement;
+  selectedRequirement!: RequirementForm;
   allPartners: Partner[] = [];
   filteredPartners: Partner[] = [];
   initialVisibleIds: number[] = [];
@@ -42,7 +39,6 @@ export class RequirementsAssignmentComponent implements OnInit {
 
   constructor(
     private dialogService: NbDialogService,
-    private toastrService: NbToastrService,
     private companyService: CompanyService,
     private documentService: DocumentService
   ) {}
@@ -61,26 +57,19 @@ export class RequirementsAssignmentComponent implements OnInit {
 
     this.loadRequirements();
   }
-  /*repuesta de la tabal de requisitos configurados (fecha) */
 
-  // requirements-assignment.component.ts
   loadRequirements(): void {
     this.documentService.getCompanyRequirements(this.companyId).subscribe({
       next: (reqs) => {
-        this.requirements = reqs.map((req) => ({
-          ...req,
-          startDate: new Date(req.startDate),
-          endDate: req.endDate,
-          // Mapear endDate
-        }));
+        this.requirements = reqs;
       },
       error: (err) => console.error("Error cargando requisitos", err),
     });
   }
 
-  /*  Funciones para visibilidad de socios  */
+  // --------------- Funciones para visibilidad de socios  ----------------
 
-  openPartnerModal(req: Requirement): void {
+  openPartnerModal(req: RequirementForm): void {
     this.selectedRequirement = req;
 
     const vis$ = this.documentService.getVisibilities(req.id);

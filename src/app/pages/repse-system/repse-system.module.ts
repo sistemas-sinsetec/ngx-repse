@@ -36,6 +36,7 @@ import { CompaniesDocumentsViewComponent } from "./bussiness-partners/companies-
 import { DocumentCatalogComponent } from "./my-company/document-catalog/document-catalog.component";
 import { RequirementAssignmentFormComponent } from './shared/requirement-assignment-form/requirement-assignment-form.component';
 import { DocumentTreeComponent } from './shared/document-tree/document-tree.component';
+import { RequirementTableComponent } from './shared/requirement-table/requirement-table.component';
 
 @NgModule({
   declarations: [
@@ -49,6 +50,7 @@ import { DocumentTreeComponent } from './shared/document-tree/document-tree.comp
     DocumentCatalogComponent,
     RequirementAssignmentFormComponent,
     DocumentTreeComponent,
+    RequirementTableComponent,
   ],
   imports: [
     CommonModule,

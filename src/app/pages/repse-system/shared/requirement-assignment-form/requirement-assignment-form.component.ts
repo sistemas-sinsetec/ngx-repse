@@ -10,7 +10,11 @@ import {
 } from "@angular/core";
 import { FormGroup, FormBuilder, Validators } from "@angular/forms";
 import * as moment from "moment";
-import { DocumentService } from "../../../../services/repse/document.service";
+import {
+  RequirementForm,
+  Partner,
+  DocumentService,
+} from "../../../../services/repse/document.service";
 import { NbDialogRef, NbDialogService, NbToastrService } from "@nebular/theme";
 
 @Component({
@@ -137,10 +141,9 @@ export class RequirementAssignmentFormComponent implements OnInit {
       next: (existing) => {
         const sameDoc = existing.find(
           (e) =>
-            e.name ===
+            e.documentType ===
             this.documentTypes.find((d) => d.id === payload.file_type_id)?.name
         );
-
         if (sameDoc) {
           this.pendingPayload = payload;
           this.overrideRef = this.dialogService.open(this.overrideModal);

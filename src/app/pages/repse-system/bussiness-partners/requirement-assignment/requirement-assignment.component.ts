@@ -1,11 +1,10 @@
 import { Component, OnInit } from "@angular/core";
 import { CompanyService } from "../../../../services/company.service";
-import * as moment from "moment";
 import { DocumentService } from "../../../../services/repse/document.service";
 import { DatePipe } from "@angular/common"; //Importar DatePipe y agregarlo a los providers del componente
 
 import {
-  AssignedRequiredFile,
+  AssignedRequiredFileView,
   Partner,
 } from "../../../../services/repse/document.service";
 @Component({
@@ -16,7 +15,7 @@ import {
 })
 export class RequirementAssignmentComponent implements OnInit {
   businessPartners: Partner[] = [];
-  requirements: AssignedRequiredFile[] = [];
+  requirements: AssignedRequiredFileView[] = [];
   documentTypes: { id: number; name: string }[] = [];
   availableFormats: { id: number; name: string; extension: string }[] = [];
 
