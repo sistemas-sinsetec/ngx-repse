@@ -8,11 +8,6 @@
   font-weight: 500; // opcional
 }
 
-.expired-doc {
-  transition: background-color 0.3s ease-in-out;
-  background-color: rgba(255, 61, 113, 0.05); // leve fondo
-}
-
 .level-type {
   color: #247ca8 !important;
   font-weight: 700;
@@ -35,4 +30,8 @@
 
 .level-file {
   color: #a6b4e5 !important;
+}
+
+.text-black {
+  color: black !important;
 }
