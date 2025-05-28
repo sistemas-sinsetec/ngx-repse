@@ -10,26 +10,52 @@
       </th>
       <td nbTreeGridCell *nbTreeGridCellDef="let row">
         <div
-          class="d-flex align-items-center"
+          class="d-flex align-items-center doc-container"
           [style.padding-left.px]="row.level * 20"
+          [ngClass]="{ 'expired-doc': row.data.expired }"
         >
+          <!-- Toggle solo si no es archivo -->
           <nb-tree-grid-row-toggle
             *ngIf="row.data.type !== 'file'"
             [expanded]="row.expanded"
             class="me-2"
           ></nb-tree-grid-row-toggle>
 
-          <!--Icono CAMBIO DE COLOR TAMAÑO-->
+          <!-- Ícono con color según tipo o vencido -->
           <nb-icon
-            [icon]="getIcon(row.data.type)"
+            [icon]="getIcon(row.data.type, row.data.expired)"
             class="icon-spaced"
-            [ngClass]="getIconClass(row.data.type)"
+            [ngClass]="{
+              'text-danger': row.data.expired,
+              'level-type': row.data.type === 'type' && !row.data.expired,
+              'level-periodicity':
+                row.data.type === 'periodicity' && !row.data.expired,
+              'level-period': row.data.type === 'period' && !row.data.expired,
+              'level-format': row.data.type === 'format' && !row.data.expired,
+              'level-file': row.data.type === 'file' && !row.data.expired
+            }"
           ></nb-icon>
-          <span class="text-secondary-emphasis doc-label">
-            {{ row.data.name }}
-          </span>
 
-          <!--FIN DEL CAMBIO -->
+          <!-- Texto en negro SIEMPRE -->
+          <span class="doc-label text-dark">
+            {{ row.data.name }}
+
+            <!-- Indicador de vencido -->
+            <span
+              *ngIf="row.data.expired"
+              class="ms-2 d-inline-flex align-items-center"
+            >
+              <nb-icon
+                icon="alert-circle-outline"
+                pack="eva"
+                class="text-danger"
+                style="font-size: 0.8em"
+              ></nb-icon>
+              <span class="small ms-1 text-danger">
+                Vencido el {{ row.data.expirationDate | date : "dd/MM/yyyy" }}
+              </span>
+            </span>
+          </span>
         </div>
       </td>
     </ng-container>
@@ -43,7 +69,7 @@
         <div class="d-flex w-100 justify-content-center">
           <!--boton de descarga-->
           <button
-            *ngIf="row.data.type === 'file'"
+            *ngIf="row.data.type === 'file' && !row.data.expired"
             nbButton
             size="small"
             status="primary"
@@ -51,6 +77,11 @@
           >
             <nb-icon icon="download-outline"></nb-icon>
           </button>
+
+          <!-- Mostrar ícono de vencido SIEMPRE -->
+          <span *ngIf="row.data.expired" class="text-danger ms-2">
+            <nb-icon icon="alert-circle-outline" pack="eva"></nb-icon>
+          </span>
         </div>
       </td>
     </ng-container>
