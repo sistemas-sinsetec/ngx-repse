@@ -492,9 +492,9 @@
           status="primary"
           *ngIf="selectedDocumentForUpload"
           (click)="openPreviewModal()"
-          [disabled]="reviewFiles.length === 0"
+          [disabled]="filesPendingConfirmation.length === 0"
         >
-          Revisar ({{ reviewFiles.length }})
+          Revisar ({{ filesPendingConfirmation.length }})
         </button>
       </div>
     </nb-card-footer>
@@ -517,7 +517,10 @@
       </button>
     </nb-card-header>
     <nb-card-body>
-      <table class="table table-hover" *ngIf="reviewFiles.length > 0">
+      <table
+        class="table table-hover"
+        *ngIf="filesPendingConfirmation.length > 0"
+      >
         <thead>
           <tr class="text-center">
             <th>Archivo</th>
@@ -526,7 +529,7 @@
           </tr>
         </thead>
         <tbody>
-          <tr *ngFor="let file of reviewFiles">
+          <tr *ngFor="let file of filesPendingConfirmation">
             <td class="align-middle">
               {{ file.name }}
             </td>
@@ -557,7 +560,10 @@
           </tr>
         </tbody>
       </table>
-      <div *ngIf="reviewFiles.length === 0" class="text-center mt-3">
+      <div
+        *ngIf="filesPendingConfirmation.length === 0"
+        class="text-center mt-3"
+      >
         <nb-alert status="info">No hay archivos cargados aún.</nb-alert>
       </div>
     </nb-card-body>
@@ -566,10 +572,10 @@
         <button
           nbButton
           status="primary"
-          [disabled]="reviewFiles.length === 0"
+          [disabled]="filesPendingConfirmation.length === 0"
           (click)="confirmUploadSubmit()"
         >
-          Confirmar ({{ reviewFiles.length }})
+          Confirmar ({{ filesPendingConfirmation.length }})
         </button>
       </div>
     </nb-card-footer>

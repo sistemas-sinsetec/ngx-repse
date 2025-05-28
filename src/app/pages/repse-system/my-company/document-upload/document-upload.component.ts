@@ -24,6 +24,14 @@ interface TreeNode<T> {
   expanded?: boolean;
 }
 
+interface FilePreview {
+  name: string;
+  path: string;
+  uploaded_at: string;
+  format: string;
+  required_file_id: number;
+}
+
 @Component({
   selector: "app-document-upload",
   templateUrl: "./document-upload.component.html",
@@ -49,13 +57,8 @@ export class DocumentUploadComponent {
 
   // Documentos
   rejectedFiles: any[] = [];
-  reviewFiles: any[] = [];
-  previewFiles: {
-    name: string;
-    path: string;
-    uploaded_at: string;
-    format: string;
-  }[] = [];
+  filesPendingConfirmation: FilePreview[] = [];
+  filesToVisualize: FilePreview[] = [];
 
   // Subida regular
   selectedDocumentForUpload: any = null;
@@ -206,17 +209,12 @@ export class DocumentUploadComponent {
 
     for (let i = 0; i < Math.min(remaining, files.length); i++) {
       await this.uploadSingleFile(files[i]);
-      const fmt = selectedDoc.formats.find(
-        (f: any) => f.code === this.selectedFormat
-      );
-      if (fmt) {
-        fmt.temp_uploaded_count = (fmt.temp_uploaded_count || 0) + 1;
-      }
     }
 
     // Actualizar solo el documento que estás viendo
-    this.updateUploadProgress(
-      this.selectedDocumentForUpload ?? this.selectedDocument
+    this.refreshUploadProgress(
+      this.selectedDocumentForUpload ?? this.selectedDocument,
+      true
     );
 
     this.selectedFile = files[0];
@@ -316,11 +314,7 @@ export class DocumentUploadComponent {
       this.documentService.uploadFile(fd).subscribe({
         next: async () => {
           this.toastrService.success("Archivo cargado", file.name);
-          if (selectedDoc) {
-            this.updateUploadProgress(selectedDoc);
-          }
-          await this.loadFilesForReview(); // para botón de revisión
-          await this.loadConfirmedFiles(); // para tabla y progreso por formato
+          this.refreshUploadProgress(selectedDoc, true);
 
           resolve();
         },
@@ -456,9 +450,7 @@ export class DocumentUploadComponent {
     this.selectedDocumentForUpload = file;
     this.selectedPeriod = file.currentPeriod ?? null;
 
-    this.updateUploadProgress(file);
-    await this.loadFilesForReview(); // para botón de revisión
-    await this.loadConfirmedFiles(); // para tabla y progreso por formato
+    this.refreshUploadProgress(file, true);
 
     this.dialogRefUpload = this.dialogService.open(this.uploadModal, {
       dialogClass: "custom-modal",
@@ -482,7 +474,7 @@ export class DocumentUploadComponent {
       .getUploadedFiles(doc.id, doc.currentPeriod.period_id, ["uploaded"])
       .subscribe({
         next: (files) => {
-          this.previewFiles = files.map((f: any) => ({
+          this.filesToVisualize = files.map((f: any) => ({
             name: f.file_path.split("/").pop(),
             path: f.file_path,
             uploaded_at: f.uploaded_at,
@@ -528,7 +520,7 @@ export class DocumentUploadComponent {
       .getUploadedFiles(doc.id, doc.currentPeriod.period_id, ["uploaded"])
       .subscribe({
         next: (files) => {
-          this.reviewFiles = files.map((f: any) => ({
+          this.filesPendingConfirmation = files.map((f: any) => ({
             name: f.file_path.split("/").pop(),
             path: f.file_path,
             uploaded_at: f.uploaded_at,
@@ -539,44 +531,6 @@ export class DocumentUploadComponent {
         error: () => {
           this.toastrService.danger(
             "Error al cargar archivos para revisión",
-            "Error"
-          );
-        },
-      });
-  }
-
-  loadConfirmedFiles(): void {
-    const doc = this.selectedDocumentForUpload;
-    if (!doc?.id || !doc?.currentPeriod?.period_id) return;
-
-    this.documentService
-      .getUploadedFiles(doc.id, doc.currentPeriod.period_id, [
-        "pending",
-        "approved",
-      ])
-      .subscribe({
-        next: (files) => {
-          const counts: Record<string, number> = {};
-          this.previewFiles = files.map((f: any) => {
-            const ext = f.file_ext?.toLowerCase() || "";
-            counts[ext] = (counts[ext] || 0) + 1;
-            return {
-              name: f.file_path.split("/").pop(),
-              path: f.file_path,
-              uploaded_at: f.uploaded_at,
-              format: ext,
-              required_file_id: f.id,
-            };
-          });
-
-          // Actualizar el contador por formato
-          for (const fmt of doc.formats) {
-            fmt.temp_uploaded_count = counts[fmt.code.toLowerCase()] || 0;
-          }
-        },
-        error: () => {
-          this.toastrService.danger(
-            "Error al cargar archivos cargados",
             "Error"
           );
         },
@@ -594,15 +548,17 @@ export class DocumentUploadComponent {
     this.documentService.deleteUploadedFile(file.path).subscribe({
       next: () => {
         this.toastrService.success("Archivo eliminado", "Éxito");
-        this.reviewFiles = this.reviewFiles.filter((f) => f.path !== file.path);
-        if (this.reviewFiles.length === 0) {
+        this.filesPendingConfirmation = this.filesPendingConfirmation.filter(
+          (f) => f.path !== file.path
+        );
+        if (this.filesPendingConfirmation.length === 0) {
           this.closeModal();
           this.toastrService.info(
             "Ya no hay archivos para revisar",
             "Revisión vacía"
           );
         }
-        this.updateUploadProgress(this.selectedDocumentForUpload);
+        this.refreshUploadProgress(this.selectedDocumentForUpload, true);
       },
       error: () => {
         this.toastrService.danger("No se pudo eliminar el archivo", "Error");
@@ -619,11 +575,7 @@ export class DocumentUploadComponent {
         next: () => {
           this.toastrService.success("Archivos enviados a revisión", "Éxito");
           this.closeModal();
-          this.loadFilesForReview(); // para botón de revisión
-          this.loadConfirmedFiles(); // para tabla y progreso por formato
-
-          this.updateUploadProgress(this.selectedDocumentForUpload);
-
+          this.refreshUploadProgress(this.selectedDocumentForUpload, true);
           this.loadDocuments();
         },
         error: () => {
@@ -751,7 +703,10 @@ export class DocumentUploadComponent {
     return `${totalDone}/${needed}`;
   }
 
-  private updateUploadProgress(doc: any): void {
+  private refreshUploadProgress(
+    doc: any,
+    includePreview: boolean = false
+  ): void {
     if (!doc?.id || !doc?.currentPeriod?.period_id) return;
 
     this.documentService
@@ -765,16 +720,28 @@ export class DocumentUploadComponent {
         next: (files) => {
           const counts: Record<string, number> = {};
 
+          // Agrupar conteo por extensión
           for (const f of files) {
             const ext = (f.file_ext || "").toLowerCase();
-
-            if (f.id === doc.id) {
-              counts[ext] = (counts[ext] || 0) + 1;
-            }
+            counts[ext] = (counts[ext] || 0) + 1;
           }
 
+          // Actualizar conteo en cada formato
           for (const fmt of doc.formats) {
             fmt.temp_uploaded_count = counts[fmt.code.toLowerCase()] || 0;
+          }
+
+          // Si se necesita, actualizar también la tabla de preview
+          if (includePreview) {
+            this.filesPendingConfirmation = files
+              .filter((f: any) => f.status === "uploaded")
+              .map((f: any) => ({
+                name: f.file_path.split("/").pop(),
+                path: f.file_path,
+                uploaded_at: f.uploaded_at,
+                format: f.file_ext.toLowerCase(),
+                required_file_id: f.id,
+              }));
           }
         },
         error: () => {
