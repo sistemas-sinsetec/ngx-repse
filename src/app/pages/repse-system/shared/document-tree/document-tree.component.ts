@@ -5,10 +5,13 @@ import {
 } from "@nebular/theme";
 import { DocumentService } from "../../../../services/repse/document.service";
 
-interface CatalogNode {
+export interface CatalogNode {
   name: string;
   type: "type" | "periodicity" | "period" | "format" | "file";
   path?: string;
+  expirationDate?: Date; // Propiedad renombrada/agregada
+  isExpired?: boolean; // Nombre correcto de la propiedad
+  children?: CatalogNode[];
 }
 
 interface TreeNode<T> {
@@ -22,24 +25,32 @@ interface TreeNode<T> {
   templateUrl: "./document-tree.component.html",
   styleUrls: ["./document-tree.component.scss"],
 })
-export class DocumentTreeComponent implements OnChanges {
-  @Input() catalog: any[] = [];
-  @Input() searchQuery: string = "";
+export class DocumentTreeComponent {
+  // Inputs que reciben datos del componente padre
+  @Input() showExpired: boolean = false;
+  @Input() catalog: CatalogNode[];
+  @Input() searchQuery: string;
 
-  getIconClass(type: string): string {
+  // Lógica para determinar si un nodo debe mostrarse
+  shouldDisplay(node: CatalogNode): boolean {
+    return this.showExpired || !node.isExpired;
+  }
+
+  getIcon(type: string, expired: boolean): string {
+    if (expired) return "file-remove-outline";
+
     switch (type) {
       case "type":
-        return "level-type";
+        return "folder-outline";
       case "periodicity":
-        return "level-periodicity";
+        return "calendar-outline";
       case "period":
-        return "level-period";
+        return "clock-outline";
       case "format":
-        return "level-format";
       case "file":
-        return "level-file";
+        return "file-outline";
       default:
-        return "";
+        return "file-outline";
     }
   }
 
@@ -51,6 +62,20 @@ export class DocumentTreeComponent implements OnChanges {
     private dataSourceBuilder: NbTreeGridDataSourceBuilder<CatalogNode>,
     private documentService: DocumentService
   ) {}
+
+  private processExpiration(documents: CatalogNode[]): void {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    documents.forEach((doc) => {
+      if (doc.expirationDate) {
+        const expirationDate = new Date(doc.expirationDate);
+        expirationDate.setHours(0, 0, 0, 0);
+        doc.isExpired = expirationDate < today;
+      }
+      if (doc.children) this.processExpiration(doc.children);
+    });
+  }
 
   ngOnChanges(changes: SimpleChanges): void {
     if (changes.catalog) {
@@ -64,43 +89,77 @@ export class DocumentTreeComponent implements OnChanges {
   }
   //actualizacion de caltalogo de documento
   transformToTree(data: any): TreeNode<CatalogNode>[] {
-    return data.map((docType: any) => ({
-      data: { name: docType.name, type: "type" },
-      expanded: false, // Cambiado de true a false
-      children: docType.periodicities.map((periodicity: any) => ({
-        data: {
-          name:
-            !periodicity.type || periodicity.type === "sin periodicidad"
-              ? "Sin periodicidad"
-              : `${periodicity.count ?? ""} ${periodicity.type ?? ""}`.trim(),
-          type: "periodicity",
-        },
-        expanded: false, // Cambiado de true a false
-        children: periodicity.periods.map((period: any) => ({
+    return data.map((docType: any) => {
+      const periodicityNodes = docType.periodicities.map((periodicity: any) => {
+        const periodNodes = periodicity.periods.map((period: any) => {
+          const isExpired = this.isExpired(period.end_date);
+
+          return {
+            data: {
+              name:
+                period.start_date === "sin periodicidad" ||
+                period.end_date === "" ||
+                period.end_date === "9999-12-31"
+                  ? "Sin periodicidad"
+                  : `${period.start_date} - ${period.end_date}`,
+              type: "period",
+              expired: isExpired,
+            },
+            expanded: isExpired,
+            children: period.formats.map((fmt: any) => ({
+              data: {
+                name: fmt.code?.toUpperCase() || "",
+                type: "format",
+                expired: isExpired,
+              },
+              expanded: false,
+              children: fmt.files.map((file: any) => ({
+                data: {
+                  name: file.file_path?.split("/").pop() || "",
+                  type: "file",
+                  path: file.file_path,
+                  // Modificación clave: Verificar vencimiento por archivo
+                  expired: this.isExpired(file.end_date), // ¡Nuevo!
+                },
+              })),
+            })),
+          };
+        });
+
+        const shouldExpandPeriodicity = periodNodes.some((p) => p.expanded);
+
+        return {
           data: {
             name:
-              period.start_date === "sin periodicidad" ||
-              period.end_date === "" ||
-              period.end_date === "9999-12-31"
+              !periodicity.type || periodicity.type === "sin periodicidad"
                 ? "Sin periodicidad"
-                : `${period.start_date} - ${period.end_date}`,
-            type: "period",
+                : `${periodicity.count ?? ""} ${periodicity.type ?? ""}`.trim(),
+            type: "periodicity",
           },
-          expanded: false, // Cambiado de true a false
-          children: period.formats.map((fmt: any) => ({
-            data: { name: fmt.code?.toUpperCase() || "", type: "format" },
-            expanded: false, // Cambiado de true a false
-            children: fmt.files.map((file: any) => ({
-              data: {
-                name: file.file_path?.split("/").pop() || "",
-                type: "file",
-                path: file.file_path,
-              },
-            })),
-          })),
-        })),
-      })),
-    }));
+          expanded: shouldExpandPeriodicity,
+          children: periodNodes,
+        };
+      });
+
+      const shouldExpandType = periodicityNodes.some((p) => p.expanded);
+
+      return {
+        data: { name: docType.name, type: "type" },
+        expanded: shouldExpandType,
+        children: periodicityNodes,
+      };
+    });
+  }
+
+  // Modificar el método isExpired para aceptar cualquier fecha
+  private isExpired(endDate: string): boolean {
+    if (!endDate || endDate === "9999-12-31") return false;
+
+    // Manejar formato ISO 8601 con timestamp
+    const date = new Date(endDate);
+    const today = new Date();
+
+    return date < today;
   }
 
   filterTree(): void {
@@ -134,16 +193,22 @@ export class DocumentTreeComponent implements OnChanges {
     this.documentService.downloadFile(path);
   }
 
-  getIcon(type: string): string {
-    return (
-      {
-        type: "folder-outline",
-        periodicity: "calendar-outline",
-        period: "clock-outline",
-        format: "file-text-outline",
-        file: "file-outline",
-      }[type] || "file-outline"
-    );
+  ggetIcon(type: string, expired: boolean): string {
+    if (expired) return "file-remove-outline"; // Icono para documentos vencidos
+
+    switch (type) {
+      case "type":
+        return "folder-outline"; // Primer nivel: Carpeta REPSE
+      case "periodicity":
+        return "calendar-outline"; // Periodicidad (anual, mensual)
+      case "period":
+        return "clock-outline"; // Un período específico
+      case "format":
+      case "file":
+        return "file-outline"; // Documentos activos
+      default:
+        return "file-outline"; // Valor por defecto
+    }
   }
 
   getLevelClass(level: number): string {
