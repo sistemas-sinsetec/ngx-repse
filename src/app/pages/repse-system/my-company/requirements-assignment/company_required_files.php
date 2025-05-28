@@ -131,6 +131,9 @@ switch ($method) {
     case 'GET':
         $param = null;
         $where = '';
+        $periodScope = $_GET['period_scope'] ?? 'all';
+        $today = new DateTimeImmutable('today');
+
 
         if (isset($_GET['assigned_by'])) {
             $param = (int) $_GET['assigned_by'];
@@ -224,6 +227,19 @@ switch ($method) {
         }
 
         foreach ($pers as $p) {
+            $start = new DateTimeImmutable($p['start_date']);
+            $end = new DateTimeImmutable($p['end_date']);
+
+            $include = true;
+            if ($periodScope === 'current') {
+                $include = $start <= $today && $end >= $today;
+            } elseif ($periodScope === 'past') {
+                $include = $end < $today;
+            }
+
+            if (!$include)
+                continue;
+
             $doc = &$out[$p['required_file_id']];
             $period = [
                 'period_id' => (int) $p['period_id'],
@@ -233,22 +249,13 @@ switch ($method) {
             ];
             $doc['periods'][] = $period;
 
-            $start = new DateTimeImmutable($p['start_date']);
-            $end = new DateTimeImmutable($p['end_date']);
 
             $minReq = max($doc['min_documents_needed'], 1);
 
-            // Si ya hay suficientes archivos aprobados en este periodo, se ignora
-            if ($p['uploaded_count'] >= $minReq) {
-                continue;
-            }
-
-            // Si todavía no se ha asignado uno, y este no cumple con lo mínimo, se considera
-            if (!$doc['current_period']) {
+            if ($p['uploaded_count'] < $minReq && !$doc['current_period']) {
                 $doc['current_period'] = $period;
                 $doc['deadline'] = $p['end_date'];
             }
-
         }
 
         foreach ($out as &$doc) {
@@ -272,6 +279,17 @@ switch ($method) {
             } else {
                 $doc['status'] = 'pending';
             }
+        }
+
+        // Filtrar documentos sin periodos si se requiere
+        if ($periodScope === 'current') {
+            $out = array_filter($out, function ($doc) {
+                return !empty($doc['periods']);
+            });
+        } elseif ($periodScope === 'past') {
+            $out = array_filter($out, function ($doc) {
+                return !empty($doc['periods']);
+            });
         }
 
         respond(200, array_values($out));
