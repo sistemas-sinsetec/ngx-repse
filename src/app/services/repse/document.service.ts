@@ -239,8 +239,13 @@ export class DocumentService {
    * GET dashboard of required files for a company.
    */
 
-  getOwnRequiredFiles(companyId: number): Observable<RequiredFileView[]> {
-    const params = new HttpParams().set("company_id", companyId.toString());
+  getOwnRequiredFiles(
+    companyId: number,
+    periodScope: "all" | "current" | "past" = "all"
+  ): Observable<RequiredFileView[]> {
+    const params = new HttpParams()
+      .set("company_id", companyId.toString())
+      .set("period_scope", periodScope);
     return this.http
       .get<any[]>(`${this.base}/company_required_files.php`, { params })
       .pipe(map((files) => files.map(mapToRequiredFileView)));

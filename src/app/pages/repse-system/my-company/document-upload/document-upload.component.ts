@@ -1,28 +1,8 @@
 import { Component, TemplateRef, ViewChild } from "@angular/core";
-import {
-  NbDialogService,
-  NbDialogRef,
-  NbToastrService,
-  NbTreeGridDataSource,
-} from "@nebular/theme";
+import { NbDialogService, NbDialogRef, NbToastrService } from "@nebular/theme";
 import { DocumentService } from "../../../../services/repse/document.service";
 import { CompanyService } from "../../../../services/company.service";
 import * as moment from "moment";
-
-interface FileNode {
-  name: string;
-  type: "period" | "format" | "file";
-  path?: string;
-  children?: FileNode[];
-  expanded?: boolean;
-  data?: any;
-}
-
-interface TreeNode<T> {
-  data: T;
-  children?: TreeNode<T>[];
-  expanded?: boolean;
-}
 
 interface FilePreview {
   name: string;
@@ -74,8 +54,6 @@ export class DocumentUploadComponent {
   // Modal preview
   dialogRef!: NbDialogRef<any>;
   modalTitle = "";
-  selectedNodes: TreeNode<FileNode>[] = [];
-  treeGridDataSource!: NbTreeGridDataSource<FileNode>;
   allColumns = ["select", "name", "actions"];
 
   // Fechas REPSE
@@ -99,7 +77,7 @@ export class DocumentUploadComponent {
     this.loading = true;
     const myCompanyId = Number(this.companyService.selectedCompany.id);
 
-    this.documentService.getOwnRequiredFiles(myCompanyId).subscribe({
+    this.documentService.getOwnRequiredFiles(myCompanyId, "current").subscribe({
       next: (files) => {
         // Forzar tipo numérico para evitar errores por comparación estricta
         const myCompanyFiles = files.filter(
@@ -544,6 +522,7 @@ export class DocumentUploadComponent {
       this.toastrService.warning("Ruta inválida del archivo", "Aviso");
     }
   }
+
   deletePreviewFile(file: any): void {
     this.documentService.deleteUploadedFile(file.path).subscribe({
       next: () => {
