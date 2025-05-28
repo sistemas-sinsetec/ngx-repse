@@ -319,7 +319,7 @@
                   >
                     <nb-option value="">Seleccione un documento</nb-option>
                     <nb-option
-                      *ngFor="let file of getIncompletePeriodicFiles()"
+                      *ngFor="let file of lateDocuments"
                       [value]="file"
                     >
                       {{ file.documentType }}
