@@ -63,6 +63,11 @@ export class DocumentTreeComponent {
     private documentService: DocumentService
   ) {}
 
+  private parseLocalDate(dateStr: string): Date {
+    const [year, month, day] = dateStr.split("-").map(Number);
+    return new Date(year, month - 1, day); // Sin hora -> evita problemas de zona horaria
+  }
+
   private processExpiration(documents: CatalogNode[]): void {
     const today = new Date();
     today.setHours(0, 0, 0, 0);
@@ -87,6 +92,7 @@ export class DocumentTreeComponent {
       this.filterTree();
     }
   }
+
   //actualizacion de caltalogo de documento
   transformToTree(data: any): TreeNode<CatalogNode>[] {
     return data.map((docType: any) => {
@@ -119,7 +125,11 @@ export class DocumentTreeComponent {
                   type: "file",
                   path: file.file_path,
                   // Modificación clave: Verificar vencimiento por archivo
-                  expired: this.isExpired(file.end_date), // ¡Nuevo!
+                  expired: file.is_expired === 1, // ¡Nuevo!
+                  expirationDate: file.expiry_date
+                    ? this.parseLocalDate(file.expiry_date)
+                    : null,
+                  // Agregado aquí
                 },
               })),
             })),

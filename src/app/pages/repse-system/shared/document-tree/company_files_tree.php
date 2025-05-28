@@ -18,7 +18,7 @@ function normalizePeriodicity($type, $count)
     return [$type, $count];
 }
 
-function buildCatalogEntry(&$tree, $typeId, $typeName, $reqId, $periodId, $startDate, $endDate, $format, $filePath)
+function buildCatalogEntry(&$tree, $typeId, $typeName, $reqId, $periodId, $startDate, $endDate, $format, $filePath, $isExpired, $expiryDate = null)
 {
     if (!isset($tree[$typeId])) {
         $tree[$typeId] = [
@@ -51,8 +51,11 @@ function buildCatalogEntry(&$tree, $typeId, $typeName, $reqId, $periodId, $start
     }
 
     $tree[$typeId]['periodicities'][$reqId]['periods'][$periodId]['formats'][$format]['files'][] = [
-        'file_path' => $filePath,
-    ];
+    'file_path' => $filePath,
+    'is_expired' => intval($isExpired),
+    'expiry_date' => $expiryDate,
+];
+
 }
 
 function treeToArray($tree)
@@ -94,6 +97,8 @@ if ($mode === 'catalog') {
         SELECT ft.file_type_id, ft.name AS file_type_name,
                crf.required_file_id, crf.periodicity_type, crf.periodicity_count,
                dp.period_id, dp.start_date, dp.end_date,
+               cf.file_path, cf.file_ext, cf.is_expired,
+               cf.expiry_date,
                cf.file_path, cf.file_ext,
                crf.assigned_by, c.nameCompany AS assigning_company_name
         FROM company_files cf
@@ -136,7 +141,7 @@ if ($mode === 'catalog') {
         list($periodStart, $periodEnd) = normalizePeriod($row['start_date'], $row['end_date']);
         list($periodicity, $count) = normalizePeriodicity($row['periodicity_type'], $row['periodicity_count']);
 
-        buildCatalogEntry($catalog, $typeId, $typeName, $row['required_file_id'], $row['period_id'], $periodStart, $periodEnd, $row['file_ext'], $row['file_path']);
+        buildCatalogEntry($catalog, $typeId, $typeName, $row['required_file_id'], $row['period_id'], $periodStart, $periodEnd, $row['file_ext'], $row['file_path'], $row['is_expired'], $row['expiry_date']);
         $catalog[$typeId]['periodicities'][$row['required_file_id']]['type'] = $periodicity;
         $catalog[$typeId]['periodicities'][$row['required_file_id']]['count'] = $count;
     }
@@ -152,6 +157,8 @@ if ($mode === 'providers') {
            ft.file_type_id, ft.name AS file_type_name,
            crf.required_file_id, crf.periodicity_type, crf.periodicity_count,
            dp.period_id, dp.start_date, dp.end_date,
+           cf.file_path, cf.file_ext, cf.is_expired
+           cf.expiry_date,
            cf.file_path, cf.file_ext
     FROM company_files cf
     LEFT JOIN document_periods dp ON cf.period_id = dp.period_id
@@ -202,7 +209,9 @@ if ($mode === 'providers') {
             $periodStart,
             $periodEnd,
             $row['file_ext'],
-            $row['file_path']
+            $row['file_path'],
+            $row['is_expired'],
+            $row['expiry_date'] 
         );
 
         $companies[$compId]['catalog'][$row['file_type_id']]['periodicities'][$row['required_file_id']]['type'] = $periodicity;
