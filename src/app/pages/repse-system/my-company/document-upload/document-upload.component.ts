@@ -48,8 +48,9 @@ export class DocumentUploadComponent {
 
   // Subida con retraso
   lateDocuments: RequiredFileView[] = [];
-  selectedDocument: any = null;
-  selectedPeriod: any = null;
+  selectedDocument: any | null = null;
+  selectedPeriod: any | null = null;
+
   selectedFormat: string = "";
   availableFormats: string[] = [];
   selectedFile: File | null = null;
@@ -166,6 +167,8 @@ export class DocumentUploadComponent {
       this.loadRejectedFiles();
     } else if (tab === "Con retraso") {
       this.loadLateDocuments();
+      this.selectedDocument = null;
+      this.selectedPeriod = null;
     }
   }
 
@@ -332,109 +335,6 @@ export class DocumentUploadComponent {
     });
   }
 
-  async uploadDocument(): Promise<void> {
-    //pestaña con retraso
-    if (!this.canUpload() || !this.selectedFile) {
-      this.toastrService.warning(
-        "Complete todos los campos requeridos",
-        "Advertencia"
-      );
-      return;
-    }
-
-    const file = this.selectedFile;
-    const fileName = file.name.toLowerCase();
-    const fileExt = fileName.split(".").pop();
-    const selectedDoc = this.selectedDocumentForUpload ?? this.selectedDocument;
-    const selectedPeriod = this.selectedPeriod;
-    const fileTypeName = selectedDoc?.documentType?.toLowerCase();
-
-    let issueDate: Date | null = null;
-    let expiryDate: Date | null = null;
-
-    // ── 1. Fechas ──
-    if (fileTypeName?.includes("repse") && fileExt === "pdf") {
-      const formatConfig = selectedDoc.formats.find(
-        (f: any) => f.code.toLowerCase() === "pdf"
-      );
-      const expiryOffset = {
-        value: formatConfig?.manual_expiry_value || 0,
-        unit: formatConfig?.manual_expiry_unit || "años",
-      };
-
-      const extracted = await this.documentService.extractRepseDates(
-        file,
-        expiryOffset
-      );
-      issueDate = extracted.issueDate;
-      expiryDate = extracted.expiryDate;
-    }
-
-    if (!expiryDate && selectedPeriod) {
-      expiryDate = new Date(selectedPeriod.end_date);
-      issueDate = new Date();
-    }
-
-    this.tempIssueDate = issueDate;
-    this.tempExpiryDate = expiryDate;
-
-    // ── 2. Validar vigencia ──
-    if (selectedPeriod && expiryDate) {
-      const periodStart = moment(selectedPeriod.start_date);
-      const periodEnd = moment(selectedPeriod.end_date);
-      const exp = moment(expiryDate);
-
-      if (exp.isBefore(periodStart)) {
-        this.toastrService.danger(
-          `La vigencia del documento (${exp.format(
-            "DD/MM/YYYY"
-          )}) no cubre el inicio del periodo.`,
-          "Vigencia inválida"
-        );
-        return;
-      }
-
-      if (exp.isBefore(periodEnd)) {
-        this.toastrService.warning(
-          `La vigencia del documento (${exp.format(
-            "DD/MM/YYYY"
-          )}) no cubre completamente el periodo.`,
-          "Advertencia"
-        );
-      }
-    }
-
-    // ── 3. Subida ──
-    this.isUploading = true;
-    const fd = new FormData();
-    fd.append("file", file);
-    fd.append("required_file_id", selectedDoc?.id.toString() || "");
-    fd.append("period_id", selectedPeriod?.period_id.toString() || "");
-    fd.append("format_code", this.selectedFormat);
-
-    if (issueDate)
-      fd.append("issue_date", issueDate.toISOString().split("T")[0]);
-    if (expiryDate)
-      fd.append("expiry_date", expiryDate.toISOString().split("T")[0]);
-
-    this.documentService.uploadFile(fd).subscribe({
-      next: (resp: any) => {
-        if (resp.success) {
-          this.toastrService.success("Archivo subido correctamente", "Éxito");
-          this.loadDocuments();
-          if (this.dialogRef) this.dialogRef.close();
-          this.resetUploadForm();
-        }
-      },
-      error: () => {
-        this.toastrService.danger("Error al subir el archivo", "Error");
-      },
-      complete: () => {
-        this.isUploading = false;
-      },
-    });
-  }
-
   // ── Limpieza ──────────────────────────────────────────
 
   resetUploadForm(): void {
@@ -456,6 +356,22 @@ export class DocumentUploadComponent {
     this.selectedPeriod = file.currentPeriod ?? null;
 
     this.refreshUploadProgress(file, true);
+
+    this.dialogRefUpload = this.dialogService.open(this.uploadModal, {
+      dialogClass: "custom-modal",
+      closeOnBackdropClick: false,
+      autoFocus: true,
+    });
+  }
+
+  prepareUploadFromLateTab(): void {
+    if (!this.selectedDocument || !this.selectedPeriod) {
+      this.toastrService.warning("Selecciona un documento y un periodo válido");
+      return;
+    }
+
+    this.selectedDocumentForUpload = this.selectedDocument;
+    this.refreshUploadProgress(this.selectedDocument, true);
 
     this.dialogRefUpload = this.dialogService.open(this.uploadModal, {
       dialogClass: "custom-modal",
@@ -572,22 +488,27 @@ export class DocumentUploadComponent {
     });
   }
   confirmUploadSubmit(): void {
-    const doc = this.selectedDocumentForUpload;
-    if (!doc?.id || !doc?.currentPeriod?.period_id) return;
+    const doc = this.selectedDocumentForUpload ?? this.selectedDocument;
 
-    this.documentService
-      .submitUploadedFiles(doc.id, doc.currentPeriod.period_id)
-      .subscribe({
-        next: () => {
-          this.toastrService.success("Archivos enviados a revisión", "Éxito");
-          this.closeModal();
-          this.refreshUploadProgress(this.selectedDocumentForUpload, true);
-          this.loadDocuments();
-        },
-        error: () => {
-          this.toastrService.danger("Error al enviar archivos", "Error");
-        },
-      });
+    const periodId =
+      this.selectedDocumentForUpload?.currentPeriod?.period_id ??
+      this.selectedPeriod?.period_id;
+
+    if (!doc?.id || !periodId) return;
+
+    this.documentService.submitUploadedFiles(doc.id, periodId).subscribe({
+      next: () => {
+        this.toastrService.success("Archivos enviados a revisión", "Éxito");
+        this.closeModal();
+        this.refreshUploadProgress(this.selectedDocumentForUpload, true);
+        this.loadLateDocuments();
+        this.loadDocuments();
+        this.resetUploadForm();
+      },
+      error: () => {
+        this.toastrService.danger("Error al enviar archivos", "Error");
+      },
+    });
   }
 
   checkExpiringDocuments(): void {
