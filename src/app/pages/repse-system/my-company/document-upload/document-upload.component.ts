@@ -1,6 +1,9 @@
 import { Component, TemplateRef, ViewChild } from "@angular/core";
 import { NbDialogService, NbDialogRef, NbToastrService } from "@nebular/theme";
-import { DocumentService } from "../../../../services/repse/document.service";
+import {
+  DocumentService,
+  RequiredFileView,
+} from "../../../../services/repse/document.service";
 import { CompanyService } from "../../../../services/company.service";
 import * as moment from "moment";
 
@@ -29,7 +32,6 @@ export class DocumentUploadComponent {
   isUploading = false;
 
   // Datos del dashboard
-  requiredFiles: any[] = [];
   assignedByMe: any[] = [];
   assignedByOthers: { company_id: number; company: string; files: any[] }[] =
     [];
@@ -45,6 +47,7 @@ export class DocumentUploadComponent {
   dialogRefUpload!: NbDialogRef<any>;
 
   // Subida con retraso
+  lateDocuments: RequiredFileView[] = [];
   selectedDocument: any = null;
   selectedPeriod: any = null;
   selectedFormat: string = "";
@@ -119,6 +122,28 @@ export class DocumentUploadComponent {
     });
   }
 
+  loadLateDocuments(): void {
+    this.loading = true;
+    const myCompanyId = Number(this.companyService.selectedCompany.id);
+
+    this.documentService.getOwnRequiredFiles(myCompanyId, "past").subscribe({
+      next: (files: RequiredFileView[]) => {
+        this.lateDocuments = files.filter(
+          (f) => f.isPeriodic && f.status !== "complete"
+        );
+        this.loading = false;
+      },
+      error: (err) => {
+        this.toastrService.danger(
+          "Error al cargar documentos con retraso",
+          "Error"
+        );
+        console.error("Error en loadLateDocuments", err);
+        this.loading = false;
+      },
+    });
+  }
+
   loadRejectedFiles(): void {
     this.documentService
       .getFilteredDocuments({ status: "rejected" })
@@ -139,6 +164,8 @@ export class DocumentUploadComponent {
     this.resetUploadForm();
     if (tab === "Rechazados") {
       this.loadRejectedFiles();
+    } else if (tab === "Con retraso") {
+      this.loadLateDocuments();
     }
   }
 
@@ -729,11 +756,6 @@ export class DocumentUploadComponent {
       });
   }
 
-  getIncompletePeriodicFiles(): any[] {
-    return this.requiredFiles.filter(
-      (f) => f.is_periodic && f.status !== "complete" && f.currentPeriod != null
-    );
-  }
   getFileAccept(): string {
     // Si estamos en “Con retraso”, sólo el formato elegido
     if (this.activeTab === "Con retraso") {
