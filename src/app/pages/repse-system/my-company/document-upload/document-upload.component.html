@@ -317,7 +317,7 @@
                     [(selected)]="selectedDocument"
                     (selectedChange)="selectForLateUpload(selectedDocument)"
                   >
-                    <nb-option value="">Seleccione un documento</nb-option>
+                    <nb-option value=""> Seleccione un documento </nb-option>
                     <nb-option
                       *ngFor="let file of lateDocuments"
                       [value]="file"
@@ -337,7 +337,7 @@
                     (selectedChange)="loadAvailableFormats()"
                     [disabled]="!selectedDocument"
                   >
-                    <nb-option value="">Seleccione un periodo</nb-option>
+                    <nb-option value=""> Seleccione un periodo </nb-option>
                     <nb-option
                       *ngFor="let period of getIncompletePeriods()"
                       [value]="period"
@@ -348,60 +348,16 @@
                   </nb-select>
                 </div>
 
-                <!-- Nvo selector de formato de archivo -->
-                <div
-                  class="col-md-6 mb-3"
-                  *ngIf="selectedDocument && selectedPeriod"
-                >
-                  <label for="file-format" class="form-label"
-                    >Formato de Archivo:</label
-                  >
-                  <nb-select
-                    id="file-format"
-                    fullWidth
-                    [(selected)]="selectedFormat"
-                    [disabled]="!selectedDocument || !selectedPeriod"
-                  >
-                    <nb-option value="">Seleccione un formato</nb-option>
-                    <nb-option
-                      *ngFor="let format of availableFormats"
-                      [value]="format"
-                    >
-                      {{ format }}
-                    </nb-option>
-                  </nb-select>
-                </div>
-
-                <!-- Selector de archivo -->
-                <div class="col-12 mb-3">
-                  <label class="form-label">Archivo:</label>
-                  <div class="d-flex align-items-center">
-                    <button
-                      nbButton
-                      (click)="fileInput.click()"
-                      [disabled]="!canSelectFile()"
-                      class="me-2"
-                    >
-                      <nb-icon icon="upload"></nb-icon> Seleccionar archivo
-                    </button>
-                    <span
-                      *ngIf="selectedFile"
-                      class="text-truncate"
-                      style="max-width: 300px"
-                    >
-                      {{ selectedFile.name }}
-                    </span>
-                  </div>
-                </div>
-
-                <div class="col-12">
+                <div class="col-12 d-flex justify-content-end">
                   <button
                     nbButton
                     status="primary"
-                    (click)="uploadDocument()"
-                    [disabled]="!canUpload()"
+                    class="w-25"
+                    [disabled]="!selectedDocument || !selectedPeriod"
+                    (click)="prepareUploadFromLateTab()"
                   >
-                    Subir Documento
+                    <nb-icon icon="upload-outline" class="mr-1"></nb-icon>
+                    <span>Subir</span>
                   </button>
                 </div>
               </div>
