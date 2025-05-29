@@ -295,7 +295,13 @@
         </nb-tab>
 
         <!-- Pestaña con Retraso -->
-        <nb-tab tabTitle="Con retraso">
+        <nb-tab
+          tabTitle="Con retraso"
+          [badgeText]="
+            latePeriodsCount > 0 ? latePeriodsCount.toString() : null
+          "
+          badgeStatus="warning"
+        >
           <ng-template nbTabContent>
             <h2>Subir Documento con Retraso</h2>
 

@@ -182,12 +182,12 @@ switch ($method) {
             IN ($placeholders)", $ids, $types);
         $pers = fetchAssoc($mysqli, "SELECT p.period_id, p.required_file_id, p.start_date, p.end_date, COUNT(cf.file_id) 
             AS uploaded_count FROM document_periods p 
-            LEFT JOIN company_files cf ON cf.period_id = p.period_id AND cf.status = 'approved' 
+            LEFT JOIN company_files cf ON cf.period_id = p.period_id AND cf.status IN ('approved', 'late')
             WHERE p.required_file_id IN ($placeholders) GROUP BY p.period_id ORDER BY p.start_date", $ids, $types);
         $fmtCounts = fetchAssoc($mysqli, "SELECT dp.required_file_id, cf.file_ext AS format_code, COUNT(*) 
             AS uploaded_count FROM company_files cf 
             JOIN document_periods dp ON dp.period_id = cf.period_id 
-            WHERE dp.required_file_id IN ($placeholders) AND cf.status = 'approved' 
+            WHERE dp.required_file_id IN ($placeholders) AND cf.status IN ('approved', 'late')  
             GROUP BY dp.required_file_id, cf.file_ext", $ids, $types);
 
         $today = new DateTimeImmutable('today');

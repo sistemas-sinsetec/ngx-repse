@@ -72,6 +72,7 @@ export class DocumentUploadComponent {
     private companyService: CompanyService
   ) {
     this.loadDocuments();
+    this.loadLateDocuments();
     this.loadRejectedFiles();
     this.checkExpiringDocuments();
   }
@@ -129,9 +130,32 @@ export class DocumentUploadComponent {
 
     this.documentService.getOwnRequiredFiles(myCompanyId, "past").subscribe({
       next: (files: RequiredFileView[]) => {
-        this.lateDocuments = files.filter(
-          (f) => f.isPeriodic && f.status !== "complete"
-        );
+        this.lateDocuments = files
+          .filter((doc) => {
+            if (!doc.isPeriodic) return false;
+
+            // Filtrar solo periodos pasados incompletos
+            const incompletePeriods = doc.periods.filter(
+              (p) =>
+                moment(p.end_date).isBefore(moment(), "day") &&
+                p.uploaded_count < doc.minQuantity
+            );
+
+            // Si tiene al menos un periodo incompleto, lo dejamos
+            return incompletePeriods.length > 0;
+          })
+          .map((doc) => {
+            // A cada documento que sí pasa, le sobreescribimos sus periodos con solo los incompletos
+            return {
+              ...doc,
+              periods: doc.periods.filter(
+                (p) =>
+                  moment(p.end_date).isBefore(moment(), "day") &&
+                  p.uploaded_count < doc.minQuantity
+              ),
+            };
+          });
+
         this.loading = false;
       },
       error: (err) => {
@@ -192,8 +216,10 @@ export class DocumentUploadComponent {
 
   triggerFileInput(formatCode: string): void {
     this.selectedFormat = formatCode;
-    this.fileInput.nativeElement.accept = `.${formatCode.toLowerCase()}`;
-    this.fileInput.nativeElement.click();
+    setTimeout(() => {
+      this.fileInput.nativeElement.accept = `.${formatCode.toLowerCase()}`;
+      this.fileInput.nativeElement.click();
+    }, 0);
   }
 
   async onFileSelected(event: any): Promise<void> {
@@ -499,11 +525,17 @@ export class DocumentUploadComponent {
     this.documentService.submitUploadedFiles(doc.id, periodId).subscribe({
       next: () => {
         this.toastrService.success("Archivos enviados a revisión", "Éxito");
+        // this.refreshUploadProgress(this.selectedDocumentForUpload, true);
         this.closeModal();
-        this.refreshUploadProgress(this.selectedDocumentForUpload, true);
+        this.closeUploadModal();
+
         this.loadLateDocuments();
         this.loadDocuments();
-        this.resetUploadForm();
+
+        setTimeout(() => {
+          this.resetUploadForm();
+          this.filesPendingConfirmation = [];
+        }, 1);
       },
       error: () => {
         this.toastrService.danger("Error al enviar archivos", "Error");
@@ -642,6 +674,7 @@ export class DocumentUploadComponent {
         "pending",
         "approved",
         "rejected",
+        "late",
       ])
       .subscribe({
         next: (files) => {
@@ -753,6 +786,12 @@ export class DocumentUploadComponent {
     }, 0);
 
     return myIncomplete + othersIncomplete;
+  }
+
+  get latePeriodsCount(): number {
+    return this.lateDocuments.reduce((total, doc) => {
+      return total + (doc.periods?.length || 0);
+    }, 0);
   }
 
   downloadZip(requiredFileId: number): void {
