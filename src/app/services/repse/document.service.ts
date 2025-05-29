@@ -338,9 +338,9 @@ export class DocumentService {
     return this.http.post(`${this.base}/company_files.php`, body);
   }
 
-  approveDocument(fileId: number): Observable<any> {
+  approveDocument(fileId: number, isLate = false): Observable<any> {
     const body = new FormData();
-    body.append("action", "approve");
+    body.append("action", isLate ? "approve_late" : "approve");
     body.append("file_id", fileId.toString());
     return this.http.post<any>(`${this.base}/company_files.php`, body);
   }

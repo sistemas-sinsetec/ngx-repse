@@ -2,6 +2,7 @@ import { Component, OnInit } from "@angular/core";
 import { RejectionCommentComponent } from "../rejection-comment/rejection-comment.component";
 import { DocumentService } from "../../../../services/repse/document.service";
 import { NbDialogService, NbToastrService } from "@nebular/theme";
+import * as moment from "moment";
 
 interface PendingDocument extends CompanyFile {
   fileNames: string[];
@@ -47,7 +48,6 @@ interface FileType {
 export class DocumentReviewComponent implements OnInit {
   pendingDocuments: PendingDocument[] = [];
   loading = true;
-  searchQuery = "";
 
   constructor(
     private documentService: DocumentService,
@@ -96,24 +96,6 @@ export class DocumentReviewComponent implements OnInit {
     });
   }
 
-  get filteredDocuments(): PendingDocument[] {
-    if (!this.searchQuery) {
-      return this.pendingDocuments;
-    }
-
-    const searchTerm = this.searchQuery.toLowerCase();
-    return this.pendingDocuments.filter((doc) => {
-      const fileTypeMatches =
-        doc.fileTypeInfo?.nombre.toLowerCase().includes(searchTerm) ?? false;
-      const periodMatches = doc.periodInfo
-        ? doc.periodInfo.start_date.toLowerCase().includes(searchTerm) ||
-          doc.periodInfo.end_date.toLowerCase().includes(searchTerm)
-        : false;
-
-      return fileTypeMatches || periodMatches;
-    });
-  }
-
   downloadDocument(fileId: number): void {
     const doc = this.pendingDocuments.find((d) => d.file_id === fileId);
     if (doc?.file_path) {
@@ -124,9 +106,19 @@ export class DocumentReviewComponent implements OnInit {
   }
 
   approveDocument(fileId: number): void {
-    this.documentService.approveDocument(fileId).subscribe({
+    const doc = this.pendingDocuments.find((d) => d.file_id === fileId);
+    if (!doc) return;
+
+    const isLate = this.isUploadedAfterPeriodEnd(doc);
+
+    this.documentService.approveDocument(doc.file_id, isLate).subscribe({
       next: () => {
-        this.toastrService.success("Documento aprobado correctamente", "Éxito");
+        this.toastrService.success(
+          isLate
+            ? "Documento marcado como tardío"
+            : "Documento aprobado correctamente",
+          "Éxito"
+        );
         this.loadPendingDocuments();
       },
       error: (err) => {
@@ -159,5 +151,33 @@ export class DocumentReviewComponent implements OnInit {
             });
         }
       });
+  }
+
+  isExpiryBeforePeriodEnd(doc: PendingDocument): boolean {
+    if (
+      !doc.expiry_date ||
+      doc.expiry_date === "9999-12-31" ||
+      !doc.periodInfo?.end_date
+    ) {
+      return false;
+    }
+
+    const expiry = moment.utc(doc.expiry_date, "YYYY-MM-DD");
+    const periodEnd = moment.utc(doc.periodInfo.end_date, "YYYY-MM-DD");
+
+    return expiry.isBefore(periodEnd, "day");
+  }
+
+  isUploadedAfterPeriodEnd(doc: PendingDocument): boolean {
+    if (!doc.uploaded_at || !doc.periodInfo?.end_date) {
+      return false;
+    }
+
+    const uploaded = moment.utc(doc.uploaded_at);
+    const periodEnd = moment
+      .utc(doc.periodInfo.end_date, "YYYY-MM-DD")
+      .endOf("day");
+
+    return uploaded.isAfter(periodEnd);
   }
 }
