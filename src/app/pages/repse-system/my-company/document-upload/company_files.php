@@ -135,6 +135,54 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         exit;
     }
 
+    if ($action === 'approve_late') {
+        $file_id = intval($_POST['file_id']);
+
+        // Obtener la ruta actual
+        $stmt = safe_prepare($mysqli, "SELECT file_path FROM company_files WHERE file_id = ?", 'approve_late select');
+        bind_and_execute($stmt, "i", $file_id);
+
+        $result = $stmt->get_result();
+        $file = $result->fetch_assoc();
+        $stmt->close();
+
+        if (!$file || !$file['file_path']) {
+            echo json_encode(['success' => false, 'error' => 'Archivo no encontrado']);
+            exit;
+        }
+
+        $oldPath = __DIR__ . '/../documents/' . $file['file_path'];
+
+        if (!file_exists($oldPath)) {
+            echo json_encode(['success' => false, 'error' => 'Archivo no existe físicamente']);
+            exit;
+        }
+
+        // Mover a carpeta de tardíos
+        $newPath = str_replace('/subidos/', '/tardios/', $oldPath);
+        $newDir = dirname($newPath);
+
+        if (!file_exists($newDir)) {
+            mkdir($newDir, 0777, true);
+        }
+
+        if (!rename($oldPath, $newPath)) {
+            echo json_encode(['success' => false, 'error' => 'Error al mover archivo']);
+            exit;
+        }
+
+        $newRelativePath = str_replace('/subidos/', '/tardios/', $file['file_path']);
+
+        // Actualizar DB con estado 'late'
+        $stmt = safe_prepare($mysqli, "UPDATE company_files SET file_path = ?, status = 'late' WHERE file_id = ?", 'approve_late update');
+        bind_and_execute($stmt, "si", $newRelativePath, $file_id);
+        $stmt->close();
+
+        echo json_encode(['success' => true]);
+        exit;
+    }
+
+
     if ($action === 'reject') {
         $file_id = intval($_POST['file_id']);
         $comment = $_POST['comment'] ?? '';

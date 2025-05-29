@@ -7,7 +7,7 @@
     </nb-alert>
 
     <table
-      *ngIf="!loading && filteredDocuments.length != 0"
+      *ngIf="!loading && pendingDocuments.length != 0"
       nbTable
       class="table table-hover w-100"
     >
@@ -22,19 +22,33 @@
         </tr>
       </thead>
       <tbody>
-        <tr *ngFor="let doc of filteredDocuments">
-          <td>{{ doc.fileTypeInfo?.nombre || "Sin tipo" }}</td>
-          <td class="text-center">
+        <tr *ngFor="let doc of pendingDocuments">
+          <td class="align-middle">
+            {{ doc.fileTypeInfo?.nombre || "Sin tipo" }}
+          </td>
+          <td class="text-center align-middle">
             {{ doc.issue_date | date : "dd/MM/yyyy" }}
           </td>
-          <td class="text-center">
-            {{
-              doc.expiry_date && doc.expiry_date !== "9999-12-31"
-                ? (doc.expiry_date | date : "dd/MM/yyyy")
-                : "No aplica"
-            }}
+          <td class="text-center align-middle">
+            <div class="d-flex justify-content-center">
+              <span [class.text-warning]="isExpiryBeforePeriodEnd(doc)">
+                {{
+                  doc.expiry_date && doc.expiry_date !== "9999-12-31"
+                    ? (doc.expiry_date | date : "dd/MM/yyyy")
+                    : "No aplica"
+                }}
+              </span>
+              <nb-icon
+                icon="info"
+                status="basic"
+                class="ml-2 tooltip-icon"
+                *ngIf="isExpiryBeforePeriodEnd(doc)"
+                nbTooltip="La vigencia del documento no cubre el periodo completo. Podrás subir uno nuevo cuando este expire."
+                [nbTooltipDisabled]="!isExpiryBeforePeriodEnd(doc)"
+              ></nb-icon>
+            </div>
           </td>
-          <td class="text-center">
+          <td class="text-center align-middle">
             {{
               doc.periodInfo?.end_date === "9999-12-31"
                 ? "Sin periodicidad"
@@ -43,8 +57,23 @@
                   (doc.periodInfo?.end_date | date : "dd/MM/yyyy")
             }}
           </td>
-          <td class="text-center">
-            {{ doc.uploaded_at | date : "dd/MM/yyyy HH:mm" }}
+          <td class="text-center align-middle">
+            <div class="d-flex justify-content-center">
+              <span
+                [class.text-danger]="isUploadedAfterPeriodEnd(doc)"
+                class="align-middle"
+              >
+                {{ doc.uploaded_at | date : "dd/MM/yyyy HH:mm" }}
+              </span>
+              <nb-icon
+                icon="info"
+                status="basic"
+                class="ml-2 tooltip-icon"
+                *ngIf="isUploadedAfterPeriodEnd(doc)"
+                nbTooltip="Este documento fue subido después del fin del periodo. Será marcado como tardío."
+                [nbTooltipDisabled]="!isUploadedAfterPeriodEnd(doc)"
+              ></nb-icon>
+            </div>
           </td>
           <td class="actions">
             <div class="w-100 d-flex justify-content-between">
@@ -81,7 +110,7 @@
     </table>
 
     <nb-alert
-      *ngIf="!loading && filteredDocuments.length === 0"
+      *ngIf="!loading && pendingDocuments.length === 0"
       status="success"
       class="text-center mb-0"
     >
