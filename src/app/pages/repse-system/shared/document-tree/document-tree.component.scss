@@ -8,6 +8,15 @@
   font-weight: 500; // opcional
 }
 
+.expired-text {
+  margin-left: 0.75rem; // separación del texto negro
+}
+
+.expired-icon {
+  font-size: 1.2rem; // Ajusta el tamaño del ícono de "vencido"
+  margin-right: 0.3rem; // Espacio entre ícono y texto rojo
+}
+
 .level-type {
   color: #247ca8 !important;
   font-weight: 700;
