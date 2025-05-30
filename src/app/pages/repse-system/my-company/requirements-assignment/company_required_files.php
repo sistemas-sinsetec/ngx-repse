@@ -3,13 +3,6 @@ header('Content-Type: application/json');
 require_once 'cors.php';
 require_once 'conexion.php';
 
-if (!isset($mysqli) || $mysqli->connect_error) {
-    respond(500, [
-        'error' => 'Falló la conexión a la base de datos',
-        'details' => $mysqli->connect_error ?? 'Sin detalles adicionales'
-    ]);
-}
-
 function respond(int $code, array $payload): never
 {
     http_response_code($code);
