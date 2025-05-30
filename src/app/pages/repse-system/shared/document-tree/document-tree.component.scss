@@ -17,38 +17,32 @@
   margin-right: 0.3rem; // Espacio entre ícono y texto rojo
 }
 
+// Mantener las clases existentes y agregar/actualizar colores
 .level-type {
-  color: #247ca8 !important;
-  font-weight: 700;
+  color: #247ca8 !important; // Color carpeta principal
 }
 
 .level-periodicity {
-  color: #0da2b9 !important; //LISTO
-  font-weight: 600;
+  color: #0da2b9 !important; // Color calendar (año/mes/semana)
 }
 
 .level-period {
-  color: #28aeb3 !important;
-  font-weight: 600;
+  color: #28aeb3 !important; // Color clock (periodo/fecha)
 }
 
 .level-format {
-  color: #6197df !important;
-  font-weight: 600;
+  color: #6197df !important; // Color file-text (tipo archivo)
 }
 
 .level-file {
-  color: #a6b4e5 !important;
+  color: #a6b4e5 !important; // Color archivos activos
 }
 
-.text-black {
-  color: black !important;
+// Nuevas clases para estados especiales
+.icon-late {
+  color: orange !important; // Color para archivos retrasados
 }
 
-.late-text {
-  font-weight: 500;
-  .late-icon {
-    margin-right: 4px;
-    font-size: 1.2rem;
-  }
+.icon-expired {
+  color: red !important; // Color para archivos vencidos
 }
