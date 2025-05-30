@@ -10,9 +10,11 @@
       </th>
       <!-- ... código existente ... -->
 
+      <!-- ... código existente ... -->
+
       <td nbTreeGridCell *nbTreeGridCellDef="let row">
         <div
-          class="d-flex align-items-center doc-container"
+          class="d-flex align-items-center"
           [style.padding-left.px]="row.level * 25"
         >
           <!-- Toggle para expandir/colapsar -->
@@ -22,54 +24,48 @@
             class="me-2"
           ></nb-tree-grid-row-toggle>
 
-          <!-- Icono basado en estado -->
+          <!-- Icono con color original -->
           <nb-icon
             [icon]="getIcon(row.data.type, row.data.expired, row.data.isLate)"
-            [ngClass]="{
-              'text-danger': row.data.expired,
-              'text-warning': row.data.isLate
-            }"
+            [class]="getLevelClass(row.level)"
             [style.font-size]="getIconSize(row.level)"
-            [style.width]="getIconSize(row.level)"
-            [style.height]="getIconSize(row.level)"
             class="icon-spaced"
           ></nb-icon>
 
-          <!-- Contenedor principal -->
-          <div class="doc-label-wrapper">
-            <!-- Nombre del elemento -->
-            <span class="text-black doc-label">
-              {{ row.data.name }}
-            </span>
+          <!-- Nombre del elemento -->
+          <span class="text-black doc-label">
+            {{ row.data.name }}
+          </span>
 
-            <!-- SOLO MOSTRAR ESTADO EN ARCHIVOS -->
-            <ng-container *ngIf="isFileNode(row)">
-              <!-- Indicador de vencimiento o retraso -->
-              <span class="ms-3 d-inline-flex align-items-center status-text">
-                <nb-icon
-                  *ngIf="row.data.expired"
-                  icon="alert-circle-outline"
-                  pack="eva"
-                  class="text-danger"
-                ></nb-icon>
-                <nb-icon
-                  *ngIf="row.data.isLate && !row.data.expired"
-                  icon="alert-triangle-outline"
-                  pack="eva"
-                  class="text-warning"
-                ></nb-icon>
-                <div
-                  [class.text-danger]="row.data.expired"
-                  [class.text-warning]="row.data.isLate && !row.data.expired"
-                  class="small-text ms-1"
-                >
-                  {{ row.data.statusText }}
-                </div>
-              </span>
-            </ng-container>
-          </div>
+          <!-- MOSTRAR ESTADO SOLO EN ARCHIVOS -->
+          <ng-container *ngIf="row.data.type === 'file'">
+            <span class="ms-3 d-inline-flex align-items-center status-text">
+              <!-- Icono de alerta para estados -->
+              <nb-icon
+                *ngIf="row.data.expired"
+                icon="alert-circle-outline"
+                class="text-danger"
+              ></nb-icon>
+              <nb-icon
+                *ngIf="row.data.isLate && !row.data.expired"
+                icon="alert-triangle-outline"
+                class="text-warning"
+              ></nb-icon>
+
+              <!-- Texto de estado -->
+              <div
+                class="small-text ms-1"
+                [class.text-danger]="row.data.expired"
+                [class.text-warning]="row.data.isLate && !row.data.expired"
+              >
+                {{ row.data.statusText }}
+              </div>
+            </span>
+          </ng-container>
         </div>
       </td>
+
+      <!-- ... código existente ... -->
 
       <!-- ... código existente ... -->
     </ng-container>

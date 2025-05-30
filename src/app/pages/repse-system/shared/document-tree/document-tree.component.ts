@@ -38,9 +38,7 @@ export class DocumentTreeComponent implements OnChanges {
   //GET DE LOS INCON
   // FUNCIÓN PARA OBTENER EL ÍCONO (YA LA TIENES)
   public getIcon(type: string, expired: boolean, isLate: boolean): string {
-    if (isLate) return "file-outline";
-    if (expired) return "file-remove-outline";
-
+    // Mantener íconos originales sin cambios de estado
     switch (type) {
       case "type":
         return "folder-outline";
@@ -51,6 +49,9 @@ export class DocumentTreeComponent implements OnChanges {
       case "format":
         return "file-text-outline";
       case "file":
+        // Para archivos, usar íconos según estado
+        if (isLate) return "file-outline";
+        if (expired) return "file-remove-outline";
         return "file-outline";
       default:
         return "file-outline";
@@ -84,6 +85,7 @@ export class DocumentTreeComponent implements OnChanges {
     private documentService: DocumentService
   ) {}
 
+  // Añadir estas funciones si no existen
   private parseLocalDate(dateStr: string): Date {
     const [year, month, day] = dateStr.split("-").map(Number);
     return new Date(year, month - 1, day);
@@ -112,30 +114,13 @@ export class DocumentTreeComponent implements OnChanges {
     if (!Array.isArray(data)) return [];
 
     return data.map((docType: any) => {
-      // Calcular si el tipo tiene archivos late (nivel tipo)
-      const typeHasLate = docType.periodicities.some((periodicity: any) =>
-        periodicity.periods.some((period: any) =>
-          period.formats.some((fmt: any) =>
-            fmt.files.some((file: any) => file.status === "late")
-          )
-        )
-      );
-
       return {
         data: {
           name: docType.name,
           type: "type",
-          isLate: typeHasLate,
         },
         expanded: true,
         children: docType.periodicities.map((periodicity: any) => {
-          // Calcular si la periodicidad tiene archivos late (nivel periodicidad)
-          const periodicityHasLate = periodicity.periods.some((period: any) =>
-            period.formats.some((fmt: any) =>
-              fmt.files.some((file: any) => file.status === "late")
-            )
-          );
-
           // Construir nombre de periodicidad
           const periodicityName =
             !periodicity.type || periodicity.type === "sin periodicidad"
@@ -146,17 +131,11 @@ export class DocumentTreeComponent implements OnChanges {
             data: {
               name: periodicityName,
               type: "periodicity",
-              isLate: periodicityHasLate,
             },
             expanded: true,
             children: periodicity.periods.map((period: any) => {
               // Calcular si el periodo está expirado
               const isPeriodExpired = this.isExpired(period.end_date);
-
-              // Calcular si el periodo tiene archivos late
-              const hasLateFiles = period.formats.some((fmt: any) =>
-                fmt.files.some((file: any) => file.status === "late")
-              );
 
               // Construir nombre del periodo
               const periodName =
@@ -171,21 +150,14 @@ export class DocumentTreeComponent implements OnChanges {
                   name: periodName,
                   type: "period",
                   expired: isPeriodExpired,
-                  isLate: hasLateFiles,
                 },
                 expanded: true,
                 children: period.formats.map((fmt: any) => {
-                  // Calcular si el formato tiene archivos late
-                  const formatHasLate = fmt.files.some(
-                    (file: any) => file.status === "late"
-                  );
-
                   return {
                     data: {
                       name: fmt.code?.toUpperCase() || "",
                       type: "format",
                       expired: isPeriodExpired, // Hereda del periodo
-                      isLate: formatHasLate,
                     },
                     expanded: true,
                     children: fmt.files.map((file: any) => {
@@ -195,6 +167,9 @@ export class DocumentTreeComponent implements OnChanges {
 
                       const isExpiredFile = file.is_expired === 1;
                       const isLateFile = file.status === "late";
+                      const formattedDate = expirationDate
+                        ? this.formatDate(expirationDate)
+                        : "";
 
                       return {
                         data: {
@@ -202,11 +177,10 @@ export class DocumentTreeComponent implements OnChanges {
                           type: "file",
                           path: file.file_path,
                           expired: isExpiredFile,
-                          status: file.status,
                           isLate: isLateFile,
                           expirationDate: expirationDate,
                           statusText: isExpiredFile
-                            ? `Vencido el ${this.formatDate(expirationDate)}`
+                            ? `Vencido el ${formattedDate}`
                             : isLateFile
                             ? "Retrasado"
                             : "",
@@ -223,7 +197,6 @@ export class DocumentTreeComponent implements OnChanges {
     });
   }
 
-  // Añadir esta función para formatear fechas
   private formatDate(date: Date): string {
     if (!date) return "";
     return date.toLocaleDateString("es-MX", {
@@ -232,6 +205,7 @@ export class DocumentTreeComponent implements OnChanges {
       year: "numeric",
     });
   }
+
   private isExpired(endDate: string): boolean {
     if (!endDate || endDate === "9999-12-31") return false;
     const date = new Date(endDate);
