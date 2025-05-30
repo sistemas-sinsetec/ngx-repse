@@ -9,8 +9,9 @@ export interface CatalogNode {
   name: string;
   type: "type" | "periodicity" | "period" | "format" | "file";
   path?: string;
-  expirationDate?: Date; // Propiedad renombrada/agregada
-  isExpired?: boolean; // Nombre correcto de la propiedad
+  expirationDate?: Date;
+  isExpired?: boolean;
+  isLate?: boolean; // Nuevo campo para archivos retrasados
   children?: CatalogNode[];
 }
 
@@ -25,10 +26,11 @@ interface TreeNode<T> {
   templateUrl: "./document-tree.component.html",
   styleUrls: ["./document-tree.component.scss"],
 })
-export class DocumentTreeComponent {
+export class DocumentTreeComponent implements OnChanges {
+  // Implementa OnChanges
   // Inputs que reciben datos del componente padre
   @Input() showExpired: boolean = false;
-  @Input() catalog: CatalogNode[];
+  @Input() catalog: any; // Cambiado a any para flexibilidad
   @Input() searchQuery: string;
 
   // Lógica para determinar si un nodo debe mostrarse
@@ -36,8 +38,10 @@ export class DocumentTreeComponent {
     return this.showExpired || !node.isExpired;
   }
 
-  getIcon(type: string, expired: boolean): string {
-    if (expired) return "file-remove-outline";
+  // ACTUALIZADO: Añadido parámetro isLate
+  getIcon(type: string, expired: boolean, isLate?: boolean): string {
+    if (isLate) return "file-text-outline"; // Icono para retrasados
+    if (expired) return "file-remove-outline"; //Icono de vencido
 
     switch (type) {
       case "type":
@@ -65,26 +69,16 @@ export class DocumentTreeComponent {
 
   private parseLocalDate(dateStr: string): Date {
     const [year, month, day] = dateStr.split("-").map(Number);
-    return new Date(year, month - 1, day); // Sin hora -> evita problemas de zona horaria
-  }
-
-  private processExpiration(documents: CatalogNode[]): void {
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-
-    documents.forEach((doc) => {
-      if (doc.expirationDate) {
-        const expirationDate = new Date(doc.expirationDate);
-        expirationDate.setHours(0, 0, 0, 0);
-        doc.isExpired = expirationDate < today;
-      }
-      if (doc.children) this.processExpiration(doc.children);
-    });
+    return new Date(year, month - 1, day);
   }
 
   ngOnChanges(changes: SimpleChanges): void {
     if (changes.catalog) {
-      this.treeData = this.transformToTree(this.catalog);
+      // Verificación de array
+      this.treeData = Array.isArray(this.catalog)
+        ? this.transformToTree(this.catalog)
+        : [];
+
       this.dataSource = this.dataSourceBuilder.create(this.treeData);
     }
 
@@ -93,8 +87,14 @@ export class DocumentTreeComponent {
     }
   }
 
-  //actualizacion de caltalogo de documento
+  // ACTUALIZADO: Manejo de array y nuevo campo isLate
   transformToTree(data: any): TreeNode<CatalogNode>[] {
+    // Verificación de array
+    if (!Array.isArray(data)) {
+      console.error("transformToTree esperaba un array pero recibió:", data);
+      return [];
+    }
+
     return data.map((docType: any) => {
       const periodicityNodes = docType.periodicities.map((periodicity: any) => {
         const periodNodes = periodicity.periods.map((period: any) => {
@@ -124,8 +124,8 @@ export class DocumentTreeComponent {
                   name: file.file_path?.split("/").pop() || "",
                   type: "file",
                   path: file.file_path,
-                  // Modificación clave: Verificar vencimiento por archivo
-                  expired: file.is_expired === 1, // ¡Nuevo!
+                  expired: file.is_expired === 1,
+                  // Nuevo campo completo
                   expirationDate: file.expiry_date
                     ? this.parseLocalDate(file.expiry_date)
                     : null,
@@ -203,23 +203,7 @@ export class DocumentTreeComponent {
     this.documentService.downloadFile(path);
   }
 
-  ggetIcon(type: string, expired: boolean): string {
-    if (expired) return "file-remove-outline"; // Icono para documentos vencidos
-
-    switch (type) {
-      case "type":
-        return "folder-outline"; // Primer nivel: Carpeta REPSE
-      case "periodicity":
-        return "calendar-outline"; // Periodicidad (anual, mensual)
-      case "period":
-        return "clock-outline"; // Un período específico
-      case "format":
-      case "file":
-        return "file-outline"; // Documentos activos
-      default:
-        return "file-outline"; // Valor por defecto
-    }
-  }
+  // ELIMINADO: Función duplicada ggetIcon
 
   getLevelClass(level: number): string {
     return (

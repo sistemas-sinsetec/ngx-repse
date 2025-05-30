@@ -402,23 +402,25 @@ export class DocumentService {
 
   getCompanyFiles(
     companyId: number,
-    status: string = "approved"
+    statuses: string[] = ["approved"]
   ): Observable<any> {
     const params = new HttpParams()
       .set("mode", "catalog")
       .set("company_id", companyId.toString())
-      .set("status", status);
+      .set("status", statuses.map((s) => encodeURIComponent(s)).join(",")); // Más seguro
+
     return this.http.get(`${this.base}/company_files_tree.php`, { params });
   }
 
   getProviderFiles(
     assignedByCompanyId: number,
-    status: string = "approved"
+    statuses: string[] = ["approved"]
   ): Observable<any> {
     const params = new HttpParams()
       .set("mode", "providers")
       .set("company_id", assignedByCompanyId.toString())
-      .set("status", status);
+      .set("status", statuses.join(","));
+
     return this.http.get(`${this.base}/company_files_tree.php`, { params });
   }
 
