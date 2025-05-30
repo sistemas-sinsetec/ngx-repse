@@ -322,13 +322,25 @@
                     fullWidth
                     [(selected)]="selectedDocument"
                     (selectedChange)="selectForLateUpload(selectedDocument)"
+                    placeholder="Seleccione un documento"
                   >
-                    <nb-option value=""> Seleccione un documento </nb-option>
                     <nb-option
                       *ngFor="let file of lateDocuments"
                       [value]="file"
                     >
                       {{ file.documentType }}
+                      <span class="ml-1 font-weight-normal">
+                        ({{
+                          file.startDate &&
+                            (file.startDate | date : "dd/MM/yyyy")
+                        }}
+                        -
+                        {{
+                          file.endDate
+                            ? (file.endDate | date : "dd/MM/yyyy")
+                            : "vigente"
+                        }})
+                      </span>
                     </nb-option>
                   </nb-select>
                 </div>
@@ -342,8 +354,8 @@
                     [(selected)]="selectedPeriod"
                     (selectedChange)="loadAvailableFormats()"
                     [disabled]="!selectedDocument"
+                    placeholder="Seleccione un periodo"
                   >
-                    <nb-option value=""> Seleccione un periodo </nb-option>
                     <nb-option
                       *ngFor="let period of getIncompletePeriods()"
                       [value]="period"

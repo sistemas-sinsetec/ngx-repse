@@ -130,32 +130,38 @@ export class DocumentUploadComponent {
 
     this.documentService.getOwnRequiredFiles(myCompanyId, "past").subscribe({
       next: (files: RequiredFileView[]) => {
-        this.lateDocuments = files
-          .filter((doc) => {
-            if (!doc.isPeriodic) return false;
+        // Filtrar documentos con al menos un periodo incompleto pasado
+        const filtered = files.filter((doc) => {
+          if (!doc.isPeriodic) return false;
 
-            // Filtrar solo periodos pasados incompletos
-            const incompletePeriods = doc.periods.filter(
-              (p) =>
-                moment(p.end_date).isBefore(moment(), "day") &&
-                p.uploaded_count < doc.minQuantity
-            );
+          const incomplete = doc.periods.filter(
+            (p) =>
+              moment(p.end_date).isBefore(moment(), "day") &&
+              p.uploaded_count < doc.minQuantity
+          );
 
-            // Si tiene al menos un periodo incompleto, lo dejamos
-            return incompletePeriods.length > 0;
-          })
-          .map((doc) => {
-            // A cada documento que sí pasa, le sobreescribimos sus periodos con solo los incompletos
-            return {
-              ...doc,
-              periods: doc.periods.filter(
-                (p) =>
-                  moment(p.end_date).isBefore(moment(), "day") &&
-                  p.uploaded_count < doc.minQuantity
-              ),
-            };
+          return incomplete.length > 0;
+        });
+
+        // Conservar las fechas originales y sobrescribir solo `periods`
+        files.forEach((doc) => {
+          doc.startDate = new Date(doc.startDate);
+          doc.endDate = doc.endDate ? new Date(doc.endDate) : null;
+          doc.periods = doc.periods.filter(
+            (p) =>
+              moment(p.end_date).isBefore(moment(), "day") &&
+              p.uploaded_count < doc.minQuantity
+          );
+
+          console.log("→ Documento con retraso:", {
+            startDate: doc.startDate,
+            endDate: doc.endDate,
+            typeofStart: typeof doc.startDate,
+            typeofEnd: typeof doc.endDate,
           });
+        });
 
+        this.lateDocuments = filtered;
         this.loading = false;
       },
       error: (err) => {
@@ -199,6 +205,7 @@ export class DocumentUploadComponent {
   selectForLateUpload(file: any): void {
     this.activeTab = "Con retraso";
     this.selectedDocument = file;
+    this.selectedPeriod = null;
     this.loadAvailableFormats();
   }
 
@@ -796,5 +803,9 @@ export class DocumentUploadComponent {
 
   downloadZip(requiredFileId: number): void {
     this.documentService.downloadApprovedZip(requiredFileId);
+  }
+
+  formatDate(date: any): string {
+    return moment(date).isValid() ? moment(date).format("DD/MM/YYYY") : "-";
   }
 }
