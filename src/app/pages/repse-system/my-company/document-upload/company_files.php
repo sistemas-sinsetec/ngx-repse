@@ -452,7 +452,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $period_coverage = 'partial';
     }
 
-    $is_expired = ($expiry_date < date('Y-m-d')) ? 1 : 0;
+    $is_expired = ($period_coverage === 'partial' && $expiry_date < date('Y-m-d')) ? 1 : 0;
 
     $stmt = safe_prepare($mysqli, "
         INSERT INTO company_files (file_path, issue_date, expiry_date, user_id, status, is_current, period_id, period_coverage, is_expired)
