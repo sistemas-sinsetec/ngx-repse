@@ -402,24 +402,34 @@ export class DocumentService {
 
   getCompanyFiles(
     companyId: number,
-    statuses: string[] = ["approved"]
+    statuses: string[] = ["approved", "late"] // Agregar "late" aquí
   ): Observable<any> {
     const params = new HttpParams()
       .set("mode", "catalog")
       .set("company_id", companyId.toString())
-      .set("status", statuses.map((s) => encodeURIComponent(s)).join(",")); // Más seguro
+      .set(
+        "status",
+        statuses.includes("approved_or_late")
+          ? "approved_or_late"
+          : statuses.join(",")
+      );
 
     return this.http.get(`${this.base}/company_files_tree.php`, { params });
   }
 
   getProviderFiles(
     assignedByCompanyId: number,
-    statuses: string[] = ["approved"]
+    statuses: string[] = ["approved", "late"]
   ): Observable<any> {
     const params = new HttpParams()
       .set("mode", "providers")
       .set("company_id", assignedByCompanyId.toString())
-      .set("status", statuses.join(","));
+      .set(
+        "status",
+        statuses.includes("approved_or_late")
+          ? "approved_or_late"
+          : statuses.join(",")
+      );
 
     return this.http.get(`${this.base}/company_files_tree.php`, { params });
   }

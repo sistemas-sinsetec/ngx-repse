@@ -11,7 +11,8 @@ export interface CatalogNode {
   path?: string;
   expirationDate?: Date;
   isExpired?: boolean;
-  isLate?: boolean; // Nuevo campo para archivos retrasados
+  isLate?: boolean;
+  status?: string; // Agregado para verificar si es "late"
   children?: CatalogNode[];
 }
 
@@ -27,21 +28,18 @@ interface TreeNode<T> {
   styleUrls: ["./document-tree.component.scss"],
 })
 export class DocumentTreeComponent implements OnChanges {
-  // Implementa OnChanges
-  // Inputs que reciben datos del componente padre
   @Input() showExpired: boolean = false;
-  @Input() catalog: any; // Cambiado a any para flexibilidad
+  @Input() catalog: any;
   @Input() searchQuery: string;
 
-  // Lógica para determinar si un nodo debe mostrarse
   shouldDisplay(node: CatalogNode): boolean {
     return this.showExpired || !node.isExpired;
   }
-
-  // ACTUALIZADO: Añadido parámetro isLate
-  getIcon(type: string, expired: boolean, isLate?: boolean): string {
-    if (isLate) return "file-text-outline"; // Icono para retrasados
-    if (expired) return "file-remove-outline"; //Icono de vencido
+  //GET DE LOS INCON
+  // FUNCIÓN PARA OBTENER EL ÍCONO (YA LA TIENES)
+  public getIcon(type: string, expired: boolean, isLate: boolean): string {
+    if (isLate) return "file-outline";
+    if (expired) return "file-remove-outline";
 
     switch (type) {
       case "type":
@@ -51,10 +49,29 @@ export class DocumentTreeComponent implements OnChanges {
       case "period":
         return "clock-outline";
       case "format":
+        return "file-text-outline";
       case "file":
         return "file-outline";
       default:
         return "file-outline";
+    }
+  }
+
+  // FUNCIÓN FALTANTE PARA TAMAÑO DE ÍCONOS (AGREGAR ESTA)
+  public getIconSize(level: number): string {
+    switch (level) {
+      case 0: // Tipo (carpeta principal)
+        return "1.8rem";
+      case 1: // Periodicidad (año/mes/semana)
+        return "1.5rem";
+      case 2: // Periodo (fecha específica)
+        return "1.5rem";
+      case 3: // Formato (tipo de archivo)
+        return "1.3rem";
+      case 4: // Archivo individual
+        return "1.2rem";
+      default:
+        return "1.2rem";
     }
   }
 
@@ -74,7 +91,6 @@ export class DocumentTreeComponent implements OnChanges {
 
   ngOnChanges(changes: SimpleChanges): void {
     if (changes.catalog) {
-      // Verificación de array
       this.treeData = Array.isArray(this.catalog)
         ? this.transformToTree(this.catalog)
         : [];
@@ -87,88 +103,139 @@ export class DocumentTreeComponent implements OnChanges {
     }
   }
 
-  // ACTUALIZADO: Manejo de array y nuevo campo isLate
-  transformToTree(data: any): TreeNode<CatalogNode>[] {
-    // Verificación de array
-    if (!Array.isArray(data)) {
-      console.error("transformToTree esperaba un array pero recibió:", data);
-      return [];
-    }
+  // Añade esta función para determinar si un nodo es hoja (archivo)
+  public isFileNode(node: TreeNode<CatalogNode>): boolean {
+    return node.data.type === "file";
+  }
+
+  private transformToTree(data: any): TreeNode<CatalogNode>[] {
+    if (!Array.isArray(data)) return [];
 
     return data.map((docType: any) => {
-      const periodicityNodes = docType.periodicities.map((periodicity: any) => {
-        const periodNodes = periodicity.periods.map((period: any) => {
-          const isExpired = this.isExpired(period.end_date);
+      // Calcular si el tipo tiene archivos late (nivel tipo)
+      const typeHasLate = docType.periodicities.some((periodicity: any) =>
+        periodicity.periods.some((period: any) =>
+          period.formats.some((fmt: any) =>
+            fmt.files.some((file: any) => file.status === "late")
+          )
+        )
+      );
+
+      return {
+        data: {
+          name: docType.name,
+          type: "type",
+          isLate: typeHasLate,
+        },
+        expanded: true,
+        children: docType.periodicities.map((periodicity: any) => {
+          // Calcular si la periodicidad tiene archivos late (nivel periodicidad)
+          const periodicityHasLate = periodicity.periods.some((period: any) =>
+            period.formats.some((fmt: any) =>
+              fmt.files.some((file: any) => file.status === "late")
+            )
+          );
+
+          // Construir nombre de periodicidad
+          const periodicityName =
+            !periodicity.type || periodicity.type === "sin periodicidad"
+              ? "Sin periodicidad"
+              : `${periodicity.count ?? ""} ${periodicity.type ?? ""}`.trim();
 
           return {
             data: {
-              name:
+              name: periodicityName,
+              type: "periodicity",
+              isLate: periodicityHasLate,
+            },
+            expanded: true,
+            children: periodicity.periods.map((period: any) => {
+              // Calcular si el periodo está expirado
+              const isPeriodExpired = this.isExpired(period.end_date);
+
+              // Calcular si el periodo tiene archivos late
+              const hasLateFiles = period.formats.some((fmt: any) =>
+                fmt.files.some((file: any) => file.status === "late")
+              );
+
+              // Construir nombre del periodo
+              const periodName =
                 period.start_date === "sin periodicidad" ||
                 period.end_date === "" ||
                 period.end_date === "9999-12-31"
                   ? "Sin periodicidad"
-                  : `${period.start_date} - ${period.end_date}`,
-              type: "period",
-              expired: isExpired,
-            },
-            expanded: isExpired,
-            children: period.formats.map((fmt: any) => ({
-              data: {
-                name: fmt.code?.toUpperCase() || "",
-                type: "format",
-                expired: isExpired,
-              },
-              expanded: false,
-              children: fmt.files.map((file: any) => ({
+                  : `${period.start_date} - ${period.end_date}`;
+
+              return {
                 data: {
-                  name: file.file_path?.split("/").pop() || "",
-                  type: "file",
-                  path: file.file_path,
-                  expired: file.is_expired === 1,
-                  // Nuevo campo completo
-                  expirationDate: file.expiry_date
-                    ? this.parseLocalDate(file.expiry_date)
-                    : null,
-                  // Agregado aquí
+                  name: periodName,
+                  type: "period",
+                  expired: isPeriodExpired,
+                  isLate: hasLateFiles,
                 },
-              })),
-            })),
+                expanded: true,
+                children: period.formats.map((fmt: any) => {
+                  // Calcular si el formato tiene archivos late
+                  const formatHasLate = fmt.files.some(
+                    (file: any) => file.status === "late"
+                  );
+
+                  return {
+                    data: {
+                      name: fmt.code?.toUpperCase() || "",
+                      type: "format",
+                      expired: isPeriodExpired, // Hereda del periodo
+                      isLate: formatHasLate,
+                    },
+                    expanded: true,
+                    children: fmt.files.map((file: any) => {
+                      const expirationDate = file.expiry_date
+                        ? this.parseLocalDate(file.expiry_date)
+                        : null;
+
+                      const isExpiredFile = file.is_expired === 1;
+                      const isLateFile = file.status === "late";
+
+                      return {
+                        data: {
+                          name: file.file_path?.split("/").pop() || "",
+                          type: "file",
+                          path: file.file_path,
+                          expired: isExpiredFile,
+                          status: file.status,
+                          isLate: isLateFile,
+                          expirationDate: expirationDate,
+                          statusText: isExpiredFile
+                            ? `Vencido el ${this.formatDate(expirationDate)}`
+                            : isLateFile
+                            ? "Retrasado"
+                            : "",
+                        },
+                      };
+                    }),
+                  };
+                }),
+              };
+            }),
           };
-        });
-
-        const shouldExpandPeriodicity = periodNodes.some((p) => p.expanded);
-
-        return {
-          data: {
-            name:
-              !periodicity.type || periodicity.type === "sin periodicidad"
-                ? "Sin periodicidad"
-                : `${periodicity.count ?? ""} ${periodicity.type ?? ""}`.trim(),
-            type: "periodicity",
-          },
-          expanded: shouldExpandPeriodicity,
-          children: periodNodes,
-        };
-      });
-
-      const shouldExpandType = periodicityNodes.some((p) => p.expanded);
-
-      return {
-        data: { name: docType.name, type: "type" },
-        expanded: shouldExpandType,
-        children: periodicityNodes,
+        }),
       };
     });
   }
 
-  // Modificar el método isExpired para aceptar cualquier fecha
+  // Añadir esta función para formatear fechas
+  private formatDate(date: Date): string {
+    if (!date) return "";
+    return date.toLocaleDateString("es-MX", {
+      day: "2-digit",
+      month: "2-digit",
+      year: "numeric",
+    });
+  }
   private isExpired(endDate: string): boolean {
     if (!endDate || endDate === "9999-12-31") return false;
-
-    // Manejar formato ISO 8601 con timestamp
     const date = new Date(endDate);
     const today = new Date();
-
     return date < today;
   }
 
@@ -203,16 +270,15 @@ export class DocumentTreeComponent implements OnChanges {
     this.documentService.downloadFile(path);
   }
 
-  // ELIMINADO: Función duplicada ggetIcon
-
   getLevelClass(level: number): string {
+    // Asignar clases CSS basadas en el nivel del nodo
     return (
       [
-        "level-type",
-        "level-periodicity",
-        "level-period",
-        "level-format",
-        "level-file",
+        "level-type", // Nivel 0: Tipo de documento
+        "level-periodicity", // Nivel 1: Periodicidad
+        "level-period", // Nivel 2: Periodo
+        "level-format", // Nivel 3: Formato
+        "level-file", // Nivel 4: Archivo
       ][level] || ""
     );
   }
