@@ -6,14 +6,22 @@ $hoy = new DateTime();
 
 function getInterval(string $type, int $count): ?DateInterval
 {
-    return match (strtolower($type)) {
-        'días' => new DateInterval("P{$count}D"),
-        'semanas' => new DateInterval("P" . ($count * 7) . "D"),
-        'meses' => new DateInterval("P{$count}M"),
-        'años' => new DateInterval("P{$count}Y"),
-        default => null,
-    };
+    $type = strtolower($type);
+
+    switch ($type) {
+        case 'días':
+            return new DateInterval("P{$count}D");
+        case 'semanas':
+            return new DateInterval("P" . ($count * 7) . "D");
+        case 'meses':
+            return new DateInterval("P{$count}M");
+        case 'años':
+            return new DateInterval("P{$count}Y");
+        default:
+            return null;
+    }
 }
+
 
 // Obtener configuraciones periódicas que tienen al menos un periodo generado
 $sql = "
