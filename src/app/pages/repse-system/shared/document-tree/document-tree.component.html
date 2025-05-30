@@ -26,31 +26,48 @@
             class="me-2"
           ></nb-tree-grid-row-toggle>
 
-          <!-- Icono con color dependiendo si está vencido -->
+          <!-- Icono -->
           <nb-icon
             [icon]="getIcon(row.data.type, row.data.expired)"
             [ngClass]="{ 'text-danger': row.data.expired }"
             class="icon-spaced"
           ></nb-icon>
 
-          <!-- Texto siempre en negro -->
-          <span class="text-black doc-label">
-            {{ row.data.name }}
+          <!-- Contenedor de nombre + vencimiento -->
+          <div class="doc-label-wrapper">
+            <!-- Nombre del documento -->
+            <span class="text-black doc-label">
+              {{ row.data.name }}
+            </span>
+
+            <!-- Vencido -->
             <span
               *ngIf="row.data.expired"
-              class="ms-2 d-inline-flex align-items-center"
+              class="ms-3 d-inline-flex align-items-center expired-text"
             >
               <nb-icon
                 icon="alert-circle-outline"
                 pack="eva"
-                class="text-danger"
-                style="font-size: 0.8em"
+                class="text-danger expired-icon"
               ></nb-icon>
-              <div *ngIf="row.data.expired" class="text-danger small-text">
+              <div class="text-danger small-text ms-1">
                 Vencido el {{ row.data.expirationDate | date : "dd/MM/yyyy" }}
               </div>
             </span>
-          </span>
+
+            <!-- Retrasado -->
+            <span
+              *ngIf="row.data.isLate"
+              class="ms-3 d-inline-flex align-items-center late-text"
+            >
+              <nb-icon
+                icon="alert-triangle-outline"
+                pack="eva"
+                class="text-warning late-icon"
+              ></nb-icon>
+              <div class="text-warning small-text ms-1">Retrasado</div>
+            </span>
+          </div>
         </div>
       </td>
     </ng-container>
