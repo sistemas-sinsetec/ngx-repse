@@ -54,7 +54,7 @@
                           class="d-none d-sm-table-cell text-center align-middle"
                         >
                           {{
-                            file.is_periodic
+                            file.isPeriodic
                               ? file.periodAmount + " " + file.periodType
                               : "No periódico"
                           }}
@@ -62,7 +62,7 @@
                         <td
                           class="d-none d-md-table-cell text-center align-middle"
                         >
-                          {{ getDeadlineLabel(file) }}
+                          {{ getLastPeriodEndDate(file) }}
                         </td>
                         <td class="align-middle text-center">
                           <nb-tag
@@ -162,7 +162,7 @@
                               class="d-none d-sm-table-cell text-center align-middle"
                             >
                               {{
-                                file.is_periodic
+                                file.isPeriodic
                                   ? file.periodAmount + " " + file.periodType
                                   : "No periódico"
                               }}
@@ -170,7 +170,7 @@
                             <td
                               class="d-none d-md-table-cell text-center align-middle"
                             >
-                              {{ getDeadlineLabel(file) }}
+                              {{ getLastPeriodEndDate(file) }}
                             </td>
                             <td class="align-middle text-center">
                               <nb-tag

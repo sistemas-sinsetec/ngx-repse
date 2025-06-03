@@ -94,6 +94,8 @@ export class DocumentUploadComponent {
           (f) => Number(f.assignedBy) === myCompanyId
         );
 
+        console.log(this.assignedByMe);
+
         // Asignados por otras empresas
         const grouped: {
           [key: number]: { company_id: number; company: string; files: any[] };
@@ -650,11 +652,11 @@ export class DocumentUploadComponent {
     );
   }
 
-  getDeadlineLabel(file: any): string {
-    if (!file.deadline || file.deadline === "9999-12-31") {
-      return "Sin límite";
-    }
-    return moment(file.deadline).format("DD/MM/YYYY");
+  getLastPeriodEndDate(file: any): string {
+    if (!file.periods || file.periods.length === 0) return "Sin periodos";
+
+    const last = file.periods[file.periods.length - 1];
+    return moment(last.end_date).format("DD/MM/YYYY");
   }
 
   getUploadProgress(file: any): string {
