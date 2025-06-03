@@ -3,9 +3,21 @@
   font-size: 1.5rem; // opcional: tamaño del ícono
 }
 
+/* Agrega esto a tus estilos */
 .doc-label {
-  font-size: 1rem; // ajusta el tamaño del texto aquí (ej. 0.875rem, 1.25rem)
-  font-weight: 500; // opcional
+  font-size: 1rem;
+  font-weight: 500;
+  margin-right: 1rem; /* Espacio adicional después del nombre */
+}
+
+.status-icon {
+  margin-right: 0.3rem; /* o ajusta a 0.5rem si quieres más espacio */
+  font-size: 1.1rem; /* opcional: para mantener tamaño uniforme */
+  vertical-align: middle; /* opcional: mejora alineación con texto */
+}
+
+.status-text {
+  margin-left: 0.5rem; /* Espacio consistente para todos los estados */
 }
 
 .expired-text {
@@ -38,9 +50,13 @@
   color: #a6b4e5 !important; // Color archivos activos
 }
 
-// Nuevas clases para estados especiales
+// Nuevas clases para estados
+
+.text-late {
+  color: rgb(248, 104, 8) !important; /* Naranja personalizado */
+}
 .icon-late {
-  color: orange !important; // Color para archivos retrasados
+  color: rgb(248, 104, 8) !important; // Color para archivos retrasados
 }
 
 .icon-expired {
