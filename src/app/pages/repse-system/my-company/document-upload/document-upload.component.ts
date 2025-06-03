@@ -571,7 +571,7 @@ export class DocumentUploadComponent {
               this.toastrService.warning(
                 `El archivo de "${
                   file.file_type_name
-                }"El archivo a vencido hoy (${expiry.format("DD/MM/YYYY")}).`,
+                }"El archivo se vence hoy (${expiry.format("DD/MM/YYYY")}).`,
                 "Archivo vencido"
               );
 
