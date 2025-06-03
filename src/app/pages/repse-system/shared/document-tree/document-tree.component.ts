@@ -119,9 +119,8 @@ export class DocumentTreeComponent implements OnChanges {
           name: docType.name,
           type: "type",
         },
-        expanded: true,
+        expanded: false, // Tipo expandido
         children: docType.periodicities.map((periodicity: any) => {
-          // Construir nombre de periodicidad
           const periodicityName =
             !periodicity.type || periodicity.type === "sin periodicidad"
               ? "Sin periodicidad"
@@ -132,7 +131,7 @@ export class DocumentTreeComponent implements OnChanges {
               name: periodicityName,
               type: "periodicity",
             },
-            expanded: true,
+            expanded: true, // Periodicidad expandida
             children: periodicity.periods.map((period: any) => {
               // Calcular si el periodo está expirado
               const isPeriodExpired = this.isExpired(period.end_date);
@@ -151,7 +150,7 @@ export class DocumentTreeComponent implements OnChanges {
                   type: "period",
                   expired: isPeriodExpired,
                 },
-                expanded: true,
+                expanded: false, // PERIODO COLAPSADO (cambio clave)
                 children: period.formats.map((fmt: any) => {
                   return {
                     data: {
@@ -159,7 +158,7 @@ export class DocumentTreeComponent implements OnChanges {
                       type: "format",
                       expired: isPeriodExpired, // Hereda del periodo
                     },
-                    expanded: true,
+                    expanded: false, // FORMATO COLAPSADO (cambio clave)
                     children: fmt.files.map((file: any) => {
                       const expirationDate = file.expiry_date
                         ? this.parseLocalDate(file.expiry_date)
