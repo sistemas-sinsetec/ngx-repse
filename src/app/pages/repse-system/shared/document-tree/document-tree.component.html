@@ -39,24 +39,24 @@
 
           <!-- MOSTRAR ESTADO SOLO EN ARCHIVOS -->
           <ng-container *ngIf="row.data.type === 'file'">
-            <span class="ms-3 d-inline-flex align-items-center status-text">
+            <span class="ms-4 d-inline-flex align-items-center status-text">
               <!-- Icono de alerta para estados -->
               <nb-icon
                 *ngIf="row.data.expired"
                 icon="alert-circle-outline"
-                class="text-danger"
+                class="text-danger status-icon"
               ></nb-icon>
               <nb-icon
                 *ngIf="row.data.isLate && !row.data.expired"
                 icon="alert-triangle-outline"
-                class="text-warning"
+                class="status-icon text-late"
               ></nb-icon>
 
               <!-- Texto de estado -->
               <div
                 class="small-text ms-1"
                 [class.text-danger]="row.data.expired"
-                [class.text-warning]="row.data.isLate && !row.data.expired"
+                [class.text-late]="row.data.isLate && !row.data.expired"
               >
                 {{ row.data.statusText }}
               </div>
