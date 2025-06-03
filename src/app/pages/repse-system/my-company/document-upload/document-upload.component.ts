@@ -691,6 +691,7 @@ export class DocumentUploadComponent {
 
           // Agrupar conteo por extensión
           for (const f of files) {
+            if (f.is_expired === 1) continue;
             const ext = (f.file_ext || "").toLowerCase();
             counts[ext] = (counts[ext] || 0) + 1;
           }
