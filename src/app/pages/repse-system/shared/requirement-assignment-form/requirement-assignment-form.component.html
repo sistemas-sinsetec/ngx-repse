@@ -29,30 +29,8 @@
   </div>
 
   <!-- Periodicidad -->
-  <div class="row mb-3" *ngIf="form.get('isPeriodic')?.value">
-    <div class="col-md-3 mb-3">
-      <nb-form-field>
-        <label>Cantidad</label>
-        <input
-          nbInput
-          type="number"
-          formControlName="periodAmount"
-          placeholder="0"
-          min="1"
-        />
-      </nb-form-field>
-    </div>
-    <div class="col-md-3 mb-3">
-      <nb-form-field>
-        <label>Período</label>
-        <nb-select formControlName="periodType" placeholder="Tipo" fullWidth>
-          <nb-option *ngFor="let type of periodTypes" [value]="type">{{
-            type
-          }}</nb-option>
-        </nb-select>
-      </nb-form-field>
-    </div>
-    <div class="col-md-6 mb-3">
+  <div class="row mb-3">
+    <div class="col-md-6">
       <nb-form-field>
         <label>Fecha de inicio</label>
         <input
@@ -66,6 +44,28 @@
           class="no-manual-input"
           fullWidth
         />
+      </nb-form-field>
+    </div>
+
+    <div *ngIf="form.get('isPeriodic')?.value" class="d-flex col-md-6">
+      <nb-form-field class="mr-3">
+        <label>Cantidad</label>
+        <input
+          nbInput
+          type="number"
+          formControlName="periodAmount"
+          placeholder="0"
+          min="1"
+        />
+      </nb-form-field>
+
+      <nb-form-field>
+        <label>Período</label>
+        <nb-select formControlName="periodType" placeholder="Tipo" fullWidth>
+          <nb-option *ngFor="let type of periodTypes" [value]="type">{{
+            type
+          }}</nb-option>
+        </nb-select>
       </nb-form-field>
     </div>
   </div>
