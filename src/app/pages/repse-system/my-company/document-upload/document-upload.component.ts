@@ -239,7 +239,7 @@ export class DocumentUploadComponent {
     const format = selectedDoc.formats.find(
       (f) => f.code === this.selectedFormat
     );
-    const currentCount = format?.uploaded_count || 0;
+    const currentCount = format?.temp_uploaded_count || 0;
     const max = format?.min_required || 1;
     const remaining = max - currentCount;
 
@@ -292,7 +292,7 @@ export class DocumentUploadComponent {
     }
 
     if (!expiryDate && selectedPeriod) {
-      expiryDate = new Date(selectedPeriod.end_date);
+      expiryDate = moment(selectedPeriod.end_date, "YYYY-MM-DD").toDate();
       issueDate = new Date();
     }
 
@@ -347,9 +347,9 @@ export class DocumentUploadComponent {
     fd.append("format_code", this.selectedFormat);
 
     if (issueDate)
-      fd.append("issue_date", issueDate.toISOString().split("T")[0]);
+      fd.append("issue_date", moment(issueDate).format("YYYY-MM-DD"));
     if (expiryDate)
-      fd.append("expiry_date", expiryDate.toISOString().split("T")[0]);
+      fd.append("expiry_date", moment(expiryDate).format("YYYY-MM-DD"));
 
     this.isUploading = true;
 
