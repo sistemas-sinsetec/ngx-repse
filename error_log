@@ -1,0 +1,8 @@
+[03-Jun-2025 20:38:28 UTC] PHP Notice:  Undefined index: start_date in /home/siinadmx/public_html/php/company_required_files.php on line 94
+[03-Jun-2025 20:38:28 UTC] PHP Notice:  Undefined index: end_date in /home/siinadmx/public_html/php/company_required_files.php on line 95
+[03-Jun-2025 20:38:28 UTC] PHP Fatal error:  Uncaught TypeError: Argument 1 passed to isOverlapping() must be an instance of DateTime, instance of DateTimeImmutable given, called in /home/siinadmx/public_html/php/company_required_files.php on line 96 and defined in /home/siinadmx/public_html/php/company_required_files.php:86
+Stack trace:
+#0 /home/siinadmx/public_html/php/company_required_files.php(96): isOverlapping(Object(DateTimeImmutable), Object(DateTimeImmutable), Object(DateTime), Object(DateTime))
+#1 /home/siinadmx/public_html/php/company_required_files.php(445): hasOverlap(Array, Array)
+#2 {main}
+  thrown in /home/siinadmx/public_html/php/company_required_files.php on line 86
