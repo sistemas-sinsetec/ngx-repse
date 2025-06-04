@@ -35,12 +35,14 @@
             <nb-checkbox formControlName="active">Activo</nb-checkbox>
           </div>
         </div>
-        <div class="col-md-2">
+        <div class="col-md-4">
           <div class="form-group">
             <label for="notify_day">
-              Notificar desde
+              <span>Notificar desde</span>
               <nb-icon
-                icon="info-outline"
+                icon="info"
+                status="basic"
+                class="ml-2 tooltip-icon"
                 nbTooltip="Días antes del vencimiento para notificar al usuario."
               ></nb-icon>
             </label>
@@ -49,7 +51,6 @@
               fullWidth
               id="notify_day"
               formControlName="notify_day"
-              placeholder="Ej. 10"
               type="number"
               min="0"
             />
@@ -68,7 +69,7 @@
 
     <div class="table-responsive mt-4">
       <table class="table" nbTable>
-        <thead>
+        <thead class="text-center">
           <tr>
             <th>Nombre</th>
             <th>Descripción</th>
@@ -81,8 +82,8 @@
           <tr *ngFor="let doc of documentTypes">
             <td>{{ doc.name }}</td>
             <td>{{ doc.description }}</td>
-            <td>{{ doc.notify_day }}</td>
-            <td>
+            <td class="text-center">{{ doc.notify_day }}</td>
+            <td class="text-center">
               <nb-tag
                 appearance="outline"
                 [text]="doc.active ? 'Activo' : 'Inactivo'"
