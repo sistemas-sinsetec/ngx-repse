@@ -10,7 +10,7 @@ switch ($method) {
         // GET all or single
         if (isset($_GET['id']) && is_numeric($_GET['id'])) {
             $id = intval($_GET['id']);
-            $stmt = $mysqli->prepare("SELECT file_type_id, name, description, is_active FROM file_types WHERE file_type_id = ?");
+            $stmt = $mysqli->prepare("SELECT file_type_id, name, description, is_active, notify_day FROM file_types WHERE file_type_id = ?"); // MODIFICAR EL GET
             $stmt->bind_param("i", $id);
             $stmt->execute();
             $res = $stmt->get_result();
@@ -22,7 +22,7 @@ switch ($method) {
             }
             $stmt->close();
         } else {
-            $result = $mysqli->query("SELECT file_type_id, name, description, is_active FROM file_types");
+            $result = $mysqli->query("SELECT file_type_id, name, description, is_active, notify_day FROM file_types"); // MODIFICAR EL GET
             $all = $result->fetch_all(MYSQLI_ASSOC);
             echo json_encode($all);
         }
@@ -41,9 +41,9 @@ switch ($method) {
         $is_active = isset($data['is_active']) ? (int) $data['is_active'] : 1;
 
         $stmt = $mysqli->prepare(
-            "INSERT INTO file_types (name, description, is_active) VALUES (?, ?, ?)"
+            "INSERT INTO file_types (name, description, is_active, notify_day) VALUES (?, ?, ?, ?)" //MODIFICAR EL POT
         );
-        $stmt->bind_param("ssi", $name, $description, $is_active);
+        $stmt->bind_param("ssii", $name, $description, $is_active, $notify_day); //actualiza el bind
         if ($stmt->execute()) {
             echo json_encode([
                 'success' => true,
@@ -68,6 +68,7 @@ switch ($method) {
         $name = isset($data['name']) ? $data['name'] : null;
         $description = array_key_exists('description', $data) ? $data['description'] : null;
         $is_active = isset($data['is_active']) ? (int) $data['is_active'] : null;
+        $notify_day = isset($data['notify_day']) ? (int) $data['notify_day'] : 0; //modificar el POT
 
         // Build dynamic SET clause
         $fields = [];
@@ -88,6 +89,13 @@ switch ($method) {
             $types .= 'i';
             $vals[] = $is_active;
         }
+//se agrego en el PUT el notify_day
+        if (isset($data['notify_day'])) {
+            $fields[] = 'notify_day = ?';
+            $types .= 'i';
+            $vals[] = (int)$data['notify_day'];
+        }
+
         if (empty($fields)) {
             http_response_code(400);
             echo json_encode(['error' => 'Nothing to update']);
