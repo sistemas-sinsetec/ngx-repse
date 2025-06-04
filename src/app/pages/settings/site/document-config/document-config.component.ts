@@ -4,14 +4,10 @@ import { NbDialogService, NbDialogRef } from "@nebular/theme";
 import { LoadingController } from "@ionic/angular";
 import { CustomToastrService } from "../../../../services/custom-toastr.service";
 import { environment } from "../../../../../environments/environment";
-import { DocumentService } from "../../../../services/repse/document.service";
-
-interface DocumentType {
-  id: number;
-  name: string;
-  description: string;
-  active: boolean;
-}
+import {
+  DocumentService,
+  DocumentType,
+} from "../../../../services/repse/document.service";
 
 @Component({
   selector: "ngx-document-config",
@@ -41,6 +37,7 @@ export class DocumentConfigComponent implements OnInit {
       name: ["", Validators.required],
       description: ["", Validators.required],
       active: [true],
+      notify_day: [0, [Validators.required, Validators.min(0)]],
     });
   }
 
@@ -79,6 +76,7 @@ export class DocumentConfigComponent implements OnInit {
           name: doc.name,
           description: doc.description,
           active: doc.active,
+          notify_day: doc.notify_day,
         });
         this.documentForm.reset({ active: true });
         this.toastr.showSuccess("Tipo de documento creado correctamente.");
@@ -104,15 +102,21 @@ export class DocumentConfigComponent implements OnInit {
     });
     await loader.present();
 
-    const { id, name, description, active } = this.editingDocument;
+    const { id, name, description, active, notify_day } = this.editingDocument;
 
     this.documentService
-      .saveOrUpdateDocumentType({ name, description, active }, id)
+      .saveOrUpdateDocumentType({ name, description, active, notify_day }, id)
       .subscribe({
         next: () => {
           const idx = this.documentTypes.findIndex((d) => d.id === id);
           if (idx > -1) {
-            this.documentTypes[idx] = { id, name, description, active };
+            this.documentTypes[idx] = {
+              id,
+              name,
+              description,
+              active,
+              notify_day,
+            };
           }
           this.toastr.showSuccess(
             "Tipo de documento actualizado correctamente."

@@ -123,6 +123,7 @@ export interface DocumentType {
   name: string;
   description: string;
   active: boolean;
+  notify_day: number;
 }
 
 function mapToRequiredFileView(file: any): RequiredFileView {
@@ -188,6 +189,7 @@ export class DocumentService {
             name: item.name,
             description: item.description,
             active: Number(item.is_active) === 1,
+            notify_day: Number(item.notify_day) || 0,
           }))
       )
     );
@@ -205,6 +207,7 @@ export class DocumentService {
       name: data.name,
       description: data.description,
       is_active: data.active ? 1 : 0,
+      notify_day: data.notify_day ?? 0,
       ...(id ? { file_type_id: id } : {}),
     };
 
