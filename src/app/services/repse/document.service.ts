@@ -117,6 +117,15 @@ export interface Partner {
   affiliation: string;
   selected: boolean;
 }
+
+export interface DocumentType {
+  id: number;
+  name: string;
+  description: string;
+  active: boolean;
+  notify_day: number;
+}
+
 function mapToRequiredFileView(file: any): RequiredFileView {
   return {
     id: file.required_file_id,
@@ -163,16 +172,68 @@ export class DocumentService {
       );
   }
 
-  getDocumentTypes(): Observable<{ id: number; name: string }[]> {
-    return this.http
-      .get<any[]>(`${this.base}/file_types.php`)
-      .pipe(
-        map((types) =>
-          types
-            .filter((t) => Number(t.is_active) === 1)
-            .map((t) => ({ id: Number(t.file_type_id), name: t.name }))
-        )
+  getDocumentTypes(options?: {
+    onlyActive?: boolean;
+  }): Observable<DocumentType[]> {
+    return this.http.get<any[]>(`${this.base}/file_types.php`).pipe(
+      map((items) =>
+        items
+          .filter((item) => {
+            if (options?.onlyActive) {
+              return Number(item.is_active) === 1;
+            }
+            return true;
+          })
+          .map((item) => ({
+            id: Number(item.file_type_id),
+            name: item.name,
+            description: item.description,
+            active: Number(item.is_active) === 1,
+            notify_day: Number(item.notify_day) || 0,
+          }))
+      )
+    );
+  }
+
+  saveOrUpdateDocumentType(
+    data: Omit<DocumentType, "id">,
+    id?: number
+  ): Observable<{
+    success: boolean;
+    file_type_id?: number;
+    affected_rows?: number;
+  }> {
+    const payload = {
+      name: data.name,
+      description: data.description,
+      is_active: data.active ? 1 : 0,
+      notify_day: data.notify_day ?? 0,
+      ...(id ? { file_type_id: id } : {}),
+    };
+
+    if (id) {
+      return this.http.put<{ success: boolean; affected_rows: number }>(
+        `${this.base}/file_types.php`,
+        payload
       );
+    } else {
+      return this.http.post<{ success: boolean; file_type_id: number }>(
+        `${this.base}/file_types.php`,
+        payload
+      );
+    }
+  }
+
+  deleteDocumentType(
+    id: number
+  ): Observable<{ success: boolean; affected_rows: number }> {
+    const params = new HttpParams().set("id", id.toString());
+    return this.http.delete<{ success: boolean; affected_rows: number }>(
+      `${this.base}/file_types.php`,
+      {
+        params,
+      }
+    );
   }
 
   getAvailableFormats(): Observable<

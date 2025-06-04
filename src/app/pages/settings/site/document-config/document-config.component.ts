@@ -1,17 +1,13 @@
 import { Component, OnInit, TemplateRef, ViewChild } from "@angular/core";
 import { FormBuilder, FormGroup, Validators } from "@angular/forms";
 import { NbDialogService, NbDialogRef } from "@nebular/theme";
-import { HttpClient, HttpParams } from "@angular/common/http";
 import { LoadingController } from "@ionic/angular";
 import { CustomToastrService } from "../../../../services/custom-toastr.service";
 import { environment } from "../../../../../environments/environment";
-
-interface DocumentType {
-  id: number;
-  name: string;
-  description: string;
-  active: boolean;
-}
+import {
+  DocumentService,
+  DocumentType,
+} from "../../../../services/repse/document.service";
 
 @Component({
   selector: "ngx-document-config",
@@ -33,7 +29,7 @@ export class DocumentConfigComponent implements OnInit {
   constructor(
     private fb: FormBuilder,
     private dialogService: NbDialogService,
-    private http: HttpClient,
+    private documentService: DocumentService,
     private loadingCtrl: LoadingController,
     private toastr: CustomToastrService
   ) {
@@ -41,6 +37,7 @@ export class DocumentConfigComponent implements OnInit {
       name: ["", Validators.required],
       description: ["", Validators.required],
       active: [true],
+      notify_day: [0, [Validators.required, Validators.min(0)]],
     });
   }
 
@@ -54,21 +51,10 @@ export class DocumentConfigComponent implements OnInit {
     });
     await loader.present();
 
-    this.http.get<any[]>(this.baseUrl).subscribe({
-      next: (data) => {
-        this.documentTypes = data.map((item) => ({
-          id: Number(item.file_type_id),
-          name: item.name,
-          description: item.description,
-          // Aquí convertimos "1" a 1 y comparamos:
-          active: Number(item.is_active) === 1,
-          // o bien: active: item.is_active === '1',
-        }));
-      },
-      error: (err) => {
-        console.error("Error loading document types", err);
-        this.toastr.showError("Error al cargar los tipos de documento.");
-      },
+    this.documentService.getDocumentTypes().subscribe({
+      next: (data) => (this.documentTypes = data),
+      error: () =>
+        this.toastr.showError("Error al cargar los tipos de documento."),
       complete: () => loader.dismiss(),
     });
   }
@@ -81,31 +67,24 @@ export class DocumentConfigComponent implements OnInit {
     });
     await loader.present();
 
-    const newDoc = {
-      name: this.documentForm.value.name,
-      description: this.documentForm.value.description,
-      is_active: this.documentForm.value.active ? 1 : 0,
-    };
+    const doc = this.documentForm.value;
 
-    this.http
-      .post<{ success: boolean; file_type_id: number }>(this.baseUrl, newDoc)
-      .subscribe({
-        next: (res) => {
-          this.documentTypes.push({
-            id: res.file_type_id,
-            name: newDoc.name,
-            description: newDoc.description,
-            active: !!newDoc.is_active,
-          });
-          this.documentForm.reset({ active: true });
-          this.toastr.showSuccess("Tipo de documento creado correctamente.");
-        },
-        error: (err) => {
-          console.error("Create error", err);
-          this.toastr.showError("Error al crear el tipo de documento.");
-        },
-        complete: () => loader.dismiss(),
-      });
+    this.documentService.saveOrUpdateDocumentType(doc).subscribe({
+      next: (res) => {
+        this.documentTypes.push({
+          id: res.file_type_id!,
+          name: doc.name,
+          description: doc.description,
+          active: doc.active,
+          notify_day: doc.notify_day,
+        });
+        this.documentForm.reset({ active: true });
+        this.toastr.showSuccess("Tipo de documento creado correctamente.");
+      },
+      error: () =>
+        this.toastr.showError("Error al crear el tipo de documento."),
+      complete: () => loader.dismiss(),
+    });
   }
 
   onEdit(doc: DocumentType) {
@@ -123,26 +102,20 @@ export class DocumentConfigComponent implements OnInit {
     });
     await loader.present();
 
-    const payload = {
-      file_type_id: this.editingDocument.id,
-      name: this.editingDocument.name,
-      description: this.editingDocument.description,
-      is_active: this.editingDocument.active ? 1 : 0,
-    };
+    const { id, name, description, active, notify_day } = this.editingDocument;
 
-    this.http
-      .put<{ success: boolean; affected_rows: number }>(this.baseUrl, payload)
+    this.documentService
+      .saveOrUpdateDocumentType({ name, description, active, notify_day }, id)
       .subscribe({
         next: () => {
-          const idx = this.documentTypes.findIndex(
-            (d) => d.id === payload.file_type_id
-          );
+          const idx = this.documentTypes.findIndex((d) => d.id === id);
           if (idx > -1) {
             this.documentTypes[idx] = {
-              id: payload.file_type_id,
-              name: payload.name,
-              description: payload.description,
-              active: !!payload.is_active,
+              id,
+              name,
+              description,
+              active,
+              notify_day,
             };
           }
           this.toastr.showSuccess(
@@ -150,10 +123,8 @@ export class DocumentConfigComponent implements OnInit {
           );
           this.cancelEdit();
         },
-        error: (err) => {
-          console.error("Update error", err);
-          this.toastr.showError("Error al actualizar el tipo de documento.");
-        },
+        error: () =>
+          this.toastr.showError("Error al actualizar el tipo de documento."),
         complete: () => loader.dismiss(),
       });
   }
@@ -178,15 +149,8 @@ export class DocumentConfigComponent implements OnInit {
     });
     await loader.present();
 
-    const params = new HttpParams().set(
-      "id",
-      this.documentToDelete.id.toString()
-    );
-
-    this.http
-      .delete<{ success: boolean; affected_rows: number }>(this.baseUrl, {
-        params,
-      })
+    this.documentService
+      .deleteDocumentType(this.documentToDelete.id)
       .subscribe({
         next: () => {
           this.documentTypes = this.documentTypes.filter(
@@ -195,10 +159,8 @@ export class DocumentConfigComponent implements OnInit {
           this.toastr.showSuccess("Tipo de documento eliminado correctamente.");
           this.cancelDelete();
         },
-        error: (err) => {
-          console.error("Delete error", err);
-          this.toastr.showError("Error al eliminar el tipo de documento.");
-        },
+        error: () =>
+          this.toastr.showError("Error al eliminar el tipo de documento."),
         complete: () => loader.dismiss(),
       });
   }

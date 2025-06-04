@@ -1,6 +1,9 @@
 import { Component, OnInit } from "@angular/core";
 import { CompanyService } from "../../../../services/company.service";
-import { DocumentService } from "../../../../services/repse/document.service";
+import {
+  DocumentService,
+  DocumentType,
+} from "../../../../services/repse/document.service";
 import { DatePipe } from "@angular/common"; //Importar DatePipe y agregarlo a los providers del componente
 
 import {
@@ -16,7 +19,7 @@ import {
 export class RequirementAssignmentComponent implements OnInit {
   businessPartners: Partner[] = [];
   requirements: AssignedRequiredFileView[] = [];
-  documentTypes: { id: number; name: string }[] = [];
+  documentTypes: DocumentType[] = [];
   availableFormats: { id: number; name: string; extension: string }[] = [];
 
   constructor(
@@ -52,9 +55,10 @@ export class RequirementAssignmentComponent implements OnInit {
   }
 
   ngOnInit(): void {
-    this.documentService.getDocumentTypes().subscribe({
+    this.documentService.getDocumentTypes({ onlyActive: true }).subscribe({
       next: (types) => (this.documentTypes = types),
-      error: (err) => console.error("Error cargando tipos de documento", err),
+      error: (err) =>
+        console.error("Error cargando tipos de documento activos", err),
     });
 
     this.documentService.getAvailableFormats().subscribe({

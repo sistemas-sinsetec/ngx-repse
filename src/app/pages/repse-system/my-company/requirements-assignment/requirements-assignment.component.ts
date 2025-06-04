@@ -8,6 +8,7 @@ import {
   RequirementForm,
   Partner,
   DocumentService,
+  DocumentType,
 } from "../../../../services/repse/document.service";
 
 @Component({
@@ -19,7 +20,7 @@ export class RequirementsAssignmentComponent implements OnInit {
   companyId!: number;
 
   requirements: RequirementForm[] = [];
-  documentTypes: { id: number; name: string }[] = [];
+  documentTypes: DocumentType[] = [];
   availableFormats: { id: number; name: string; extension: string }[] = [];
   lastUpdated?: moment.Moment;
 
@@ -45,9 +46,10 @@ export class RequirementsAssignmentComponent implements OnInit {
 
   ngOnInit(): void {
     this.companyId = this.companyService.selectedCompany.id;
-    this.documentService.getDocumentTypes().subscribe({
+    this.documentService.getDocumentTypes({ onlyActive: true }).subscribe({
       next: (types) => (this.documentTypes = types),
-      error: (err) => console.error("Error cargando tipos de documento", err),
+      error: (err) =>
+        console.error("Error cargando tipos de documento activos", err),
     });
 
     this.documentService.getAvailableFormats().subscribe({

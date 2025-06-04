@@ -35,6 +35,26 @@
             <nb-checkbox formControlName="active">Activo</nb-checkbox>
           </div>
         </div>
+        <div class="col-md-2">
+          <div class="form-group">
+            <label for="notify_day">
+              Notificar desde
+              <nb-icon
+                icon="info-outline"
+                nbTooltip="Días antes del vencimiento para notificar al usuario."
+              ></nb-icon>
+            </label>
+            <input
+              nbInput
+              fullWidth
+              id="notify_day"
+              formControlName="notify_day"
+              placeholder="Ej. 10"
+              type="number"
+              min="0"
+            />
+          </div>
+        </div>
       </div>
       <button
         nbButton
@@ -52,6 +72,7 @@
           <tr>
             <th>Nombre</th>
             <th>Descripción</th>
+            <th>Notificar desde (días)</th>
             <th>Estado</th>
             <th>Acciones</th>
           </tr>
@@ -60,6 +81,7 @@
           <tr *ngFor="let doc of documentTypes">
             <td>{{ doc.name }}</td>
             <td>{{ doc.description }}</td>
+            <td>{{ doc.notify_day }}</td>
             <td>
               <nb-tag
                 appearance="outline"
@@ -120,6 +142,18 @@
           [(ngModel)]="data.description"
           placeholder="Descripción del documento"
           type="text"
+        />
+      </div>
+      <div class="form-group">
+        <label for="editNotifyDay">Notificar desde (días)</label>
+        <input
+          nbInput
+          fullWidth
+          id="editNotifyDay"
+          [(ngModel)]="data.notify_day"
+          placeholder="Ej. 10"
+          type="number"
+          min="0"
         />
       </div>
       <div class="form-group">
