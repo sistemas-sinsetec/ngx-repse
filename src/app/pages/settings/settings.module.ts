@@ -23,6 +23,7 @@ import {
   NbUserModule,
   NbSpinnerModule,
   NbDialogModule,
+  NbTooltipModule,
 } from "@nebular/theme";
 import { ThemeModule } from "../../@theme/theme.module";
 import { SettingsRoutingModule } from "./settings-routing.module";
@@ -142,6 +143,7 @@ import { DocumentConfigComponent } from "./site/document-config/document-config.
     NbTagModule,
     NbUserModule,
     NbSpinnerModule,
+    NbTooltipModule,
     IonicModule.forRoot(),
   ],
 })
