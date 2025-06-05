@@ -4,12 +4,12 @@
       <tr class="text-center">
         <th *ngIf="!isForCompany">Proveedor</th>
         <th>Documento</th>
-
         <th>Periódico</th>
         <th>Periodicidad</th>
         <th>Cant. Mínima</th>
         <th>Fecha de inicio</th>
         <th>Fecha de final</th>
+        <th>Acciones</th>
       </tr>
     </thead>
     <tbody>
@@ -17,15 +17,12 @@
         <td *ngIf="!isForCompany" class="text-center align-middle">
           {{ req.company_name }}
         </td>
-
         <td class="text-start align-middle">
           {{ req.documentType || req.name }}
         </td>
-
         <td class="text-center align-middle">
           {{ req.isPeriodic || req.is_periodic ? "Sí" : "No" }}
         </td>
-
         <td class="text-center align-middle">
           {{
             req.isPeriodic || req.is_periodic
@@ -36,26 +33,70 @@
               : "Sin periodicidad"
           }}
         </td>
-
         <td class="text-center align-middle">
           {{ req.minQuantity }}
         </td>
-
         <td class="text-center align-middle">
           {{ getFormattedDate(req.startDate) }}
         </td>
-
         <td class="text-center align-middle">
           {{ getFormattedDate(req.endDate || req.current_period?.end_date) }}
+        </td>
+        <td class="text-center align-middle">
+          <button
+            nbButton
+            status="danger"
+            size="small"
+            (click)="openDeleteConfirmation(req)"
+          >
+            <nb-icon icon="trash-2-outline"></nb-icon>
+          </button>
         </td>
       </tr>
     </tbody>
   </table>
 </div>
 
-<!-- ALERTA cuando no hay requisitos configurados -->
 <div *ngIf="requirements.length === 0" class="text-center">
   <nb-alert status="info" class="mb-0">
     No hay requisitos configurados actualmente
   </nb-alert>
 </div>
+
+<ng-template #deleteConfirmation let-ref="dialogRef">
+  <nb-card class="delete-confirmation-card">
+    <nb-card-header class="text-center">
+      <h5 class="mb-0">Confirmar eliminación</h5>
+    </nb-card-header>
+    <nb-card-body class="text-center">
+      <p>
+        ¿Estás seguro que deseas eliminar "{{
+          requirementToDelete?.documentType || requirementToDelete?.name
+        }}"?
+      </p>
+      <p class="text-danger">
+        <strong>Esta acción no se puede deshacer.</strong>
+      </p>
+    </nb-card-body>
+    <nb-card-footer class="d-flex justify-content-center">
+      <button
+        nbButton
+        status="danger"
+        size="small"
+        class="mr-2"
+        (click)="ref.close(true)"
+      >
+        ELIMINAR
+      </button>
+      <button
+        nbButton
+        status="basic"
+        size="small"
+        outline
+        (click)="ref.close(false)"
+      >
+        CANCELAR
+      </button>
+    </nb-card-footer>
+  </nb-card>
+</ng-template>

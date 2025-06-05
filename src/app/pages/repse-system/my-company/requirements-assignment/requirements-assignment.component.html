@@ -12,10 +12,11 @@
     </div>
     <hr />
     <h4>Requisitos configurados</h4>
-    <!-- TABLA DE REQUISITOS -->
+    <!-- TABLA DE REQUISITOS ACTUALIZADA -->
     <ngx-requirement-table
       [requirements]="requirements"
       [isForCompany]="true"
+      (deletePeriodicity)="onDeletePeriodicity($event)"
     ></ngx-requirement-table>
   </nb-card-body>
 </nb-card>

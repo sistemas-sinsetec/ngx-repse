@@ -1,6 +1,6 @@
 import { Component, OnInit, TemplateRef, ViewChild } from "@angular/core";
 import { FormControl } from "@angular/forms";
-import { NbDialogRef, NbDialogService } from "@nebular/theme";
+import { NbDialogRef, NbDialogService, NbToastrService } from "@nebular/theme";
 import { forkJoin } from "rxjs";
 import { CompanyService } from "../../../../services/company.service";
 import * as moment from "moment";
@@ -41,7 +41,8 @@ export class RequirementsAssignmentComponent implements OnInit {
   constructor(
     private dialogService: NbDialogService,
     private companyService: CompanyService,
-    private documentService: DocumentService
+    private documentService: DocumentService,
+    private toastr: NbToastrService
   ) {}
 
   ngOnInit(): void {
@@ -165,5 +166,37 @@ export class RequirementsAssignmentComponent implements OnInit {
 
   confirmOverrideAndSubmit(): void {
     this.overrideDialogRef?.close();
+  }
+
+  // ============= NUEVA FUNCIÓN PARA MANEJAR ELIMINACIÓN =============
+  onDeletePeriodicity(requirement: any): void {
+    this.documentService.deleteRequiredFile(requirement.id).subscribe({
+      next: (response) => {
+        if (response.success) {
+          // 1. Actualizar lista local
+          this.requirements = this.requirements.filter(
+            (req) => req.id !== requirement.id
+          );
+
+          // 2. Mostrar notificación
+          this.toastr.success(
+            `Se eliminó completamente "${requirement.documentType}"`,
+            "Éxito",
+            { duration: 3000 }
+          );
+        } else {
+          this.toastr.danger(
+            response.error || "Error al eliminar el documento",
+            "Error",
+            { duration: 3000 }
+          );
+        }
+      },
+      error: (err) => {
+        this.toastr.danger("Error de conexión con el servidor", "Error", {
+          duration: 3000,
+        });
+      },
+    });
   }
 }
