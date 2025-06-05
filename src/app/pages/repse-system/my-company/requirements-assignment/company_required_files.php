@@ -577,6 +577,76 @@ switch ($method) {
         }
 
         break;
+    case 'DELETE':
+
+        if (isset($_GET['required_file_id'])) {
+            // Obtención desde la URL
+            $required_file_id = intval($_GET['required_file_id']);
+        } else {
+            // Obtención desde el cuerpo
+            parse_str(file_get_contents("php://input"), $data);
+            $required_file_id = intval($data['required_file_id'] ?? 0);
+        }
+
+        // Obtener información de empresa y nombre para ruta
+        $stmt = $mysqli->prepare("
+            SELECT c.id AS company_id, c.nameCompany AS company_name, ft.name AS required_file_name
+            FROM company_required_files crf
+            JOIN companies c ON crf.company_id = c.id
+            JOIN file_types ft ON crf.file_type_id = ft.file_type_id
+            WHERE crf.required_file_id = ?
+        ");
+        $stmt->bind_param("i", $required_file_id);
+        $stmt->execute();
+        $result = $stmt->get_result();
+        $info = $result->fetch_assoc();
+        $stmt->close();
+
+        if (!$info) {
+            echo json_encode(['success' => false, 'error' => 'No record found']);
+            exit;
+        }
+
+        $company_id = $info['company_id'];
+        $company_name = preg_replace('/[^a-zA-Z0-9_-]/', '', str_replace(' ', '_', $info['company_name']));
+        $required_file_name = preg_replace('/[^a-zA-Z0-9_-]/', '', str_replace(' ', '_', $info['required_file_name']));
+        $basePath = __DIR__ . "/../documents/{$company_id}-{$company_name}/{$required_file_id}-{$required_file_name}";
+
+        // Eliminar archivos físicos
+        function deleteFolderRecursively($folder)
+        {
+            if (!is_dir($folder))
+                return;
+            $items = scandir($folder);
+            foreach ($items as $item) {
+                if ($item === '.' || $item === '..')
+                    continue;
+                $path = $folder . DIRECTORY_SEPARATOR . $item;
+                is_dir($path) ? deleteFolderRecursively($path) : unlink($path);
+            }
+            rmdir($folder);
+        }
+
+        if (is_dir($basePath)) {
+            deleteFolderRecursively($basePath);
+        }
+
+        // Eliminar archivos de base de datos
+        $mysqli->begin_transaction();
+
+        try {
+            $mysqli->query("DELETE FROM company_files WHERE period_id IN (SELECT period_id FROM document_periods WHERE required_file_id = $required_file_id)");
+            $mysqli->query("DELETE FROM document_periods WHERE required_file_id = $required_file_id");
+            $mysqli->query("DELETE FROM required_file_formats WHERE required_file_id = $required_file_id");
+            $mysqli->query("DELETE FROM company_required_files WHERE required_file_id = $required_file_id");
+
+            $mysqli->commit();
+            echo json_encode(['success' => true]);
+        } catch (Exception $e) {
+            $mysqli->rollback();
+            echo json_encode(['success' => false, 'error' => $e->getMessage()]);
+        }
+        break;
 
     default:
         respond(405, ['error' => 'Method not allowed']);

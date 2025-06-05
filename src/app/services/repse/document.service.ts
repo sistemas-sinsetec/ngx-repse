@@ -332,6 +332,20 @@ export class DocumentService {
     return this.http.post(`${this.base}/company_required_files.php`, data);
   }
 
+  deleteRequiredFile(
+    requiredFileId: number
+  ): Observable<{ success: boolean; error?: string }> {
+    const params = new HttpParams().set(
+      "required_file_id",
+      requiredFileId.toString()
+    );
+
+    return this.http.delete<{ success: boolean; error?: string }>(
+      `${this.base}/company_required_files.php`,
+      { params }
+    );
+  }
+
   getFileStructure(
     requiredFileId: number,
     periodId?: number
