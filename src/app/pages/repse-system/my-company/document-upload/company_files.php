@@ -526,6 +526,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
                cf.period_coverage, cf.is_expired,
                dp.start_date, dp.end_date, dp.required_file_id,
                ft.name AS file_type_name, ft.description AS file_type_description,
+               ft.notify_day,
                cf.file_ext
         FROM company_files cf
         LEFT JOIN document_periods dp ON cf.period_id = dp.period_id

@@ -70,6 +70,7 @@ $stmt->bind_param("ssii", $name, $description, $is_active, $notify_day);
         $name = isset($data['name']) ? $data['name'] : null;
         $description = array_key_exists('description', $data) ? $data['description'] : null;
         $is_active = isset($data['is_active']) ? (int) $data['is_active'] : null;
+        $notify_day = isset($data['notify_day']) ? (int) $data['notify_day'] : null; 
 
         // Build dynamic SET clause
         $fields = [];
@@ -90,6 +91,11 @@ $stmt->bind_param("ssii", $name, $description, $is_active, $notify_day);
             $types .= 'i';
             $vals[] = $is_active;
         }
+        if ($notify_day !== null) { // Añadir notify_day
+        $fields[] = 'notify_day = ?';
+        $types .= 'i';
+        $vals[] = $notify_day;
+    }
         if (empty($fields)) {
             http_response_code(400);
             echo json_encode(['error' => 'Nothing to update']);

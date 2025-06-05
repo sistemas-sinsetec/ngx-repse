@@ -561,35 +561,35 @@ export class DocumentUploadComponent {
       })
       .subscribe({
         next: (files) => {
-          const now = moment();
+          const now = moment().startOf("day");
+
           files.forEach((file) => {
             if (!file.expiry_date) return;
-            const expiry = moment(file.expiry_date);
+
+            const expiry = moment(file.expiry_date).startOf("day");
             const daysLeft = expiry.diff(now, "days");
 
-            if (expiry.isBefore(now)) {
+            // Vencido hoy o en el pasado
+            if (daysLeft <= 0) {
               this.toastrService.warning(
                 `El archivo de "${
                   file.file_type_name
-                }"El archivo se vence hoy (${expiry.format("DD/MM/YYYY")}).`,
+                }" se vence hoy (${expiry.format("DD/MM/YYYY")}).`,
                 "Archivo vencido"
               );
-
-              // Marcar como notificado
-            }
-            // Mostrar próximo a vencer
-            else {
-              let threshold = file.file_type_name;
-              const isRepse = file.file_type_name
-                ?.toLowerCase()
-                .includes("repse");
-              threshold = isRepse ? 90 : 7;
-
-              if (daysLeft <= threshold) {
+            } else {
+              // Notificar desde notify_day hasta 1 día antes del vencimiento
+              if (
+                file.notify_day > 0 &&
+                daysLeft <= file.notify_day &&
+                daysLeft >= 1
+              ) {
                 this.toastrService.info(
-                  `El archivo de "${
+                  `El archivo "${
                     file.file_type_name
-                  }" vencerá pronto (${expiry.format("DD/MM/YYYY")}).`,
+                  }" vencerá en ${daysLeft} día(s) (${expiry.format(
+                    "DD/MM/YYYY"
+                  )}).`,
                   "Próximo a vencer"
                 );
               }
