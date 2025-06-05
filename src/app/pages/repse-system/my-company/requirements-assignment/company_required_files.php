@@ -91,8 +91,8 @@ function isOverlapping(DateTimeInterface $start1, DateTimeInterface $end1, DateT
 function hasOverlap(array $newPeriod, array $existingPeriods): bool
 {
     foreach ($existingPeriods as $ex) {
-        $exStart = new DateTime($ex['start_date']);
-        $exEnd = new DateTime($ex['end_date']);
+        $exStart = new DateTime($ex['start'] ?? $ex['start_date']);
+        $exEnd = new DateTime($ex['end'] ?? $ex['end_date']);
         if (isOverlapping($newPeriod['start'], $newPeriod['end'], $exStart, $exEnd)) {
             return true;
         }
@@ -142,8 +142,11 @@ function tryGenerateNonOverlappingPeriods(array $cfg, array $existingPeriods, bo
         for ($i = 0; $i < $count; $i++) {
             $end = (clone $current)->add($interval)->sub(new DateInterval('P1D'));
             $period = ['start' => clone $current, 'end' => $end];
-            if (hasOverlap($period, $existingPeriods))
-                break;
+
+            if (hasOverlap($period, $existingPeriods)) {
+                respond(409, ['error' => 'Uno o más periodos propuestos se solapan con una configuración existente.']);
+            }
+
             $periods[] = $period;
             $current = (clone $end)->modify('+1 day');
         }
@@ -151,8 +154,13 @@ function tryGenerateNonOverlappingPeriods(array $cfg, array $existingPeriods, bo
         while (true) {
             $end = (clone $current)->add($interval)->sub(new DateInterval('P1D'));
             $period = ['start' => clone $current, 'end' => $end];
-            if (hasOverlap($period, $existingPeriods))
+
+            if (hasOverlap($period, $existingPeriods)) {
+                if (empty($periods)) {
+                    respond(409, ['error' => 'Uno o más periodos propuestos se solapan con una configuración existente.']);
+                }
                 break;
+            }
 
             $periods[] = $period;
 
