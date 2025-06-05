@@ -94,8 +94,6 @@ export class DocumentUploadComponent {
           (f) => Number(f.assignedBy) === myCompanyId
         );
 
-        console.log(this.assignedByMe);
-
         // Asignados por otras empresas
         const grouped: {
           [key: number]: { company_id: number; company: string; files: any[] };
@@ -154,13 +152,6 @@ export class DocumentUploadComponent {
               moment(p.end_date).isBefore(moment(), "day") &&
               p.uploaded_count < doc.minQuantity
           );
-
-          console.log("→ Documento con retraso:", {
-            startDate: doc.startDate,
-            endDate: doc.endDate,
-            typeofStart: typeof doc.startDate,
-            typeofEnd: typeof doc.endDate,
-          });
         });
 
         this.lateDocuments = filtered;
