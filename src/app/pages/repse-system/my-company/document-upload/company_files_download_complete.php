@@ -37,11 +37,20 @@ $zipFileName = "{$tipoDocumento}_({$start}_{$end}).zip";
 
 // 2. Obtener archivos aprobados
 $sql = "
-SELECT cf.file_path, cf.file_ext
+SELECT 
+    cf.file_id,
+    cf.file_path,
+    cf.uploaded_at,
+    cf.expiry_date,
+    ft.name AS file_type_name,
+    ft.notify_day,
+    r.name AS required_file_name
 FROM company_files cf
-JOIN document_periods dp ON cf.period_id = dp.period_id
-WHERE dp.required_file_id = ? AND cf.status = 'approved'
+JOIN file_types ft ON cf.file_type_id = ft.file_type_id
+JOIN company_required_files r ON cf.required_file_id = r.required_file_id
+WHERE cf.company_id = ? AND cf.status = 'approved'
 ";
+
 $stmt = $mysqli->prepare($sql);
 $stmt->bind_param('i', $required_file_id);
 $stmt->execute();
