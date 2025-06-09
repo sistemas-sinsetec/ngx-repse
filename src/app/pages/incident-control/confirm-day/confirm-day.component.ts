@@ -320,7 +320,71 @@ export class ConfirmDayComponent {
     }
   }
 
+  async validarEmpleadosNoRegistrados(): Promise<boolean> {
+    const companyId = this.companyService.selectedCompany.id;
+    const period = this.periodService.selectedPeriod;
+    const dia = this.selectedDia;
+
+    const url = `${environment.apiBaseUrl}/get_unassigned_employees.php?company_id=${companyId}&start_date=${this.periodStartDate}&end_date=${this.periodEndDate}&week_number=${this.currentSemana}&day_of_week=${dia.date}&user_id=${this.authService.userId}`;
+
+    try {
+      const empleadosNoAsignados: any[] = await this.http
+        .get<any[]>(url)
+        .toPromise();
+
+      // Filtrar solo los de rango 10 o mayor
+      const empleadosFiltrados = empleadosNoAsignados.filter(
+        (emp) => emp.position_range >= 10
+      );
+
+      // Obtener IDs ya registrados como incidencia
+      const empleadosConIncidenciaIds = this.empleadosIncidencias.map((emp) =>
+        parseInt(emp.employee_id)
+      );
+
+      // Verificar cuáles no están registrados
+      const faltantes = empleadosFiltrados.filter(
+        (emp) => !empleadosConIncidenciaIds.includes(emp.employee_id)
+      );
+
+      if (faltantes.length > 0) {
+        // Limitar a los primeros 3 nombres
+        const nombresVisibles = faltantes
+          .slice(0, 3)
+          .map((emp) =>
+            `${emp.first_name} ${emp.middle_name || ""} ${emp.last_name}`.trim()
+          );
+
+        const totalFaltantes = faltantes.length;
+        const mensaje =
+          totalFaltantes > 3
+            ? `Faltan incidencias para: ${nombresVisibles.join(", ")} y ${
+                totalFaltantes - 3
+              } más`
+            : `Faltan incidencias para: ${nombresVisibles.join(", ")}`;
+
+        this.toastrService.showWarning(mensaje, "No puedes confirmar el día");
+        return false;
+      }
+
+      return true;
+    } catch (error) {
+      console.error("Error al validar empleados no asignados:", error);
+      await this.mostrarAlerta(
+        "Error",
+        "Ocurrió un error al validar los empleados no asignados."
+      );
+      return false;
+    }
+  }
+
   async confirmarDia(dia: any) {
+    const esValido = await this.validarEmpleadosNoRegistrados();
+
+    if (!esValido) {
+      return;
+    }
+
     if (
       dia.isRestDay &&
       this.empleadosDia.length === 0 &&

@@ -112,24 +112,22 @@
             El apellido paterno es requerido y solo debe contener letras.
           </small>
         </nb-form-field>
-        <!-- Teléfono -->
+        <!-- Apellido Materno -->
         <nb-form-field class="mb-3">
-          <label>Teléfono</label>
+          <label>Apellido Materno</label>
           <input
             nbInput
             fullWidth
-            [(ngModel)]="employee.phone_number"
-            #phoneNumber="ngModel"
+            [(ngModel)]="employee.middle_name"
+            #middleName="ngModel"
             required
-            pattern="^\d{10}$"
-            maxlength="10"
-            oninput="this.value = this.value.replace(/[^0-9]/g, '')"
+            (keypress)="soloLetrasEspacios($event)"
           />
           <small
             class="text-danger"
-            *ngIf="phoneNumber.invalid && phoneNumber.touched"
+            *ngIf="middleName.invalid && middleName.touched"
           >
-            El teléfono debe contener exactamente 10 dígitos numéricos.
+            El apellido materno es requerido y solo debe contener letras.
           </small>
         </nb-form-field>
         <nb-form-field class="mb-3">
