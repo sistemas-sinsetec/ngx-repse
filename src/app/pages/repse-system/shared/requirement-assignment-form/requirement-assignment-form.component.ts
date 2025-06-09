@@ -269,6 +269,14 @@ export class RequirementAssignmentFormComponent implements OnInit {
     return true;
   }
 
+  // SOLO UNA DEFINICIÓN DEBERÍA EXISTIR ▼▼▼
+  showManualPeriodOptions(): boolean {
+    const isPeriodic = this.form.get("isPeriodic")?.value;
+    const start = this.form.get("startDate")?.value;
+    return isPeriodic && !!start && moment(start).isBefore(moment(), "day");
+  }
+  // ▲▲▲ ESTA ES LA ÚNICA DEFINICIÓN ▲▲
+
   onAutoGenerationChange(isAutomatic: boolean): void {
     this.manualGeneration.automatic = isAutomatic;
     if (isAutomatic) {
@@ -321,11 +329,6 @@ export class RequirementAssignmentFormComponent implements OnInit {
       });
       currentStart = currentEnd.clone().add(1, "day");
     }
-  }
-
-  showManualPeriodOptions(): boolean {
-    const start = this.form.get("startDate")?.value;
-    return !!start && moment(start).isBefore(moment(), "day");
   }
 
   forceDatePicker(event: Event): void {
