@@ -217,7 +217,7 @@ function tryGenerateNonOverlappingPeriods(array $cfg, array $existingPeriods, bo
             if ($endOfPeriod >= $today) {
                 break;
             }
-            
+
             $current = $endOfPeriod; // Avanzar al inicio del siguiente periodo.
         }
     }
@@ -460,7 +460,7 @@ switch ($method) {
                     $updatePeriod->bind_param('si', $newEndDate, $prev['required_file_id']);
                     $updatePeriod->execute();
                     $updatePeriod->close();
-                    
+
                     $existingPeriods = getExtendedPeriodsForPost($mysqli, $companyId, $fileTypeId);
 
                 } else {
@@ -474,25 +474,43 @@ switch ($method) {
             $newPeriods = tryGenerateNonOverlappingPeriods($data, $existingPeriods, $manual);
 
             if (empty($newPeriods)) {
-                $interval = getInterval($data['periodicity_type'], (int)$data['periodicity_count']);
+                $interval = getInterval($data['periodicity_type'], (int) $data['periodicity_count']);
                 // Check if the first period itself would overlap before creating it
                 $end = (new DateTime($data['start_date']))->add($interval)->modify('-1 day');
                 $potentialPeriod = ['start' => new DateTime($data['start_date']), 'end' => $end];
-                if(hasOverlap($potentialPeriod, $existingPeriods)){
+                if (hasOverlap($potentialPeriod, $existingPeriods)) {
                     respond(409, ['error' => 'El periodo inicial se solapa con una configuración existente. No se pueden generar periodos.']);
                 } else {
                     $newPeriods[] = $potentialPeriod;
                 }
             }
         } else {
-            $end = new DateTimeImmutable('9999-12-31');
+            // Buscar periodo futuro más cercano
+            $nextExistingStartDate = null;
+            foreach ($existingPeriods as $ex) {
+                $exStart = new DateTimeImmutable($ex['start']);
+                if ($exStart > $start) {
+                    if ($nextExistingStartDate === null || $exStart < $nextExistingStartDate) {
+                        $nextExistingStartDate = $exStart;
+                    }
+                }
+            }
+
+            if ($nextExistingStartDate) {
+                $end = $nextExistingStartDate->modify('-1 day');
+            } else {
+                $end = new DateTimeImmutable('9999-12-31');
+            }
+
             $openPeriod = ['start' => $start, 'end' => $end];
 
             if (hasOverlap($openPeriod, $existingPeriods)) {
                 respond(409, ['error' => 'El periodo propuesto se solapa con uno existente.']);
             }
+
             $newPeriods[] = $openPeriod;
         }
+
 
         $mysqli->begin_transaction();
 
@@ -513,7 +531,7 @@ switch ($method) {
             $today = new DateTimeImmutable('today');
 
             if (!$isPeriodicInt) {
-                $finalEndDate = '9999-12-31';
+                $finalEndDate = $newPeriods[0]['end']->format('Y-m-d');
             } elseif (!empty($data['manual_generation'])) {
                 $finalEndDate = $lastPeriodEnd->format('Y-m-d');
             } elseif ($lastPeriodEnd < $today) {
@@ -553,7 +571,7 @@ switch ($method) {
                 $expiryUnit = $f['expiry_visible'] ? null : $f['expiry_unit'];
 
                 $fmtStmt->bind_param(
-                    'isiis',
+                    'isisis',
                     $requiredFileId,
                     $formatCode,
                     $minRequired,
@@ -566,7 +584,7 @@ switch ($method) {
             $fmtStmt->close();
 
             $periodStmt = $mysqli->prepare("INSERT INTO document_periods (required_file_id, start_date, end_date, created_at) VALUES (?, ?, ?, NOW())");
-            
+
             foreach ($newPeriods as $p) {
                 $startFmt = $p['start']->format('Y-m-d');
                 $endFmt = $p['end']->format('Y-m-d');
