@@ -62,7 +62,6 @@ function validateRequired(array $data): void
         $data['periodicity_type'] = null;
         $data['periodicity_count'] = null;
     }
-
 }
 
 function getInterval(string $type, int $count): ?DateInterval
@@ -126,13 +125,29 @@ function getExtendedPeriodsForPost(mysqli $mysqli, int $companyId, int $fileType
     );
 }
 
+// ==================================================================
+// FUNCIÓN CORREGIDA
+// ==================================================================
 function tryGenerateNonOverlappingPeriods(array $cfg, array $existingPeriods, bool $manual): array
 {
     $periods = [];
     $start = new DateTime($cfg['start_date']);
     $interval = getInterval($cfg['periodicity_type'], (int) $cfg['periodicity_count']);
-    if (!$interval)
+    if (!$interval) {
         respond(400, ['error' => 'Invalid periodicity_type']);
+    }
+
+    // 1. Encontrar la fecha de inicio del periodo existente más cercano en el futuro.
+    // Esto es necesario tanto para la generación manual como para la automática.
+    $nextExistingStartDate = null;
+    foreach ($existingPeriods as $ex) {
+        $exStart = new DateTime($ex['start'] ?? $ex['start_date']);
+        if ($exStart > $start) {
+            if ($nextExistingStartDate === null || $exStart < $nextExistingStartDate) {
+                $nextExistingStartDate = $exStart;
+            }
+        }
+    }
 
     $today = new DateTimeImmutable('today');
     $current = clone $start;
@@ -140,8 +155,24 @@ function tryGenerateNonOverlappingPeriods(array $cfg, array $existingPeriods, bo
     if ($manual) {
         $count = (int) $cfg['manual_range']['period_count'];
         for ($i = 0; $i < $count; $i++) {
-            // CORRECCIÓN: Eliminar la resta de 1 día
-            $end = (clone $current)->add($interval);
+            $endOfPeriod = (clone $current)->add($interval);
+
+            // 2. Verificar si el periodo a crear se cruza con el límite del periodo futuro.
+            if ($nextExistingStartDate !== null && $endOfPeriod >= $nextExistingStartDate) {
+                // Si se cruza, el fin de este periodo es un día antes del inicio del siguiente.
+                $finalEndDate = (clone $nextExistingStartDate)->modify('-1 day');
+                if ($current <= $finalEndDate) {
+                    $lastPeriod = ['start' => clone $current, 'end' => $finalEndDate];
+                    if (!hasOverlap($lastPeriod, $existingPeriods)) {
+                        $periods[] = $lastPeriod;
+                    }
+                }
+                break; // Detener la generación, hemos llegado al límite.
+            }
+
+            // Generación de periodo normal (sin colisión futura).
+            // Se resta 1 día para que los periodos no se toquen (ej: termina el 31/01, el siguiente empieza el 01/02).
+            $end = (clone $endOfPeriod)->modify('-1 day');
             $period = ['start' => clone $current, 'end' => $end];
 
             if (hasOverlap($period, $existingPeriods)) {
@@ -149,33 +180,54 @@ function tryGenerateNonOverlappingPeriods(array $cfg, array $existingPeriods, bo
             }
 
             $periods[] = $period;
-            $current = (clone $end); // Avanzar al final del periodo actual
+            $current = $endOfPeriod; // Avanzar al inicio del siguiente periodo.
         }
-    } else {
+    } else { // Generación automática
         while (true) {
-            // CORRECCIÓN: Eliminar la resta de 1 día
-            $end = (clone $current)->add($interval);
+            $endOfPeriod = (clone $current)->add($interval);
+
+            // 2. Misma verificación para la colisión con un periodo futuro.
+            if ($nextExistingStartDate !== null && $endOfPeriod >= $nextExistingStartDate) {
+                $finalEndDate = (clone $nextExistingStartDate)->modify('-1 day');
+                if ($current <= $finalEndDate) {
+                    $lastPeriod = ['start' => clone $current, 'end' => $finalEndDate];
+                    if (!hasOverlap($lastPeriod, $existingPeriods)) {
+                        $periods[] = $lastPeriod;
+                    } else if (empty($periods)) {
+                        respond(409, ['error' => 'El periodo inicial se solapa con una configuración existente.']);
+                    }
+                }
+                break; // Detener la generación.
+            }
+
+            // Generación de periodo normal (sin colisión futura)
+            $end = (clone $endOfPeriod)->modify('-1 day');
             $period = ['start' => clone $current, 'end' => $end];
 
             if (hasOverlap($period, $existingPeriods)) {
                 if (empty($periods)) {
-                    respond(409, ['error' => 'Uno o más periodos propuestos se solapan con una configuración existente.']);
+                    respond(409, ['error' => 'El periodo propuesto se solapa con una configuración existente.']);
                 }
                 break;
             }
 
             $periods[] = $period;
 
-            // Detener si se llegó a hoy o ya es futuro
-            if ($end >= $today)
+            // Detener si el periodo que acabamos de crear ya es futuro.
+            if ($endOfPeriod >= $today) {
                 break;
-
-            $current = (clone $end);
+            }
+            
+            $current = $endOfPeriod; // Avanzar al inicio del siguiente periodo.
         }
     }
 
     return $periods;
 }
+// ==================================================================
+// FIN DE LA FUNCIÓN CORREGIDA
+// ==================================================================
+
 
 function generatePeriods(array $cfg): array
 {
@@ -206,20 +258,16 @@ function generatePeriods(array $cfg): array
             respond(400, ['error' => 'Invalid period type']);
     }
 
-
-
     if (!empty($cfg['manual_generation'])) {
         $count = (int) $cfg['manual_range']['period_count'];
         $current = clone $start;
         for ($i = 0; $i < $count; $i++) {
-            // CORRECCIÓN: Eliminar resta de 1 día
-            $end = (clone $current)->add($interval);
+            $end = (clone $current)->add($interval)->modify('-1 day');
             $periods[] = ['start' => clone $current, 'end' => $end];
-            $current = (clone $end); // Avanzar al final del periodo actual
+            $current = (clone $end)->modify('+1 day');
         }
     } else {
-        // CORRECCIÓN: Eliminar resta de 1 día
-        $end = (clone $start)->add($interval);
+        $end = (clone $start)->add($interval)->modify('-1 day');
         $periods[] = ['start' => $start, 'end' => $end];
     }
 
@@ -253,9 +301,9 @@ switch ($method) {
                     crf.start_date, crf.end_date,
                     (SELECT COUNT(*) FROM required_file_visibilities v
                      WHERE v.required_file_id = crf.required_file_id AND v.is_visible = 1) AS partner_count
-               FROM company_required_files crf
-               JOIN file_types ft ON ft.file_type_id = crf.file_type_id
-               WHERE $where",
+             FROM company_required_files crf
+             JOIN file_types ft ON ft.file_type_id = crf.file_type_id
+             WHERE $where",
             [$param],
             'i'
         );
@@ -267,29 +315,19 @@ switch ($method) {
         $placeholders = implode(',', array_fill(0, count($ids), '?'));
         $types = str_repeat('i', count($ids));
 
-        // 2) formatos mínimos
-        $sqlFmts = "
-            SELECT required_file_id,
-                format_code AS code,
-                min_required,
-                manual_expiry_value,
-                manual_expiry_unit
-            FROM required_file_formats
-            WHERE required_file_id IN ($placeholders)
-        ";
         $fmts = fetchAssoc($mysqli, "SELECT required_file_id, format_code 
-            AS code, min_required, manual_expiry_value, manual_expiry_unit 
-            FROM required_file_formats WHERE required_file_id 
-            IN ($placeholders)", $ids, $types);
+             AS code, min_required, manual_expiry_value, manual_expiry_unit 
+             FROM required_file_formats WHERE required_file_id 
+             IN ($placeholders)", $ids, $types);
         $pers = fetchAssoc($mysqli, "SELECT p.period_id, p.required_file_id, p.start_date, p.end_date, COUNT(cf.file_id) 
-            AS uploaded_count FROM document_periods p 
-            LEFT JOIN company_files cf ON cf.period_id = p.period_id AND cf.status IN ('approved', 'late') AND cf.is_expired = 0
-            WHERE p.required_file_id IN ($placeholders) GROUP BY p.period_id ORDER BY p.start_date", $ids, $types);
+             AS uploaded_count FROM document_periods p 
+             LEFT JOIN company_files cf ON cf.period_id = p.period_id AND cf.status IN ('approved', 'late') AND cf.is_expired = 0
+             WHERE p.required_file_id IN ($placeholders) GROUP BY p.period_id ORDER BY p.start_date", $ids, $types);
         $fmtCounts = fetchAssoc($mysqli, "SELECT dp.required_file_id, cf.file_ext AS format_code, COUNT(*) 
-            AS uploaded_count FROM company_files cf 
-            JOIN document_periods dp ON dp.period_id = cf.period_id 
-            WHERE dp.required_file_id IN ($placeholders) AND cf.status IN ('approved', 'late') AND cf.is_expired = 0
-            GROUP BY dp.required_file_id, cf.file_ext", $ids, $types);
+             AS uploaded_count FROM company_files cf 
+             JOIN document_periods dp ON dp.period_id = cf.period_id 
+             WHERE dp.required_file_id IN ($placeholders) AND cf.status IN ('approved', 'late') AND cf.is_expired = 0
+             GROUP BY dp.required_file_id, cf.file_ext", $ids, $types);
 
         $today = new DateTimeImmutable('today');
         $out = [];
@@ -350,7 +388,6 @@ switch ($method) {
             ];
             $doc['periods'][] = $period;
 
-
             $minReq = max($doc['min_documents_needed'], 1);
 
             if ($p['uploaded_count'] < $minReq && !$doc['current_period']) {
@@ -382,12 +419,7 @@ switch ($method) {
             }
         }
 
-        // Filtrar documentos sin periodos si se requiere
-        if ($periodScope === 'current') {
-            $out = array_filter($out, function ($doc) {
-                return !empty($doc['periods']);
-            });
-        } elseif ($periodScope === 'past') {
+        if ($periodScope === 'current' || $periodScope === 'past') {
             $out = array_filter($out, function ($doc) {
                 return !empty($doc['periods']);
             });
@@ -407,11 +439,10 @@ switch ($method) {
 
         $start = new DateTimeImmutable($data['start_date']);
 
-        // Siempre verificar si hay un requisito anterior sin periodicidad que debe ser acotado
         foreach ($existingPeriods as $prev) {
             if (
                 $prev['is_periodic'] == 0 &&
-                $prev['start'] < $start &&
+                $prev['start'] < $start->format('Y-m-d H:i:s') &&
                 $prev['end'] == '9999-12-31'
             ) {
                 $prevStart = new DateTimeImmutable($prev['start']);
@@ -420,19 +451,16 @@ switch ($method) {
                 if ($interval->days >= 7) {
                     $newEndDate = $start->modify('-1 day')->format('Y-m-d');
 
-                    // Actualizar configuración anterior
                     $updateConfig = $mysqli->prepare("UPDATE company_required_files SET end_date = ? WHERE required_file_id = ?");
                     $updateConfig->bind_param('si', $newEndDate, $prev['required_file_id']);
                     $updateConfig->execute();
                     $updateConfig->close();
 
-                    // Actualizar periodo correspondiente
                     $updatePeriod = $mysqli->prepare("UPDATE document_periods SET end_date = ? WHERE required_file_id = ?");
                     $updatePeriod->bind_param('si', $newEndDate, $prev['required_file_id']);
                     $updatePeriod->execute();
                     $updatePeriod->close();
-
-                    // Refrescar periodos
+                    
                     $existingPeriods = getExtendedPeriodsForPost($mysqli, $companyId, $fileTypeId);
 
                 } else {
@@ -445,24 +473,24 @@ switch ($method) {
             $manual = !empty($data['manual_generation']);
             $newPeriods = tryGenerateNonOverlappingPeriods($data, $existingPeriods, $manual);
 
-            // CORRECCIÓN: Crear al menos un periodo si está vacío
-    if (empty($newPeriods)) {
-        $start = new DateTimeImmutable($data['start_date']);
-        $interval = getInterval($data['periodicity_type'], (int)$data['periodicity_count']);
-        $end = $start->add($interval);
-        $newPeriods[] = ['start' => $start, 'end' => $end];
-    }
-} else {
-            // Documento no periódico
+            if (empty($newPeriods)) {
+                $interval = getInterval($data['periodicity_type'], (int)$data['periodicity_count']);
+                // Check if the first period itself would overlap before creating it
+                $end = (new DateTime($data['start_date']))->add($interval)->modify('-1 day');
+                $potentialPeriod = ['start' => new DateTime($data['start_date']), 'end' => $end];
+                if(hasOverlap($potentialPeriod, $existingPeriods)){
+                    respond(409, ['error' => 'El periodo inicial se solapa con una configuración existente. No se pueden generar periodos.']);
+                } else {
+                    $newPeriods[] = $potentialPeriod;
+                }
+            }
+        } else {
             $end = new DateTimeImmutable('9999-12-31');
             $openPeriod = ['start' => $start, 'end' => $end];
 
-            foreach ($existingPeriods as $prev) {
-                if (hasOverlap($openPeriod, [$prev])) {
-                    respond(409, ['error' => 'El periodo propuesto se solapa con uno existente.']);
-                }
+            if (hasOverlap($openPeriod, $existingPeriods)) {
+                respond(409, ['error' => 'El periodo propuesto se solapa con uno existente.']);
             }
-
             $newPeriods[] = $openPeriod;
         }
 
@@ -487,43 +515,31 @@ switch ($method) {
             if (!$isPeriodicInt) {
                 $finalEndDate = '9999-12-31';
             } elseif (!empty($data['manual_generation'])) {
-                $finalEndDate = $lastPeriodEnd->format('Y-m-d'); // manual siempre lleva end_date
+                $finalEndDate = $lastPeriodEnd->format('Y-m-d');
             } elseif ($lastPeriodEnd < $today) {
-                $finalEndDate = $lastPeriodEnd->format('Y-m-d'); // automático pero ya terminó
+                $finalEndDate = $lastPeriodEnd->format('Y-m-d');
             } else {
-                $finalEndDate = null; // automático, actual o futuro
+                $finalEndDate = null;
             }
 
             $minDocs = array_sum(array_column($data['file_formats'], 'min_quantity'));
 
-            $types = 'iiiisiiss';
-            $params = [
-                &
+            $stmt->bind_param(
+                'iiiisiiss',
                 $companyId,
-                &
                 $assigned_by,
-                &
                 $fileTypeId,
-                &
                 $isPeriodicInt,
-                &
                 $periodicityType,
-                &
                 $periodicityCount,
-                &
                 $minDocs,
-                &
                 $startDate,
-                &
                 $finalEndDate
-            ];
-
-            call_user_func_array([$stmt, 'bind_param'], array_merge([$types], $params));
+            );
             $stmt->execute();
             $requiredFileId = $stmt->insert_id;
             $stmt->close();
 
-            // Insertar los formatos de archivo requeridos
             $fmtStmt = $mysqli->prepare("INSERT INTO required_file_formats (
                     required_file_id, format_code, min_required,
                     manual_expiry_visible, manual_expiry_value, manual_expiry_unit
@@ -536,43 +552,26 @@ switch ($method) {
                 $expiryValue = $f['expiry_visible'] ? null : (int) $f['expiry_value'];
                 $expiryUnit = $f['expiry_visible'] ? null : $f['expiry_unit'];
 
-                $typesFmt = 'isiiis';
-                $paramsFmt = [
-                    &
+                $fmtStmt->bind_param(
+                    'isiis',
                     $requiredFileId,
-                    &
                     $formatCode,
-                    &
                     $minRequired,
-                    &
                     $expiryVisible,
-                    &
                     $expiryValue,
-                    &
                     $expiryUnit
-                ];
-
-                call_user_func_array([$fmtStmt, 'bind_param'], array_merge([$typesFmt], $paramsFmt));
+                );
                 $fmtStmt->execute();
             }
             $fmtStmt->close();
 
-            // Insertar periodos generados
             $periodStmt = $mysqli->prepare("INSERT INTO document_periods (required_file_id, start_date, end_date, created_at) VALUES (?, ?, ?, NOW())");
-            if (!$isPeriodicInt) {
-                // Documento no periódico: insertar un único periodo abierto
-                $start = $startDate;
-                $end = '9999-12-31';
-                $periodStmt->bind_param('iss', $requiredFileId, $start, $end);
+            
+            foreach ($newPeriods as $p) {
+                $startFmt = $p['start']->format('Y-m-d');
+                $endFmt = $p['end']->format('Y-m-d');
+                $periodStmt->bind_param('iss', $requiredFileId, $startFmt, $endFmt);
                 $periodStmt->execute();
-            } else {
-                // Documento periódico: insertar múltiples periodos generados
-                foreach ($newPeriods as $p) {
-                    $start = $p['start']->format('Y-m-d');
-                    $end = $p['end']->format('Y-m-d');
-                    $periodStmt->bind_param('iss', $requiredFileId, $start, $end);
-                    $periodStmt->execute();
-                }
             }
             $periodStmt->close();
 
@@ -588,15 +587,12 @@ switch ($method) {
     case 'DELETE':
 
         if (isset($_GET['required_file_id'])) {
-            // Obtención desde la URL
             $required_file_id = intval($_GET['required_file_id']);
         } else {
-            // Obtención desde el cuerpo
             parse_str(file_get_contents("php://input"), $data);
             $required_file_id = intval($data['required_file_id'] ?? 0);
         }
 
-        // Obtener información de empresa y nombre para ruta
         $stmt = $mysqli->prepare("
             SELECT c.id AS company_id, c.nameCompany AS company_name, ft.name AS required_file_name
             FROM company_required_files crf
@@ -620,7 +616,6 @@ switch ($method) {
         $required_file_name = preg_replace('/[^a-zA-Z0-9_-]/', '', str_replace(' ', '_', $info['required_file_name']));
         $basePath = __DIR__ . "/../documents/{$company_id}-{$company_name}/{$required_file_id}-{$required_file_name}";
 
-        // Eliminar archivos físicos
         function deleteFolderRecursively($folder)
         {
             if (!is_dir($folder))
@@ -639,7 +634,6 @@ switch ($method) {
             deleteFolderRecursively($basePath);
         }
 
-        // Eliminar archivos de base de datos
         $mysqli->begin_transaction();
 
         try {
