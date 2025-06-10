@@ -10,11 +10,7 @@ import {
 } from "@angular/core";
 import { FormGroup, FormBuilder, Validators } from "@angular/forms";
 import * as moment from "moment";
-import {
-  RequirementForm,
-  Partner,
-  DocumentService,
-} from "../../../../services/repse/document.service";
+import { DocumentService } from "../../../../services/repse/document.service";
 import { NbDialogRef, NbDialogService, NbToastrService } from "@nebular/theme";
 
 @Component({
@@ -52,7 +48,6 @@ export class RequirementAssignmentFormComponent implements OnInit {
 
   constructor(
     private fb: FormBuilder,
-    private http: HttpClient,
     private documentService: DocumentService,
     private toastService: NbToastrService,
     private dialogService: NbDialogService
@@ -89,7 +84,6 @@ export class RequirementAssignmentFormComponent implements OnInit {
         this.form.patchValue({
           periodAmount: null,
           periodType: "semanas",
-          startDate: null,
         });
       }
 
