@@ -118,7 +118,8 @@ export class RequirementAssignmentFormComponent implements OnInit {
       company_id: this.isForCompany ? this.assignedByCompanyId : f.provider,
       assigned_by: this.assignedByCompanyId,
       file_type_id: f.documentType,
-      is_periodic: f.isPeriodic,
+      // DESPUÉS (CORREGIDO)
+      is_periodic: !!f.isPeriodic,
       start_date: f.startDate || moment().format("YYYY-MM-DD"),
       file_formats: this.buildFormatPayload(),
     };
