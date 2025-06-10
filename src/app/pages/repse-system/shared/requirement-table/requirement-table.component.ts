@@ -25,28 +25,18 @@ export class RequirementTableComponent {
 
   constructor(private dialogService: NbDialogService) {}
 
-  isExtremeFutureDate(momentDate: moment.Moment): boolean {
-    return (
-      momentDate.isValid() && momentDate.format("DD/MM/YYYY") === "31/12/9999"
-    );
-  }
-
   getFormattedDate(date: string | Date | null | undefined): string {
     if (!date) return "-";
     const parsed = moment.utc(date);
     if (!parsed.isValid()) return "-";
-
-    return this.isExtremeFutureDate(parsed)
-      ? "N/A"
-      : parsed.format("DD/MM/YYYY");
+    if (parsed.format("YYYY-MM-DD") === "9999-12-31") return "Vigente";
+    return parsed.format("DD/MM/YYYY");
   }
 
   openDeleteConfirmation(requirement: any): void {
     this.requirementToDelete = requirement;
     this.dialogService
-      .open(this.deleteConfirmationTemplate, {
-        context: { requirement },
-      })
+      .open(this.deleteConfirmationTemplate, { context: { requirement } })
       .onClose.subscribe((confirmed: boolean) => {
         if (confirmed) {
           this.deletePeriodicity.emit(requirement);

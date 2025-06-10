@@ -40,7 +40,11 @@
           {{ getFormattedDate(req.startDate) }}
         </td>
         <td class="text-center align-middle">
-          {{ getFormattedDate(req.endDate || req.current_period?.end_date) }}
+          {{
+            (!req.isPeriodic && !req.endDate) || req.endDate === "9999-12-31"
+              ? "Vigente"
+              : getFormattedDate(req.endDate)
+          }}
         </td>
         <td class="text-center align-middle">
           <button

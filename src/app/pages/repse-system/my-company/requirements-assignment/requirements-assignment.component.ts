@@ -18,7 +18,6 @@ import {
 })
 export class RequirementsAssignmentComponent implements OnInit {
   companyId!: number;
-
   requirements: RequirementForm[] = [];
   documentTypes: DocumentType[] = [];
   availableFormats: { id: number; name: string; extension: string }[] = [];
@@ -64,17 +63,17 @@ export class RequirementsAssignmentComponent implements OnInit {
   loadRequirements(): void {
     this.documentService.getCompanyRequirements(this.companyId).subscribe({
       next: (reqs) => {
-        this.requirements = reqs;
+        this.requirements = reqs.sort(
+          (a, b) =>
+            new Date(b.startDate).getTime() - new Date(a.startDate).getTime()
+        );
       },
       error: (err) => console.error("Error cargando requisitos", err),
     });
   }
 
-  // --------------- Funciones para visibilidad de socios  ----------------
-
   openPartnerModal(req: RequirementForm): void {
     this.selectedRequirement = req;
-
     const vis$ = this.documentService.getVisibilities(req.id);
     const bp$ = this.documentService.getBusinessPartners(this.companyId);
 
@@ -156,7 +155,6 @@ export class RequirementsAssignmentComponent implements OnInit {
     this.initialVisibleIds = this.allPartners
       .filter((p) => p.selected)
       .map((p) => p.id);
-
     this.dialogRef.close();
   }
 
@@ -168,17 +166,13 @@ export class RequirementsAssignmentComponent implements OnInit {
     this.overrideDialogRef?.close();
   }
 
-  // ============= NUEVA FUNCIÓN PARA MANEJAR ELIMINACIÓN =============
   onDeletePeriodicity(requirement: any): void {
     this.documentService.deleteRequiredFile(requirement.id).subscribe({
       next: (response) => {
         if (response.success) {
-          // 1. Actualizar lista local
           this.requirements = this.requirements.filter(
             (req) => req.id !== requirement.id
           );
-
-          // 2. Mostrar notificación
           this.toastr.success(
             `Se eliminó completamente "${requirement.documentType}"`,
             "Éxito",

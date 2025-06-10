@@ -140,7 +140,8 @@ function tryGenerateNonOverlappingPeriods(array $cfg, array $existingPeriods, bo
     if ($manual) {
         $count = (int) $cfg['manual_range']['period_count'];
         for ($i = 0; $i < $count; $i++) {
-            $end = (clone $current)->add($interval)->sub(new DateInterval('P1D'));
+            // CORRECCIÓN: Eliminar la resta de 1 día
+            $end = (clone $current)->add($interval);
             $period = ['start' => clone $current, 'end' => $end];
 
             if (hasOverlap($period, $existingPeriods)) {
@@ -148,11 +149,12 @@ function tryGenerateNonOverlappingPeriods(array $cfg, array $existingPeriods, bo
             }
 
             $periods[] = $period;
-            $current = (clone $end)->modify('+1 day');
+            $current = (clone $end); // Avanzar al final del periodo actual
         }
     } else {
         while (true) {
-            $end = (clone $current)->add($interval)->sub(new DateInterval('P1D'));
+            // CORRECCIÓN: Eliminar la resta de 1 día
+            $end = (clone $current)->add($interval);
             $period = ['start' => clone $current, 'end' => $end];
 
             if (hasOverlap($period, $existingPeriods)) {
@@ -164,11 +166,11 @@ function tryGenerateNonOverlappingPeriods(array $cfg, array $existingPeriods, bo
 
             $periods[] = $period;
 
-            // Detener si se llegó a hoy o ya es futuro (solo planificar)
+            // Detener si se llegó a hoy o ya es futuro
             if ($end >= $today)
                 break;
 
-            $current = (clone $end)->modify('+1 day');
+            $current = (clone $end);
         }
     }
 
@@ -210,12 +212,14 @@ function generatePeriods(array $cfg): array
         $count = (int) $cfg['manual_range']['period_count'];
         $current = clone $start;
         for ($i = 0; $i < $count; $i++) {
-            $end = (clone $current)->add($interval)->sub(new DateInterval('P1D'));
+            // CORRECCIÓN: Eliminar resta de 1 día
+            $end = (clone $current)->add($interval);
             $periods[] = ['start' => clone $current, 'end' => $end];
-            $current = (clone $end)->modify('+1 day');
+            $current = (clone $end); // Avanzar al final del periodo actual
         }
     } else {
-        $end = (clone $start)->add($interval)->sub(new DateInterval('P1D'));
+        // CORRECCIÓN: Eliminar resta de 1 día
+        $end = (clone $start)->add($interval);
         $periods[] = ['start' => $start, 'end' => $end];
     }
 
@@ -441,10 +445,14 @@ switch ($method) {
             $manual = !empty($data['manual_generation']);
             $newPeriods = tryGenerateNonOverlappingPeriods($data, $existingPeriods, $manual);
 
-            if (empty($newPeriods)) {
-                respond(409, ['error' => 'No se pudo generar ningún periodo. Todos se solapan o no hay espacio suficiente.']);
-            }
-        } else {
+            // CORRECCIÓN: Crear al menos un periodo si está vacío
+    if (empty($newPeriods)) {
+        $start = new DateTimeImmutable($data['start_date']);
+        $interval = getInterval($data['periodicity_type'], (int)$data['periodicity_count']);
+        $end = $start->add($interval);
+        $newPeriods[] = ['start' => $start, 'end' => $end];
+    }
+} else {
             // Documento no periódico
             $end = new DateTimeImmutable('9999-12-31');
             $openPeriod = ['start' => $start, 'end' => $end];
