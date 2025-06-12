@@ -74,10 +74,20 @@
     </nb-card-header>
     <nb-card-body class="text-center">
       <p>
-        ¿Estás seguro que deseas eliminar "{{
+        ¿Estás seguro que deseas eliminar la periodicidad de "<strong>{{
           requirementToDelete?.documentType || requirementToDelete?.name
-        }}"?
+        }}</strong
+        >"?
       </p>
+      <p>Esta acción eliminará:</p>
+      <ul class="text-left">
+        <li>La configuración del requisito.</li>
+        <li>Todos los periodos generados para esta periodicidad.</li>
+        <li>
+          Todos los archivos cargados previamente, incluso los que ya fueron
+          aprobados.
+        </li>
+      </ul>
       <p class="text-danger">
         <strong>Esta acción no se puede deshacer.</strong>
       </p>
@@ -92,13 +102,7 @@
       >
         ELIMINAR
       </button>
-      <button
-        nbButton
-        status="basic"
-        size="small"
-        outline
-        (click)="ref.close(false)"
-      >
+      <button nbButton status="basic" size="small" (click)="ref.close(false)">
         CANCELAR
       </button>
     </nb-card-footer>

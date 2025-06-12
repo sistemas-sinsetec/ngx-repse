@@ -228,6 +228,7 @@ export class PermissionsSectionsComponent implements OnInit {
     //Las ven los proveedores
     const subSectionsProviderMap: { [key: string]: string[] } = {
       "Sistema REPSE": [
+        "Asignacion de requisitos de empresa",
         "Carga de documentos de empresa",
         "Revision de documentos",
         "Catalogo de documentos",
