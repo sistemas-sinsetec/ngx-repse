@@ -29,7 +29,11 @@ const meses: Record<string, number> = {
   diciembre: 11,
 };
 
-function calculateExpiry(baseDate: Date, value: number, unit: string): Date {
+export function calculateExpiry(
+  baseDate: Date,
+  value: number,
+  unit: string
+): Date {
   const result = new Date(baseDate);
   switch (unit.toLowerCase()) {
     case "dias":
@@ -124,6 +128,23 @@ export interface DocumentType {
   description: string;
   active: boolean;
   notify_day: number;
+}
+
+// Extracción de datos de Archivos
+export interface ExtractedData {
+  [key: string]: string | number | Date | null;
+}
+
+export interface PdfExtractor {
+  key: string;
+  pattern: RegExp;
+  transform?: (match: RegExpMatchArray) => any;
+}
+
+export interface XmlExtractor {
+  key: string;
+  path: string; // XPath o navegación manual
+  transform?: (text: string) => any;
 }
 
 function mapToRequiredFileView(file: any): RequiredFileView {
@@ -509,108 +530,53 @@ export class DocumentService {
     return this.http.get(`${this.base}/company_files_tree.php`, { params });
   }
 
-  // ─────────────── VALIDACIÓN PDF ───────────────
+  // ─────────────── OBTENCIÓN DE DATOS DE ARCHIVOS ───────────────
 
-  async parsePDFForRepse(
+  async parsePdfData(
     file: File,
-    expiryOffset: { value: number; unit: string }
-  ): Promise<ParsedDocumentDates> {
+    extractors: PdfExtractor[]
+  ): Promise<ExtractedData> {
     const arrayBuffer = await file.arrayBuffer();
     const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
 
-    let textContent = "";
+    let text = "";
     for (let i = 1; i <= pdf.numPages; i++) {
       const page = await pdf.getPage(i);
       const content = await page.getTextContent();
-      textContent += content.items.map((item: any) => item.str).join(" ");
+      text += content.items.map((item: any) => item.str).join(" ");
     }
 
-    const match = textContent.match(
-      /ciudad de méxico a\s+([a-zñ]+)\s+(\d{1,2})\s+de\s+([a-zñ]+)\s+del\s+(\d{4})/i
-    );
+    const result: ExtractedData = {};
 
-    let issueDate: Date | null = null;
-    if (match) {
-      const dia = parseInt(match[2]);
-      const mes = match[3].toLowerCase();
-      const anio = parseInt(match[4]);
-
-      const mesIndex = meses[mes];
-      if (!isNaN(dia) && !isNaN(anio) && mesIndex !== undefined) {
-        issueDate = new Date(anio, mesIndex, dia);
-      }
+    for (const extractor of extractors) {
+      const match = text.match(extractor.pattern);
+      result[extractor.key] = match
+        ? extractor.transform
+          ? extractor.transform(match)
+          : match[1]
+        : null;
     }
 
-    const expiryDate = issueDate
-      ? calculateExpiry(issueDate, expiryOffset.value, expiryOffset.unit)
-      : null;
-
-    return { issueDate, expiryDate };
+    return result;
   }
 
-  async validateRepsePdf(
+  async parseXmlData(
     file: File,
-    expiryConfig: { value: number; unit: string },
-    currentPeriod?: { start_date: string; end_date: string }
-  ): Promise<{ valid: boolean; message?: string; warning?: string }> {
-    const { issueDate, expiryDate } = await this.extractRepseDates(
-      file,
-      expiryConfig
-    );
+    extractors: XmlExtractor[]
+  ): Promise<ExtractedData> {
+    const text = await file.text();
+    const parser = new DOMParser();
+    const xmlDoc = parser.parseFromString(text, "text/xml");
 
-    if (!issueDate || !expiryDate) {
-      return {
-        valid: false,
-        message: "No se pudo obtener la fecha de expedición del documento.",
-      };
+    const result: ExtractedData = {};
+
+    for (const extractor of extractors) {
+      const element = xmlDoc.querySelector(extractor.path);
+      const value = element?.textContent?.trim() ?? null;
+      result[extractor.key] =
+        value && extractor.transform ? extractor.transform(value) : value;
     }
 
-    if (!currentPeriod) {
-      return { valid: true };
-    }
-
-    const periodStart = moment(currentPeriod.start_date);
-    const periodEnd = moment(currentPeriod.end_date);
-    const exp = moment(expiryDate);
-
-    console.log("→ Fecha de expedición:", issueDate);
-    console.log("→ Vigencia calculada:", expiryDate);
-    console.log(
-      "→ Periodo actual:",
-      periodStart.format("DD/MM/YYYY"),
-      "-",
-      periodEnd.format("DD/MM/YYYY")
-    );
-
-    if (exp.isBefore(periodStart)) {
-      return {
-        valid: false,
-        message: `La vigencia del documento (${exp.format(
-          "DD/MM/YYYY"
-        )}) no cubre el periodo actual.`,
-      };
-    }
-
-    if (exp.isBefore(periodEnd)) {
-      return {
-        valid: true,
-        warning: `El documento vencerá durante este periodo (${exp.format(
-          "DD/MM/YYYY"
-        )}).`,
-      };
-    }
-
-    return { valid: true };
-  }
-
-  private formatDate(date: Date): string {
-    return moment(date).format("DD/MM/YYYY");
-  }
-
-  async extractRepseDates(
-    file: File,
-    expiryOffset: { value: number; unit: string }
-  ): Promise<ParsedDocumentDates> {
-    return this.parsePDFForRepse(file, expiryOffset);
+    return result;
   }
 }

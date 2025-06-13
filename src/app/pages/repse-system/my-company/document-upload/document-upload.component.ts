@@ -1,7 +1,9 @@
 import { Component, TemplateRef, ViewChild } from "@angular/core";
 import { NbDialogService, NbDialogRef, NbToastrService } from "@nebular/theme";
 import {
+  calculateExpiry,
   DocumentService,
+  PdfExtractor,
   RequiredFileView,
 } from "../../../../services/repse/document.service";
 import { CompanyService } from "../../../../services/company.service";
@@ -264,6 +266,7 @@ export class DocumentUploadComponent {
     let issueDate: Date | null = null;
     let expiryDate: Date | null = null;
 
+    const extractors: PdfExtractor[] = [];
     // ── 1. Obtener fechas ──
     if (fileTypeName?.includes("repse") && fileExt === "pdf") {
       const formatConfig = selectedDoc.formats.find(
@@ -274,12 +277,20 @@ export class DocumentUploadComponent {
         unit: formatConfig?.manual_expiry_unit || "años",
       };
 
-      const extracted = await this.documentService.extractRepseDates(
-        file,
-        expiryOffset
-      );
-      issueDate = extracted.issueDate;
-      expiryDate = extracted.expiryDate;
+      extractors.push({
+        key: "issueDate",
+        pattern:
+          /ciudad de méxico a\s+([a-zñ]+)\s+(\d{1,2})\s+de\s+([a-zñ]+)\s+del\s+(\d{4})/i,
+        transform: ([_, , day, month, year]) =>
+          new Date(`${day} ${month} ${year}`),
+      });
+
+      const parsed = await this.documentService.parsePdfData(file, extractors);
+
+      issueDate = parsed.issueDate as Date | null;
+      expiryDate = issueDate
+        ? calculateExpiry(issueDate, expiryOffset.value, expiryOffset.unit)
+        : null;
     }
 
     if (!expiryDate && selectedPeriod) {
