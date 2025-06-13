@@ -47,6 +47,206 @@ function bind_and_execute($stmt, $types, ...$params)
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $action = $_POST['action'] ?? '';
 
+    // 1. Acción para subir archivo físico (nueva)
+    if ($action === 'upload_physical') {
+        try {
+            // Validar que se haya subido un archivo
+            if (!isset($_FILES['file']) || $_FILES['file']['error'] !== UPLOAD_ERR_OK) {
+                throw new Exception('No se recibió el archivo o hubo un error en la subida');
+            }
+
+            $file = $_FILES['file'];
+            
+            // Configurar directorio para archivos temporales
+            $uploadDir = $_SERVER['DOCUMENT_ROOT'] . '/siindad/documents/temp_uploads/';
+            
+            // Crear directorio si no existe
+            if (!file_exists($uploadDir)) {
+                if (!mkdir($uploadDir, 0777, true)) {
+                    throw new Exception('No se pudo crear el directorio temporal');
+                }
+            }
+
+            // Generar nombre único para el archivo
+            $fileName = uniqid() . '_' . basename($file['name']);
+            $filePath = $uploadDir . $fileName;
+
+            // Mover el archivo subido
+            if (!move_uploaded_file($file['tmp_name'], $filePath)) {
+                throw new Exception('Error al guardar el archivo en el servidor');
+            }
+
+            // Obtener fechas si existen
+            $issueDate = $_POST['issue_date'] ?? null;
+            $expiryDate = $_POST['expiry_date'] ?? null;
+
+            // Devolver respuesta exitosa con la ruta relativa
+            echo json_encode([
+                'success' => true,
+                'filePath' => "temp_uploads/" . $fileName,
+                'fileName' => $fileName,
+                'issue_date' => $issueDate,
+                'expiry_date' => $expiryDate
+            ]);
+            
+        } catch (Exception $e) {
+            // Manejar errores
+            http_response_code(500);
+            echo json_encode([
+                'success' => false,
+                'message' => $e->getMessage()
+            ]);
+        }
+        exit;
+    }
+
+    // 2. Acción para asociar archivo a una asignación (nueva)
+    if ($action === 'associate_file') {
+        try {
+            // Obtener parámetros
+            $requiredFileId = intval($_POST['required_file_id'] ?? 0);
+            $periodId = intval($_POST['period_id'] ?? 0);
+            $filePath = $_POST['file_path'] ?? '';
+            $formatCode = strtolower(trim($_POST['format_code'] ?? ''));
+            $issueDate = $_POST['issue_date'] ?? null;
+            $expiryDate = $_POST['expiry_date'] ?? null;
+
+            // Validar parámetros
+            if ($requiredFileId <= 0 || $periodId <= 0 || empty($filePath) || empty($formatCode)) {
+                throw new Exception('Parámetros incompletos para asociar el archivo');
+            }
+
+            // Obtener información de la empresa y tipo de documento
+            $stmt = safe_prepare(
+                $mysqli,
+                "SELECT c.id AS company_id, c.nameCompany AS company_name, ft.name AS required_file_name
+                 FROM company_required_files crf
+                 JOIN companies c ON crf.company_id = c.id
+                 JOIN file_types ft ON crf.file_type_id = ft.file_type_id
+                 WHERE crf.required_file_id = ?",
+                'company query'
+            );
+            bind_and_execute($stmt, "i", $requiredFileId);
+            $result = $stmt->get_result();
+            $company = $result->fetch_assoc();
+            $stmt->close();
+
+            if (!$company) {
+                throw new Exception('Empresa o tipo de documento no encontrado');
+            }
+
+            // Preparar nombres de directorio
+            $company_id = $company['company_id'];
+            $company_name = $company['company_name'] ?: 'UnknownCompany';
+            $required_file_name = $company['required_file_name'] ?: 'UnknownFile';
+            
+            // Sanitizar nombres para rutas
+            $company_name = preg_replace('/[^a-zA-Z0-9_-]/', '', str_replace(' ', '_', $company_name));
+            $required_file_name = preg_replace('/[^a-zA-Z0-9_-]/', '', str_replace(' ', '_', $required_file_name));
+
+            // Obtener información del período
+            $period_range = 'sin_periodicidad';
+            $stmt = safe_prepare($mysqli, "SELECT start_date, end_date FROM document_periods WHERE period_id = ?", 'period query');
+            bind_and_execute($stmt, "i", $periodId);
+            $period = $stmt->get_result()->fetch_assoc();
+            $stmt->close();
+            
+            if ($period) {
+                $period_range = ($period['end_date'] === '9999-12-31') 
+                    ? 'sin_periodicidad' 
+                    : $period['start_date'] . '_' . $period['end_date'];
+            }
+
+            // Construir rutas
+            $company_dir = "{$company_id}-{$company_name}";
+            $required_file_dir = "{$requiredFileId}-{$required_file_name}";
+            $period_dir = $period_range;
+            $format_dir = $formatCode;
+
+            $base_dir = __DIR__ . "/../documents/$company_dir/$required_file_dir/$period_dir/$format_dir/cargados";
+
+            // Crear directorio si no existe
+            if (!file_exists($base_dir)) {
+                if (!mkdir($base_dir, 0777, true)) {
+                    throw new Exception('Error al crear directorio: ' . $base_dir);
+                }
+            }
+
+            // Preparar nuevo nombre de archivo
+            $tempPath = __DIR__ . "/../documents/" . $filePath;
+            $file_ext = pathinfo($tempPath, PATHINFO_EXTENSION) ?: 'unknown';
+            $timestamp = date('Ymd\THis');
+            $file_name = "{$company_id}_{$requiredFileId}_{$periodId}_{$timestamp}.{$file_ext}";
+            $new_file_path = "$base_dir/$file_name";
+            $relative_path = "$company_dir/$required_file_dir/$period_dir/$format_dir/cargados/$file_name";
+
+            // Copiar archivo temporal a ubicación final
+            if (!copy($tempPath, $new_file_path)) {
+                throw new Exception('Error al copiar archivo a ubicación final: ' . $tempPath . ' -> ' . $new_file_path);
+            }
+
+            // Obtener fechas válidas
+            $today = date('Y-m-d');
+            $validDateFormat = function ($date) {
+                return preg_match('/^\d{4}-\d{2}-\d{2}$/', $date);
+            };
+
+            $period_end = $period['end_date'] ?? $today;
+            $final_issue_date = ($issueDate && $validDateFormat($issueDate)) ? $issueDate : $today;
+            $final_expiry_date = ($expiryDate && $validDateFormat($expiryDate)) ? $expiryDate : $period_end;
+
+            // Determinar cobertura del período
+            $period_coverage = 'full';
+            if (isset($period['start_date']) && $final_expiry_date < $period['start_date']) {
+                $period_coverage = 'none';
+            } elseif (isset($period['end_date']) && $final_expiry_date < $period['end_date']) {
+                $period_coverage = 'partial';
+            }
+
+            // Verificar si está expirado
+            $is_expired = ($period_coverage === 'partial' && $final_expiry_date < $today) ? 1 : 0;
+            $user_id = 1; // Reemplazar con ID de usuario real
+
+            // Insertar registro en base de datos
+            $stmt = safe_prepare($mysqli, "
+                INSERT INTO company_files 
+                (file_path, issue_date, expiry_date, user_id, status, is_current, period_id, period_coverage, is_expired, file_ext)
+                VALUES (?, ?, ?, ?, 'uploaded', 1, ?, ?, ?, ?)
+            ", 'file insert');
+            
+            bind_and_execute(
+                $stmt, 
+                "sssisiss", 
+                $relative_path, 
+                $final_issue_date, 
+                $final_expiry_date, 
+                $user_id,
+                $periodId, 
+                $period_coverage, 
+                $is_expired,
+                $file_ext
+            );
+
+            $file_id = $stmt->insert_id;
+            $stmt->close();
+
+            echo json_encode([
+                'success' => true,
+                'message' => 'Archivo asociado correctamente',
+                'file_id' => $file_id
+            ]);
+            
+        } catch (Exception $e) {
+            http_response_code(500);
+            echo json_encode([
+                'success' => false,
+                'message' => $e->getMessage()
+            ]);
+        }
+        exit;
+    }
+
+    // Acciones existentes...
     if ($action === 'submit_uploads') {
         $required_file_id = intval($_POST['required_file_id']);
         $period_id = intval($_POST['period_id']);
@@ -181,7 +381,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         echo json_encode(['success' => true]);
         exit;
     }
-
 
     if ($action === 'reject') {
         $file_id = intval($_POST['file_id']);
@@ -337,7 +536,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         exit;
     }
 
-
+    // Acción tradicional para subida directa
     if (!isset($_FILES['file'])) {
         echo json_encode(['success' => false, 'error' => 'No file uploaded']);
         exit;
@@ -464,7 +663,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     echo json_encode(['success' => true]);
     exit;
-
 }
 
 if ($_SERVER['REQUEST_METHOD'] === 'GET') {
