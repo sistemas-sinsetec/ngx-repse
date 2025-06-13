@@ -579,4 +579,26 @@ export class DocumentService {
 
     return result;
   }
+
+  // Nuevo método para verificar compatibilidad de periodicidad
+  isFileCompatibleWithAssignment(
+    filePeriod: { start: Date; end: Date },
+    assignment: RequiredFileView
+  ): boolean {
+    const periodStart = moment(assignment.startDate);
+    const periodEnd = assignment.endDate ? moment(assignment.endDate) : null;
+    const fileStart = moment(filePeriod.start);
+    const fileEnd = moment(filePeriod.end);
+
+    // Verificar cobertura del periodo
+    if (periodEnd) {
+      return (
+        fileStart.isSameOrBefore(periodStart) &&
+        fileEnd.isSameOrAfter(periodEnd)
+      );
+    }
+
+    // Para asignaciones sin fecha fin
+    return fileEnd.isSameOrAfter(periodStart);
+  }
 }

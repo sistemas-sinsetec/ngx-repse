@@ -444,20 +444,50 @@
                 >
                   <!-- Si no está cargando -->
                   <nb-icon *ngIf="!isUploading" icon="upload-outline"></nb-icon>
-                  <!-- <span *ngIf="!isUploading">Subir</span> -->
                   <!-- Si está cargando -->
                   <nb-icon
                     *ngIf="isUploading"
                     icon="upload-outline"
                     class="opacity-0"
                   ></nb-icon>
-                  <!-- <span *ngIf="isUploading" class="opacity-0">Subir</span> -->
                 </button>
               </div>
             </td>
           </tr>
         </tbody>
       </table>
+
+      <!-- SECCIÓN CORREGIDA: Compatibilidad con asignaciones -->
+      <nb-card *ngIf="sharedAssignments.length > 0" class="mt-4">
+        <nb-card-header>
+          <nb-checkbox [(ngModel)]="useForOtherAssignments">
+            Usar este archivo para otras asignaciones compatibles
+          </nb-checkbox>
+        </nb-card-header>
+        <nb-card-body *ngIf="useForOtherAssignments">
+          <h5>Asignaciones compatibles:</h5>
+          <div class="compatible-assignments">
+            <div
+              *ngFor="let assignment of sharedAssignments"
+              class="assignment-item"
+            >
+              <nb-checkbox [(ngModel)]="assignment.checked">
+                {{ assignment.documentType }}
+                ({{ assignment.companyName }})
+                <br />
+                <small>
+                  Periodo: {{ formatDate(assignment.assignment.startDate) }} -
+                  {{
+                    assignment.assignment.endDate
+                      ? formatDate(assignment.assignment.endDate)
+                      : "Vigente"
+                  }}
+                </small>
+              </nb-checkbox>
+            </div>
+          </div>
+        </nb-card-body>
+      </nb-card>
     </nb-card-body>
     <nb-card-footer>
       <div class="d-flex justify-content-end">
