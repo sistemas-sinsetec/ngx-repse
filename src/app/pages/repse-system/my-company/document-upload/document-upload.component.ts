@@ -65,7 +65,10 @@ export class DocumentUploadComponent {
   // Fechas REPSE
   private tempIssueDate: Date | null = null;
   private tempExpiryDate: Date | null = null;
-  // Nuevo conjunto para rastrear notificaciones
+
+  // Nuevas propiedades para compartir archivos
+  sharedAssignments: any[] = []; // Lista de asignaciones compatibles
+  useForOtherAssignments = false; // Si el usuario quiere usar el archivo para otras asignaciones
 
   constructor(
     private documentService: DocumentService,
@@ -262,79 +265,141 @@ export class DocumentUploadComponent {
     const selectedDoc = this.selectedDocumentForUpload ?? this.selectedDocument;
     const fileTypeName = selectedDoc?.documentType?.toLowerCase();
 
-    const selectedPeriod = this.selectedPeriod;
+    // Extraer fechas si es REPSE y PDF
     let issueDate: Date | null = null;
     let expiryDate: Date | null = null;
 
-    const extractors: PdfExtractor[] = [];
-    // ── 1. Obtener fechas ──
     if (fileTypeName?.includes("repse") && fileExt === "pdf") {
+      const parsed = await this.extractDatesFromPdf(file);
+      issueDate = parsed.issueDate;
+      expiryDate = parsed.expiryDate;
+    }
+
+    // Si no se pudo extraer la fecha de vencimiento, usar la lógica existente
+    if (!expiryDate && selectedDoc) {
       const formatConfig = selectedDoc.formats.find(
         (f: any) => f.code.toLowerCase() === "pdf"
       );
-      const expiryOffset = {
-        value: formatConfig?.manual_expiry_value || 0,
-        unit: formatConfig?.manual_expiry_unit || "años",
-      };
+      if (formatConfig) {
+        const expiryOffset = {
+          value: formatConfig.manual_expiry_value || 0,
+          unit: formatConfig.manual_expiry_unit || "años",
+        };
+        issueDate = issueDate || new Date();
+        expiryDate = calculateExpiry(
+          issueDate,
+          expiryOffset.value,
+          expiryOffset.unit
+        );
+      }
+    }
 
-      extractors.push({
-        key: "issueDate",
-        pattern:
-          /ciudad de méxico a\s+([a-zñ]+)\s+(\d{1,2})\s+de\s+([a-zñ]+)\s+del\s+(\d{4})/i,
-        transform: ([_, , day, month, year]) =>
-          new Date(`${day} ${month} ${year}`),
+    // Buscar asignaciones compatibles
+    if (issueDate && expiryDate) {
+      this.findCompatibleAssignments(selectedDoc, {
+        start: issueDate,
+        end: expiryDate,
       });
-
-      const parsed = await this.documentService.parsePdfData(file, extractors);
-
-      issueDate = parsed.issueDate as Date | null;
-      expiryDate = issueDate
-        ? calculateExpiry(issueDate, expiryOffset.value, expiryOffset.unit)
-        : null;
+    } else {
+      this.sharedAssignments = [];
     }
 
-    if (!expiryDate && selectedPeriod) {
-      expiryDate = moment(selectedPeriod.end_date, "YYYY-MM-DD").toDate();
-      issueDate = new Date();
-    }
+    // Subir a la asignación principal
+    await this.uploadToAssignment(file, selectedDoc, issueDate, expiryDate);
 
-    // Guardar en estado
-    this.tempIssueDate = issueDate;
-    this.tempExpiryDate = expiryDate;
+    // Subir a asignaciones adicionales si el usuario seleccionó alguna
+    if (this.useForOtherAssignments && this.sharedAssignments.length > 0) {
+      const selectedAssignments = this.sharedAssignments
+        .filter((a) => a.checked)
+        .map((a) => a.assignment);
 
-    // ── 2. Validar cobertura ──
-    if (selectedPeriod && expiryDate) {
-      const periodStart = moment(selectedPeriod.start_date);
-      const periodEnd = moment(selectedPeriod.end_date);
-      const exp = moment(expiryDate);
-
-      if (exp.isBefore(periodStart)) {
-        this.toastrService.danger(
-          `La vigencia del documento (${exp.format(
-            "DD/MM/YYYY"
-          )}) no cubre el inicio del periodo.`,
-          "Vigencia inválida"
-        );
-        return;
-      }
-
-      if (exp.isBefore(periodEnd)) {
-        this.toastrService.warning(
-          `La vigencia del documento (${exp.format(
-            "DD/MM/YYYY"
-          )}) no cubre completamente el periodo.`,
-          "Advertencia"
-        );
+      for (const assignment of selectedAssignments) {
+        await this.uploadToAssignment(file, assignment, issueDate, expiryDate);
       }
     }
+  }
 
-    // ── 3. Subir ──
+  // CORRECCIÓN: Función con tipo de retorno explícito
+  private async extractDatesFromPdf(file: File): Promise<{
+    issueDate: Date | null;
+    expiryDate: Date | null;
+  }> {
+    const extractors: PdfExtractor[] = [
+      {
+        key: "issueDate",
+        pattern: /Fecha de Emisión:\s*(\d{2}\/\d{2}\/\d{4})/i,
+        transform: ([_, date]) => {
+          const parsedDate = moment(date, "DD/MM/YYYY");
+          return parsedDate.isValid() ? parsedDate.toDate() : null;
+        },
+      },
+      {
+        key: "expiryDate",
+        pattern: /Fecha de Vencimiento:\s*(\d{2}\/\d{2}\/\d{4})/i,
+        transform: ([_, date]) => {
+          const parsedDate = moment(date, "DD/MM/YYYY");
+          return parsedDate.isValid() ? parsedDate.toDate() : null;
+        },
+      },
+    ];
+
+    const parsed = await this.documentService.parsePdfData(file, extractors);
+    return {
+      issueDate: parsed["issueDate"] as Date | null,
+      expiryDate: parsed["expiryDate"] as Date | null,
+    };
+  }
+
+  private findCompatibleAssignments(
+    currentAssignment: any,
+    filePeriod: { start: Date; end: Date }
+  ) {
+    this.sharedAssignments = [];
+    const myCompanyId = Number(this.companyService.selectedCompany.id);
+
+    // Buscar en todas las asignaciones (asignadas por mi y por otros)
+    const allAssignments = [
+      ...this.assignedByMe,
+      ...this.assignedByOthers.flatMap((group) => group.files),
+    ].filter(
+      (assignment) =>
+        // Excluir la asignación actual
+        assignment.id !== currentAssignment.id
+    );
+
+    for (const assignment of allAssignments) {
+      // Verificar que el formato del archivo sea compatible
+      const formatMatch = assignment.formats.some(
+        (f: any) => f.code === this.selectedFormat
+      );
+
+      // Verificar que el periodo de la asignación esté cubierto por el archivo
+      const coversPeriod = this.documentService.isFileCompatibleWithAssignment(
+        filePeriod,
+        assignment
+      );
+
+      if (formatMatch && coversPeriod) {
+        this.sharedAssignments.push({
+          assignment: assignment,
+          companyName: assignment.companyName || "Mi empresa",
+          documentType: assignment.documentType,
+          checked: false,
+        });
+      }
+    }
+  }
+
+  private async uploadToAssignment(
+    file: File,
+    assignment: any,
+    issueDate: Date | null,
+    expiryDate: Date | null
+  ): Promise<void> {
     const fd = new FormData();
     fd.append("file", file);
-    fd.append("required_file_id", selectedDoc?.id.toString() || "");
-    const periodId =
-      this.selectedDocumentForUpload?.currentPeriod?.period_id ||
-      this.selectedPeriod?.period_id;
+    fd.append("required_file_id", assignment.id.toString());
+    const periodId = assignment.currentPeriod?.period_id;
 
     if (!periodId) {
       this.toastrService.danger(
@@ -344,32 +409,33 @@ export class DocumentUploadComponent {
       return;
     }
 
-    fd.append("period_id", periodId?.toString() || "");
-
+    fd.append("period_id", periodId.toString());
     fd.append("format_code", this.selectedFormat);
 
-    if (issueDate)
+    if (issueDate) {
       fd.append("issue_date", moment(issueDate).format("YYYY-MM-DD"));
-    if (expiryDate)
+    }
+    if (expiryDate) {
       fd.append("expiry_date", moment(expiryDate).format("YYYY-MM-DD"));
+    }
 
     this.isUploading = true;
 
-    return new Promise((resolve) => {
-      this.documentService.uploadFile(fd).subscribe({
-        next: async () => {
-          this.toastrService.success("Archivo cargado", file.name);
-          this.refreshUploadProgress(selectedDoc, true);
-
-          resolve();
-        },
-        error: () => {
-          this.toastrService.danger("Error al subir archivo", file.name);
-          resolve();
-        },
-        complete: () => (this.isUploading = false),
-      });
-    });
+    try {
+      // SOLUCIÓN CORREGIDA: Usar toPromise() en lugar de lastValueFrom
+      await this.documentService.uploadFile(fd).toPromise();
+      this.toastrService.success(
+        `Archivo aplicado a: ${assignment.documentType}`,
+        file.name
+      );
+    } catch (error) {
+      this.toastrService.danger(
+        `Error al subir a ${assignment.documentType}`,
+        file.name
+      );
+    } finally {
+      this.isUploading = false;
+    }
   }
 
   // ── Limpieza ──────────────────────────────────────────
@@ -383,6 +449,8 @@ export class DocumentUploadComponent {
     this.availableFormats = [];
     this.tempIssueDate = null;
     this.tempExpiryDate = null;
+    this.sharedAssignments = [];
+    this.useForOtherAssignments = false;
   }
 
   // ── Modal de subida y preview ─────────────────────────
@@ -466,6 +534,7 @@ export class DocumentUploadComponent {
       this.dialogRefUpload.close();
       this.dialogRefUpload = null!;
     }
+    this.resetUploadForm();
   }
 
   // ── Archivos subidos (preview y eliminación) ──────────
@@ -524,6 +593,7 @@ export class DocumentUploadComponent {
       },
     });
   }
+
   confirmUploadSubmit(): void {
     const doc = this.selectedDocumentForUpload ?? this.selectedDocument;
 
@@ -536,7 +606,6 @@ export class DocumentUploadComponent {
     this.documentService.submitUploadedFiles(doc.id, periodId).subscribe({
       next: () => {
         this.toastrService.success("Archivos enviados a revisión", "Éxito");
-        // this.refreshUploadProgress(this.selectedDocumentForUpload, true);
         this.closeModal();
         this.closeUploadModal();
 
@@ -613,11 +682,8 @@ export class DocumentUploadComponent {
       this.toastrService.warning("Archivo no encontrado", "Advertencia");
     }
   }
-  acknowledgeDocument(fileId: number): void {
-    const body = new FormData();
-    body.append("action", "acknowledge");
-    body.append("file_id", fileId.toString());
 
+  acknowledgeDocument(fileId: number): void {
     this.documentService.acknowledgeDocument(fileId).subscribe({
       next: () => {
         this.toastrService.success("Documento eliminado", "Éxito");
@@ -768,6 +834,7 @@ export class DocumentUploadComponent {
     }
     return !!this.selectedDocumentForUpload;
   }
+
   canUpload(): boolean {
     if (!this.selectedFile) return false;
     if (this.activeTab === "Con retraso") {
