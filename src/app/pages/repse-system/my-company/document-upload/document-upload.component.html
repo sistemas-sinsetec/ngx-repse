@@ -423,8 +423,18 @@
         </thead>
         <tbody>
           <tr *ngFor="let format of selectedDocumentForUpload.formats">
-            <td class="text-center">{{ format.code }}</td>
-            <td class="text-center">
+            <td class="text-center align-middle">
+              {{ format.code }}
+              <nb-icon
+                *ngIf="format.code.toLowerCase() === 'pdf'"
+                icon="info"
+                status="basic"
+                class="ml-2 tooltip-icon"
+                nbTooltip="Se recomienda que el PDF esté digitalizado (texto seleccionable) para facilitar la lectura automática de datos."
+              ></nb-icon>
+            </td>
+
+            <td class="text-center align-middle">
               {{ format.temp_uploaded_count || 0 }}/{{ format.min_required }}
             </td>
 
