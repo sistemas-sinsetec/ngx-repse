@@ -8,13 +8,24 @@ import {
 } from "../../../../services/repse/document.service";
 import { CompanyService } from "../../../../services/company.service";
 import * as moment from "moment";
+import { forkJoin } from "rxjs";
 
 interface FilePreview {
+  file_id: number; // <-- Añade esta propiedad
   name: string;
   path: string;
   uploaded_at: string;
   format: string;
   required_file_id: number;
+  period_id: number;
+  assignment_id: number;
+}
+
+interface CompatibleAssignment {
+  assignment: any;
+  companyName: string;
+  documentType: string;
+  periodCoverage: string;
 }
 
 @Component({
@@ -62,13 +73,8 @@ export class DocumentUploadComponent {
   modalTitle = "";
   allColumns = ["select", "name", "actions"];
 
-  // Fechas REPSE
-  private tempIssueDate: Date | null = null;
-  private tempExpiryDate: Date | null = null;
-
   // Nuevas propiedades para compartir archivos
-  sharedAssignments: any[] = []; // Lista de asignaciones compatibles
-  useForOtherAssignments = false; // Si el usuario quiere usar el archivo para otras asignaciones
+  sharedAssignments: CompatibleAssignment[] = [];
 
   constructor(
     private documentService: DocumentService,
@@ -89,7 +95,6 @@ export class DocumentUploadComponent {
 
     this.documentService.getOwnRequiredFiles(myCompanyId, "current").subscribe({
       next: (files) => {
-        // Forzar tipo numérico para evitar errores por comparación estricta
         const myCompanyFiles = files.filter(
           (f) => Number(f.companyId) === myCompanyId
         );
@@ -119,7 +124,6 @@ export class DocumentUploadComponent {
         });
 
         this.assignedByOthers = Object.values(grouped);
-
         this.loading = false;
       },
       error: (err) => {
@@ -135,7 +139,6 @@ export class DocumentUploadComponent {
 
     this.documentService.getOwnRequiredFiles(myCompanyId, "past").subscribe({
       next: (files: RequiredFileView[]) => {
-        // Filtrar documentos con al menos un periodo incompleto pasado
         const filtered = files.filter((doc) => {
           if (!doc.isPeriodic) return false;
 
@@ -148,7 +151,6 @@ export class DocumentUploadComponent {
           return incomplete.length > 0;
         });
 
-        // Conservar las fechas originales y sobrescribir solo `periods`
         files.forEach((doc) => {
           doc.startDate = new Date(doc.startDate);
           doc.endDate = doc.endDate ? new Date(doc.endDate) : null;
@@ -250,7 +252,6 @@ export class DocumentUploadComponent {
       await this.uploadSingleFile(files[i]);
     }
 
-    // Actualizar solo el documento que estás viendo
     this.refreshUploadProgress(
       this.selectedDocumentForUpload ?? this.selectedDocument,
       true
@@ -260,6 +261,9 @@ export class DocumentUploadComponent {
   }
 
   async uploadSingleFile(file: File): Promise<void> {
+    // Resetear asignaciones compatibles
+    this.sharedAssignments = [];
+
     const fileName = file.name.toLowerCase();
     const fileExt = fileName.split(".").pop();
     const selectedDoc = this.selectedDocumentForUpload ?? this.selectedDocument;
@@ -275,7 +279,6 @@ export class DocumentUploadComponent {
       expiryDate = parsed.expiryDate;
     }
 
-    // Si no se pudo extraer la fecha de vencimiento, usar la lógica existente
     if (!expiryDate && selectedDoc) {
       const formatConfig = selectedDoc.formats.find(
         (f: any) => f.code.toLowerCase() === "pdf"
@@ -294,32 +297,27 @@ export class DocumentUploadComponent {
       }
     }
 
-    // Buscar asignaciones compatibles
+    // Buscar asignaciones compatibles automáticamente
+    let compatibleAssignments: any[] = [];
     if (issueDate && expiryDate) {
-      this.findCompatibleAssignments(selectedDoc, {
+      compatibleAssignments = this.findCompatibleAssignments(selectedDoc, {
         start: issueDate,
         end: expiryDate,
       });
-    } else {
-      this.sharedAssignments = [];
     }
 
-    // Subir a la asignación principal
-    await this.uploadToAssignment(file, selectedDoc, issueDate, expiryDate);
+    // Crear lista de todas las asignaciones (principal + compatibles)
+    const allAssignments = [selectedDoc, ...compatibleAssignments];
 
-    // Subir a asignaciones adicionales si el usuario seleccionó alguna
-    if (this.useForOtherAssignments && this.sharedAssignments.length > 0) {
-      const selectedAssignments = this.sharedAssignments
-        .filter((a) => a.checked)
-        .map((a) => a.assignment);
-
-      for (const assignment of selectedAssignments) {
-        await this.uploadToAssignment(file, assignment, issueDate, expiryDate);
-      }
-    }
+    // Subir a todas las asignaciones
+    await this.uploadToMultipleAssignments(
+      file,
+      allAssignments,
+      issueDate,
+      expiryDate
+    );
   }
 
-  // CORRECCIÓN: Función con tipo de retorno explícito
   private async extractDatesFromPdf(file: File): Promise<{
     issueDate: Date | null;
     expiryDate: Date | null;
@@ -353,40 +351,81 @@ export class DocumentUploadComponent {
   private findCompatibleAssignments(
     currentAssignment: any,
     filePeriod: { start: Date; end: Date }
-  ) {
-    this.sharedAssignments = [];
+  ): any[] {
+    const compatibleAssignments = [];
     const myCompanyId = Number(this.companyService.selectedCompany.id);
 
-    // Buscar en todas las asignaciones (asignadas por mi y por otros)
     const allAssignments = [
       ...this.assignedByMe,
       ...this.assignedByOthers.flatMap((group) => group.files),
     ].filter(
       (assignment) =>
-        // Excluir la asignación actual
-        assignment.id !== currentAssignment.id
+        assignment.id !== currentAssignment.id && assignment.isPeriodic === true
     );
 
     for (const assignment of allAssignments) {
-      // Verificar que el formato del archivo sea compatible
       const formatMatch = assignment.formats.some(
         (f: any) => f.code === this.selectedFormat
       );
 
-      // Verificar que el periodo de la asignación esté cubierto por el archivo
       const coversPeriod = this.documentService.isFileCompatibleWithAssignment(
         filePeriod,
         assignment
       );
 
-      if (formatMatch && coversPeriod) {
+      const isActive =
+        !assignment.endDate || new Date(assignment.endDate) > new Date();
+
+      if (formatMatch && coversPeriod && isActive) {
+        // Agregar a lista para mostrar en UI
         this.sharedAssignments.push({
           assignment: assignment,
           companyName: assignment.companyName || "Mi empresa",
           documentType: assignment.documentType,
-          checked: false,
+          periodCoverage: this.getPeriodCoverageString(assignment),
         });
+
+        // Agregar a lista para subida
+        compatibleAssignments.push(assignment);
       }
+    }
+
+    return compatibleAssignments;
+  }
+
+  private getPeriodCoverageString(assignment: any): string {
+    if (!assignment.startDate || !assignment.endDate)
+      return "Período no definido";
+
+    const start = moment(assignment.startDate).format("DD/MM/YYYY");
+    const end = assignment.endDate
+      ? moment(assignment.endDate).format("DD/MM/YYYY")
+      : "Vigente";
+
+    return `${start} - ${end}`;
+  }
+
+  private async uploadToMultipleAssignments(
+    file: File,
+    assignments: any[],
+    issueDate: Date | null,
+    expiryDate: Date | null
+  ): Promise<void> {
+    this.isUploading = true;
+    const uploadPromises = [];
+
+    for (const assignment of assignments) {
+      uploadPromises.push(
+        this.uploadToAssignment(file, assignment, issueDate, expiryDate)
+      );
+    }
+
+    try {
+      await Promise.all(uploadPromises);
+    } catch (error) {
+      console.error("Error en subidas múltiples", error);
+    } finally {
+      this.isUploading = false;
     }
   }
 
@@ -399,11 +438,12 @@ export class DocumentUploadComponent {
     const fd = new FormData();
     fd.append("file", file);
     fd.append("required_file_id", assignment.id.toString());
+
     const periodId = assignment.currentPeriod?.period_id;
 
     if (!periodId) {
       this.toastrService.danger(
-        "No se encontró el periodo actual para este documento",
+        `No se encontró el periodo actual para ${assignment.documentType}`,
         "Error"
       );
       return;
@@ -419,22 +459,35 @@ export class DocumentUploadComponent {
       fd.append("expiry_date", moment(expiryDate).format("YYYY-MM-DD"));
     }
 
-    this.isUploading = true;
-
     try {
-      // SOLUCIÓN CORREGIDA: Usar toPromise() en lugar de lastValueFrom
-      await this.documentService.uploadFile(fd).toPromise();
+      const response: any = await this.documentService
+        .uploadFile(fd)
+        .toPromise();
+
+      // Asegúrate de que la respuesta incluya el file_id
+      this.filesPendingConfirmation.push({
+        file_id: response.file_id, // ID devuelto por el backend
+        name: file.name,
+        path: response.file_path,
+        uploaded_at: new Date().toISOString(),
+        format: this.selectedFormat,
+        required_file_id: assignment.id,
+        period_id: periodId,
+        assignment_id: assignment.id,
+      });
+
       this.toastrService.success(
-        `Archivo aplicado a: ${assignment.documentType}`,
+        `Archivo subido a: ${assignment.documentType}`,
         file.name
       );
-    } catch (error) {
+    } catch (error: any) {
       this.toastrService.danger(
-        `Error al subir a ${assignment.documentType}`,
+        `Error al subir a ${assignment.documentType}: ${
+          error?.message || "Error desconocido"
+        }`,
         file.name
       );
-    } finally {
-      this.isUploading = false;
+      throw error;
     }
   }
 
@@ -447,10 +500,7 @@ export class DocumentUploadComponent {
     this.selectedPeriod = null;
     this.selectedFormat = "";
     this.availableFormats = [];
-    this.tempIssueDate = null;
-    this.tempExpiryDate = null;
     this.sharedAssignments = [];
-    this.useForOtherAssignments = false;
   }
 
   // ── Modal de subida y preview ─────────────────────────
@@ -486,82 +536,35 @@ export class DocumentUploadComponent {
   }
 
   openPreviewModal(): void {
-    const doc = this.selectedDocumentForUpload;
-
-    if (!doc?.id || !doc?.currentPeriod?.period_id) {
-      this.toastrService.warning(
-        "No se encontró información del documento",
-        "Error"
-      );
-      return;
-    }
-
-    this.documentService
-      .getUploadedFiles(doc.id, doc.currentPeriod.period_id, ["uploaded"])
-      .subscribe({
-        next: (files) => {
-          this.filesToVisualize = files.map((f: any) => ({
-            name: f.file_path.split("/").pop(),
-            path: f.file_path,
-            uploaded_at: f.uploaded_at,
-            format: f.file_ext.toLowerCase(),
-            required_file_id: f.id,
-          }));
-
-          this.dialogRef = this.dialogService.open(this.previewModal, {
-            dialogClass: "custom-modal",
-            closeOnBackdropClick: false,
-          });
-        },
-        error: () => {
-          this.toastrService.danger(
-            "Error al cargar archivos cargados",
-            "Error"
-          );
-        },
-      });
+    this.dialogRef = this.dialogService.open(this.previewModal, {
+      dialogClass: "custom-modal",
+      closeOnBackdropClick: false,
+    });
   }
 
   closeModal(): void {
     if (this.dialogRef) {
       this.dialogRef.close();
-      this.dialogRef = null!;
     }
   }
 
   closeUploadModal(): void {
     if (this.dialogRefUpload) {
       this.dialogRefUpload.close();
-      this.dialogRefUpload = null!;
     }
     this.resetUploadForm();
   }
 
   // ── Archivos subidos (preview y eliminación) ──────────
 
-  loadFilesForReview(): void {
-    const doc = this.selectedDocumentForUpload;
-    if (!doc?.id || !doc?.currentPeriod?.period_id) return;
+  getAssignmentName(assignmentId: number): string {
+    const allAssignments = [
+      ...this.assignedByMe,
+      ...this.assignedByOthers.flatMap((group) => group.files),
+    ];
 
-    this.documentService
-      .getUploadedFiles(doc.id, doc.currentPeriod.period_id, ["uploaded"])
-      .subscribe({
-        next: (files) => {
-          this.filesPendingConfirmation = files.map((f: any) => ({
-            name: f.file_path.split("/").pop(),
-            path: f.file_path,
-            uploaded_at: f.uploaded_at,
-            format: f.file_ext.toLowerCase(),
-            required_file_id: f.id,
-          }));
-        },
-        error: () => {
-          this.toastrService.danger(
-            "Error al cargar archivos para revisión",
-            "Error"
-          );
-        },
-      });
+    const assignment = allAssignments.find((a) => a.id === assignmentId);
+    return assignment?.documentType || `Asignación ${assignmentId}`;
   }
 
   downloadPreviewFile(file: any): void {
@@ -595,32 +598,32 @@ export class DocumentUploadComponent {
   }
 
   confirmUploadSubmit(): void {
-    const doc = this.selectedDocumentForUpload ?? this.selectedDocument;
+    // Recopilar todos los IDs de archivo pendientes
+    const fileIds = this.filesPendingConfirmation.map((file) => file.file_id);
 
-    const periodId =
-      this.selectedDocumentForUpload?.currentPeriod?.period_id ??
-      this.selectedPeriod?.period_id;
+    if (fileIds.length === 0) {
+      this.finalizeUpload();
+      return;
+    }
 
-    if (!doc?.id || !periodId) return;
-
-    this.documentService.submitUploadedFiles(doc.id, periodId).subscribe({
-      next: () => {
-        this.toastrService.success("Archivos enviados a revisión", "Éxito");
-        this.closeModal();
-        this.closeUploadModal();
-
-        this.loadLateDocuments();
-        this.loadDocuments();
-
-        setTimeout(() => {
-          this.resetUploadForm();
-          this.filesPendingConfirmation = [];
-        }, 1);
-      },
-      error: () => {
+    // Enviar todos los IDs en una sola solicitud
+    this.documentService.submitMultipleUploadsGroup(0, fileIds).subscribe({
+      next: () => this.finalizeUpload(),
+      error: (error) => {
         this.toastrService.danger("Error al enviar archivos", "Error");
+        console.error(error);
       },
     });
+  }
+
+  private finalizeUpload(): void {
+    this.toastrService.success("Archivos enviados a revisión", "Éxito");
+    this.closeModal();
+    this.closeUploadModal();
+    this.loadLateDocuments();
+    this.loadDocuments();
+    this.resetUploadForm();
+    this.filesPendingConfirmation = [];
   }
 
   checkExpiringDocuments(): void {
@@ -640,7 +643,6 @@ export class DocumentUploadComponent {
             const expiry = moment(file.expiry_date).startOf("day");
             const daysLeft = expiry.diff(now, "days");
 
-            // Vencido hoy o en el pasado
             if (daysLeft <= 0) {
               this.toastrService.warning(
                 `El archivo de "${
@@ -648,22 +650,19 @@ export class DocumentUploadComponent {
                 }" se vence hoy (${expiry.format("DD/MM/YYYY")}).`,
                 "Archivo vencido"
               );
-            } else {
-              // Notificar desde notify_day hasta 1 día antes del vencimiento
-              if (
-                file.notify_day > 0 &&
-                daysLeft <= file.notify_day &&
-                daysLeft >= 1
-              ) {
-                this.toastrService.info(
-                  `El archivo "${
-                    file.file_type_name
-                  }" vencerá en ${daysLeft} día(s) (${expiry.format(
-                    "DD/MM/YYYY"
-                  )}).`,
-                  "Próximo a vencer"
-                );
-              }
+            } else if (
+              file.notify_day > 0 &&
+              daysLeft <= file.notify_day &&
+              daysLeft >= 1
+            ) {
+              this.toastrService.info(
+                `El archivo "${
+                  file.file_type_name
+                }" vencerá en ${daysLeft} día(s) (${expiry.format(
+                  "DD/MM/YYYY"
+                )}).`,
+                "Próximo a vencer"
+              );
             }
           });
         },
@@ -757,28 +756,29 @@ export class DocumentUploadComponent {
         next: (files) => {
           const counts: Record<string, number> = {};
 
-          // Agrupar conteo por extensión
           for (const f of files) {
             if (f.is_expired === 1) continue;
             const ext = (f.file_ext || "").toLowerCase();
             counts[ext] = (counts[ext] || 0) + 1;
           }
 
-          // Actualizar conteo en cada formato
           for (const fmt of doc.formats) {
             fmt.temp_uploaded_count = counts[fmt.code.toLowerCase()] || 0;
           }
 
-          // Si se necesita, actualizar también la tabla de preview
           if (includePreview) {
+            // ACTUALIZA ESTA PARTE PARA QUE COINCIDA CON FilePreview
             this.filesPendingConfirmation = files
               .filter((f: any) => f.status === "uploaded")
               .map((f: any) => ({
+                file_id: f.file_id, // Añade el file_id
                 name: f.file_path.split("/").pop(),
                 path: f.file_path,
                 uploaded_at: f.uploaded_at,
                 format: f.file_ext.toLowerCase(),
-                required_file_id: f.id,
+                required_file_id: f.required_file_id,
+                period_id: f.period_id,
+                assignment_id: f.required_file_id,
               }));
           }
         },
@@ -789,14 +789,12 @@ export class DocumentUploadComponent {
   }
 
   getFileAccept(): string {
-    // Si estamos en “Con retraso”, sólo el formato elegido
     if (this.activeTab === "Con retraso") {
       return this.selectedFormat
         ? `.${this.selectedFormat.toLowerCase()}`
         : "*/*";
     }
 
-    // En “Regular”, toma todos los códigos de formato disponibles
     if (!this.selectedDocumentForUpload) {
       return "*/*";
     }

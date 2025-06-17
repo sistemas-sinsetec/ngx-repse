@@ -413,6 +413,36 @@
       </div>
     </nb-card-header>
     <nb-card-body>
+      <!-- SECCIÓN DE ASIGNACIONES COMPATIBLES AUTOMÁTICAS -->
+      <nb-card *ngIf="sharedAssignments.length > 0" class="mt-4">
+        <nb-card-header>
+          <h5>Este archivo será compartido automáticamente con:</h5>
+        </nb-card-header>
+        <nb-card-body>
+          <div class="compatible-assignments">
+            <div
+              *ngFor="let assignment of sharedAssignments"
+              class="assignment-item mb-3 p-2 border rounded"
+            >
+              <div class="d-flex flex-column">
+                <span class="font-weight-bold">{{
+                  assignment.documentType
+                }}</span>
+                <span>Empresa: {{ assignment.companyName }}</span>
+                <span class="text-muted small"
+                  >Periodo: {{ assignment.periodCoverage }}</span
+                >
+              </div>
+            </div>
+          </div>
+
+          <div class="mt-2 text-info small">
+            <nb-icon icon="info-outline"></nb-icon>
+            Se crearán {{ sharedAssignments.length + 1 }} registros en total
+          </div>
+        </nb-card-body>
+      </nb-card>
+
       <table class="table table-striped">
         <thead>
           <tr>
@@ -452,9 +482,7 @@
                   "
                   [nbSpinner]="isUploading"
                 >
-                  <!-- Si no está cargando -->
                   <nb-icon *ngIf="!isUploading" icon="upload-outline"></nb-icon>
-                  <!-- Si está cargando -->
                   <nb-icon
                     *ngIf="isUploading"
                     icon="upload-outline"
@@ -466,38 +494,6 @@
           </tr>
         </tbody>
       </table>
-
-      <!-- SECCIÓN CORREGIDA: Compatibilidad con asignaciones -->
-      <nb-card *ngIf="sharedAssignments.length > 0" class="mt-4">
-        <nb-card-header>
-          <nb-checkbox [(ngModel)]="useForOtherAssignments">
-            Usar este archivo para otras asignaciones compatibles
-          </nb-checkbox>
-        </nb-card-header>
-        <nb-card-body *ngIf="useForOtherAssignments">
-          <h5>Asignaciones compatibles:</h5>
-          <div class="compatible-assignments">
-            <div
-              *ngFor="let assignment of sharedAssignments"
-              class="assignment-item"
-            >
-              <nb-checkbox [(ngModel)]="assignment.checked">
-                {{ assignment.documentType }}
-                ({{ assignment.companyName }})
-                <br />
-                <small>
-                  Periodo: {{ formatDate(assignment.assignment.startDate) }} -
-                  {{
-                    assignment.assignment.endDate
-                      ? formatDate(assignment.assignment.endDate)
-                      : "Vigente"
-                  }}
-                </small>
-              </nb-checkbox>
-            </div>
-          </div>
-        </nb-card-body>
-      </nb-card>
     </nb-card-body>
     <nb-card-footer>
       <div class="d-flex justify-content-end">
@@ -538,6 +534,7 @@
         <thead>
           <tr class="text-center">
             <th>Archivo</th>
+            <th>Asignación</th>
             <th>Fecha de carga</th>
             <th>Acciones</th>
           </tr>
@@ -546,6 +543,9 @@
           <tr *ngFor="let file of filesPendingConfirmation">
             <td class="align-middle">
               {{ file.name }}
+            </td>
+            <td class="align-middle">
+              {{ getAssignmentName(file.assignment_id) }}
             </td>
             <td class="align-middle">
               {{ file.uploaded_at | date : "dd/MM/yyyy HH:mm" }}

@@ -176,6 +176,17 @@ export class DocumentService {
 
   constructor(private http: HttpClient) {}
 
+  submitMultipleUploadsGroup(
+    requiredFileId: number,
+    fileIds: number[] // Cambiamos a recibir IDs de archivo directamente
+  ): Observable<any> {
+    const formData = new FormData();
+    formData.append("action", "submit_multiple_files");
+    formData.append("file_ids", fileIds.join(","));
+
+    return this.http.post(`${this.base}/company_files.php`, formData);
+  }
+
   getCompanyRequirements(companyId: number): Observable<RequirementForm[]> {
     const params = new HttpParams().set("company_id", companyId.toString());
     return this.http
@@ -383,11 +394,16 @@ export class DocumentService {
     });
   }
 
-  uploadFile(formData: FormData): Observable<{ success: boolean }> {
-    return this.http.post<{ success: boolean }>(
-      `${this.base}/company_files.php`,
-      formData
-    );
+  uploadFile(formData: FormData): Observable<{
+    success: boolean;
+    file_id: number;
+    file_path: string;
+  }> {
+    return this.http.post<{
+      success: boolean;
+      file_id: number;
+      file_path: string;
+    }>(`${this.base}/company_files.php`, formData);
   }
 
   downloadFile(filePath: string): void {

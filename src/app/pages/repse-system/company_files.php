@@ -47,6 +47,74 @@ function bind_and_execute($stmt, $types, ...$params)
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $action = $_POST['action'] ?? '';
 
+    // ===> INSERTAR AQUÍ EL NUEVO BLOQUE DE ACCIÓN <===
+    if ($action === 'submit_multiple_files') {
+        $file_ids_str = $_POST['file_ids'] ?? '';
+        $file_ids = array_map('intval', explode(',', $file_ids_str));
+        $file_ids = array_filter($file_ids, function($id) { return $id > 0; });
+
+        if (empty($file_ids)) {
+            echo json_encode(['success' => false, 'error' => 'No valid file IDs provided']);
+            exit;
+        }
+
+        // 1. Obtener los archivos
+        $placeholders = implode(',', array_fill(0, count($file_ids), '?'));
+        $types = str_repeat('i', count($file_ids));
+        
+        $stmt = safe_prepare(
+            $mysqli,
+            "SELECT file_id, file_path FROM company_files WHERE file_id IN ($placeholders) AND status = 'uploaded'",
+            'submit_multiple_files select'
+        );
+        $stmt->bind_param($types, ...$file_ids);
+        safe_execute($stmt, 'submit_multiple_files select');
+        $result = $stmt->get_result();
+        $files_to_update = [];
+        $file_ids_found = [];
+        
+        while ($row = $result->fetch_assoc()) {
+            $file_ids_found[] = $row['file_id'];
+            $files_to_update[] = $row;
+        }
+        $stmt->close();
+
+        // 2. Mover archivos físicos
+        foreach ($files_to_update as $row) {
+            $oldPath = __DIR__ . '/../documents/' . $row['file_path'];
+            $newPath = str_replace('/cargados/', '/subidos/', $oldPath);
+
+            $newDir = dirname($newPath);
+            if (!file_exists($newDir)) {
+                mkdir($newDir, 0777, true);
+            }
+
+            if (file_exists($oldPath)) {
+                rename($oldPath, $newPath);
+            }
+        }
+
+        // 3. Actualizar la base de datos
+        if (!empty($file_ids_found)) {
+            $placeholders_update = implode(',', array_fill(0, count($file_ids_found), '?'));
+            $types_update = str_repeat('i', count($file_ids_found));
+            
+            $update_sql = "UPDATE company_files 
+                           SET file_path = REPLACE(file_path, '/cargados/', '/subidos/'),
+                               status = 'pending' 
+                           WHERE file_id IN ($placeholders_update)";
+            
+            $update_stmt = safe_prepare($mysqli, $update_sql, 'submit_multiple_files update');
+            $update_stmt->bind_param($types_update, ...$file_ids_found);
+            safe_execute($update_stmt, 'submit_multiple_files update');
+            $update_stmt->close();
+        }
+
+        echo json_encode(['success' => true, 'updated_count' => count($file_ids_found)]);
+        exit;
+    }
+
+    
     // 1. Acción para subir archivo físico (nueva)
     if ($action === 'upload_physical') {
         try {
@@ -208,35 +276,37 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $user_id = 1; // Reemplazar con ID de usuario real
 
             // Insertar registro en base de datos
-            $stmt = safe_prepare($mysqli, "
-                INSERT INTO company_files 
-                (file_path, issue_date, expiry_date, user_id, status, is_current, period_id, period_coverage, is_expired, file_ext)
-                VALUES (?, ?, ?, ?, 'uploaded', 1, ?, ?, ?, ?)
-            ", 'file insert');
+           $stmt = safe_prepare($mysqli, "
+            INSERT INTO company_files 
+            (file_path, issue_date, expiry_date, user_id, status, is_current, period_id, period_coverage, is_expired, file_ext)
+            VALUES (?, ?, ?, ?, 'uploaded', 1, ?, ?, ?, ?)
+        ", 'file insert');
             
-            bind_and_execute(
-                $stmt, 
-                "sssisiss", 
-                $relative_path, 
-                $final_issue_date, 
-                $final_expiry_date, 
-                $user_id,
-                $periodId, 
-                $period_coverage, 
-                $is_expired,
-                $file_ext
-            );
+             bind_and_execute(
+            $stmt, 
+            "sssisiss", 
+            $relative_path, 
+            $final_issue_date, 
+            $final_expiry_date, 
+            $user_id,
+            $periodId, 
+            $period_coverage, 
+            $is_expired,
+            $file_ext
+        );
 
-            $file_id = $stmt->insert_id;
-            $stmt->close();
+        $file_id = $stmt->insert_id;
+        $stmt->close();
 
-            echo json_encode([
-                'success' => true,
-                'message' => 'Archivo asociado correctamente',
-                'file_id' => $file_id
-            ]);
-            
-        } catch (Exception $e) {
+        // MODIFICAR ESTA PARTE: Añadir file_path a la respuesta
+        echo json_encode([
+            'success' => true,
+            'message' => 'Archivo asociado correctamente',
+            'file_id' => $file_id,
+            'file_path' => $relative_path  // <- Nueva línea añadida
+        ]);
+        
+    } catch (Exception $e) {
             http_response_code(500);
             echo json_encode([
                 'success' => false,
@@ -246,47 +316,88 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         exit;
     }
 
-    // Acciones existentes...
     if ($action === 'submit_uploads') {
         $required_file_id = intval($_POST['required_file_id']);
-        $period_id = intval($_POST['period_id']);
         $format_code = trim($_POST['format_code']);
+        $period_ids_str = $_POST['period_ids'] ?? '';
+        
+        // Convertir a array de IDs
+        $period_ids = array_map('intval', explode(',', $period_ids_str));
+        $period_ids = array_filter($period_ids, function($id) {
+            return $id > 0;
+        });
 
+        if (empty($period_ids)) {
+            echo json_encode(['success' => false, 'error' => 'No se proporcionaron IDs de período válidos']);
+            exit;
+        }
+
+        // 1. Obtener todos los archivos a procesar
+        $placeholders = implode(',', array_fill(0, count($period_ids), '?'));
+        $types = str_repeat('i', count($period_ids));
+        
         $stmt = safe_prepare(
             $mysqli,
             "SELECT cf.file_id, cf.file_path 
-            FROM company_files cf
-            JOIN document_periods dp ON cf.period_id = dp.period_id
-            WHERE dp.required_file_id = ? AND cf.period_id = ? AND cf.file_ext = ? AND cf.status = 'uploaded'",
+             FROM company_files cf
+             JOIN document_periods dp ON cf.period_id = dp.period_id
+             WHERE dp.required_file_id = ? 
+               AND cf.period_id IN ($placeholders)
+               AND cf.file_ext = ? 
+               AND cf.status = 'uploaded'",
             'submit_uploads select'
         );
-
-        bind_and_execute($stmt, "iis", $required_file_id, $period_id, $format_code);
-
+        
+        // Parámetros: required_file_id + period_ids + format_code
+        $params = array_merge([$required_file_id], $period_ids, [$format_code]);
+        $stmt->bind_param("i".$types."s", ...$params);
+        safe_execute($stmt, 'submit_uploads select');
+        
         $result = $stmt->get_result();
+        $file_ids = [];
+        $files_to_update = [];
+        
         while ($row = $result->fetch_assoc()) {
+            $file_ids[] = $row['file_id'];
+            $files_to_update[] = $row;
+        }
+        $stmt->close();
+
+        // 2. Mover archivos físicos
+        foreach ($files_to_update as $row) {
             $oldPath = __DIR__ . '/../documents/' . $row['file_path'];
             $newPath = str_replace('/cargados/', '/subidos/', $oldPath);
 
             $newDir = dirname($newPath);
-            if (!file_exists($newDir))
+            if (!file_exists($newDir)) {
                 mkdir($newDir, 0777, true);
+            }
 
             if (file_exists($oldPath)) {
                 rename($oldPath, $newPath);
             }
-
-            $newRelativePath = str_replace('/cargados/', '/subidos/', $row['file_path']);
-
-            $update = safe_prepare($mysqli, "UPDATE company_files SET file_path = ?, status = 'pending' WHERE file_id = ?", 'submit_uploads update');
-            bind_and_execute($update, "si", $newRelativePath, $row['file_id']);
-            $update->close();
         }
 
-        $stmt->close();
-        echo json_encode(['success' => true]);
+        // 3. Actualización MASIVA del estado y rutas
+        if (!empty($file_ids)) {
+            $placeholders_file = implode(',', array_fill(0, count($file_ids), '?'));
+            $types_file = str_repeat('i', count($file_ids));
+            
+            $update_sql = "UPDATE company_files 
+                           SET file_path = REPLACE(file_path, '/cargados/', '/subidos/'),
+                               status = 'pending' 
+                           WHERE file_id IN ($placeholders_file)";
+            
+            $update_stmt = safe_prepare($mysqli, $update_sql, 'submit_uploads mass update');
+            $update_stmt->bind_param($types_file, ...$file_ids);
+            safe_execute($update_stmt, 'submit_uploads mass update');
+            $update_stmt->close();
+        }
+
+        echo json_encode(['success' => true, 'updated_count' => count($file_ids)]);
         exit;
     }
+
 
     if ($action === 'approve') {
         $file_id = intval($_POST['file_id']);
@@ -495,44 +606,71 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $required_file_id = intval($_POST['required_file_id']);
         $period_id = intval($_POST['period_id']);
 
-        $stmt = safe_prepare($mysqli, "
-            SELECT cf.file_id, cf.file_path 
+        // Obtener todos los archivos a procesar
+        $stmt = safe_prepare(
+            $mysqli,
+            "SELECT cf.file_id, cf.file_path 
             FROM company_files cf
             JOIN document_periods dp ON cf.period_id = dp.period_id
-            WHERE dp.required_file_id = ? AND cf.period_id = ? AND cf.status = 'uploaded'
-        ", 'submit_uploaded select');
+            WHERE dp.required_file_id = ? 
+              AND cf.period_id = ? 
+              AND cf.status = 'uploaded'",
+            'submit_uploaded select'
+        );
+        
         bind_and_execute($stmt, "ii", $required_file_id, $period_id);
         $result = $stmt->get_result();
-
+        $file_ids = [];
+        $files_to_update = [];
+        
         while ($row = $result->fetch_assoc()) {
+            $file_ids[] = $row['file_id'];
+            $files_to_update[] = $row;
+        }
+        $stmt->close();
+
+        // Mover archivos físicos
+        foreach ($files_to_update as $row) {
             $oldPath = __DIR__ . '/../documents/' . $row['file_path'];
 
+            // Solo procesar si está en /cargados/
             if (strpos($oldPath, '/cargados/') === false) {
                 continue;
             }
 
             $newPath = str_replace('/cargados/', '/subidos/', $oldPath);
-
             $newDir = dirname($newPath);
+            
             if (!file_exists($newDir)) {
                 mkdir($newDir, 0777, true);
             }
 
             if (file_exists($oldPath)) {
-                if (!rename($oldPath, $newPath)) {
-                    echo json_encode(['success' => false, 'error' => 'Error al mover archivo: ' . $oldPath]);
-                    exit;
-                }
+                rename($oldPath, $newPath);
             }
-
-            $newRelativePath = str_replace('/cargados/', '/subidos/', $row['file_path']);
-            $update = safe_prepare($mysqli, "UPDATE company_files SET file_path = ?, status = 'pending' WHERE file_id = ?", 'submit_uploaded update');
-            bind_and_execute($update, "si", $newRelativePath, $row['file_id']);
-            $update->close();
         }
 
-        $stmt->close();
-        echo json_encode(['success' => true]);
+        // Actualización MASIVA del estado y rutas
+        if (!empty($file_ids)) {
+            $placeholders = implode(',', array_fill(0, count($file_ids), '?'));
+            $types = str_repeat('i', count($file_ids));
+            
+            // Actualizar rutas y estados en una sola operación
+            $update_sql = "UPDATE company_files 
+                           SET file_path = REPLACE(file_path, '/cargados/', '/subidos/'),
+                               status = 'pending' 
+                           WHERE file_id IN ($placeholders)";
+            
+            $update_stmt = safe_prepare($mysqli, $update_sql, 'submit_uploaded mass update');
+            $update_stmt->bind_param($types, ...$file_ids);
+            safe_execute($update_stmt, 'submit_uploaded mass update');
+            $update_stmt->close();
+        }
+
+        echo json_encode([
+            'success' => true, 
+            'updated_count' => count($file_ids)
+        ]);
         exit;
     }
 
