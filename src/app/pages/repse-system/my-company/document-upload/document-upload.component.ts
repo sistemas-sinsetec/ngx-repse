@@ -19,16 +19,20 @@ interface FilePreview {
 
 interface FileHandlerConfig {
   extensions: string[];
-  extractDates?: (
+  extractMandatoryData?: (
     file: File,
     documentService: DocumentService
-  ) => Promise<{ issueDate: Date | null; expiryDate: Date | null }>;
+  ) => Promise<{
+    issueDate: Date | null;
+    expiryDate: Date | null;
+    rfc?: string | null;
+  }>;
 }
 
 const FILE_HANDLERS: Record<string, FileHandlerConfig> = {
   repse: {
     extensions: ["pdf"],
-    extractDates: async (file, service) => {
+    extractMandatoryData: async (file, service) => {
       const extractors: PdfExtractor[] = [
         {
           key: "issueDate",
@@ -60,53 +64,90 @@ const FILE_HANDLERS: Record<string, FileHandlerConfig> = {
             return d.isValid() ? d.toDate() : null;
           },
         },
+        {
+          key: "rfc",
+          pattern: /Registro Federal de Contribuyentes:\s*([A-ZÑ&0-9]{12,13})/i,
+          transform: ([_, rfc]) => rfc.trim().toUpperCase(),
+        },
       ];
 
       const result = await service.parsePdfData(file, extractors);
 
-      const issueDate =
-        result["issueDate"] instanceof Date ? result["issueDate"] : null;
-      const expiryDate =
-        result["expiryDate"] instanceof Date ? result["expiryDate"] : null;
-
-      return { issueDate, expiryDate };
+      return {
+        issueDate: result.issueDate instanceof Date ? result.issueDate : null,
+        expiryDate:
+          result.expiryDate instanceof Date ? result.expiryDate : null,
+        rfc: typeof result.rfc === "string" ? result.rfc : null,
+      };
     },
   },
   rfc: {
     extensions: ["xml"],
-    extractDates: async (file, service) => {
+    extractMandatoryData: async (file, service) => {
       const parsed = await service.parseXmlData(file, [
         {
           key: "FechaInicio",
-          path: "cfdi\\:Receptor",
-          transform: (v) => new Date(v),
+          namespace: "cfdi",
+          tag: "Receptor",
+          transform: (v) => {
+            const [year, month, day] = v.split("-");
+            return new Date(Number(year), Number(month) - 1, Number(day));
+          },
         },
         {
           key: "FechaFin",
-          path: "cfdi\\:Receptor",
-          transform: (v) => new Date(v),
+          namespace: "cfdi",
+          tag: "Receptor",
+          transform: (v) => {
+            const [year, month, day] = v.split("-");
+            return new Date(Number(year), Number(month) - 1, Number(day));
+          },
         },
       ]);
+
       return {
         issueDate: parsed["FechaInicio"] as Date,
         expiryDate: parsed["FechaFin"] as Date,
       };
     },
   },
-  nomina: {
+  nómina: {
     extensions: ["xml"],
-    extractDates: async (file, documentService) => {
+    extractMandatoryData: async (file, documentService) => {
       const parsed = await documentService.parseXmlData(file, [
         {
-          key: "FechaPago",
-          path: "nomina12\\:Receptor",
-          transform: (v) => new Date(v),
+          key: "rfc",
+          namespace: "cfdi",
+          tag: "Emisor",
+          attribute: "Rfc",
+          transform: (v) => v.toUpperCase().trim(),
+        },
+        {
+          key: "issueDate",
+          namespace: "nomina12",
+          tag: "Nomina",
+          attribute: "FechaInicialPago",
+          transform: (v) => {
+            const [year, month, day] = v.split("-");
+            return new Date(Number(year), Number(month) - 1, Number(day));
+          },
+        },
+        {
+          key: "expiryDate",
+          namespace: "nomina12",
+          tag: "Nomina",
+          attribute: "FechaFinalPago",
+          transform: (v) => {
+            const [year, month, day] = v.split("-");
+            return new Date(Number(year), Number(month) - 1, Number(day));
+          },
         },
       ]);
-      const issue = parsed["FechaPago"] as Date;
+      console.log(parsed);
       return {
-        issueDate: issue,
-        expiryDate: issue,
+        issueDate: parsed["issueDate"] as Date,
+        expiryDate: parsed["expiryDate"] as Date,
+        rfc: parsed["rfc"] as string,
       };
     },
   },
@@ -371,13 +412,18 @@ export class DocumentUploadComponent {
 
     let issueDate: Date | null = null;
     let expiryDate: Date | null = null;
+    let extractedRfc: string | null = null;
 
     // Intentar extraer fechas
-    if (config?.extractDates) {
+    if (config?.extractMandatoryData) {
       try {
-        const result = await config.extractDates(file, this.documentService);
+        const result = await config.extractMandatoryData(
+          file,
+          this.documentService
+        );
         issueDate = result.issueDate;
         expiryDate = result.expiryDate;
+        extractedRfc = result.rfc;
       } catch (error) {
         console.warn("Error al extraer fechas:", error);
         this.toastrService.danger(
@@ -386,6 +432,18 @@ export class DocumentUploadComponent {
         );
         return;
       }
+    }
+
+    // Valida que sí haya RFC extraído y que coincida
+    const companyRfc = this.companyService.selectedCompany?.rfc?.toUpperCase();
+    if (!extractedRfc || extractedRfc !== companyRfc) {
+      this.toastrService.warning(
+        `El RFC extraído (${
+          extractedRfc ?? "N/D"
+        }) no coincide con el RFC de la empresa (${companyRfc}).`,
+        "RFC no coincide"
+      );
+      return;
     }
 
     // Validar issueDate obligatoria
@@ -402,15 +460,12 @@ export class DocumentUploadComponent {
       (f: any) => f.code.toLowerCase() === fileExt
     );
 
-    console.log(formatConfig);
     if (!expiryDate && formatConfig?.manual_expiry_visible === 0) {
       const value = formatConfig.manual_expiry_value || 0;
       const unit = formatConfig.manual_expiry_unit || "años";
       const normalizedIssue = moment(issueDate).startOf("day").toDate();
       expiryDate = calculateExpiry(normalizedIssue, value, unit);
     }
-    console.log("Issue date:", issueDate);
-    console.log("Expiry date:", expiryDate);
 
     if (!expiryDate) {
       this.toastrService.warning(

@@ -143,7 +143,9 @@ export interface PdfExtractor {
 
 export interface XmlExtractor {
   key: string;
-  path: string; // XPath o navegación manual
+  namespace?: string;
+  tag: string;
+  attribute?: string;
   transform?: (text: string) => any;
 }
 
@@ -566,15 +568,22 @@ export class DocumentService {
   ): Promise<ExtractedData> {
     const text = await file.text();
     const parser = new DOMParser();
-    const xmlDoc = parser.parseFromString(text, "text/xml");
+    const xmlDoc = parser.parseFromString(text, "application/xml");
 
     const result: ExtractedData = {};
 
     for (const extractor of extractors) {
-      const element = xmlDoc.querySelector(extractor.path);
-      const value = element?.textContent?.trim() ?? null;
+      const ns = extractor.namespace
+        ? xmlDoc.documentElement.lookupNamespaceURI(extractor.namespace)
+        : null;
+
+      const elements = ns
+        ? xmlDoc.getElementsByTagNameNS(ns, extractor.tag)
+        : xmlDoc.getElementsByTagName(extractor.tag);
+
+      const attr = elements[0]?.getAttribute(extractor.attribute) ?? null;
       result[extractor.key] =
-        value && extractor.transform ? extractor.transform(value) : value;
+        attr && extractor.transform ? extractor.transform(attr) : attr;
     }
 
     return result;
