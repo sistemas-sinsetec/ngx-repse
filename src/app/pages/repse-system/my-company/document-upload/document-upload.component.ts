@@ -8,7 +8,6 @@ import {
 } from "../../../../services/repse/document.service";
 import { CompanyService } from "../../../../services/company.service";
 import * as moment from "moment";
-import { forkJoin } from "rxjs";
 
 interface FilePreview {
   file_id: number; // <-- Añade esta propiedad
@@ -27,6 +26,141 @@ interface CompatibleAssignment {
   documentType: string;
   periodCoverage: string;
 }
+interface FileHandlerConfig {
+  extensions: string[];
+  extractMandatoryData?: (
+    file: File,
+    documentService: DocumentService
+  ) => Promise<{
+    issueDate: Date | null;
+    expiryDate: Date | null;
+    rfc?: string | null;
+  }>;
+}
+
+const FILE_HANDLERS: Record<string, FileHandlerConfig> = {
+  repse: {
+    extensions: ["pdf"],
+    extractMandatoryData: async (file, service) => {
+      const extractors: PdfExtractor[] = [
+        {
+          key: "issueDate",
+          pattern: /Ciudad de México a .*?(\d{2}) de (\w+) del (\d{4})/i,
+          transform: ([_, day, monthText, year]) => {
+            const monthNum = {
+              enero: 0,
+              febrero: 1,
+              marzo: 2,
+              abril: 3,
+              mayo: 4,
+              junio: 5,
+              julio: 6,
+              agosto: 7,
+              septiembre: 8,
+              octubre: 9,
+              noviembre: 10,
+              diciembre: 11,
+            }[monthText.toLowerCase()];
+            if (monthNum === undefined) return null;
+            return new Date(Number(year), monthNum, Number(day));
+          },
+        },
+        {
+          key: "expiryDate",
+          pattern: /Fecha de Vencimiento:\s*(\d{2}\/\d{2}\/\d{4})/i,
+          transform: ([_, date]) => {
+            const d = moment(date, "DD/MM/YYYY");
+            return d.isValid() ? d.toDate() : null;
+          },
+        },
+        {
+          key: "rfc",
+          pattern: /Registro Federal de Contribuyentes:\s*([A-ZÑ&0-9]{12,13})/i,
+          transform: ([_, rfc]) => rfc.trim().toUpperCase(),
+        },
+      ];
+
+      const result = await service.parsePdfData(file, extractors);
+
+      return {
+        issueDate: result.issueDate instanceof Date ? result.issueDate : null,
+        expiryDate:
+          result.expiryDate instanceof Date ? result.expiryDate : null,
+        rfc: typeof result.rfc === "string" ? result.rfc : null,
+      };
+    },
+  },
+  rfc: {
+    extensions: ["xml"],
+    extractMandatoryData: async (file, service) => {
+      const parsed = await service.parseXmlData(file, [
+        {
+          key: "FechaInicio",
+          namespace: "cfdi",
+          tag: "Receptor",
+          transform: (v) => {
+            const [year, month, day] = v.split("-");
+            return new Date(Number(year), Number(month) - 1, Number(day));
+          },
+        },
+        {
+          key: "FechaFin",
+          namespace: "cfdi",
+          tag: "Receptor",
+          transform: (v) => {
+            const [year, month, day] = v.split("-");
+            return new Date(Number(year), Number(month) - 1, Number(day));
+          },
+        },
+      ]);
+
+      return {
+        issueDate: parsed["FechaInicio"] as Date,
+        expiryDate: parsed["FechaFin"] as Date,
+      };
+    },
+  },
+  nómina: {
+    extensions: ["xml"],
+    extractMandatoryData: async (file, documentService) => {
+      const parsed = await documentService.parseXmlData(file, [
+        {
+          key: "rfc",
+          namespace: "cfdi",
+          tag: "Emisor",
+          attribute: "Rfc",
+          transform: (v) => v.toUpperCase().trim(),
+        },
+        {
+          key: "issueDate",
+          namespace: "nomina12",
+          tag: "Nomina",
+          attribute: "FechaInicialPago",
+          transform: (v) => {
+            const [year, month, day] = v.split("-");
+            return new Date(Number(year), Number(month) - 1, Number(day));
+          },
+        },
+        {
+          key: "expiryDate",
+          namespace: "nomina12",
+          tag: "Nomina",
+          attribute: "FechaFinalPago",
+          transform: (v) => {
+            const [year, month, day] = v.split("-");
+            return new Date(Number(year), Number(month) - 1, Number(day));
+          },
+        },
+      ]);
+      console.log(parsed);
+      return {
+        issueDate: parsed["issueDate"] as Date,
+        expiryDate: parsed["expiryDate"] as Date,
+        rfc: parsed["rfc"] as string,
+      };
+    },
+  },
+};
 
 @Component({
   selector: "app-document-upload",
@@ -177,7 +311,10 @@ export class DocumentUploadComponent {
 
   loadRejectedFiles(): void {
     this.documentService
-      .getFilteredDocuments({ status: "rejected" })
+      .getFilteredDocuments({
+        status: "rejected",
+        company_id: this.companyService.selectedCompany.id,
+      })
       .subscribe({
         next: (files) => {
           this.rejectedFiles = files;
@@ -265,87 +402,134 @@ export class DocumentUploadComponent {
     this.sharedAssignments = [];
 
     const fileName = file.name.toLowerCase();
-    const fileExt = fileName.split(".").pop();
     const selectedDoc = this.selectedDocumentForUpload ?? this.selectedDocument;
     const fileTypeName = selectedDoc?.documentType?.toLowerCase();
+    const fileExt = fileName.split(".").pop();
 
-    // Extraer fechas si es REPSE y PDF
+    // Buscar configuración de extracción según tipo de documento y formato
+    const config = Object.entries(FILE_HANDLERS).find(
+      ([type, cfg]) =>
+        fileTypeName.includes(type) && cfg.extensions.includes(fileExt)
+    )?.[1];
+
     let issueDate: Date | null = null;
     let expiryDate: Date | null = null;
+    let extractedRfc: string | null = null;
 
-    if (fileTypeName?.includes("repse") && fileExt === "pdf") {
-      const parsed = await this.extractDatesFromPdf(file);
-      issueDate = parsed.issueDate;
-      expiryDate = parsed.expiryDate;
-    }
-
-    if (!expiryDate && selectedDoc) {
-      const formatConfig = selectedDoc.formats.find(
-        (f: any) => f.code.toLowerCase() === "pdf"
-      );
-      if (formatConfig) {
-        const expiryOffset = {
-          value: formatConfig.manual_expiry_value || 0,
-          unit: formatConfig.manual_expiry_unit || "años",
-        };
-        issueDate = issueDate || new Date();
-        expiryDate = calculateExpiry(
-          issueDate,
-          expiryOffset.value,
-          expiryOffset.unit
+    // Intentar extraer fechas
+    if (config?.extractMandatoryData) {
+      try {
+        const result = await config.extractMandatoryData(
+          file,
+          this.documentService
         );
+        issueDate = result.issueDate;
+        expiryDate = result.expiryDate;
+        extractedRfc = result.rfc;
+      } catch (error) {
+        console.warn("Error al extraer fechas:", error);
+        this.toastrService.danger(
+          `Ocurrió un error al procesar el archivo "${file.name}".`,
+          "Error de extracción"
+        );
+        return;
       }
     }
 
-    // Buscar asignaciones compatibles automáticamente
-    let compatibleAssignments: any[] = [];
-    if (issueDate && expiryDate) {
-      compatibleAssignments = this.findCompatibleAssignments(selectedDoc, {
-        start: issueDate,
-        end: expiryDate,
-      });
+    // Valida que sí haya RFC extraído y que coincida
+    const companyRfc = this.companyService.selectedCompany?.rfc?.toUpperCase();
+    if (!extractedRfc || extractedRfc !== companyRfc) {
+      this.toastrService.warning(
+        `El RFC extraído (${
+          extractedRfc ?? "N/D"
+        }) no coincide con el RFC de la empresa (${companyRfc}).`,
+        "RFC no coincide"
+      );
+      return;
     }
 
-    // Crear lista de todas las asignaciones (principal + compatibles)
-    const allAssignments = [selectedDoc, ...compatibleAssignments];
+    // Validar issueDate obligatoria
+    if (!issueDate) {
+      this.toastrService.warning(
+        `No se pudo encontrar la fecha de emisión en el archivo "${file.name}". Verifica el contenido del PDF.`,
+        "Fecha no detectada"
+      );
+      return;
+    }
 
-    // Subir a todas las asignaciones
-    await this.uploadToMultipleAssignments(
-      file,
-      allAssignments,
-      issueDate,
-      expiryDate
+    // Si no hay fecha de vencimiento y se permite calcularla
+    const formatConfig = selectedDoc.formats.find(
+      (f: any) => f.code.toLowerCase() === fileExt
     );
-  }
 
-  private async extractDatesFromPdf(file: File): Promise<{
-    issueDate: Date | null;
-    expiryDate: Date | null;
-  }> {
-    const extractors: PdfExtractor[] = [
-      {
-        key: "issueDate",
-        pattern: /Fecha de Emisión:\s*(\d{2}\/\d{2}\/\d{4})/i,
-        transform: ([_, date]) => {
-          const parsedDate = moment(date, "DD/MM/YYYY");
-          return parsedDate.isValid() ? parsedDate.toDate() : null;
-        },
-      },
-      {
-        key: "expiryDate",
-        pattern: /Fecha de Vencimiento:\s*(\d{2}\/\d{2}\/\d{4})/i,
-        transform: ([_, date]) => {
-          const parsedDate = moment(date, "DD/MM/YYYY");
-          return parsedDate.isValid() ? parsedDate.toDate() : null;
-        },
-      },
-    ];
+    if (!expiryDate && formatConfig?.manual_expiry_visible === 0) {
+      const value = formatConfig.manual_expiry_value || 0;
+      const unit = formatConfig.manual_expiry_unit || "años";
+      const normalizedIssue = moment(issueDate).startOf("day").toDate();
+      expiryDate = calculateExpiry(normalizedIssue, value, unit);
+    }
 
-    const parsed = await this.documentService.parsePdfData(file, extractors);
-    return {
-      issueDate: parsed["issueDate"] as Date | null,
-      expiryDate: parsed["expiryDate"] as Date | null,
-    };
+    if (!expiryDate) {
+      this.toastrService.warning(
+        `No se pudo determinar la fecha de vencimiento del archivo "${file.name}" (${issueDate} - ${expiryDate}).`,
+        "Vencimiento no detectado"
+      );
+      return;
+    }
+
+    // Determinar la cobertura del periodo actual
+    const period = selectedDoc.currentPeriod ?? this.selectedPeriod;
+    if (!period) {
+      this.toastrService.danger("No se encontró el periodo actual", "Error");
+      return;
+    }
+
+    const periodStart = moment(period.start_date).startOf("day");
+    const periodEnd = moment(period.end_date).endOf("day");
+
+    let coverage: "none" | "partial" | "full" = "none";
+
+    if (expiryDate && moment(expiryDate).isBefore(periodStart)) {
+      coverage = "none";
+    } else if (expiryDate && moment(expiryDate).isBefore(periodEnd)) {
+      coverage = "partial";
+    } else {
+      coverage = "full";
+    }
+
+    // Mostrar notificaciones según cobertura
+    if (coverage === "none") {
+      this.toastrService.warning(
+        `El archivo "${
+          file.name
+        }" no cubre el periodo actual (${periodStart.format(
+          "DD/MM/YYYY"
+        )} a ${periodEnd.format("DD/MM/YYYY")}).`,
+        "Archivo inválido"
+      );
+      return;
+    } else if (coverage === "partial") {
+      this.toastrService.info(
+        `El archivo "${
+          file.name
+        }" solo cubre parcialmente el periodo (${periodStart.format(
+          "DD/MM/YYYY"
+        )} a ${periodEnd.format("DD/MM/YYYY")}).`,
+        "Cobertura parcial"
+      );
+    }
+
+    // Subir a la asignación principal
+    await this.uploadToAssignment(file, selectedDoc, issueDate, expiryDate);
+
+    // Buscar asignaciones compatibles
+    this.findCompatibleAssignments(selectedDoc, {
+      start: issueDate,
+      end: expiryDate,
+    });
+
+    // Guardar referencia del último archivo cargado
+    this.selectedFile = file;
   }
 
   private findCompatibleAssignments(
@@ -631,6 +815,7 @@ export class DocumentUploadComponent {
       .getFilteredDocuments({
         status: "all",
         period_coverage: "partial",
+        company_id: this.companyService.selectedCompany.id,
         is_expired: 0,
       })
       .subscribe({

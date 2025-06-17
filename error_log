@@ -1,0 +1,2900 @@
+[10-Jun-2025 23:00:28 UTC] User Position Range: 0
+[10-Jun-2025 23:00:28 UTC] User Position Range: 0
+[10-Jun-2025 23:00:28 UTC] Empleados no asignados encontrados: 4
+[10-Jun-2025 23:00:28 UTC] Empleados filtrados encontrados: 24
+[10-Jun-2025 23:02:34 UTC] User Position Range: 4
+[10-Jun-2025 23:02:34 UTC] User Position Range: 4
+[10-Jun-2025 23:02:34 UTC] Empleados no asignados encontrados: 5
+[10-Jun-2025 23:02:34 UTC] Empleados filtrados encontrados: 1
+[10-Jun-2025 23:03:04 UTC] User Position Range: 4
+[10-Jun-2025 23:03:04 UTC] Empleados no asignados encontrados: 5
+[10-Jun-2025 23:03:19 UTC] User Position Range: 4
+[10-Jun-2025 23:03:19 UTC] Empleados no asignados encontrados: 5
+[10-Jun-2025 23:03:20 UTC] User Position Range: 4
+[10-Jun-2025 23:03:20 UTC] Empleados no asignados encontrados: 5
+[10-Jun-2025 23:03:58 UTC] User Position Range: 4
+[10-Jun-2025 23:03:58 UTC] User Position Range: 4
+[10-Jun-2025 23:03:58 UTC] Empleados filtrados encontrados: 0
+[10-Jun-2025 23:03:58 UTC] Empleados no asignados encontrados: 6
+[11-Jun-2025 03:07:48 UTC] User Position Range: 10
+[11-Jun-2025 03:07:48 UTC] User Position Range: 10
+[11-Jun-2025 03:07:48 UTC] Empleados filtrados encontrados: 0
+[11-Jun-2025 03:07:48 UTC] Empleados no asignados encontrados: 26
+[11-Jun-2025 03:20:34 UTC] User Position Range: 10
+[11-Jun-2025 03:20:34 UTC] User Position Range: 10
+[11-Jun-2025 03:20:34 UTC] Empleados no asignados encontrados: 26
+[11-Jun-2025 03:20:34 UTC] Empleados filtrados encontrados: 0
+[11-Jun-2025 03:21:18 UTC] User Position Range: 10
+[11-Jun-2025 03:21:18 UTC] Empleados no asignados encontrados: 26
+[11-Jun-2025 03:21:18 UTC] User Position Range: 10
+[11-Jun-2025 03:21:18 UTC] Empleados filtrados encontrados: 0
+[11-Jun-2025 03:32:45 UTC] User Position Range: 10
+[11-Jun-2025 03:32:45 UTC] ==== INICIO DEPURACIÓN ====
+[11-Jun-2025 03:32:45 UTC] company_id: 180
+[11-Jun-2025 03:32:45 UTC] project_id: 10099
+[11-Jun-2025 03:32:45 UTC] given_date (day_of_week): 2025-06-06
+[11-Jun-2025 03:32:45 UTC] Empleados filtrados encontrados: 26
+[11-Jun-2025 03:32:45 UTC] target_date found: 2025-06-05
+[11-Jun-2025 03:32:45 UTC] Final query: 
+    SELECT ea.assignment_id,
+           ea.employee_id,
+           e.full_name,
+           TRIM(ea.day_of_week) AS day_of_week
+    FROM employee_assignments ea
+    JOIN employees e ON ea.employee_id = e.employee_id
+    WHERE ea.company_id = ?
+      AND ea.project_id = ?
+      AND TRIM(ea.day_of_week) = ?
+ (params: company_id=180, project_id=10099, target_date=2025-06-05)
+[11-Jun-2025 03:32:45 UTC] Empleados devueltos: 1
+[11-Jun-2025 03:32:45 UTC] ==== FIN DEPURACIÓN ====
+[11-Jun-2025 03:33:34 UTC] User Position Range: 10
+[11-Jun-2025 03:33:34 UTC] Empleados filtrados encontrados: 26
+[11-Jun-2025 03:34:11 UTC] ==== INICIO DEPURACIÓN ====
+[11-Jun-2025 03:34:11 UTC] company_id: 180
+[11-Jun-2025 03:34:11 UTC] project_id: 10094
+[11-Jun-2025 03:34:11 UTC] given_date (day_of_week): 2025-06-06
+[11-Jun-2025 03:34:11 UTC] target_date found: 2025-06-02
+[11-Jun-2025 03:34:11 UTC] Final query: 
+    SELECT ea.assignment_id,
+           ea.employee_id,
+           e.full_name,
+           TRIM(ea.day_of_week) AS day_of_week
+    FROM employee_assignments ea
+    JOIN employees e ON ea.employee_id = e.employee_id
+    WHERE ea.company_id = ?
+      AND ea.project_id = ?
+      AND TRIM(ea.day_of_week) = ?
+ (params: company_id=180, project_id=10094, target_date=2025-06-02)
+[11-Jun-2025 03:34:11 UTC] Empleados devueltos: 2
+[11-Jun-2025 03:34:11 UTC] ==== FIN DEPURACIÓN ====
+[11-Jun-2025 03:34:11 UTC] User Position Range: 10
+[11-Jun-2025 03:34:11 UTC] Empleados filtrados encontrados: 26
+[11-Jun-2025 03:34:33 UTC] User Position Range: 10
+[11-Jun-2025 03:34:33 UTC] Empleados filtrados encontrados: 26
+[11-Jun-2025 03:34:45 UTC] ==== INICIO DEPURACIÓN ====
+[11-Jun-2025 03:34:45 UTC] company_id: 180
+[11-Jun-2025 03:34:45 UTC] project_id: 10097
+[11-Jun-2025 03:34:45 UTC] given_date (day_of_week): 2025-06-06
+[11-Jun-2025 03:34:45 UTC] target_date found: 2025-06-05
+[11-Jun-2025 03:34:45 UTC] Final query: 
+    SELECT ea.assignment_id,
+           ea.employee_id,
+           e.full_name,
+           TRIM(ea.day_of_week) AS day_of_week
+    FROM employee_assignments ea
+    JOIN employees e ON ea.employee_id = e.employee_id
+    WHERE ea.company_id = ?
+      AND ea.project_id = ?
+      AND TRIM(ea.day_of_week) = ?
+ (params: company_id=180, project_id=10097, target_date=2025-06-05)
+[11-Jun-2025 03:34:45 UTC] Empleados devueltos: 1
+[11-Jun-2025 03:34:45 UTC] ==== FIN DEPURACIÓN ====
+[11-Jun-2025 03:34:45 UTC] User Position Range: 10
+[11-Jun-2025 03:34:45 UTC] Empleados filtrados encontrados: 26
+[11-Jun-2025 03:35:59 UTC] User Position Range: 10
+[11-Jun-2025 03:35:59 UTC] Empleados filtrados encontrados: 26
+[11-Jun-2025 03:36:06 UTC] User Position Range: 10
+[11-Jun-2025 03:36:06 UTC] Empleados filtrados encontrados: 26
+[11-Jun-2025 03:36:06 UTC] ==== INICIO DEPURACIÓN ====
+[11-Jun-2025 03:36:06 UTC] company_id: 180
+[11-Jun-2025 03:36:06 UTC] project_id: 10100
+[11-Jun-2025 03:36:06 UTC] given_date (day_of_week): 2025-06-06
+[11-Jun-2025 03:36:06 UTC] target_date found: 2025-06-05
+[11-Jun-2025 03:36:06 UTC] Final query: 
+    SELECT ea.assignment_id,
+           ea.employee_id,
+           e.full_name,
+           TRIM(ea.day_of_week) AS day_of_week
+    FROM employee_assignments ea
+    JOIN employees e ON ea.employee_id = e.employee_id
+    WHERE ea.company_id = ?
+      AND ea.project_id = ?
+      AND TRIM(ea.day_of_week) = ?
+ (params: company_id=180, project_id=10100, target_date=2025-06-05)
+[11-Jun-2025 03:36:06 UTC] Empleados devueltos: 2
+[11-Jun-2025 03:36:06 UTC] ==== FIN DEPURACIÓN ====
+[11-Jun-2025 03:36:46 UTC] User Position Range: 10
+[11-Jun-2025 03:36:46 UTC] Empleados filtrados encontrados: 26
+[11-Jun-2025 03:37:03 UTC] ==== INICIO DEPURACIÓN ====
+[11-Jun-2025 03:37:03 UTC] company_id: 180
+[11-Jun-2025 03:37:03 UTC] project_id: 10086
+[11-Jun-2025 03:37:03 UTC] given_date (day_of_week): 2025-06-06
+[11-Jun-2025 03:37:03 UTC] User Position Range: 10
+[11-Jun-2025 03:37:03 UTC] target_date found: 2025-06-05
+[11-Jun-2025 03:37:03 UTC] Final query: 
+    SELECT ea.assignment_id,
+           ea.employee_id,
+           e.full_name,
+           TRIM(ea.day_of_week) AS day_of_week
+    FROM employee_assignments ea
+    JOIN employees e ON ea.employee_id = e.employee_id
+    WHERE ea.company_id = ?
+      AND ea.project_id = ?
+      AND TRIM(ea.day_of_week) = ?
+ (params: company_id=180, project_id=10086, target_date=2025-06-05)
+[11-Jun-2025 03:37:03 UTC] Empleados filtrados encontrados: 26
+[11-Jun-2025 03:37:03 UTC] Empleados devueltos: 2
+[11-Jun-2025 03:37:03 UTC] ==== FIN DEPURACIÓN ====
+[11-Jun-2025 03:37:34 UTC] User Position Range: 10
+[11-Jun-2025 03:37:34 UTC] Empleados filtrados encontrados: 26
+[11-Jun-2025 03:37:50 UTC] User Position Range: 10
+[11-Jun-2025 03:37:50 UTC] Empleados filtrados encontrados: 26
+[11-Jun-2025 03:37:50 UTC] ==== INICIO DEPURACIÓN ====
+[11-Jun-2025 03:37:50 UTC] company_id: 180
+[11-Jun-2025 03:37:50 UTC] project_id: 10098
+[11-Jun-2025 03:37:50 UTC] given_date (day_of_week): 2025-06-06
+[11-Jun-2025 03:37:50 UTC] target_date found: 2025-06-05
+[11-Jun-2025 03:37:50 UTC] Final query: 
+    SELECT ea.assignment_id,
+           ea.employee_id,
+           e.full_name,
+           TRIM(ea.day_of_week) AS day_of_week
+    FROM employee_assignments ea
+    JOIN employees e ON ea.employee_id = e.employee_id
+    WHERE ea.company_id = ?
+      AND ea.project_id = ?
+      AND TRIM(ea.day_of_week) = ?
+ (params: company_id=180, project_id=10098, target_date=2025-06-05)
+[11-Jun-2025 03:37:50 UTC] Empleados devueltos: 1
+[11-Jun-2025 03:37:50 UTC] ==== FIN DEPURACIÓN ====
+[11-Jun-2025 03:38:28 UTC] User Position Range: 10
+[11-Jun-2025 03:38:28 UTC] Empleados filtrados encontrados: 26
+[11-Jun-2025 03:39:05 UTC] ==== INICIO DEPURACIÓN ====
+[11-Jun-2025 03:39:05 UTC] company_id: 180
+[11-Jun-2025 03:39:05 UTC] project_id: 10093
+[11-Jun-2025 03:39:05 UTC] given_date (day_of_week): 2025-06-06
+[11-Jun-2025 03:39:05 UTC] target_date found: 2025-06-05
+[11-Jun-2025 03:39:05 UTC] Final query: 
+    SELECT ea.assignment_id,
+           ea.employee_id,
+           e.full_name,
+           TRIM(ea.day_of_week) AS day_of_week
+    FROM employee_assignments ea
+    JOIN employees e ON ea.employee_id = e.employee_id
+    WHERE ea.company_id = ?
+      AND ea.project_id = ?
+      AND TRIM(ea.day_of_week) = ?
+ (params: company_id=180, project_id=10093, target_date=2025-06-05)
+[11-Jun-2025 03:39:05 UTC] User Position Range: 10
+[11-Jun-2025 03:39:05 UTC] Empleados devueltos: 2
+[11-Jun-2025 03:39:05 UTC] ==== FIN DEPURACIÓN ====
+[11-Jun-2025 03:39:05 UTC] Empleados filtrados encontrados: 26
+[11-Jun-2025 03:39:27 UTC] User Position Range: 10
+[11-Jun-2025 03:39:27 UTC] Empleados filtrados encontrados: 26
+[11-Jun-2025 03:40:24 UTC] ==== INICIO DEPURACIÓN ====
+[11-Jun-2025 03:40:24 UTC] company_id: 180
+[11-Jun-2025 03:40:24 UTC] project_id: 10092
+[11-Jun-2025 03:40:24 UTC] given_date (day_of_week): 2025-06-06
+[11-Jun-2025 03:40:24 UTC] target_date found: 2025-06-02
+[11-Jun-2025 03:40:24 UTC] Final query: 
+    SELECT ea.assignment_id,
+           ea.employee_id,
+           e.full_name,
+           TRIM(ea.day_of_week) AS day_of_week
+    FROM employee_assignments ea
+    JOIN employees e ON ea.employee_id = e.employee_id
+    WHERE ea.company_id = ?
+      AND ea.project_id = ?
+      AND TRIM(ea.day_of_week) = ?
+ (params: company_id=180, project_id=10092, target_date=2025-06-02)
+[11-Jun-2025 03:40:24 UTC] User Position Range: 10
+[11-Jun-2025 03:40:24 UTC] Empleados devueltos: 1
+[11-Jun-2025 03:40:24 UTC] ==== FIN DEPURACIÓN ====
+[11-Jun-2025 03:40:24 UTC] Empleados filtrados encontrados: 26
+[11-Jun-2025 03:40:39 UTC] User Position Range: 10
+[11-Jun-2025 03:40:39 UTC] Empleados filtrados encontrados: 26
+[11-Jun-2025 03:40:50 UTC] ==== INICIO DEPURACIÓN ====
+[11-Jun-2025 03:40:50 UTC] company_id: 180
+[11-Jun-2025 03:40:50 UTC] project_id: 10104
+[11-Jun-2025 03:40:50 UTC] given_date (day_of_week): 2025-06-06
+[11-Jun-2025 03:40:50 UTC] target_date found: 
+[11-Jun-2025 03:40:50 UTC] No se encontró ninguna fecha anterior para project_id=10104, company_id=180
+[11-Jun-2025 03:40:50 UTC] User Position Range: 10
+[11-Jun-2025 03:40:50 UTC] Empleados filtrados encontrados: 26
+[11-Jun-2025 03:41:03 UTC] User Position Range: 10
+[11-Jun-2025 03:41:03 UTC] Empleados filtrados encontrados: 26
+[11-Jun-2025 03:41:19 UTC] User Position Range: 10
+[11-Jun-2025 03:41:19 UTC] Empleados filtrados encontrados: 26
+[11-Jun-2025 03:41:19 UTC] ==== INICIO DEPURACIÓN ====
+[11-Jun-2025 03:41:19 UTC] company_id: 180
+[11-Jun-2025 03:41:19 UTC] project_id: 10103
+[11-Jun-2025 03:41:19 UTC] given_date (day_of_week): 2025-06-06
+[11-Jun-2025 03:41:19 UTC] target_date found: 
+[11-Jun-2025 03:41:19 UTC] No se encontró ninguna fecha anterior para project_id=10103, company_id=180
+[11-Jun-2025 03:41:59 UTC] User Position Range: 10
+[11-Jun-2025 03:41:59 UTC] Empleados filtrados encontrados: 26
+[11-Jun-2025 03:42:15 UTC] ==== INICIO DEPURACIÓN ====
+[11-Jun-2025 03:42:15 UTC] company_id: 180
+[11-Jun-2025 03:42:15 UTC] project_id: 46
+[11-Jun-2025 03:42:15 UTC] given_date (day_of_week): 2025-06-06
+[11-Jun-2025 03:42:15 UTC] User Position Range: 10
+[11-Jun-2025 03:42:15 UTC] Empleados filtrados encontrados: 26
+[11-Jun-2025 03:42:15 UTC] target_date found: 2025-06-05
+[11-Jun-2025 03:42:15 UTC] Final query: 
+    SELECT ea.assignment_id,
+           ea.employee_id,
+           e.full_name,
+           TRIM(ea.day_of_week) AS day_of_week
+    FROM employee_assignments ea
+    JOIN employees e ON ea.employee_id = e.employee_id
+    WHERE ea.company_id = ?
+      AND ea.project_id = ?
+      AND TRIM(ea.day_of_week) = ?
+ (params: company_id=180, project_id=46, target_date=2025-06-05)
+[11-Jun-2025 03:42:15 UTC] Empleados devueltos: 2
+[11-Jun-2025 03:42:15 UTC] ==== FIN DEPURACIÓN ====
+[11-Jun-2025 03:42:28 UTC] User Position Range: 10
+[11-Jun-2025 03:42:28 UTC] Empleados filtrados encontrados: 26
+[11-Jun-2025 03:42:57 UTC] User Position Range: 10
+[11-Jun-2025 03:42:57 UTC] ==== INICIO DEPURACIÓN ====
+[11-Jun-2025 03:42:57 UTC] company_id: 180
+[11-Jun-2025 03:42:57 UTC] project_id: 10096
+[11-Jun-2025 03:42:57 UTC] given_date (day_of_week): 2025-06-06
+[11-Jun-2025 03:42:57 UTC] target_date found: 2025-06-04
+[11-Jun-2025 03:42:57 UTC] Final query: 
+    SELECT ea.assignment_id,
+           ea.employee_id,
+           e.full_name,
+           TRIM(ea.day_of_week) AS day_of_week
+    FROM employee_assignments ea
+    JOIN employees e ON ea.employee_id = e.employee_id
+    WHERE ea.company_id = ?
+      AND ea.project_id = ?
+      AND TRIM(ea.day_of_week) = ?
+ (params: company_id=180, project_id=10096, target_date=2025-06-04)
+[11-Jun-2025 03:42:57 UTC] Empleados filtrados encontrados: 26
+[11-Jun-2025 03:42:57 UTC] Empleados devueltos: 1
+[11-Jun-2025 03:42:57 UTC] ==== FIN DEPURACIÓN ====
+[11-Jun-2025 03:43:07 UTC] User Position Range: 10
+[11-Jun-2025 03:43:07 UTC] Empleados filtrados encontrados: 26
+[11-Jun-2025 03:43:13 UTC] ==== INICIO DEPURACIÓN ====
+[11-Jun-2025 03:43:13 UTC] company_id: 180
+[11-Jun-2025 03:43:13 UTC] project_id: 10102
+[11-Jun-2025 03:43:13 UTC] given_date (day_of_week): 2025-06-06
+[11-Jun-2025 03:43:13 UTC] User Position Range: 10
+[11-Jun-2025 03:43:13 UTC] target_date found: 
+[11-Jun-2025 03:43:13 UTC] Empleados filtrados encontrados: 26
+[11-Jun-2025 03:43:13 UTC] No se encontró ninguna fecha anterior para project_id=10102, company_id=180
+[11-Jun-2025 03:43:22 UTC] User Position Range: 10
+[11-Jun-2025 03:43:22 UTC] Empleados filtrados encontrados: 26
+[11-Jun-2025 03:43:45 UTC] ==== INICIO DEPURACIÓN ====
+[11-Jun-2025 03:43:45 UTC] company_id: 180
+[11-Jun-2025 03:43:45 UTC] project_id: 10074
+[11-Jun-2025 03:43:45 UTC] given_date (day_of_week): 2025-06-06
+[11-Jun-2025 03:43:45 UTC] User Position Range: 10
+[11-Jun-2025 03:43:45 UTC] target_date found: 2025-06-02
+[11-Jun-2025 03:43:45 UTC] Final query: 
+    SELECT ea.assignment_id,
+           ea.employee_id,
+           e.full_name,
+           TRIM(ea.day_of_week) AS day_of_week
+    FROM employee_assignments ea
+    JOIN employees e ON ea.employee_id = e.employee_id
+    WHERE ea.company_id = ?
+      AND ea.project_id = ?
+      AND TRIM(ea.day_of_week) = ?
+ (params: company_id=180, project_id=10074, target_date=2025-06-02)
+[11-Jun-2025 03:43:45 UTC] Empleados filtrados encontrados: 26
+[11-Jun-2025 03:43:45 UTC] Empleados devueltos: 2
+[11-Jun-2025 03:43:45 UTC] ==== FIN DEPURACIÓN ====
+[11-Jun-2025 03:44:05 UTC] User Position Range: 10
+[11-Jun-2025 03:44:05 UTC] Empleados filtrados encontrados: 26
+[11-Jun-2025 03:44:12 UTC] ==== INICIO DEPURACIÓN ====
+[11-Jun-2025 03:44:12 UTC] company_id: 180
+[11-Jun-2025 03:44:12 UTC] project_id: 10055
+[11-Jun-2025 03:44:12 UTC] given_date (day_of_week): 2025-06-06
+[11-Jun-2025 03:44:12 UTC] target_date found: 2025-06-05
+[11-Jun-2025 03:44:12 UTC] Final query: 
+    SELECT ea.assignment_id,
+           ea.employee_id,
+           e.full_name,
+           TRIM(ea.day_of_week) AS day_of_week
+    FROM employee_assignments ea
+    JOIN employees e ON ea.employee_id = e.employee_id
+    WHERE ea.company_id = ?
+      AND ea.project_id = ?
+      AND TRIM(ea.day_of_week) = ?
+ (params: company_id=180, project_id=10055, target_date=2025-06-05)
+[11-Jun-2025 03:44:12 UTC] User Position Range: 10
+[11-Jun-2025 03:44:12 UTC] Empleados devueltos: 1
+[11-Jun-2025 03:44:12 UTC] ==== FIN DEPURACIÓN ====
+[11-Jun-2025 03:44:12 UTC] Empleados filtrados encontrados: 26
+[11-Jun-2025 03:44:55 UTC] User Position Range: 10
+[11-Jun-2025 03:44:55 UTC] Empleados filtrados encontrados: 26
+[11-Jun-2025 03:45:00 UTC] User Position Range: 10
+[11-Jun-2025 03:45:00 UTC] Empleados filtrados encontrados: 26
+[11-Jun-2025 03:45:00 UTC] ==== INICIO DEPURACIÓN ====
+[11-Jun-2025 03:45:00 UTC] company_id: 180
+[11-Jun-2025 03:45:00 UTC] project_id: 52
+[11-Jun-2025 03:45:00 UTC] given_date (day_of_week): 2025-06-06
+[11-Jun-2025 03:45:00 UTC] target_date found: 2025-06-05
+[11-Jun-2025 03:45:00 UTC] Final query: 
+    SELECT ea.assignment_id,
+           ea.employee_id,
+           e.full_name,
+           TRIM(ea.day_of_week) AS day_of_week
+    FROM employee_assignments ea
+    JOIN employees e ON ea.employee_id = e.employee_id
+    WHERE ea.company_id = ?
+      AND ea.project_id = ?
+      AND TRIM(ea.day_of_week) = ?
+ (params: company_id=180, project_id=52, target_date=2025-06-05)
+[11-Jun-2025 03:45:00 UTC] Empleados devueltos: 2
+[11-Jun-2025 03:45:00 UTC] ==== FIN DEPURACIÓN ====
+[11-Jun-2025 03:45:25 UTC] User Position Range: 10
+[11-Jun-2025 03:45:25 UTC] Empleados filtrados encontrados: 26
+[11-Jun-2025 03:45:47 UTC] ==== INICIO DEPURACIÓN ====
+[11-Jun-2025 03:45:47 UTC] company_id: 180
+[11-Jun-2025 03:45:47 UTC] project_id: 10088
+[11-Jun-2025 03:45:47 UTC] given_date (day_of_week): 2025-06-06
+[11-Jun-2025 03:45:47 UTC] target_date found: 2025-06-05
+[11-Jun-2025 03:45:47 UTC] Final query: 
+    SELECT ea.assignment_id,
+           ea.employee_id,
+           e.full_name,
+           TRIM(ea.day_of_week) AS day_of_week
+    FROM employee_assignments ea
+    JOIN employees e ON ea.employee_id = e.employee_id
+    WHERE ea.company_id = ?
+      AND ea.project_id = ?
+      AND TRIM(ea.day_of_week) = ?
+ (params: company_id=180, project_id=10088, target_date=2025-06-05)
+[11-Jun-2025 03:45:47 UTC] User Position Range: 10
+[11-Jun-2025 03:45:47 UTC] Empleados devueltos: 1
+[11-Jun-2025 03:45:47 UTC] ==== FIN DEPURACIÓN ====
+[11-Jun-2025 03:45:47 UTC] Empleados filtrados encontrados: 26
+[11-Jun-2025 03:46:15 UTC] User Position Range: 10
+[11-Jun-2025 03:46:15 UTC] Empleados filtrados encontrados: 26
+[11-Jun-2025 03:46:36 UTC] ==== INICIO DEPURACIÓN ====
+[11-Jun-2025 03:46:36 UTC] company_id: 180
+[11-Jun-2025 03:46:36 UTC] project_id: 10088
+[11-Jun-2025 03:46:36 UTC] given_date (day_of_week): 2025-06-07
+[11-Jun-2025 03:46:36 UTC] target_date found: 2025-06-06
+[11-Jun-2025 03:46:36 UTC] Final query: 
+    SELECT ea.assignment_id,
+           ea.employee_id,
+           e.full_name,
+           TRIM(ea.day_of_week) AS day_of_week
+    FROM employee_assignments ea
+    JOIN employees e ON ea.employee_id = e.employee_id
+    WHERE ea.company_id = ?
+      AND ea.project_id = ?
+      AND TRIM(ea.day_of_week) = ?
+ (params: company_id=180, project_id=10088, target_date=2025-06-06)
+[11-Jun-2025 03:46:36 UTC] User Position Range: 10
+[11-Jun-2025 03:46:36 UTC] Empleados devueltos: 1
+[11-Jun-2025 03:46:36 UTC] ==== FIN DEPURACIÓN ====
+[11-Jun-2025 03:46:36 UTC] Empleados filtrados encontrados: 26
+[11-Jun-2025 03:53:20 UTC] User Position Range: 10
+[11-Jun-2025 03:53:20 UTC] User Position Range: 10
+[11-Jun-2025 03:53:20 UTC] Empleados filtrados encontrados: 0
+[11-Jun-2025 03:53:20 UTC] Empleados no asignados encontrados: 26
+[11-Jun-2025 03:54:27 UTC] User Position Range: 10
+[11-Jun-2025 03:54:27 UTC] User Position Range: 10
+[11-Jun-2025 03:54:27 UTC] Empleados filtrados encontrados: 0
+[11-Jun-2025 03:54:27 UTC] Empleados no asignados encontrados: 26
+[11-Jun-2025 03:58:51 UTC] User Position Range: 10
+[11-Jun-2025 03:58:51 UTC] Empleados filtrados encontrados: 26
+[11-Jun-2025 03:58:51 UTC] ==== INICIO DEPURACIÓN ====
+[11-Jun-2025 03:58:51 UTC] company_id: 180
+[11-Jun-2025 03:58:51 UTC] project_id: 10099
+[11-Jun-2025 03:58:51 UTC] given_date (day_of_week): 2025-06-07
+[11-Jun-2025 03:58:51 UTC] target_date found: 2025-06-06
+[11-Jun-2025 03:58:51 UTC] Final query: 
+    SELECT ea.assignment_id,
+           ea.employee_id,
+           e.full_name,
+           TRIM(ea.day_of_week) AS day_of_week
+    FROM employee_assignments ea
+    JOIN employees e ON ea.employee_id = e.employee_id
+    WHERE ea.company_id = ?
+      AND ea.project_id = ?
+      AND TRIM(ea.day_of_week) = ?
+ (params: company_id=180, project_id=10099, target_date=2025-06-06)
+[11-Jun-2025 03:58:51 UTC] Empleados devueltos: 2
+[11-Jun-2025 03:58:51 UTC] ==== FIN DEPURACIÓN ====
+[11-Jun-2025 03:59:25 UTC] User Position Range: 10
+[11-Jun-2025 03:59:25 UTC] Empleados filtrados encontrados: 26
+[11-Jun-2025 03:59:33 UTC] User Position Range: 10
+[11-Jun-2025 03:59:33 UTC] Empleados filtrados encontrados: 26
+[11-Jun-2025 03:59:33 UTC] ==== INICIO DEPURACIÓN ====
+[11-Jun-2025 03:59:33 UTC] company_id: 180
+[11-Jun-2025 03:59:33 UTC] project_id: 10094
+[11-Jun-2025 03:59:33 UTC] given_date (day_of_week): 2025-06-07
+[11-Jun-2025 03:59:33 UTC] target_date found: 2025-06-06
+[11-Jun-2025 03:59:33 UTC] Final query: 
+    SELECT ea.assignment_id,
+           ea.employee_id,
+           e.full_name,
+           TRIM(ea.day_of_week) AS day_of_week
+    FROM employee_assignments ea
+    JOIN employees e ON ea.employee_id = e.employee_id
+    WHERE ea.company_id = ?
+      AND ea.project_id = ?
+      AND TRIM(ea.day_of_week) = ?
+ (params: company_id=180, project_id=10094, target_date=2025-06-06)
+[11-Jun-2025 03:59:33 UTC] Empleados devueltos: 2
+[11-Jun-2025 03:59:33 UTC] ==== FIN DEPURACIÓN ====
+[11-Jun-2025 03:59:59 UTC] User Position Range: 10
+[11-Jun-2025 03:59:59 UTC] Empleados filtrados encontrados: 26
+[11-Jun-2025 04:00:14 UTC] ==== INICIO DEPURACIÓN ====
+[11-Jun-2025 04:00:14 UTC] company_id: 180
+[11-Jun-2025 04:00:14 UTC] project_id: 10097
+[11-Jun-2025 04:00:14 UTC] given_date (day_of_week): 2025-06-07
+[11-Jun-2025 04:00:14 UTC] User Position Range: 10
+[11-Jun-2025 04:00:14 UTC] target_date found: 2025-06-06
+[11-Jun-2025 04:00:14 UTC] Final query: 
+    SELECT ea.assignment_id,
+           ea.employee_id,
+           e.full_name,
+           TRIM(ea.day_of_week) AS day_of_week
+    FROM employee_assignments ea
+    JOIN employees e ON ea.employee_id = e.employee_id
+    WHERE ea.company_id = ?
+      AND ea.project_id = ?
+      AND TRIM(ea.day_of_week) = ?
+ (params: company_id=180, project_id=10097, target_date=2025-06-06)
+[11-Jun-2025 04:00:14 UTC] Empleados filtrados encontrados: 26
+[11-Jun-2025 04:00:14 UTC] Empleados devueltos: 2
+[11-Jun-2025 04:00:14 UTC] ==== FIN DEPURACIÓN ====
+[11-Jun-2025 04:00:27 UTC] User Position Range: 10
+[11-Jun-2025 04:00:27 UTC] Empleados filtrados encontrados: 26
+[11-Jun-2025 04:00:34 UTC] ==== INICIO DEPURACIÓN ====
+[11-Jun-2025 04:00:34 UTC] company_id: 180
+[11-Jun-2025 04:00:34 UTC] project_id: 10100
+[11-Jun-2025 04:00:34 UTC] given_date (day_of_week): 2025-06-07
+[11-Jun-2025 04:00:34 UTC] target_date found: 2025-06-06
+[11-Jun-2025 04:00:34 UTC] Final query: 
+    SELECT ea.assignment_id,
+           ea.employee_id,
+           e.full_name,
+           TRIM(ea.day_of_week) AS day_of_week
+    FROM employee_assignments ea
+    JOIN employees e ON ea.employee_id = e.employee_id
+    WHERE ea.company_id = ?
+      AND ea.project_id = ?
+      AND TRIM(ea.day_of_week) = ?
+ (params: company_id=180, project_id=10100, target_date=2025-06-06)
+[11-Jun-2025 04:00:34 UTC] User Position Range: 10
+[11-Jun-2025 04:00:34 UTC] Empleados devueltos: 1
+[11-Jun-2025 04:00:34 UTC] ==== FIN DEPURACIÓN ====
+[11-Jun-2025 04:00:34 UTC] Empleados filtrados encontrados: 26
+[11-Jun-2025 04:01:02 UTC] User Position Range: 10
+[11-Jun-2025 04:01:02 UTC] Empleados filtrados encontrados: 26
+[11-Jun-2025 04:02:39 UTC] User Position Range: 10
+[11-Jun-2025 04:02:39 UTC] ==== INICIO DEPURACIÓN ====
+[11-Jun-2025 04:02:39 UTC] company_id: 180
+[11-Jun-2025 04:02:39 UTC] project_id: 10086
+[11-Jun-2025 04:02:39 UTC] given_date (day_of_week): 2025-06-07
+[11-Jun-2025 04:02:39 UTC] Empleados filtrados encontrados: 26
+[11-Jun-2025 04:02:39 UTC] target_date found: 2025-06-06
+[11-Jun-2025 04:02:39 UTC] Final query: 
+    SELECT ea.assignment_id,
+           ea.employee_id,
+           e.full_name,
+           TRIM(ea.day_of_week) AS day_of_week
+    FROM employee_assignments ea
+    JOIN employees e ON ea.employee_id = e.employee_id
+    WHERE ea.company_id = ?
+      AND ea.project_id = ?
+      AND TRIM(ea.day_of_week) = ?
+ (params: company_id=180, project_id=10086, target_date=2025-06-06)
+[11-Jun-2025 04:02:39 UTC] Empleados devueltos: 2
+[11-Jun-2025 04:02:39 UTC] ==== FIN DEPURACIÓN ====
+[11-Jun-2025 04:03:05 UTC] User Position Range: 10
+[11-Jun-2025 04:03:05 UTC] Empleados filtrados encontrados: 26
+[11-Jun-2025 04:03:23 UTC] User Position Range: 10
+[11-Jun-2025 04:03:23 UTC] Empleados filtrados encontrados: 26
+[11-Jun-2025 04:03:40 UTC] User Position Range: 10
+[11-Jun-2025 04:03:40 UTC] Empleados filtrados encontrados: 26
+[11-Jun-2025 04:03:40 UTC] ==== INICIO DEPURACIÓN ====
+[11-Jun-2025 04:03:40 UTC] company_id: 180
+[11-Jun-2025 04:03:40 UTC] project_id: 10098
+[11-Jun-2025 04:03:40 UTC] given_date (day_of_week): 2025-06-07
+[11-Jun-2025 04:03:40 UTC] target_date found: 2025-06-06
+[11-Jun-2025 04:03:40 UTC] Final query: 
+    SELECT ea.assignment_id,
+           ea.employee_id,
+           e.full_name,
+           TRIM(ea.day_of_week) AS day_of_week
+    FROM employee_assignments ea
+    JOIN employees e ON ea.employee_id = e.employee_id
+    WHERE ea.company_id = ?
+      AND ea.project_id = ?
+      AND TRIM(ea.day_of_week) = ?
+ (params: company_id=180, project_id=10098, target_date=2025-06-06)
+[11-Jun-2025 04:03:40 UTC] Empleados devueltos: 1
+[11-Jun-2025 04:03:40 UTC] ==== FIN DEPURACIÓN ====
+[11-Jun-2025 04:03:52 UTC] User Position Range: 10
+[11-Jun-2025 04:03:52 UTC] Empleados filtrados encontrados: 26
+[11-Jun-2025 04:03:59 UTC] ==== INICIO DEPURACIÓN ====
+[11-Jun-2025 04:03:59 UTC] company_id: 180
+[11-Jun-2025 04:03:59 UTC] project_id: 10093
+[11-Jun-2025 04:03:59 UTC] given_date (day_of_week): 2025-06-07
+[11-Jun-2025 04:03:59 UTC] User Position Range: 10
+[11-Jun-2025 04:03:59 UTC] target_date found: 2025-06-06
+[11-Jun-2025 04:03:59 UTC] Final query: 
+    SELECT ea.assignment_id,
+           ea.employee_id,
+           e.full_name,
+           TRIM(ea.day_of_week) AS day_of_week
+    FROM employee_assignments ea
+    JOIN employees e ON ea.employee_id = e.employee_id
+    WHERE ea.company_id = ?
+      AND ea.project_id = ?
+      AND TRIM(ea.day_of_week) = ?
+ (params: company_id=180, project_id=10093, target_date=2025-06-06)
+[11-Jun-2025 04:03:59 UTC] Empleados filtrados encontrados: 26
+[11-Jun-2025 04:03:59 UTC] Empleados devueltos: 2
+[11-Jun-2025 04:03:59 UTC] ==== FIN DEPURACIÓN ====
+[11-Jun-2025 04:04:17 UTC] User Position Range: 10
+[11-Jun-2025 04:04:17 UTC] Empleados filtrados encontrados: 26
+[11-Jun-2025 04:04:28 UTC] ==== INICIO DEPURACIÓN ====
+[11-Jun-2025 04:04:28 UTC] company_id: 180
+[11-Jun-2025 04:04:28 UTC] project_id: 10092
+[11-Jun-2025 04:04:28 UTC] given_date (day_of_week): 2025-06-07
+[11-Jun-2025 04:04:28 UTC] target_date found: 2025-06-06
+[11-Jun-2025 04:04:28 UTC] Final query: 
+    SELECT ea.assignment_id,
+           ea.employee_id,
+           e.full_name,
+           TRIM(ea.day_of_week) AS day_of_week
+    FROM employee_assignments ea
+    JOIN employees e ON ea.employee_id = e.employee_id
+    WHERE ea.company_id = ?
+      AND ea.project_id = ?
+      AND TRIM(ea.day_of_week) = ?
+ (params: company_id=180, project_id=10092, target_date=2025-06-06)
+[11-Jun-2025 04:04:28 UTC] Empleados devueltos: 1
+[11-Jun-2025 04:04:28 UTC] ==== FIN DEPURACIÓN ====
+[11-Jun-2025 04:04:28 UTC] User Position Range: 10
+[11-Jun-2025 04:04:28 UTC] Empleados filtrados encontrados: 26
+[11-Jun-2025 04:04:52 UTC] User Position Range: 10
+[11-Jun-2025 04:04:52 UTC] Empleados filtrados encontrados: 26
+[11-Jun-2025 04:05:56 UTC] User Position Range: 10
+[11-Jun-2025 04:05:56 UTC] Empleados filtrados encontrados: 26
+[11-Jun-2025 04:05:56 UTC] ==== INICIO DEPURACIÓN ====
+[11-Jun-2025 04:05:56 UTC] company_id: 180
+[11-Jun-2025 04:05:56 UTC] project_id: 10104
+[11-Jun-2025 04:05:56 UTC] given_date (day_of_week): 2025-06-07
+[11-Jun-2025 04:05:56 UTC] target_date found: 2025-06-06
+[11-Jun-2025 04:05:56 UTC] Final query: 
+    SELECT ea.assignment_id,
+           ea.employee_id,
+           e.full_name,
+           TRIM(ea.day_of_week) AS day_of_week
+    FROM employee_assignments ea
+    JOIN employees e ON ea.employee_id = e.employee_id
+    WHERE ea.company_id = ?
+      AND ea.project_id = ?
+      AND TRIM(ea.day_of_week) = ?
+ (params: company_id=180, project_id=10104, target_date=2025-06-06)
+[11-Jun-2025 04:05:56 UTC] Empleados devueltos: 1
+[11-Jun-2025 04:05:56 UTC] ==== FIN DEPURACIÓN ====
+[11-Jun-2025 04:07:32 UTC] User Position Range: 10
+[11-Jun-2025 04:07:32 UTC] Empleados filtrados encontrados: 26
+[11-Jun-2025 04:07:38 UTC] User Position Range: 10
+[11-Jun-2025 04:07:38 UTC] Empleados filtrados encontrados: 26
+[11-Jun-2025 04:07:38 UTC] ==== INICIO DEPURACIÓN ====
+[11-Jun-2025 04:07:38 UTC] company_id: 180
+[11-Jun-2025 04:07:38 UTC] project_id: 10103
+[11-Jun-2025 04:07:38 UTC] given_date (day_of_week): 2025-06-07
+[11-Jun-2025 04:07:38 UTC] target_date found: 2025-06-06
+[11-Jun-2025 04:07:38 UTC] Final query: 
+    SELECT ea.assignment_id,
+           ea.employee_id,
+           e.full_name,
+           TRIM(ea.day_of_week) AS day_of_week
+    FROM employee_assignments ea
+    JOIN employees e ON ea.employee_id = e.employee_id
+    WHERE ea.company_id = ?
+      AND ea.project_id = ?
+      AND TRIM(ea.day_of_week) = ?
+ (params: company_id=180, project_id=10103, target_date=2025-06-06)
+[11-Jun-2025 04:07:38 UTC] Empleados devueltos: 1
+[11-Jun-2025 04:07:38 UTC] ==== FIN DEPURACIÓN ====
+[11-Jun-2025 04:08:21 UTC] User Position Range: 10
+[11-Jun-2025 04:08:21 UTC] Empleados filtrados encontrados: 26
+[11-Jun-2025 04:08:27 UTC] User Position Range: 10
+[11-Jun-2025 04:08:27 UTC] Empleados filtrados encontrados: 26
+[11-Jun-2025 04:08:27 UTC] ==== INICIO DEPURACIÓN ====
+[11-Jun-2025 04:08:27 UTC] company_id: 180
+[11-Jun-2025 04:08:27 UTC] project_id: 46
+[11-Jun-2025 04:08:27 UTC] given_date (day_of_week): 2025-06-07
+[11-Jun-2025 04:08:27 UTC] target_date found: 2025-06-06
+[11-Jun-2025 04:08:27 UTC] Final query: 
+    SELECT ea.assignment_id,
+           ea.employee_id,
+           e.full_name,
+           TRIM(ea.day_of_week) AS day_of_week
+    FROM employee_assignments ea
+    JOIN employees e ON ea.employee_id = e.employee_id
+    WHERE ea.company_id = ?
+      AND ea.project_id = ?
+      AND TRIM(ea.day_of_week) = ?
+ (params: company_id=180, project_id=46, target_date=2025-06-06)
+[11-Jun-2025 04:08:27 UTC] Empleados devueltos: 2
+[11-Jun-2025 04:08:27 UTC] ==== FIN DEPURACIÓN ====
+[11-Jun-2025 04:08:41 UTC] User Position Range: 10
+[11-Jun-2025 04:08:41 UTC] Empleados filtrados encontrados: 26
+[11-Jun-2025 04:08:47 UTC] ==== INICIO DEPURACIÓN ====
+[11-Jun-2025 04:08:47 UTC] company_id: 180
+[11-Jun-2025 04:08:47 UTC] project_id: 10074
+[11-Jun-2025 04:08:47 UTC] given_date (day_of_week): 2025-06-07
+[11-Jun-2025 04:08:47 UTC] target_date found: 2025-06-06
+[11-Jun-2025 04:08:47 UTC] Final query: 
+    SELECT ea.assignment_id,
+           ea.employee_id,
+           e.full_name,
+           TRIM(ea.day_of_week) AS day_of_week
+    FROM employee_assignments ea
+    JOIN employees e ON ea.employee_id = e.employee_id
+    WHERE ea.company_id = ?
+      AND ea.project_id = ?
+      AND TRIM(ea.day_of_week) = ?
+ (params: company_id=180, project_id=10074, target_date=2025-06-06)
+[11-Jun-2025 04:08:47 UTC] User Position Range: 10
+[11-Jun-2025 04:08:47 UTC] Empleados devueltos: 1
+[11-Jun-2025 04:08:47 UTC] ==== FIN DEPURACIÓN ====
+[11-Jun-2025 04:08:47 UTC] Empleados filtrados encontrados: 26
+[11-Jun-2025 04:09:02 UTC] User Position Range: 10
+[11-Jun-2025 04:09:02 UTC] Empleados filtrados encontrados: 26
+[11-Jun-2025 04:09:26 UTC] ==== INICIO DEPURACIÓN ====
+[11-Jun-2025 04:09:26 UTC] company_id: 180
+[11-Jun-2025 04:09:26 UTC] project_id: 10096
+[11-Jun-2025 04:09:26 UTC] given_date (day_of_week): 2025-06-07
+[11-Jun-2025 04:09:26 UTC] User Position Range: 10
+[11-Jun-2025 04:09:26 UTC] Empleados filtrados encontrados: 26
+[11-Jun-2025 04:09:26 UTC] target_date found: 2025-06-06
+[11-Jun-2025 04:09:26 UTC] Final query: 
+    SELECT ea.assignment_id,
+           ea.employee_id,
+           e.full_name,
+           TRIM(ea.day_of_week) AS day_of_week
+    FROM employee_assignments ea
+    JOIN employees e ON ea.employee_id = e.employee_id
+    WHERE ea.company_id = ?
+      AND ea.project_id = ?
+      AND TRIM(ea.day_of_week) = ?
+ (params: company_id=180, project_id=10096, target_date=2025-06-06)
+[11-Jun-2025 04:09:26 UTC] Empleados devueltos: 1
+[11-Jun-2025 04:09:26 UTC] ==== FIN DEPURACIÓN ====
+[11-Jun-2025 04:09:39 UTC] User Position Range: 10
+[11-Jun-2025 04:09:39 UTC] Empleados filtrados encontrados: 26
+[11-Jun-2025 04:09:47 UTC] ==== INICIO DEPURACIÓN ====
+[11-Jun-2025 04:09:47 UTC] company_id: 180
+[11-Jun-2025 04:09:47 UTC] project_id: 10102
+[11-Jun-2025 04:09:47 UTC] given_date (day_of_week): 2025-06-07
+[11-Jun-2025 04:09:47 UTC] target_date found: 2025-06-06
+[11-Jun-2025 04:09:47 UTC] Final query: 
+    SELECT ea.assignment_id,
+           ea.employee_id,
+           e.full_name,
+           TRIM(ea.day_of_week) AS day_of_week
+    FROM employee_assignments ea
+    JOIN employees e ON ea.employee_id = e.employee_id
+    WHERE ea.company_id = ?
+      AND ea.project_id = ?
+      AND TRIM(ea.day_of_week) = ?
+ (params: company_id=180, project_id=10102, target_date=2025-06-06)
+[11-Jun-2025 04:09:47 UTC] User Position Range: 10
+[11-Jun-2025 04:09:47 UTC] Empleados devueltos: 1
+[11-Jun-2025 04:09:47 UTC] ==== FIN DEPURACIÓN ====
+[11-Jun-2025 04:09:47 UTC] Empleados filtrados encontrados: 26
+[11-Jun-2025 04:10:10 UTC] User Position Range: 10
+[11-Jun-2025 04:10:10 UTC] Empleados filtrados encontrados: 26
+[11-Jun-2025 04:10:30 UTC] User Position Range: 10
+[11-Jun-2025 04:10:30 UTC] ==== INICIO DEPURACIÓN ====
+[11-Jun-2025 04:10:30 UTC] company_id: 180
+[11-Jun-2025 04:10:30 UTC] project_id: 10074
+[11-Jun-2025 04:10:30 UTC] given_date (day_of_week): 2025-06-07
+[11-Jun-2025 04:10:30 UTC] Empleados filtrados encontrados: 26
+[11-Jun-2025 04:10:30 UTC] target_date found: 2025-06-06
+[11-Jun-2025 04:10:30 UTC] Final query: 
+    SELECT ea.assignment_id,
+           ea.employee_id,
+           e.full_name,
+           TRIM(ea.day_of_week) AS day_of_week
+    FROM employee_assignments ea
+    JOIN employees e ON ea.employee_id = e.employee_id
+    WHERE ea.company_id = ?
+      AND ea.project_id = ?
+      AND TRIM(ea.day_of_week) = ?
+ (params: company_id=180, project_id=10074, target_date=2025-06-06)
+[11-Jun-2025 04:10:30 UTC] Empleados devueltos: 1
+[11-Jun-2025 04:10:30 UTC] ==== FIN DEPURACIÓN ====
+[11-Jun-2025 04:10:42 UTC] User Position Range: 10
+[11-Jun-2025 04:10:42 UTC] Empleados filtrados encontrados: 26
+[11-Jun-2025 04:11:10 UTC] ==== INICIO DEPURACIÓN ====
+[11-Jun-2025 04:11:10 UTC] company_id: 180
+[11-Jun-2025 04:11:10 UTC] project_id: 10055
+[11-Jun-2025 04:11:10 UTC] given_date (day_of_week): 2025-06-07
+[11-Jun-2025 04:11:10 UTC] target_date found: 2025-06-06
+[11-Jun-2025 04:11:10 UTC] Final query: 
+    SELECT ea.assignment_id,
+           ea.employee_id,
+           e.full_name,
+           TRIM(ea.day_of_week) AS day_of_week
+    FROM employee_assignments ea
+    JOIN employees e ON ea.employee_id = e.employee_id
+    WHERE ea.company_id = ?
+      AND ea.project_id = ?
+      AND TRIM(ea.day_of_week) = ?
+ (params: company_id=180, project_id=10055, target_date=2025-06-06)
+[11-Jun-2025 04:11:10 UTC] Empleados devueltos: 1
+[11-Jun-2025 04:11:10 UTC] ==== FIN DEPURACIÓN ====
+[11-Jun-2025 04:11:10 UTC] User Position Range: 10
+[11-Jun-2025 04:11:10 UTC] Empleados filtrados encontrados: 26
+[11-Jun-2025 04:11:22 UTC] User Position Range: 10
+[11-Jun-2025 04:11:22 UTC] Empleados filtrados encontrados: 26
+[11-Jun-2025 04:11:28 UTC] User Position Range: 10
+[11-Jun-2025 04:11:28 UTC] ==== INICIO DEPURACIÓN ====
+[11-Jun-2025 04:11:28 UTC] company_id: 180
+[11-Jun-2025 04:11:28 UTC] project_id: 52
+[11-Jun-2025 04:11:28 UTC] given_date (day_of_week): 2025-06-07
+[11-Jun-2025 04:11:28 UTC] Empleados filtrados encontrados: 26
+[11-Jun-2025 04:11:28 UTC] target_date found: 2025-06-06
+[11-Jun-2025 04:11:28 UTC] Final query: 
+    SELECT ea.assignment_id,
+           ea.employee_id,
+           e.full_name,
+           TRIM(ea.day_of_week) AS day_of_week
+    FROM employee_assignments ea
+    JOIN employees e ON ea.employee_id = e.employee_id
+    WHERE ea.company_id = ?
+      AND ea.project_id = ?
+      AND TRIM(ea.day_of_week) = ?
+ (params: company_id=180, project_id=52, target_date=2025-06-06)
+[11-Jun-2025 04:11:28 UTC] Empleados devueltos: 1
+[11-Jun-2025 04:11:28 UTC] ==== FIN DEPURACIÓN ====
+[11-Jun-2025 04:11:40 UTC] User Position Range: 10
+[11-Jun-2025 04:11:40 UTC] Empleados filtrados encontrados: 26
+[11-Jun-2025 04:11:53 UTC] User Position Range: 10
+[11-Jun-2025 04:11:53 UTC] Empleados filtrados encontrados: 26
+[11-Jun-2025 04:11:53 UTC] ==== INICIO DEPURACIÓN ====
+[11-Jun-2025 04:11:53 UTC] company_id: 180
+[11-Jun-2025 04:11:53 UTC] project_id: 10089
+[11-Jun-2025 04:11:53 UTC] given_date (day_of_week): 2025-06-07
+[11-Jun-2025 04:11:53 UTC] target_date found: 2025-06-05
+[11-Jun-2025 04:11:53 UTC] Final query: 
+    SELECT ea.assignment_id,
+           ea.employee_id,
+           e.full_name,
+           TRIM(ea.day_of_week) AS day_of_week
+    FROM employee_assignments ea
+    JOIN employees e ON ea.employee_id = e.employee_id
+    WHERE ea.company_id = ?
+      AND ea.project_id = ?
+      AND TRIM(ea.day_of_week) = ?
+ (params: company_id=180, project_id=10089, target_date=2025-06-05)
+[11-Jun-2025 04:11:53 UTC] Empleados devueltos: 2
+[11-Jun-2025 04:11:53 UTC] ==== FIN DEPURACIÓN ====
+[11-Jun-2025 04:12:00 UTC] User Position Range: 10
+[11-Jun-2025 04:12:00 UTC] Empleados filtrados encontrados: 26
+[11-Jun-2025 04:12:23 UTC] User Position Range: 10
+[11-Jun-2025 04:12:23 UTC] Empleados filtrados encontrados: 26
+[11-Jun-2025 04:12:23 UTC] ==== INICIO DEPURACIÓN ====
+[11-Jun-2025 04:12:23 UTC] company_id: 180
+[11-Jun-2025 04:12:23 UTC] project_id: 10088
+[11-Jun-2025 04:12:23 UTC] given_date (day_of_week): 2025-06-07
+[11-Jun-2025 04:12:23 UTC] target_date found: 2025-06-06
+[11-Jun-2025 04:12:23 UTC] Final query: 
+    SELECT ea.assignment_id,
+           ea.employee_id,
+           e.full_name,
+           TRIM(ea.day_of_week) AS day_of_week
+    FROM employee_assignments ea
+    JOIN employees e ON ea.employee_id = e.employee_id
+    WHERE ea.company_id = ?
+      AND ea.project_id = ?
+      AND TRIM(ea.day_of_week) = ?
+ (params: company_id=180, project_id=10088, target_date=2025-06-06)
+[11-Jun-2025 04:12:23 UTC] Empleados devueltos: 1
+[11-Jun-2025 04:12:23 UTC] ==== FIN DEPURACIÓN ====
+[11-Jun-2025 04:12:32 UTC] User Position Range: 10
+[11-Jun-2025 04:12:32 UTC] Empleados filtrados encontrados: 26
+[11-Jun-2025 04:18:12 UTC] User Position Range: 10
+[11-Jun-2025 04:18:12 UTC] User Position Range: 10
+[11-Jun-2025 04:18:12 UTC] Empleados filtrados encontrados: 0
+[11-Jun-2025 04:18:12 UTC] Empleados no asignados encontrados: 26
+[11-Jun-2025 04:19:35 UTC] User Position Range: 10
+[11-Jun-2025 04:19:35 UTC] User Position Range: 10
+[11-Jun-2025 04:19:35 UTC] Empleados filtrados encontrados: 0
+[11-Jun-2025 04:19:35 UTC] Empleados no asignados encontrados: 26
+[11-Jun-2025 04:20:59 UTC] ==== INICIO DEPURACIÓN ====
+[11-Jun-2025 04:20:59 UTC] company_id: 180
+[11-Jun-2025 04:20:59 UTC] project_id: 10099
+[11-Jun-2025 04:20:59 UTC] given_date (day_of_week): 2025-06-09
+[11-Jun-2025 04:20:59 UTC] User Position Range: 10
+[11-Jun-2025 04:20:59 UTC] Empleados filtrados encontrados: 26
+[11-Jun-2025 04:20:59 UTC] target_date found: 2025-06-07
+[11-Jun-2025 04:20:59 UTC] Final query: 
+    SELECT ea.assignment_id,
+           ea.employee_id,
+           e.full_name,
+           TRIM(ea.day_of_week) AS day_of_week
+    FROM employee_assignments ea
+    JOIN employees e ON ea.employee_id = e.employee_id
+    WHERE ea.company_id = ?
+      AND ea.project_id = ?
+      AND TRIM(ea.day_of_week) = ?
+ (params: company_id=180, project_id=10099, target_date=2025-06-07)
+[11-Jun-2025 04:20:59 UTC] Empleados devueltos: 2
+[11-Jun-2025 04:20:59 UTC] ==== FIN DEPURACIÓN ====
+[11-Jun-2025 04:21:41 UTC] User Position Range: 10
+[11-Jun-2025 04:21:41 UTC] Empleados filtrados encontrados: 26
+[11-Jun-2025 04:21:47 UTC] User Position Range: 10
+[11-Jun-2025 04:21:47 UTC] Empleados filtrados encontrados: 26
+[11-Jun-2025 04:21:47 UTC] ==== INICIO DEPURACIÓN ====
+[11-Jun-2025 04:21:47 UTC] company_id: 180
+[11-Jun-2025 04:21:47 UTC] project_id: 10094
+[11-Jun-2025 04:21:47 UTC] given_date (day_of_week): 2025-06-09
+[11-Jun-2025 04:21:47 UTC] target_date found: 2025-06-07
+[11-Jun-2025 04:21:47 UTC] Final query: 
+    SELECT ea.assignment_id,
+           ea.employee_id,
+           e.full_name,
+           TRIM(ea.day_of_week) AS day_of_week
+    FROM employee_assignments ea
+    JOIN employees e ON ea.employee_id = e.employee_id
+    WHERE ea.company_id = ?
+      AND ea.project_id = ?
+      AND TRIM(ea.day_of_week) = ?
+ (params: company_id=180, project_id=10094, target_date=2025-06-07)
+[11-Jun-2025 04:21:47 UTC] Empleados devueltos: 2
+[11-Jun-2025 04:21:47 UTC] ==== FIN DEPURACIÓN ====
+[11-Jun-2025 04:22:06 UTC] User Position Range: 10
+[11-Jun-2025 04:22:06 UTC] Empleados filtrados encontrados: 26
+[11-Jun-2025 04:22:14 UTC] ==== INICIO DEPURACIÓN ====
+[11-Jun-2025 04:22:14 UTC] company_id: 180
+[11-Jun-2025 04:22:14 UTC] project_id: 10097
+[11-Jun-2025 04:22:14 UTC] given_date (day_of_week): 2025-06-09
+[11-Jun-2025 04:22:14 UTC] target_date found: 2025-06-07
+[11-Jun-2025 04:22:14 UTC] Final query: 
+    SELECT ea.assignment_id,
+           ea.employee_id,
+           e.full_name,
+           TRIM(ea.day_of_week) AS day_of_week
+    FROM employee_assignments ea
+    JOIN employees e ON ea.employee_id = e.employee_id
+    WHERE ea.company_id = ?
+      AND ea.project_id = ?
+      AND TRIM(ea.day_of_week) = ?
+ (params: company_id=180, project_id=10097, target_date=2025-06-07)
+[11-Jun-2025 04:22:14 UTC] User Position Range: 10
+[11-Jun-2025 04:22:14 UTC] Empleados devueltos: 1
+[11-Jun-2025 04:22:14 UTC] ==== FIN DEPURACIÓN ====
+[11-Jun-2025 04:22:14 UTC] Empleados filtrados encontrados: 26
+[11-Jun-2025 04:22:23 UTC] User Position Range: 10
+[11-Jun-2025 04:22:23 UTC] Empleados filtrados encontrados: 26
+[11-Jun-2025 04:22:47 UTC] User Position Range: 10
+[11-Jun-2025 04:22:47 UTC] Empleados filtrados encontrados: 26
+[11-Jun-2025 04:22:53 UTC] ==== INICIO DEPURACIÓN ====
+[11-Jun-2025 04:22:53 UTC] company_id: 180
+[11-Jun-2025 04:22:53 UTC] project_id: 10100
+[11-Jun-2025 04:22:53 UTC] given_date (day_of_week): 2025-06-09
+[11-Jun-2025 04:22:53 UTC] target_date found: 2025-06-07
+[11-Jun-2025 04:22:53 UTC] Final query: 
+    SELECT ea.assignment_id,
+           ea.employee_id,
+           e.full_name,
+           TRIM(ea.day_of_week) AS day_of_week
+    FROM employee_assignments ea
+    JOIN employees e ON ea.employee_id = e.employee_id
+    WHERE ea.company_id = ?
+      AND ea.project_id = ?
+      AND TRIM(ea.day_of_week) = ?
+ (params: company_id=180, project_id=10100, target_date=2025-06-07)
+[11-Jun-2025 04:22:53 UTC] Empleados devueltos: 1
+[11-Jun-2025 04:22:53 UTC] ==== FIN DEPURACIÓN ====
+[11-Jun-2025 04:22:53 UTC] User Position Range: 10
+[11-Jun-2025 04:22:53 UTC] Empleados filtrados encontrados: 26
+[11-Jun-2025 04:23:10 UTC] User Position Range: 10
+[11-Jun-2025 04:23:10 UTC] Empleados filtrados encontrados: 26
+[11-Jun-2025 04:23:20 UTC] User Position Range: 10
+[11-Jun-2025 04:23:20 UTC] Empleados filtrados encontrados: 26
+[11-Jun-2025 04:23:20 UTC] ==== INICIO DEPURACIÓN ====
+[11-Jun-2025 04:23:20 UTC] company_id: 180
+[11-Jun-2025 04:23:20 UTC] project_id: 10086
+[11-Jun-2025 04:23:20 UTC] given_date (day_of_week): 2025-06-09
+[11-Jun-2025 04:23:20 UTC] target_date found: 2025-06-07
+[11-Jun-2025 04:23:20 UTC] Final query: 
+    SELECT ea.assignment_id,
+           ea.employee_id,
+           e.full_name,
+           TRIM(ea.day_of_week) AS day_of_week
+    FROM employee_assignments ea
+    JOIN employees e ON ea.employee_id = e.employee_id
+    WHERE ea.company_id = ?
+      AND ea.project_id = ?
+      AND TRIM(ea.day_of_week) = ?
+ (params: company_id=180, project_id=10086, target_date=2025-06-07)
+[11-Jun-2025 04:23:20 UTC] Empleados devueltos: 2
+[11-Jun-2025 04:23:20 UTC] ==== FIN DEPURACIÓN ====
+[11-Jun-2025 04:23:34 UTC] User Position Range: 10
+[11-Jun-2025 04:23:34 UTC] Empleados filtrados encontrados: 26
+[11-Jun-2025 04:24:00 UTC] User Position Range: 10
+[11-Jun-2025 04:24:00 UTC] ==== INICIO DEPURACIÓN ====
+[11-Jun-2025 04:24:00 UTC] company_id: 180
+[11-Jun-2025 04:24:00 UTC] project_id: 10098
+[11-Jun-2025 04:24:00 UTC] given_date (day_of_week): 2025-06-09
+[11-Jun-2025 04:24:00 UTC] Empleados filtrados encontrados: 26
+[11-Jun-2025 04:24:00 UTC] target_date found: 2025-06-07
+[11-Jun-2025 04:24:00 UTC] Final query: 
+    SELECT ea.assignment_id,
+           ea.employee_id,
+           e.full_name,
+           TRIM(ea.day_of_week) AS day_of_week
+    FROM employee_assignments ea
+    JOIN employees e ON ea.employee_id = e.employee_id
+    WHERE ea.company_id = ?
+      AND ea.project_id = ?
+      AND TRIM(ea.day_of_week) = ?
+ (params: company_id=180, project_id=10098, target_date=2025-06-07)
+[11-Jun-2025 04:24:00 UTC] Empleados devueltos: 1
+[11-Jun-2025 04:24:00 UTC] ==== FIN DEPURACIÓN ====
+[11-Jun-2025 04:24:11 UTC] User Position Range: 10
+[11-Jun-2025 04:24:11 UTC] Empleados filtrados encontrados: 26
+[11-Jun-2025 04:24:22 UTC] ==== INICIO DEPURACIÓN ====
+[11-Jun-2025 04:24:22 UTC] company_id: 180
+[11-Jun-2025 04:24:22 UTC] project_id: 10093
+[11-Jun-2025 04:24:22 UTC] given_date (day_of_week): 2025-06-09
+[11-Jun-2025 04:24:22 UTC] User Position Range: 10
+[11-Jun-2025 04:24:22 UTC] Empleados filtrados encontrados: 26
+[11-Jun-2025 04:24:22 UTC] target_date found: 2025-06-07
+[11-Jun-2025 04:24:22 UTC] Final query: 
+    SELECT ea.assignment_id,
+           ea.employee_id,
+           e.full_name,
+           TRIM(ea.day_of_week) AS day_of_week
+    FROM employee_assignments ea
+    JOIN employees e ON ea.employee_id = e.employee_id
+    WHERE ea.company_id = ?
+      AND ea.project_id = ?
+      AND TRIM(ea.day_of_week) = ?
+ (params: company_id=180, project_id=10093, target_date=2025-06-07)
+[11-Jun-2025 04:24:22 UTC] Empleados devueltos: 1
+[11-Jun-2025 04:24:22 UTC] ==== FIN DEPURACIÓN ====
+[11-Jun-2025 04:24:35 UTC] User Position Range: 10
+[11-Jun-2025 04:24:35 UTC] Empleados filtrados encontrados: 26
+[11-Jun-2025 04:24:54 UTC] ==== INICIO DEPURACIÓN ====
+[11-Jun-2025 04:24:54 UTC] company_id: 180
+[11-Jun-2025 04:24:54 UTC] project_id: 10092
+[11-Jun-2025 04:24:54 UTC] given_date (day_of_week): 2025-06-09
+[11-Jun-2025 04:24:54 UTC] User Position Range: 10
+[11-Jun-2025 04:24:54 UTC] target_date found: 2025-06-07
+[11-Jun-2025 04:24:54 UTC] Empleados filtrados encontrados: 26
+[11-Jun-2025 04:24:54 UTC] Final query: 
+    SELECT ea.assignment_id,
+           ea.employee_id,
+           e.full_name,
+           TRIM(ea.day_of_week) AS day_of_week
+    FROM employee_assignments ea
+    JOIN employees e ON ea.employee_id = e.employee_id
+    WHERE ea.company_id = ?
+      AND ea.project_id = ?
+      AND TRIM(ea.day_of_week) = ?
+ (params: company_id=180, project_id=10092, target_date=2025-06-07)
+[11-Jun-2025 04:24:54 UTC] Empleados devueltos: 1
+[11-Jun-2025 04:24:54 UTC] ==== FIN DEPURACIÓN ====
+[11-Jun-2025 04:25:03 UTC] User Position Range: 10
+[11-Jun-2025 04:25:03 UTC] Empleados filtrados encontrados: 26
+[11-Jun-2025 04:25:11 UTC] User Position Range: 10
+[11-Jun-2025 04:25:11 UTC] Empleados filtrados encontrados: 26
+[11-Jun-2025 04:25:11 UTC] ==== INICIO DEPURACIÓN ====
+[11-Jun-2025 04:25:11 UTC] company_id: 180
+[11-Jun-2025 04:25:11 UTC] project_id: 10104
+[11-Jun-2025 04:25:11 UTC] given_date (day_of_week): 2025-06-09
+[11-Jun-2025 04:25:11 UTC] target_date found: 2025-06-07
+[11-Jun-2025 04:25:11 UTC] Final query: 
+    SELECT ea.assignment_id,
+           ea.employee_id,
+           e.full_name,
+           TRIM(ea.day_of_week) AS day_of_week
+    FROM employee_assignments ea
+    JOIN employees e ON ea.employee_id = e.employee_id
+    WHERE ea.company_id = ?
+      AND ea.project_id = ?
+      AND TRIM(ea.day_of_week) = ?
+ (params: company_id=180, project_id=10104, target_date=2025-06-07)
+[11-Jun-2025 04:25:11 UTC] Empleados devueltos: 1
+[11-Jun-2025 04:25:11 UTC] ==== FIN DEPURACIÓN ====
+[11-Jun-2025 04:25:20 UTC] User Position Range: 10
+[11-Jun-2025 04:25:20 UTC] Empleados filtrados encontrados: 26
+[11-Jun-2025 04:25:25 UTC] User Position Range: 10
+[11-Jun-2025 04:25:25 UTC] Empleados filtrados encontrados: 26
+[11-Jun-2025 04:25:25 UTC] ==== INICIO DEPURACIÓN ====
+[11-Jun-2025 04:25:25 UTC] company_id: 180
+[11-Jun-2025 04:25:25 UTC] project_id: 10103
+[11-Jun-2025 04:25:25 UTC] given_date (day_of_week): 2025-06-09
+[11-Jun-2025 04:25:25 UTC] target_date found: 2025-06-07
+[11-Jun-2025 04:25:25 UTC] Final query: 
+    SELECT ea.assignment_id,
+           ea.employee_id,
+           e.full_name,
+           TRIM(ea.day_of_week) AS day_of_week
+    FROM employee_assignments ea
+    JOIN employees e ON ea.employee_id = e.employee_id
+    WHERE ea.company_id = ?
+      AND ea.project_id = ?
+      AND TRIM(ea.day_of_week) = ?
+ (params: company_id=180, project_id=10103, target_date=2025-06-07)
+[11-Jun-2025 04:25:25 UTC] Empleados devueltos: 2
+[11-Jun-2025 04:25:25 UTC] ==== FIN DEPURACIÓN ====
+[11-Jun-2025 04:25:54 UTC] User Position Range: 10
+[11-Jun-2025 04:25:54 UTC] Empleados filtrados encontrados: 26
+[11-Jun-2025 04:26:01 UTC] ==== INICIO DEPURACIÓN ====
+[11-Jun-2025 04:26:01 UTC] company_id: 180
+[11-Jun-2025 04:26:01 UTC] project_id: 46
+[11-Jun-2025 04:26:01 UTC] given_date (day_of_week): 2025-06-09
+[11-Jun-2025 04:26:01 UTC] User Position Range: 10
+[11-Jun-2025 04:26:01 UTC] Empleados filtrados encontrados: 26
+[11-Jun-2025 04:26:01 UTC] target_date found: 2025-06-07
+[11-Jun-2025 04:26:01 UTC] Final query: 
+    SELECT ea.assignment_id,
+           ea.employee_id,
+           e.full_name,
+           TRIM(ea.day_of_week) AS day_of_week
+    FROM employee_assignments ea
+    JOIN employees e ON ea.employee_id = e.employee_id
+    WHERE ea.company_id = ?
+      AND ea.project_id = ?
+      AND TRIM(ea.day_of_week) = ?
+ (params: company_id=180, project_id=46, target_date=2025-06-07)
+[11-Jun-2025 04:26:01 UTC] Empleados devueltos: 1
+[11-Jun-2025 04:26:01 UTC] ==== FIN DEPURACIÓN ====
+[11-Jun-2025 04:26:11 UTC] User Position Range: 10
+[11-Jun-2025 04:26:11 UTC] Empleados filtrados encontrados: 26
+[11-Jun-2025 04:26:37 UTC] User Position Range: 10
+[11-Jun-2025 04:26:37 UTC] ==== INICIO DEPURACIÓN ====
+[11-Jun-2025 04:26:37 UTC] company_id: 180
+[11-Jun-2025 04:26:37 UTC] project_id: 10074
+[11-Jun-2025 04:26:37 UTC] given_date (day_of_week): 2025-06-09
+[11-Jun-2025 04:26:37 UTC] Empleados filtrados encontrados: 26
+[11-Jun-2025 04:26:37 UTC] target_date found: 2025-06-07
+[11-Jun-2025 04:26:37 UTC] Final query: 
+    SELECT ea.assignment_id,
+           ea.employee_id,
+           e.full_name,
+           TRIM(ea.day_of_week) AS day_of_week
+    FROM employee_assignments ea
+    JOIN employees e ON ea.employee_id = e.employee_id
+    WHERE ea.company_id = ?
+      AND ea.project_id = ?
+      AND TRIM(ea.day_of_week) = ?
+ (params: company_id=180, project_id=10074, target_date=2025-06-07)
+[11-Jun-2025 04:26:37 UTC] Empleados devueltos: 2
+[11-Jun-2025 04:26:37 UTC] ==== FIN DEPURACIÓN ====
+[11-Jun-2025 04:26:45 UTC] User Position Range: 10
+[11-Jun-2025 04:26:45 UTC] Empleados filtrados encontrados: 26
+[11-Jun-2025 04:27:05 UTC] ==== INICIO DEPURACIÓN ====
+[11-Jun-2025 04:27:05 UTC] company_id: 180
+[11-Jun-2025 04:27:05 UTC] project_id: 10055
+[11-Jun-2025 04:27:05 UTC] given_date (day_of_week): 2025-06-09
+[11-Jun-2025 04:27:05 UTC] target_date found: 2025-06-07
+[11-Jun-2025 04:27:05 UTC] Final query: 
+    SELECT ea.assignment_id,
+           ea.employee_id,
+           e.full_name,
+           TRIM(ea.day_of_week) AS day_of_week
+    FROM employee_assignments ea
+    JOIN employees e ON ea.employee_id = e.employee_id
+    WHERE ea.company_id = ?
+      AND ea.project_id = ?
+      AND TRIM(ea.day_of_week) = ?
+ (params: company_id=180, project_id=10055, target_date=2025-06-07)
+[11-Jun-2025 04:27:05 UTC] User Position Range: 10
+[11-Jun-2025 04:27:05 UTC] Empleados devueltos: 1
+[11-Jun-2025 04:27:05 UTC] ==== FIN DEPURACIÓN ====
+[11-Jun-2025 04:27:05 UTC] Empleados filtrados encontrados: 26
+[11-Jun-2025 04:27:23 UTC] User Position Range: 10
+[11-Jun-2025 04:27:23 UTC] Empleados filtrados encontrados: 26
+[11-Jun-2025 04:27:29 UTC] ==== INICIO DEPURACIÓN ====
+[11-Jun-2025 04:27:29 UTC] company_id: 180
+[11-Jun-2025 04:27:29 UTC] project_id: 52
+[11-Jun-2025 04:27:29 UTC] given_date (day_of_week): 2025-06-09
+[11-Jun-2025 04:27:29 UTC] User Position Range: 10
+[11-Jun-2025 04:27:29 UTC] Empleados filtrados encontrados: 26
+[11-Jun-2025 04:27:29 UTC] target_date found: 2025-06-07
+[11-Jun-2025 04:27:29 UTC] Final query: 
+    SELECT ea.assignment_id,
+           ea.employee_id,
+           e.full_name,
+           TRIM(ea.day_of_week) AS day_of_week
+    FROM employee_assignments ea
+    JOIN employees e ON ea.employee_id = e.employee_id
+    WHERE ea.company_id = ?
+      AND ea.project_id = ?
+      AND TRIM(ea.day_of_week) = ?
+ (params: company_id=180, project_id=52, target_date=2025-06-07)
+[11-Jun-2025 04:27:29 UTC] Empleados devueltos: 1
+[11-Jun-2025 04:27:29 UTC] ==== FIN DEPURACIÓN ====
+[11-Jun-2025 04:27:43 UTC] User Position Range: 10
+[11-Jun-2025 04:27:43 UTC] Empleados filtrados encontrados: 26
+[11-Jun-2025 04:27:53 UTC] ==== INICIO DEPURACIÓN ====
+[11-Jun-2025 04:27:53 UTC] company_id: 180
+[11-Jun-2025 04:27:53 UTC] project_id: 10089
+[11-Jun-2025 04:27:53 UTC] given_date (day_of_week): 2025-06-09
+[11-Jun-2025 04:27:53 UTC] target_date found: 2025-06-07
+[11-Jun-2025 04:27:53 UTC] Final query: 
+    SELECT ea.assignment_id,
+           ea.employee_id,
+           e.full_name,
+           TRIM(ea.day_of_week) AS day_of_week
+    FROM employee_assignments ea
+    JOIN employees e ON ea.employee_id = e.employee_id
+    WHERE ea.company_id = ?
+      AND ea.project_id = ?
+      AND TRIM(ea.day_of_week) = ?
+ (params: company_id=180, project_id=10089, target_date=2025-06-07)
+[11-Jun-2025 04:27:53 UTC] Empleados devueltos: 1
+[11-Jun-2025 04:27:53 UTC] ==== FIN DEPURACIÓN ====
+[11-Jun-2025 04:27:53 UTC] User Position Range: 10
+[11-Jun-2025 04:27:53 UTC] Empleados filtrados encontrados: 26
+[11-Jun-2025 04:28:09 UTC] User Position Range: 10
+[11-Jun-2025 04:28:09 UTC] ==== INICIO DEPURACIÓN ====
+[11-Jun-2025 04:28:09 UTC] company_id: 180
+[11-Jun-2025 04:28:09 UTC] project_id: 10102
+[11-Jun-2025 04:28:09 UTC] given_date (day_of_week): 2025-06-09
+[11-Jun-2025 04:28:09 UTC] Empleados filtrados encontrados: 26
+[11-Jun-2025 04:28:09 UTC] target_date found: 2025-06-07
+[11-Jun-2025 04:28:09 UTC] Final query: 
+    SELECT ea.assignment_id,
+           ea.employee_id,
+           e.full_name,
+           TRIM(ea.day_of_week) AS day_of_week
+    FROM employee_assignments ea
+    JOIN employees e ON ea.employee_id = e.employee_id
+    WHERE ea.company_id = ?
+      AND ea.project_id = ?
+      AND TRIM(ea.day_of_week) = ?
+ (params: company_id=180, project_id=10102, target_date=2025-06-07)
+[11-Jun-2025 04:28:09 UTC] Empleados devueltos: 1
+[11-Jun-2025 04:28:09 UTC] ==== FIN DEPURACIÓN ====
+[11-Jun-2025 04:28:15 UTC] User Position Range: 10
+[11-Jun-2025 04:28:15 UTC] Empleados filtrados encontrados: 26
+[11-Jun-2025 04:28:40 UTC] ==== INICIO DEPURACIÓN ====
+[11-Jun-2025 04:28:40 UTC] User Position Range: 10
+[11-Jun-2025 04:28:40 UTC] company_id: 180
+[11-Jun-2025 04:28:40 UTC] project_id: 10088
+[11-Jun-2025 04:28:40 UTC] given_date (day_of_week): 2025-06-09
+[11-Jun-2025 04:28:40 UTC] Empleados filtrados encontrados: 26
+[11-Jun-2025 04:28:40 UTC] target_date found: 2025-06-07
+[11-Jun-2025 04:28:40 UTC] Final query: 
+    SELECT ea.assignment_id,
+           ea.employee_id,
+           e.full_name,
+           TRIM(ea.day_of_week) AS day_of_week
+    FROM employee_assignments ea
+    JOIN employees e ON ea.employee_id = e.employee_id
+    WHERE ea.company_id = ?
+      AND ea.project_id = ?
+      AND TRIM(ea.day_of_week) = ?
+ (params: company_id=180, project_id=10088, target_date=2025-06-07)
+[11-Jun-2025 04:28:40 UTC] Empleados devueltos: 1
+[11-Jun-2025 04:28:40 UTC] ==== FIN DEPURACIÓN ====
+[11-Jun-2025 04:29:09 UTC] User Position Range: 10
+[11-Jun-2025 04:29:09 UTC] ==== INICIO DEPURACIÓN ====
+[11-Jun-2025 04:29:09 UTC] company_id: 180
+[11-Jun-2025 04:29:09 UTC] project_id: 10089
+[11-Jun-2025 04:29:09 UTC] given_date (day_of_week): 2025-06-09
+[11-Jun-2025 04:29:09 UTC] Empleados filtrados encontrados: 26
+[11-Jun-2025 04:29:09 UTC] target_date found: 2025-06-07
+[11-Jun-2025 04:29:09 UTC] Final query: 
+    SELECT ea.assignment_id,
+           ea.employee_id,
+           e.full_name,
+           TRIM(ea.day_of_week) AS day_of_week
+    FROM employee_assignments ea
+    JOIN employees e ON ea.employee_id = e.employee_id
+    WHERE ea.company_id = ?
+      AND ea.project_id = ?
+      AND TRIM(ea.day_of_week) = ?
+ (params: company_id=180, project_id=10089, target_date=2025-06-07)
+[11-Jun-2025 04:29:09 UTC] Empleados devueltos: 1
+[11-Jun-2025 04:29:09 UTC] ==== FIN DEPURACIÓN ====
+[11-Jun-2025 04:29:20 UTC] User Position Range: 10
+[11-Jun-2025 04:29:20 UTC] Empleados filtrados encontrados: 26
+[11-Jun-2025 04:29:25 UTC] User Position Range: 10
+[11-Jun-2025 04:29:25 UTC] Empleados filtrados encontrados: 26
+[11-Jun-2025 04:29:25 UTC] ==== INICIO DEPURACIÓN ====
+[11-Jun-2025 04:29:25 UTC] company_id: 180
+[11-Jun-2025 04:29:25 UTC] project_id: 10088
+[11-Jun-2025 04:29:25 UTC] given_date (day_of_week): 2025-06-09
+[11-Jun-2025 04:29:25 UTC] target_date found: 2025-06-07
+[11-Jun-2025 04:29:25 UTC] Final query: 
+    SELECT ea.assignment_id,
+           ea.employee_id,
+           e.full_name,
+           TRIM(ea.day_of_week) AS day_of_week
+    FROM employee_assignments ea
+    JOIN employees e ON ea.employee_id = e.employee_id
+    WHERE ea.company_id = ?
+      AND ea.project_id = ?
+      AND TRIM(ea.day_of_week) = ?
+ (params: company_id=180, project_id=10088, target_date=2025-06-07)
+[11-Jun-2025 04:29:25 UTC] Empleados devueltos: 1
+[11-Jun-2025 04:29:25 UTC] ==== FIN DEPURACIÓN ====
+[11-Jun-2025 04:29:37 UTC] User Position Range: 10
+[11-Jun-2025 04:29:37 UTC] Empleados filtrados encontrados: 26
+[11-Jun-2025 04:29:44 UTC] User Position Range: 10
+[11-Jun-2025 04:29:44 UTC] ==== INICIO DEPURACIÓN ====
+[11-Jun-2025 04:29:44 UTC] company_id: 180
+[11-Jun-2025 04:29:44 UTC] project_id: 10101
+[11-Jun-2025 04:29:44 UTC] given_date (day_of_week): 2025-06-09
+[11-Jun-2025 04:29:44 UTC] target_date found: 2025-06-05
+[11-Jun-2025 04:29:44 UTC] Final query: 
+    SELECT ea.assignment_id,
+           ea.employee_id,
+           e.full_name,
+           TRIM(ea.day_of_week) AS day_of_week
+    FROM employee_assignments ea
+    JOIN employees e ON ea.employee_id = e.employee_id
+    WHERE ea.company_id = ?
+      AND ea.project_id = ?
+      AND TRIM(ea.day_of_week) = ?
+ (params: company_id=180, project_id=10101, target_date=2025-06-05)
+[11-Jun-2025 04:29:44 UTC] Empleados filtrados encontrados: 26
+[11-Jun-2025 04:29:44 UTC] Empleados devueltos: 1
+[11-Jun-2025 04:29:44 UTC] ==== FIN DEPURACIÓN ====
+[11-Jun-2025 04:29:55 UTC] User Position Range: 10
+[11-Jun-2025 04:29:55 UTC] Empleados filtrados encontrados: 26
+[11-Jun-2025 04:30:01 UTC] ==== INICIO DEPURACIÓN ====
+[11-Jun-2025 04:30:01 UTC] company_id: 180
+[11-Jun-2025 04:30:01 UTC] project_id: 10087
+[11-Jun-2025 04:30:01 UTC] given_date (day_of_week): 2025-06-09
+[11-Jun-2025 04:30:01 UTC] User Position Range: 10
+[11-Jun-2025 04:30:01 UTC] Empleados filtrados encontrados: 26
+[11-Jun-2025 04:30:01 UTC] target_date found: 2025-06-05
+[11-Jun-2025 04:30:01 UTC] Final query: 
+    SELECT ea.assignment_id,
+           ea.employee_id,
+           e.full_name,
+           TRIM(ea.day_of_week) AS day_of_week
+    FROM employee_assignments ea
+    JOIN employees e ON ea.employee_id = e.employee_id
+    WHERE ea.company_id = ?
+      AND ea.project_id = ?
+      AND TRIM(ea.day_of_week) = ?
+ (params: company_id=180, project_id=10087, target_date=2025-06-05)
+[11-Jun-2025 04:30:01 UTC] Empleados devueltos: 1
+[11-Jun-2025 04:30:01 UTC] ==== FIN DEPURACIÓN ====
+[11-Jun-2025 04:30:12 UTC] User Position Range: 10
+[11-Jun-2025 04:30:12 UTC] Empleados filtrados encontrados: 26
+[11-Jun-2025 16:26:17 UTC] User Position Range: 4
+[11-Jun-2025 16:26:17 UTC] User Position Range: 4
+[11-Jun-2025 16:26:17 UTC] Empleados no asignados encontrados: 5
+[11-Jun-2025 16:26:17 UTC] Empleados filtrados encontrados: 1
+[11-Jun-2025 16:26:26 UTC] User Position Range: 4
+[11-Jun-2025 16:26:26 UTC] Empleados no asignados encontrados: 5
+[11-Jun-2025 16:37:05 UTC] Respuesta JSON: []
+[11-Jun-2025 16:37:27 UTC] User Position Range: 4
+[11-Jun-2025 16:37:27 UTC] Empleados no asignados encontrados: 5
+[11-Jun-2025 16:37:27 UTC] User Position Range: 4
+[11-Jun-2025 16:37:27 UTC] Empleados filtrados encontrados: 1
+[11-Jun-2025 16:37:36 UTC] User Position Range: 4
+[11-Jun-2025 16:37:36 UTC] Empleados no asignados encontrados: 5
+[11-Jun-2025 16:37:47 UTC] User Position Range: 4
+[11-Jun-2025 16:37:47 UTC] User Position Range: 4
+[11-Jun-2025 16:37:47 UTC] Empleados no asignados encontrados: 5
+[11-Jun-2025 16:37:47 UTC] Empleados filtrados encontrados: 1
+[11-Jun-2025 16:38:09 UTC] User Position Range: 4
+[11-Jun-2025 16:38:09 UTC] Empleados no asignados encontrados: 5
+[11-Jun-2025 16:45:41 UTC] User Position Range: 4
+[11-Jun-2025 16:45:41 UTC] User Position Range: 4
+[11-Jun-2025 16:45:41 UTC] Empleados no asignados encontrados: 5
+[11-Jun-2025 16:45:41 UTC] Empleados filtrados encontrados: 1
+[11-Jun-2025 16:45:51 UTC] User Position Range: 4
+[11-Jun-2025 16:45:51 UTC] Empleados no asignados encontrados: 5
+[11-Jun-2025 17:06:13 UTC] Respuesta JSON: []
+[11-Jun-2025 17:06:16 UTC] Respuesta JSON: []
+[11-Jun-2025 17:06:19 UTC] Respuesta JSON: []
+[12-Jun-2025 03:28:49 UTC] ==== INICIO DEPURACIÓN ====
+[12-Jun-2025 03:28:49 UTC] User Position Range: 10
+[12-Jun-2025 03:28:49 UTC] company_id: 180
+[12-Jun-2025 03:28:49 UTC] Empleados filtrados encontrados: 26
+[12-Jun-2025 03:28:49 UTC] project_id: 46
+[12-Jun-2025 03:28:49 UTC] given_date (day_of_week): 2025-06-10
+[12-Jun-2025 03:28:49 UTC] target_date found: 2025-06-09
+[12-Jun-2025 03:28:49 UTC] Final query: 
+    SELECT ea.assignment_id,
+           ea.employee_id,
+           e.full_name,
+           TRIM(ea.day_of_week) AS day_of_week
+    FROM employee_assignments ea
+    JOIN employees e ON ea.employee_id = e.employee_id
+    WHERE ea.company_id = ?
+      AND ea.project_id = ?
+      AND TRIM(ea.day_of_week) = ?
+ (params: company_id=180, project_id=46, target_date=2025-06-09)
+[12-Jun-2025 03:28:49 UTC] Empleados devueltos: 1
+[12-Jun-2025 03:28:49 UTC] ==== FIN DEPURACIÓN ====
+[12-Jun-2025 03:29:58 UTC] User Position Range: 10
+[12-Jun-2025 03:29:58 UTC] Empleados filtrados encontrados: 26
+[12-Jun-2025 03:30:30 UTC] User Position Range: 10
+[12-Jun-2025 03:30:30 UTC] User Position Range: 10
+[12-Jun-2025 03:30:30 UTC] Empleados filtrados encontrados: 1
+[12-Jun-2025 03:30:30 UTC] Empleados no asignados encontrados: 25
+[12-Jun-2025 03:31:30 UTC] ==== INICIO DEPURACIÓN ====
+[12-Jun-2025 03:31:30 UTC] company_id: 180
+[12-Jun-2025 03:31:30 UTC] project_id: 46
+[12-Jun-2025 03:31:30 UTC] given_date (day_of_week): 2025-06-10
+[12-Jun-2025 03:31:30 UTC] User Position Range: 10
+[12-Jun-2025 03:31:30 UTC] target_date found: 2025-06-09
+[12-Jun-2025 03:31:30 UTC] Final query: 
+    SELECT ea.assignment_id,
+           ea.employee_id,
+           e.full_name,
+           TRIM(ea.day_of_week) AS day_of_week
+    FROM employee_assignments ea
+    JOIN employees e ON ea.employee_id = e.employee_id
+    WHERE ea.company_id = ?
+      AND ea.project_id = ?
+      AND TRIM(ea.day_of_week) = ?
+ (params: company_id=180, project_id=46, target_date=2025-06-09)
+[12-Jun-2025 03:31:30 UTC] Empleados filtrados encontrados: 26
+[12-Jun-2025 03:31:30 UTC] Empleados devueltos: 1
+[12-Jun-2025 03:31:30 UTC] ==== FIN DEPURACIÓN ====
+[12-Jun-2025 03:31:48 UTC] ==== INICIO DEPURACIÓN ====
+[12-Jun-2025 03:31:48 UTC] company_id: 180
+[12-Jun-2025 03:31:48 UTC] project_id: 10096
+[12-Jun-2025 03:31:48 UTC] given_date (day_of_week): 2025-06-10
+[12-Jun-2025 03:31:48 UTC] User Position Range: 10
+[12-Jun-2025 03:31:48 UTC] Empleados filtrados encontrados: 26
+[12-Jun-2025 03:31:48 UTC] target_date found: 2025-06-07
+[12-Jun-2025 03:31:48 UTC] Final query: 
+    SELECT ea.assignment_id,
+           ea.employee_id,
+           e.full_name,
+           TRIM(ea.day_of_week) AS day_of_week
+    FROM employee_assignments ea
+    JOIN employees e ON ea.employee_id = e.employee_id
+    WHERE ea.company_id = ?
+      AND ea.project_id = ?
+      AND TRIM(ea.day_of_week) = ?
+ (params: company_id=180, project_id=10096, target_date=2025-06-07)
+[12-Jun-2025 03:31:48 UTC] Empleados devueltos: 1
+[12-Jun-2025 03:31:48 UTC] ==== FIN DEPURACIÓN ====
+[12-Jun-2025 03:32:01 UTC] User Position Range: 10
+[12-Jun-2025 03:32:01 UTC] Empleados filtrados encontrados: 26
+[12-Jun-2025 03:32:21 UTC] ==== INICIO DEPURACIÓN ====
+[12-Jun-2025 03:32:21 UTC] User Position Range: 10
+[12-Jun-2025 03:32:21 UTC] company_id: 180
+[12-Jun-2025 03:32:21 UTC] project_id: 10074
+[12-Jun-2025 03:32:21 UTC] given_date (day_of_week): 2025-06-10
+[12-Jun-2025 03:32:21 UTC] Empleados filtrados encontrados: 26
+[12-Jun-2025 03:32:21 UTC] target_date found: 2025-06-09
+[12-Jun-2025 03:32:21 UTC] Final query: 
+    SELECT ea.assignment_id,
+           ea.employee_id,
+           e.full_name,
+           TRIM(ea.day_of_week) AS day_of_week
+    FROM employee_assignments ea
+    JOIN employees e ON ea.employee_id = e.employee_id
+    WHERE ea.company_id = ?
+      AND ea.project_id = ?
+      AND TRIM(ea.day_of_week) = ?
+ (params: company_id=180, project_id=10074, target_date=2025-06-09)
+[12-Jun-2025 03:32:21 UTC] Empleados devueltos: 1
+[12-Jun-2025 03:32:21 UTC] ==== FIN DEPURACIÓN ====
+[12-Jun-2025 03:32:34 UTC] User Position Range: 10
+[12-Jun-2025 03:32:34 UTC] Empleados filtrados encontrados: 26
+[12-Jun-2025 03:33:02 UTC] ==== INICIO DEPURACIÓN ====
+[12-Jun-2025 03:33:02 UTC] company_id: 180
+[12-Jun-2025 03:33:02 UTC] project_id: 10082
+[12-Jun-2025 03:33:02 UTC] given_date (day_of_week): 2025-06-10
+[12-Jun-2025 03:33:02 UTC] User Position Range: 10
+[12-Jun-2025 03:33:02 UTC] target_date found: 2025-06-02
+[12-Jun-2025 03:33:02 UTC] Final query: 
+    SELECT ea.assignment_id,
+           ea.employee_id,
+           e.full_name,
+           TRIM(ea.day_of_week) AS day_of_week
+    FROM employee_assignments ea
+    JOIN employees e ON ea.employee_id = e.employee_id
+    WHERE ea.company_id = ?
+      AND ea.project_id = ?
+      AND TRIM(ea.day_of_week) = ?
+ (params: company_id=180, project_id=10082, target_date=2025-06-02)
+[12-Jun-2025 03:33:02 UTC] Empleados filtrados encontrados: 26
+[12-Jun-2025 03:33:02 UTC] Empleados devueltos: 2
+[12-Jun-2025 03:33:02 UTC] ==== FIN DEPURACIÓN ====
+[12-Jun-2025 03:33:14 UTC] User Position Range: 10
+[12-Jun-2025 03:33:14 UTC] Empleados filtrados encontrados: 26
+[12-Jun-2025 03:33:31 UTC] ==== INICIO DEPURACIÓN ====
+[12-Jun-2025 03:33:31 UTC] company_id: 180
+[12-Jun-2025 03:33:31 UTC] project_id: 10055
+[12-Jun-2025 03:33:31 UTC] given_date (day_of_week): 2025-06-10
+[12-Jun-2025 03:33:31 UTC] target_date found: 2025-06-09
+[12-Jun-2025 03:33:31 UTC] Final query: 
+    SELECT ea.assignment_id,
+           ea.employee_id,
+           e.full_name,
+           TRIM(ea.day_of_week) AS day_of_week
+    FROM employee_assignments ea
+    JOIN employees e ON ea.employee_id = e.employee_id
+    WHERE ea.company_id = ?
+      AND ea.project_id = ?
+      AND TRIM(ea.day_of_week) = ?
+ (params: company_id=180, project_id=10055, target_date=2025-06-09)
+[12-Jun-2025 03:33:31 UTC] Empleados devueltos: 1
+[12-Jun-2025 03:33:31 UTC] ==== FIN DEPURACIÓN ====
+[12-Jun-2025 03:33:31 UTC] User Position Range: 10
+[12-Jun-2025 03:33:31 UTC] Empleados filtrados encontrados: 26
+[12-Jun-2025 03:33:49 UTC] User Position Range: 10
+[12-Jun-2025 03:33:49 UTC] Empleados filtrados encontrados: 26
+[12-Jun-2025 03:33:58 UTC] User Position Range: 10
+[12-Jun-2025 03:33:58 UTC] ==== INICIO DEPURACIÓN ====
+[12-Jun-2025 03:33:58 UTC] company_id: 180
+[12-Jun-2025 03:33:58 UTC] project_id: 52
+[12-Jun-2025 03:33:58 UTC] given_date (day_of_week): 2025-06-10
+[12-Jun-2025 03:33:58 UTC] Empleados filtrados encontrados: 26
+[12-Jun-2025 03:33:58 UTC] target_date found: 2025-06-09
+[12-Jun-2025 03:33:58 UTC] Final query: 
+    SELECT ea.assignment_id,
+           ea.employee_id,
+           e.full_name,
+           TRIM(ea.day_of_week) AS day_of_week
+    FROM employee_assignments ea
+    JOIN employees e ON ea.employee_id = e.employee_id
+    WHERE ea.company_id = ?
+      AND ea.project_id = ?
+      AND TRIM(ea.day_of_week) = ?
+ (params: company_id=180, project_id=52, target_date=2025-06-09)
+[12-Jun-2025 03:33:58 UTC] Empleados devueltos: 1
+[12-Jun-2025 03:33:58 UTC] ==== FIN DEPURACIÓN ====
+[12-Jun-2025 03:34:15 UTC] User Position Range: 10
+[12-Jun-2025 03:34:15 UTC] Empleados filtrados encontrados: 26
+[12-Jun-2025 03:34:32 UTC] ==== INICIO DEPURACIÓN ====
+[12-Jun-2025 03:34:32 UTC] company_id: 180
+[12-Jun-2025 03:34:32 UTC] project_id: 10089
+[12-Jun-2025 03:34:32 UTC] given_date (day_of_week): 2025-06-10
+[12-Jun-2025 03:34:32 UTC] target_date found: 2025-06-09
+[12-Jun-2025 03:34:32 UTC] Final query: 
+    SELECT ea.assignment_id,
+           ea.employee_id,
+           e.full_name,
+           TRIM(ea.day_of_week) AS day_of_week
+    FROM employee_assignments ea
+    JOIN employees e ON ea.employee_id = e.employee_id
+    WHERE ea.company_id = ?
+      AND ea.project_id = ?
+      AND TRIM(ea.day_of_week) = ?
+ (params: company_id=180, project_id=10089, target_date=2025-06-09)
+[12-Jun-2025 03:34:32 UTC] User Position Range: 10
+[12-Jun-2025 03:34:32 UTC] Empleados filtrados encontrados: 26
+[12-Jun-2025 03:34:32 UTC] Empleados devueltos: 1
+[12-Jun-2025 03:34:32 UTC] ==== FIN DEPURACIÓN ====
+[12-Jun-2025 03:34:38 UTC] User Position Range: 10
+[12-Jun-2025 03:34:38 UTC] Empleados filtrados encontrados: 26
+[12-Jun-2025 03:34:47 UTC] ==== INICIO DEPURACIÓN ====
+[12-Jun-2025 03:34:47 UTC] company_id: 180
+[12-Jun-2025 03:34:47 UTC] project_id: 10088
+[12-Jun-2025 03:34:47 UTC] given_date (day_of_week): 2025-06-10
+[12-Jun-2025 03:34:47 UTC] target_date found: 2025-06-09
+[12-Jun-2025 03:34:47 UTC] Final query: 
+    SELECT ea.assignment_id,
+           ea.employee_id,
+           e.full_name,
+           TRIM(ea.day_of_week) AS day_of_week
+    FROM employee_assignments ea
+    JOIN employees e ON ea.employee_id = e.employee_id
+    WHERE ea.company_id = ?
+      AND ea.project_id = ?
+      AND TRIM(ea.day_of_week) = ?
+ (params: company_id=180, project_id=10088, target_date=2025-06-09)
+[12-Jun-2025 03:34:47 UTC] Empleados devueltos: 1
+[12-Jun-2025 03:34:47 UTC] ==== FIN DEPURACIÓN ====
+[12-Jun-2025 03:34:47 UTC] User Position Range: 10
+[12-Jun-2025 03:34:47 UTC] Empleados filtrados encontrados: 26
+[12-Jun-2025 03:35:00 UTC] User Position Range: 10
+[12-Jun-2025 03:35:00 UTC] Empleados filtrados encontrados: 26
+[12-Jun-2025 03:35:12 UTC] User Position Range: 10
+[12-Jun-2025 03:35:12 UTC] Empleados filtrados encontrados: 26
+[12-Jun-2025 03:35:12 UTC] ==== INICIO DEPURACIÓN ====
+[12-Jun-2025 03:35:12 UTC] company_id: 180
+[12-Jun-2025 03:35:12 UTC] project_id: 10101
+[12-Jun-2025 03:35:12 UTC] given_date (day_of_week): 2025-06-10
+[12-Jun-2025 03:35:12 UTC] target_date found: 2025-06-09
+[12-Jun-2025 03:35:12 UTC] Final query: 
+    SELECT ea.assignment_id,
+           ea.employee_id,
+           e.full_name,
+           TRIM(ea.day_of_week) AS day_of_week
+    FROM employee_assignments ea
+    JOIN employees e ON ea.employee_id = e.employee_id
+    WHERE ea.company_id = ?
+      AND ea.project_id = ?
+      AND TRIM(ea.day_of_week) = ?
+ (params: company_id=180, project_id=10101, target_date=2025-06-09)
+[12-Jun-2025 03:35:12 UTC] Empleados devueltos: 1
+[12-Jun-2025 03:35:12 UTC] ==== FIN DEPURACIÓN ====
+[12-Jun-2025 03:35:23 UTC] User Position Range: 10
+[12-Jun-2025 03:35:23 UTC] Empleados filtrados encontrados: 26
+[12-Jun-2025 03:35:38 UTC] User Position Range: 10
+[12-Jun-2025 03:35:38 UTC] Empleados filtrados encontrados: 26
+[12-Jun-2025 03:35:38 UTC] ==== INICIO DEPURACIÓN ====
+[12-Jun-2025 03:35:38 UTC] company_id: 180
+[12-Jun-2025 03:35:38 UTC] project_id: 10087
+[12-Jun-2025 03:35:38 UTC] given_date (day_of_week): 2025-06-10
+[12-Jun-2025 03:35:38 UTC] target_date found: 2025-06-09
+[12-Jun-2025 03:35:38 UTC] Final query: 
+    SELECT ea.assignment_id,
+           ea.employee_id,
+           e.full_name,
+           TRIM(ea.day_of_week) AS day_of_week
+    FROM employee_assignments ea
+    JOIN employees e ON ea.employee_id = e.employee_id
+    WHERE ea.company_id = ?
+      AND ea.project_id = ?
+      AND TRIM(ea.day_of_week) = ?
+ (params: company_id=180, project_id=10087, target_date=2025-06-09)
+[12-Jun-2025 03:35:38 UTC] Empleados devueltos: 1
+[12-Jun-2025 03:35:38 UTC] ==== FIN DEPURACIÓN ====
+[12-Jun-2025 03:36:03 UTC] User Position Range: 10
+[12-Jun-2025 03:36:03 UTC] Empleados filtrados encontrados: 26
+[12-Jun-2025 03:36:20 UTC] ==== INICIO DEPURACIÓN ====
+[12-Jun-2025 03:36:20 UTC] company_id: 180
+[12-Jun-2025 03:36:20 UTC] project_id: 10102
+[12-Jun-2025 03:36:20 UTC] given_date (day_of_week): 2025-06-10
+[12-Jun-2025 03:36:20 UTC] target_date found: 2025-06-09
+[12-Jun-2025 03:36:20 UTC] Final query: 
+    SELECT ea.assignment_id,
+           ea.employee_id,
+           e.full_name,
+           TRIM(ea.day_of_week) AS day_of_week
+    FROM employee_assignments ea
+    JOIN employees e ON ea.employee_id = e.employee_id
+    WHERE ea.company_id = ?
+      AND ea.project_id = ?
+      AND TRIM(ea.day_of_week) = ?
+ (params: company_id=180, project_id=10102, target_date=2025-06-09)
+[12-Jun-2025 03:36:20 UTC] User Position Range: 10
+[12-Jun-2025 03:36:20 UTC] Empleados filtrados encontrados: 26
+[12-Jun-2025 03:36:20 UTC] Empleados devueltos: 1
+[12-Jun-2025 03:36:20 UTC] ==== FIN DEPURACIÓN ====
+[12-Jun-2025 03:36:35 UTC] User Position Range: 10
+[12-Jun-2025 03:36:35 UTC] Empleados filtrados encontrados: 26
+[12-Jun-2025 03:36:49 UTC] ==== INICIO DEPURACIÓN ====
+[12-Jun-2025 03:36:49 UTC] company_id: 180
+[12-Jun-2025 03:36:49 UTC] project_id: 10099
+[12-Jun-2025 03:36:49 UTC] given_date (day_of_week): 2025-06-10
+[12-Jun-2025 03:36:50 UTC] target_date found: 2025-06-09
+[12-Jun-2025 03:36:50 UTC] Final query: 
+    SELECT ea.assignment_id,
+           ea.employee_id,
+           e.full_name,
+           TRIM(ea.day_of_week) AS day_of_week
+    FROM employee_assignments ea
+    JOIN employees e ON ea.employee_id = e.employee_id
+    WHERE ea.company_id = ?
+      AND ea.project_id = ?
+      AND TRIM(ea.day_of_week) = ?
+ (params: company_id=180, project_id=10099, target_date=2025-06-09)
+[12-Jun-2025 03:36:50 UTC] User Position Range: 10
+[12-Jun-2025 03:36:50 UTC] Empleados filtrados encontrados: 26
+[12-Jun-2025 03:36:50 UTC] Empleados devueltos: 2
+[12-Jun-2025 03:36:50 UTC] ==== FIN DEPURACIÓN ====
+[12-Jun-2025 03:37:21 UTC] User Position Range: 10
+[12-Jun-2025 03:37:21 UTC] Empleados filtrados encontrados: 26
+[12-Jun-2025 03:37:31 UTC] ==== INICIO DEPURACIÓN ====
+[12-Jun-2025 03:37:31 UTC] company_id: 180
+[12-Jun-2025 03:37:31 UTC] project_id: 10094
+[12-Jun-2025 03:37:31 UTC] given_date (day_of_week): 2025-06-10
+[12-Jun-2025 03:37:31 UTC] target_date found: 2025-06-09
+[12-Jun-2025 03:37:31 UTC] Final query: 
+    SELECT ea.assignment_id,
+           ea.employee_id,
+           e.full_name,
+           TRIM(ea.day_of_week) AS day_of_week
+    FROM employee_assignments ea
+    JOIN employees e ON ea.employee_id = e.employee_id
+    WHERE ea.company_id = ?
+      AND ea.project_id = ?
+      AND TRIM(ea.day_of_week) = ?
+ (params: company_id=180, project_id=10094, target_date=2025-06-09)
+[12-Jun-2025 03:37:31 UTC] Empleados devueltos: 2
+[12-Jun-2025 03:37:31 UTC] ==== FIN DEPURACIÓN ====
+[12-Jun-2025 03:37:31 UTC] User Position Range: 10
+[12-Jun-2025 03:37:31 UTC] Empleados filtrados encontrados: 26
+[12-Jun-2025 03:37:50 UTC] User Position Range: 10
+[12-Jun-2025 03:37:50 UTC] Empleados filtrados encontrados: 26
+[12-Jun-2025 03:37:57 UTC] ==== INICIO DEPURACIÓN ====
+[12-Jun-2025 03:37:57 UTC] company_id: 180
+[12-Jun-2025 03:37:57 UTC] project_id: 10097
+[12-Jun-2025 03:37:57 UTC] given_date (day_of_week): 2025-06-10
+[12-Jun-2025 03:37:57 UTC] target_date found: 2025-06-09
+[12-Jun-2025 03:37:57 UTC] Final query: 
+    SELECT ea.assignment_id,
+           ea.employee_id,
+           e.full_name,
+           TRIM(ea.day_of_week) AS day_of_week
+    FROM employee_assignments ea
+    JOIN employees e ON ea.employee_id = e.employee_id
+    WHERE ea.company_id = ?
+      AND ea.project_id = ?
+      AND TRIM(ea.day_of_week) = ?
+ (params: company_id=180, project_id=10097, target_date=2025-06-09)
+[12-Jun-2025 03:37:57 UTC] Empleados devueltos: 2
+[12-Jun-2025 03:37:57 UTC] ==== FIN DEPURACIÓN ====
+[12-Jun-2025 03:37:57 UTC] User Position Range: 10
+[12-Jun-2025 03:37:57 UTC] Empleados filtrados encontrados: 26
+[12-Jun-2025 03:38:21 UTC] User Position Range: 10
+[12-Jun-2025 03:38:21 UTC] Empleados filtrados encontrados: 26
+[12-Jun-2025 03:38:28 UTC] User Position Range: 10
+[12-Jun-2025 03:38:28 UTC] Empleados filtrados encontrados: 26
+[12-Jun-2025 03:38:28 UTC] ==== INICIO DEPURACIÓN ====
+[12-Jun-2025 03:38:28 UTC] company_id: 180
+[12-Jun-2025 03:38:28 UTC] project_id: 10100
+[12-Jun-2025 03:38:28 UTC] given_date (day_of_week): 2025-06-10
+[12-Jun-2025 03:38:28 UTC] target_date found: 2025-06-09
+[12-Jun-2025 03:38:28 UTC] Final query: 
+    SELECT ea.assignment_id,
+           ea.employee_id,
+           e.full_name,
+           TRIM(ea.day_of_week) AS day_of_week
+    FROM employee_assignments ea
+    JOIN employees e ON ea.employee_id = e.employee_id
+    WHERE ea.company_id = ?
+      AND ea.project_id = ?
+      AND TRIM(ea.day_of_week) = ?
+ (params: company_id=180, project_id=10100, target_date=2025-06-09)
+[12-Jun-2025 03:38:28 UTC] Empleados devueltos: 1
+[12-Jun-2025 03:38:28 UTC] ==== FIN DEPURACIÓN ====
+[12-Jun-2025 03:38:45 UTC] User Position Range: 10
+[12-Jun-2025 03:38:45 UTC] Empleados filtrados encontrados: 26
+[12-Jun-2025 03:38:51 UTC] ==== INICIO DEPURACIÓN ====
+[12-Jun-2025 03:38:51 UTC] company_id: 180
+[12-Jun-2025 03:38:51 UTC] project_id: 10086
+[12-Jun-2025 03:38:51 UTC] given_date (day_of_week): 2025-06-10
+[12-Jun-2025 03:38:51 UTC] target_date found: 2025-06-09
+[12-Jun-2025 03:38:51 UTC] Final query: 
+    SELECT ea.assignment_id,
+           ea.employee_id,
+           e.full_name,
+           TRIM(ea.day_of_week) AS day_of_week
+    FROM employee_assignments ea
+    JOIN employees e ON ea.employee_id = e.employee_id
+    WHERE ea.company_id = ?
+      AND ea.project_id = ?
+      AND TRIM(ea.day_of_week) = ?
+ (params: company_id=180, project_id=10086, target_date=2025-06-09)
+[12-Jun-2025 03:38:51 UTC] User Position Range: 10
+[12-Jun-2025 03:38:51 UTC] Empleados filtrados encontrados: 26
+[12-Jun-2025 03:38:51 UTC] Empleados devueltos: 1
+[12-Jun-2025 03:38:51 UTC] ==== FIN DEPURACIÓN ====
+[12-Jun-2025 03:39:03 UTC] User Position Range: 10
+[12-Jun-2025 03:39:03 UTC] Empleados filtrados encontrados: 26
+[12-Jun-2025 03:39:17 UTC] User Position Range: 10
+[12-Jun-2025 03:39:17 UTC] ==== INICIO DEPURACIÓN ====
+[12-Jun-2025 03:39:17 UTC] company_id: 180
+[12-Jun-2025 03:39:17 UTC] project_id: 10098
+[12-Jun-2025 03:39:17 UTC] given_date (day_of_week): 2025-06-10
+[12-Jun-2025 03:39:17 UTC] Empleados filtrados encontrados: 26
+[12-Jun-2025 03:39:17 UTC] target_date found: 2025-06-09
+[12-Jun-2025 03:39:17 UTC] Final query: 
+    SELECT ea.assignment_id,
+           ea.employee_id,
+           e.full_name,
+           TRIM(ea.day_of_week) AS day_of_week
+    FROM employee_assignments ea
+    JOIN employees e ON ea.employee_id = e.employee_id
+    WHERE ea.company_id = ?
+      AND ea.project_id = ?
+      AND TRIM(ea.day_of_week) = ?
+ (params: company_id=180, project_id=10098, target_date=2025-06-09)
+[12-Jun-2025 03:39:17 UTC] Empleados devueltos: 1
+[12-Jun-2025 03:39:17 UTC] ==== FIN DEPURACIÓN ====
+[12-Jun-2025 03:39:36 UTC] User Position Range: 10
+[12-Jun-2025 03:39:36 UTC] Empleados filtrados encontrados: 26
+[12-Jun-2025 03:39:56 UTC] ==== INICIO DEPURACIÓN ====
+[12-Jun-2025 03:39:56 UTC] company_id: 180
+[12-Jun-2025 03:39:56 UTC] project_id: 10104
+[12-Jun-2025 03:39:56 UTC] given_date (day_of_week): 2025-06-10
+[12-Jun-2025 03:39:56 UTC] User Position Range: 10
+[12-Jun-2025 03:39:56 UTC] target_date found: 2025-06-09
+[12-Jun-2025 03:39:56 UTC] Final query: 
+    SELECT ea.assignment_id,
+           ea.employee_id,
+           e.full_name,
+           TRIM(ea.day_of_week) AS day_of_week
+    FROM employee_assignments ea
+    JOIN employees e ON ea.employee_id = e.employee_id
+    WHERE ea.company_id = ?
+      AND ea.project_id = ?
+      AND TRIM(ea.day_of_week) = ?
+ (params: company_id=180, project_id=10104, target_date=2025-06-09)
+[12-Jun-2025 03:39:56 UTC] Empleados filtrados encontrados: 26
+[12-Jun-2025 03:39:56 UTC] Empleados devueltos: 1
+[12-Jun-2025 03:39:56 UTC] ==== FIN DEPURACIÓN ====
+[12-Jun-2025 03:40:04 UTC] User Position Range: 10
+[12-Jun-2025 03:40:04 UTC] Empleados filtrados encontrados: 26
+[12-Jun-2025 03:40:08 UTC] ==== INICIO DEPURACIÓN ====
+[12-Jun-2025 03:40:08 UTC] company_id: 180
+[12-Jun-2025 03:40:08 UTC] project_id: 10103
+[12-Jun-2025 03:40:08 UTC] given_date (day_of_week): 2025-06-10
+[12-Jun-2025 03:40:08 UTC] target_date found: 2025-06-09
+[12-Jun-2025 03:40:08 UTC] Final query: 
+    SELECT ea.assignment_id,
+           ea.employee_id,
+           e.full_name,
+           TRIM(ea.day_of_week) AS day_of_week
+    FROM employee_assignments ea
+    JOIN employees e ON ea.employee_id = e.employee_id
+    WHERE ea.company_id = ?
+      AND ea.project_id = ?
+      AND TRIM(ea.day_of_week) = ?
+ (params: company_id=180, project_id=10103, target_date=2025-06-09)
+[12-Jun-2025 03:40:08 UTC] User Position Range: 10
+[12-Jun-2025 03:40:08 UTC] Empleados devueltos: 2
+[12-Jun-2025 03:40:08 UTC] ==== FIN DEPURACIÓN ====
+[12-Jun-2025 03:40:08 UTC] Empleados filtrados encontrados: 26
+[12-Jun-2025 03:40:17 UTC] User Position Range: 10
+[12-Jun-2025 03:40:17 UTC] Empleados filtrados encontrados: 26
+[12-Jun-2025 03:40:34 UTC] ==== INICIO DEPURACIÓN ====
+[12-Jun-2025 03:40:34 UTC] company_id: 180
+[12-Jun-2025 03:40:34 UTC] project_id: 10093
+[12-Jun-2025 03:40:34 UTC] given_date (day_of_week): 2025-06-10
+[12-Jun-2025 03:40:34 UTC] target_date found: 2025-06-09
+[12-Jun-2025 03:40:34 UTC] Final query: 
+    SELECT ea.assignment_id,
+           ea.employee_id,
+           e.full_name,
+           TRIM(ea.day_of_week) AS day_of_week
+    FROM employee_assignments ea
+    JOIN employees e ON ea.employee_id = e.employee_id
+    WHERE ea.company_id = ?
+      AND ea.project_id = ?
+      AND TRIM(ea.day_of_week) = ?
+ (params: company_id=180, project_id=10093, target_date=2025-06-09)
+[12-Jun-2025 03:40:34 UTC] Empleados devueltos: 1
+[12-Jun-2025 03:40:34 UTC] ==== FIN DEPURACIÓN ====
+[12-Jun-2025 03:40:34 UTC] User Position Range: 10
+[12-Jun-2025 03:40:34 UTC] Empleados filtrados encontrados: 26
+[12-Jun-2025 03:40:44 UTC] User Position Range: 10
+[12-Jun-2025 03:40:44 UTC] Empleados filtrados encontrados: 26
+[12-Jun-2025 03:40:51 UTC] ==== INICIO DEPURACIÓN ====
+[12-Jun-2025 03:40:51 UTC] company_id: 180
+[12-Jun-2025 03:40:51 UTC] project_id: 10093
+[12-Jun-2025 03:40:51 UTC] given_date (day_of_week): 2025-06-11
+[12-Jun-2025 03:40:51 UTC] target_date found: 2025-06-10
+[12-Jun-2025 03:40:51 UTC] Final query: 
+    SELECT ea.assignment_id,
+           ea.employee_id,
+           e.full_name,
+           TRIM(ea.day_of_week) AS day_of_week
+    FROM employee_assignments ea
+    JOIN employees e ON ea.employee_id = e.employee_id
+    WHERE ea.company_id = ?
+      AND ea.project_id = ?
+      AND TRIM(ea.day_of_week) = ?
+ (params: company_id=180, project_id=10093, target_date=2025-06-10)
+[12-Jun-2025 03:40:51 UTC] Empleados devueltos: 1
+[12-Jun-2025 03:40:51 UTC] ==== FIN DEPURACIÓN ====
+[12-Jun-2025 03:40:51 UTC] User Position Range: 10
+[12-Jun-2025 03:40:51 UTC] Empleados filtrados encontrados: 26
+[12-Jun-2025 03:41:27 UTC] User Position Range: 10
+[12-Jun-2025 03:41:27 UTC] ==== INICIO DEPURACIÓN ====
+[12-Jun-2025 03:41:27 UTC] company_id: 180
+[12-Jun-2025 03:41:27 UTC] project_id: 46
+[12-Jun-2025 03:41:27 UTC] given_date (day_of_week): 2025-06-11
+[12-Jun-2025 03:41:27 UTC] Empleados filtrados encontrados: 26
+[12-Jun-2025 03:41:27 UTC] target_date found: 2025-06-10
+[12-Jun-2025 03:41:27 UTC] Final query: 
+    SELECT ea.assignment_id,
+           ea.employee_id,
+           e.full_name,
+           TRIM(ea.day_of_week) AS day_of_week
+    FROM employee_assignments ea
+    JOIN employees e ON ea.employee_id = e.employee_id
+    WHERE ea.company_id = ?
+      AND ea.project_id = ?
+      AND TRIM(ea.day_of_week) = ?
+ (params: company_id=180, project_id=46, target_date=2025-06-10)
+[12-Jun-2025 03:41:27 UTC] Empleados devueltos: 1
+[12-Jun-2025 03:41:27 UTC] ==== FIN DEPURACIÓN ====
+[12-Jun-2025 03:41:45 UTC] User Position Range: 10
+[12-Jun-2025 03:41:45 UTC] Empleados filtrados encontrados: 26
+[12-Jun-2025 03:41:59 UTC] ==== INICIO DEPURACIÓN ====
+[12-Jun-2025 03:41:59 UTC] company_id: 180
+[12-Jun-2025 03:41:59 UTC] project_id: 10096
+[12-Jun-2025 03:41:59 UTC] given_date (day_of_week): 2025-06-11
+[12-Jun-2025 03:41:59 UTC] target_date found: 2025-06-10
+[12-Jun-2025 03:41:59 UTC] Final query: 
+    SELECT ea.assignment_id,
+           ea.employee_id,
+           e.full_name,
+           TRIM(ea.day_of_week) AS day_of_week
+    FROM employee_assignments ea
+    JOIN employees e ON ea.employee_id = e.employee_id
+    WHERE ea.company_id = ?
+      AND ea.project_id = ?
+      AND TRIM(ea.day_of_week) = ?
+ (params: company_id=180, project_id=10096, target_date=2025-06-10)
+[12-Jun-2025 03:41:59 UTC] User Position Range: 10
+[12-Jun-2025 03:41:59 UTC] Empleados devueltos: 1
+[12-Jun-2025 03:41:59 UTC] ==== FIN DEPURACIÓN ====
+[12-Jun-2025 03:41:59 UTC] Empleados filtrados encontrados: 26
+[12-Jun-2025 03:42:20 UTC] User Position Range: 10
+[12-Jun-2025 03:42:20 UTC] Empleados filtrados encontrados: 26
+[12-Jun-2025 03:42:34 UTC] ==== INICIO DEPURACIÓN ====
+[12-Jun-2025 03:42:34 UTC] company_id: 180
+[12-Jun-2025 03:42:34 UTC] project_id: 10074
+[12-Jun-2025 03:42:34 UTC] given_date (day_of_week): 2025-06-11
+[12-Jun-2025 03:42:34 UTC] User Position Range: 10
+[12-Jun-2025 03:42:34 UTC] target_date found: 2025-06-10
+[12-Jun-2025 03:42:34 UTC] Final query: 
+    SELECT ea.assignment_id,
+           ea.employee_id,
+           e.full_name,
+           TRIM(ea.day_of_week) AS day_of_week
+    FROM employee_assignments ea
+    JOIN employees e ON ea.employee_id = e.employee_id
+    WHERE ea.company_id = ?
+      AND ea.project_id = ?
+      AND TRIM(ea.day_of_week) = ?
+ (params: company_id=180, project_id=10074, target_date=2025-06-10)
+[12-Jun-2025 03:42:34 UTC] Empleados filtrados encontrados: 26
+[12-Jun-2025 03:42:34 UTC] Empleados devueltos: 1
+[12-Jun-2025 03:42:34 UTC] ==== FIN DEPURACIÓN ====
+[12-Jun-2025 03:42:52 UTC] User Position Range: 10
+[12-Jun-2025 03:42:52 UTC] Empleados filtrados encontrados: 26
+[12-Jun-2025 03:43:07 UTC] ==== INICIO DEPURACIÓN ====
+[12-Jun-2025 03:43:07 UTC] company_id: 180
+[12-Jun-2025 03:43:07 UTC] project_id: 10082
+[12-Jun-2025 03:43:07 UTC] given_date (day_of_week): 2025-06-11
+[12-Jun-2025 03:43:07 UTC] User Position Range: 10
+[12-Jun-2025 03:43:07 UTC] Empleados filtrados encontrados: 26
+[12-Jun-2025 03:43:07 UTC] target_date found: 2025-06-10
+[12-Jun-2025 03:43:07 UTC] Final query: 
+    SELECT ea.assignment_id,
+           ea.employee_id,
+           e.full_name,
+           TRIM(ea.day_of_week) AS day_of_week
+    FROM employee_assignments ea
+    JOIN employees e ON ea.employee_id = e.employee_id
+    WHERE ea.company_id = ?
+      AND ea.project_id = ?
+      AND TRIM(ea.day_of_week) = ?
+ (params: company_id=180, project_id=10082, target_date=2025-06-10)
+[12-Jun-2025 03:43:07 UTC] Empleados devueltos: 1
+[12-Jun-2025 03:43:07 UTC] ==== FIN DEPURACIÓN ====
+[12-Jun-2025 03:43:26 UTC] User Position Range: 10
+[12-Jun-2025 03:43:26 UTC] Empleados filtrados encontrados: 26
+[12-Jun-2025 03:43:56 UTC] ==== INICIO DEPURACIÓN ====
+[12-Jun-2025 03:43:56 UTC] company_id: 180
+[12-Jun-2025 03:43:56 UTC] project_id: 10055
+[12-Jun-2025 03:43:56 UTC] given_date (day_of_week): 2025-06-11
+[12-Jun-2025 03:43:56 UTC] User Position Range: 10
+[12-Jun-2025 03:43:56 UTC] Empleados filtrados encontrados: 26
+[12-Jun-2025 03:43:56 UTC] target_date found: 2025-06-10
+[12-Jun-2025 03:43:56 UTC] Final query: 
+    SELECT ea.assignment_id,
+           ea.employee_id,
+           e.full_name,
+           TRIM(ea.day_of_week) AS day_of_week
+    FROM employee_assignments ea
+    JOIN employees e ON ea.employee_id = e.employee_id
+    WHERE ea.company_id = ?
+      AND ea.project_id = ?
+      AND TRIM(ea.day_of_week) = ?
+ (params: company_id=180, project_id=10055, target_date=2025-06-10)
+[12-Jun-2025 03:43:56 UTC] Empleados devueltos: 1
+[12-Jun-2025 03:43:56 UTC] ==== FIN DEPURACIÓN ====
+[12-Jun-2025 03:44:10 UTC] User Position Range: 10
+[12-Jun-2025 03:44:10 UTC] Empleados filtrados encontrados: 26
+[12-Jun-2025 03:44:23 UTC] ==== INICIO DEPURACIÓN ====
+[12-Jun-2025 03:44:23 UTC] company_id: 180
+[12-Jun-2025 03:44:23 UTC] project_id: 52
+[12-Jun-2025 03:44:23 UTC] given_date (day_of_week): 2025-06-11
+[12-Jun-2025 03:44:23 UTC] User Position Range: 10
+[12-Jun-2025 03:44:23 UTC] Empleados filtrados encontrados: 26
+[12-Jun-2025 03:44:23 UTC] target_date found: 2025-06-10
+[12-Jun-2025 03:44:23 UTC] Final query: 
+    SELECT ea.assignment_id,
+           ea.employee_id,
+           e.full_name,
+           TRIM(ea.day_of_week) AS day_of_week
+    FROM employee_assignments ea
+    JOIN employees e ON ea.employee_id = e.employee_id
+    WHERE ea.company_id = ?
+      AND ea.project_id = ?
+      AND TRIM(ea.day_of_week) = ?
+ (params: company_id=180, project_id=52, target_date=2025-06-10)
+[12-Jun-2025 03:44:23 UTC] Empleados devueltos: 1
+[12-Jun-2025 03:44:23 UTC] ==== FIN DEPURACIÓN ====
+[12-Jun-2025 03:44:47 UTC] User Position Range: 10
+[12-Jun-2025 03:44:47 UTC] Empleados filtrados encontrados: 26
+[12-Jun-2025 03:44:55 UTC] User Position Range: 10
+[12-Jun-2025 03:44:55 UTC] Empleados filtrados encontrados: 26
+[12-Jun-2025 03:44:55 UTC] ==== INICIO DEPURACIÓN ====
+[12-Jun-2025 03:44:55 UTC] company_id: 180
+[12-Jun-2025 03:44:55 UTC] project_id: 10089
+[12-Jun-2025 03:44:55 UTC] given_date (day_of_week): 2025-06-11
+[12-Jun-2025 03:44:55 UTC] target_date found: 2025-06-10
+[12-Jun-2025 03:44:55 UTC] Final query: 
+    SELECT ea.assignment_id,
+           ea.employee_id,
+           e.full_name,
+           TRIM(ea.day_of_week) AS day_of_week
+    FROM employee_assignments ea
+    JOIN employees e ON ea.employee_id = e.employee_id
+    WHERE ea.company_id = ?
+      AND ea.project_id = ?
+      AND TRIM(ea.day_of_week) = ?
+ (params: company_id=180, project_id=10089, target_date=2025-06-10)
+[12-Jun-2025 03:44:55 UTC] Empleados devueltos: 1
+[12-Jun-2025 03:44:55 UTC] ==== FIN DEPURACIÓN ====
+[12-Jun-2025 03:45:28 UTC] User Position Range: 10
+[12-Jun-2025 03:45:28 UTC] Empleados filtrados encontrados: 26
+[12-Jun-2025 03:45:38 UTC] ==== INICIO DEPURACIÓN ====
+[12-Jun-2025 03:45:38 UTC] company_id: 180
+[12-Jun-2025 03:45:38 UTC] project_id: 10088
+[12-Jun-2025 03:45:38 UTC] given_date (day_of_week): 2025-06-11
+[12-Jun-2025 03:45:38 UTC] target_date found: 2025-06-10
+[12-Jun-2025 03:45:38 UTC] Final query: 
+    SELECT ea.assignment_id,
+           ea.employee_id,
+           e.full_name,
+           TRIM(ea.day_of_week) AS day_of_week
+    FROM employee_assignments ea
+    JOIN employees e ON ea.employee_id = e.employee_id
+    WHERE ea.company_id = ?
+      AND ea.project_id = ?
+      AND TRIM(ea.day_of_week) = ?
+ (params: company_id=180, project_id=10088, target_date=2025-06-10)
+[12-Jun-2025 03:45:38 UTC] User Position Range: 10
+[12-Jun-2025 03:45:38 UTC] Empleados devueltos: 1
+[12-Jun-2025 03:45:38 UTC] ==== FIN DEPURACIÓN ====
+[12-Jun-2025 03:45:38 UTC] Empleados filtrados encontrados: 26
+[12-Jun-2025 03:45:58 UTC] User Position Range: 10
+[12-Jun-2025 03:45:58 UTC] Empleados filtrados encontrados: 26
+[12-Jun-2025 03:46:05 UTC] ==== INICIO DEPURACIÓN ====
+[12-Jun-2025 03:46:05 UTC] company_id: 180
+[12-Jun-2025 03:46:05 UTC] project_id: 10101
+[12-Jun-2025 03:46:05 UTC] given_date (day_of_week): 2025-06-11
+[12-Jun-2025 03:46:05 UTC] target_date found: 2025-06-10
+[12-Jun-2025 03:46:05 UTC] Final query: 
+    SELECT ea.assignment_id,
+           ea.employee_id,
+           e.full_name,
+           TRIM(ea.day_of_week) AS day_of_week
+    FROM employee_assignments ea
+    JOIN employees e ON ea.employee_id = e.employee_id
+    WHERE ea.company_id = ?
+      AND ea.project_id = ?
+      AND TRIM(ea.day_of_week) = ?
+ (params: company_id=180, project_id=10101, target_date=2025-06-10)
+[12-Jun-2025 03:46:05 UTC] User Position Range: 10
+[12-Jun-2025 03:46:05 UTC] Empleados devueltos: 1
+[12-Jun-2025 03:46:05 UTC] ==== FIN DEPURACIÓN ====
+[12-Jun-2025 03:46:05 UTC] Empleados filtrados encontrados: 26
+[12-Jun-2025 03:46:28 UTC] User Position Range: 10
+[12-Jun-2025 03:46:28 UTC] Empleados filtrados encontrados: 26
+[12-Jun-2025 03:46:40 UTC] ==== INICIO DEPURACIÓN ====
+[12-Jun-2025 03:46:40 UTC] company_id: 180
+[12-Jun-2025 03:46:40 UTC] project_id: 10087
+[12-Jun-2025 03:46:40 UTC] given_date (day_of_week): 2025-06-11
+[12-Jun-2025 03:46:40 UTC] User Position Range: 10
+[12-Jun-2025 03:46:40 UTC] Empleados filtrados encontrados: 26
+[12-Jun-2025 03:46:40 UTC] target_date found: 2025-06-10
+[12-Jun-2025 03:46:40 UTC] Final query: 
+    SELECT ea.assignment_id,
+           ea.employee_id,
+           e.full_name,
+           TRIM(ea.day_of_week) AS day_of_week
+    FROM employee_assignments ea
+    JOIN employees e ON ea.employee_id = e.employee_id
+    WHERE ea.company_id = ?
+      AND ea.project_id = ?
+      AND TRIM(ea.day_of_week) = ?
+ (params: company_id=180, project_id=10087, target_date=2025-06-10)
+[12-Jun-2025 03:46:40 UTC] Empleados devueltos: 1
+[12-Jun-2025 03:46:40 UTC] ==== FIN DEPURACIÓN ====
+[12-Jun-2025 03:46:57 UTC] User Position Range: 10
+[12-Jun-2025 03:46:57 UTC] Empleados filtrados encontrados: 26
+[12-Jun-2025 03:47:18 UTC] User Position Range: 10
+[12-Jun-2025 03:47:18 UTC] ==== INICIO DEPURACIÓN ====
+[12-Jun-2025 03:47:18 UTC] company_id: 180
+[12-Jun-2025 03:47:18 UTC] project_id: 10102
+[12-Jun-2025 03:47:18 UTC] given_date (day_of_week): 2025-06-11
+[12-Jun-2025 03:47:18 UTC] Empleados filtrados encontrados: 26
+[12-Jun-2025 03:47:18 UTC] target_date found: 2025-06-10
+[12-Jun-2025 03:47:18 UTC] Final query: 
+    SELECT ea.assignment_id,
+           ea.employee_id,
+           e.full_name,
+           TRIM(ea.day_of_week) AS day_of_week
+    FROM employee_assignments ea
+    JOIN employees e ON ea.employee_id = e.employee_id
+    WHERE ea.company_id = ?
+      AND ea.project_id = ?
+      AND TRIM(ea.day_of_week) = ?
+ (params: company_id=180, project_id=10102, target_date=2025-06-10)
+[12-Jun-2025 03:47:18 UTC] Empleados devueltos: 1
+[12-Jun-2025 03:47:18 UTC] ==== FIN DEPURACIÓN ====
+[12-Jun-2025 03:47:41 UTC] User Position Range: 10
+[12-Jun-2025 03:47:41 UTC] Empleados filtrados encontrados: 26
+[12-Jun-2025 03:47:54 UTC] ==== INICIO DEPURACIÓN ====
+[12-Jun-2025 03:47:54 UTC] company_id: 180
+[12-Jun-2025 03:47:54 UTC] project_id: 10099
+[12-Jun-2025 03:47:54 UTC] given_date (day_of_week): 2025-06-11
+[12-Jun-2025 03:47:54 UTC] target_date found: 2025-06-10
+[12-Jun-2025 03:47:54 UTC] Final query: 
+    SELECT ea.assignment_id,
+           ea.employee_id,
+           e.full_name,
+           TRIM(ea.day_of_week) AS day_of_week
+    FROM employee_assignments ea
+    JOIN employees e ON ea.employee_id = e.employee_id
+    WHERE ea.company_id = ?
+      AND ea.project_id = ?
+      AND TRIM(ea.day_of_week) = ?
+ (params: company_id=180, project_id=10099, target_date=2025-06-10)
+[12-Jun-2025 03:47:54 UTC] User Position Range: 10
+[12-Jun-2025 03:47:54 UTC] Empleados devueltos: 2
+[12-Jun-2025 03:47:54 UTC] ==== FIN DEPURACIÓN ====
+[12-Jun-2025 03:47:54 UTC] Empleados filtrados encontrados: 26
+[12-Jun-2025 03:48:17 UTC] User Position Range: 10
+[12-Jun-2025 03:48:17 UTC] Empleados filtrados encontrados: 26
+[12-Jun-2025 03:48:29 UTC] ==== INICIO DEPURACIÓN ====
+[12-Jun-2025 03:48:29 UTC] company_id: 180
+[12-Jun-2025 03:48:29 UTC] project_id: 10094
+[12-Jun-2025 03:48:29 UTC] given_date (day_of_week): 2025-06-11
+[12-Jun-2025 03:48:29 UTC] target_date found: 2025-06-10
+[12-Jun-2025 03:48:29 UTC] Final query: 
+    SELECT ea.assignment_id,
+           ea.employee_id,
+           e.full_name,
+           TRIM(ea.day_of_week) AS day_of_week
+    FROM employee_assignments ea
+    JOIN employees e ON ea.employee_id = e.employee_id
+    WHERE ea.company_id = ?
+      AND ea.project_id = ?
+      AND TRIM(ea.day_of_week) = ?
+ (params: company_id=180, project_id=10094, target_date=2025-06-10)
+[12-Jun-2025 03:48:29 UTC] User Position Range: 10
+[12-Jun-2025 03:48:29 UTC] Empleados devueltos: 2
+[12-Jun-2025 03:48:29 UTC] ==== FIN DEPURACIÓN ====
+[12-Jun-2025 03:48:29 UTC] Empleados filtrados encontrados: 26
+[12-Jun-2025 03:49:53 UTC] User Position Range: 10
+[12-Jun-2025 03:49:53 UTC] Empleados filtrados encontrados: 26
+[12-Jun-2025 03:50:02 UTC] User Position Range: 10
+[12-Jun-2025 03:50:02 UTC] Empleados filtrados encontrados: 26
+[12-Jun-2025 03:50:02 UTC] ==== INICIO DEPURACIÓN ====
+[12-Jun-2025 03:50:02 UTC] company_id: 180
+[12-Jun-2025 03:50:02 UTC] project_id: 10097
+[12-Jun-2025 03:50:02 UTC] given_date (day_of_week): 2025-06-11
+[12-Jun-2025 03:50:02 UTC] target_date found: 2025-06-10
+[12-Jun-2025 03:50:02 UTC] Final query: 
+    SELECT ea.assignment_id,
+           ea.employee_id,
+           e.full_name,
+           TRIM(ea.day_of_week) AS day_of_week
+    FROM employee_assignments ea
+    JOIN employees e ON ea.employee_id = e.employee_id
+    WHERE ea.company_id = ?
+      AND ea.project_id = ?
+      AND TRIM(ea.day_of_week) = ?
+ (params: company_id=180, project_id=10097, target_date=2025-06-10)
+[12-Jun-2025 03:50:02 UTC] Empleados devueltos: 2
+[12-Jun-2025 03:50:02 UTC] ==== FIN DEPURACIÓN ====
+[12-Jun-2025 03:50:16 UTC] User Position Range: 10
+[12-Jun-2025 03:50:16 UTC] Empleados filtrados encontrados: 26
+[12-Jun-2025 03:50:21 UTC] User Position Range: 10
+[12-Jun-2025 03:50:21 UTC] Empleados filtrados encontrados: 26
+[12-Jun-2025 03:50:21 UTC] ==== INICIO DEPURACIÓN ====
+[12-Jun-2025 03:50:21 UTC] company_id: 180
+[12-Jun-2025 03:50:21 UTC] project_id: 10100
+[12-Jun-2025 03:50:21 UTC] given_date (day_of_week): 2025-06-11
+[12-Jun-2025 03:50:21 UTC] target_date found: 2025-06-10
+[12-Jun-2025 03:50:21 UTC] Final query: 
+    SELECT ea.assignment_id,
+           ea.employee_id,
+           e.full_name,
+           TRIM(ea.day_of_week) AS day_of_week
+    FROM employee_assignments ea
+    JOIN employees e ON ea.employee_id = e.employee_id
+    WHERE ea.company_id = ?
+      AND ea.project_id = ?
+      AND TRIM(ea.day_of_week) = ?
+ (params: company_id=180, project_id=10100, target_date=2025-06-10)
+[12-Jun-2025 03:50:21 UTC] Empleados devueltos: 1
+[12-Jun-2025 03:50:21 UTC] ==== FIN DEPURACIÓN ====
+[12-Jun-2025 03:50:31 UTC] User Position Range: 10
+[12-Jun-2025 03:50:31 UTC] Empleados filtrados encontrados: 26
+[12-Jun-2025 03:50:38 UTC] ==== INICIO DEPURACIÓN ====
+[12-Jun-2025 03:50:38 UTC] company_id: 180
+[12-Jun-2025 03:50:38 UTC] project_id: 10086
+[12-Jun-2025 03:50:38 UTC] given_date (day_of_week): 2025-06-11
+[12-Jun-2025 03:50:38 UTC] User Position Range: 10
+[12-Jun-2025 03:50:38 UTC] target_date found: 2025-06-10
+[12-Jun-2025 03:50:38 UTC] Final query: 
+    SELECT ea.assignment_id,
+           ea.employee_id,
+           e.full_name,
+           TRIM(ea.day_of_week) AS day_of_week
+    FROM employee_assignments ea
+    JOIN employees e ON ea.employee_id = e.employee_id
+    WHERE ea.company_id = ?
+      AND ea.project_id = ?
+      AND TRIM(ea.day_of_week) = ?
+ (params: company_id=180, project_id=10086, target_date=2025-06-10)
+[12-Jun-2025 03:50:38 UTC] Empleados filtrados encontrados: 26
+[12-Jun-2025 03:50:38 UTC] Empleados devueltos: 2
+[12-Jun-2025 03:50:38 UTC] ==== FIN DEPURACIÓN ====
+[12-Jun-2025 03:50:57 UTC] User Position Range: 10
+[12-Jun-2025 03:50:57 UTC] Empleados filtrados encontrados: 26
+[12-Jun-2025 03:51:23 UTC] ==== INICIO DEPURACIÓN ====
+[12-Jun-2025 03:51:23 UTC] company_id: 180
+[12-Jun-2025 03:51:23 UTC] project_id: 10098
+[12-Jun-2025 03:51:23 UTC] given_date (day_of_week): 2025-06-11
+[12-Jun-2025 03:51:23 UTC] User Position Range: 10
+[12-Jun-2025 03:51:23 UTC] Empleados filtrados encontrados: 26
+[12-Jun-2025 03:51:23 UTC] target_date found: 2025-06-10
+[12-Jun-2025 03:51:23 UTC] Final query: 
+    SELECT ea.assignment_id,
+           ea.employee_id,
+           e.full_name,
+           TRIM(ea.day_of_week) AS day_of_week
+    FROM employee_assignments ea
+    JOIN employees e ON ea.employee_id = e.employee_id
+    WHERE ea.company_id = ?
+      AND ea.project_id = ?
+      AND TRIM(ea.day_of_week) = ?
+ (params: company_id=180, project_id=10098, target_date=2025-06-10)
+[12-Jun-2025 03:51:23 UTC] Empleados devueltos: 1
+[12-Jun-2025 03:51:23 UTC] ==== FIN DEPURACIÓN ====
+[12-Jun-2025 03:51:30 UTC] User Position Range: 10
+[12-Jun-2025 03:51:30 UTC] Empleados filtrados encontrados: 26
+[12-Jun-2025 03:51:37 UTC] ==== INICIO DEPURACIÓN ====
+[12-Jun-2025 03:51:37 UTC] company_id: 180
+[12-Jun-2025 03:51:37 UTC] project_id: 10093
+[12-Jun-2025 03:51:37 UTC] given_date (day_of_week): 2025-06-11
+[12-Jun-2025 03:51:37 UTC] target_date found: 2025-06-10
+[12-Jun-2025 03:51:37 UTC] Final query: 
+    SELECT ea.assignment_id,
+           ea.employee_id,
+           e.full_name,
+           TRIM(ea.day_of_week) AS day_of_week
+    FROM employee_assignments ea
+    JOIN employees e ON ea.employee_id = e.employee_id
+    WHERE ea.company_id = ?
+      AND ea.project_id = ?
+      AND TRIM(ea.day_of_week) = ?
+ (params: company_id=180, project_id=10093, target_date=2025-06-10)
+[12-Jun-2025 03:51:37 UTC] User Position Range: 10
+[12-Jun-2025 03:51:37 UTC] Empleados devueltos: 1
+[12-Jun-2025 03:51:37 UTC] ==== FIN DEPURACIÓN ====
+[12-Jun-2025 03:51:37 UTC] Empleados filtrados encontrados: 26
+[12-Jun-2025 03:51:45 UTC] User Position Range: 10
+[12-Jun-2025 03:51:45 UTC] Empleados filtrados encontrados: 26
+[12-Jun-2025 03:52:08 UTC] ==== INICIO DEPURACIÓN ====
+[12-Jun-2025 03:52:08 UTC] company_id: 180
+[12-Jun-2025 03:52:08 UTC] project_id: 10092
+[12-Jun-2025 03:52:08 UTC] given_date (day_of_week): 2025-06-11
+[12-Jun-2025 03:52:08 UTC] target_date found: 2025-06-09
+[12-Jun-2025 03:52:08 UTC] User Position Range: 10
+[12-Jun-2025 03:52:08 UTC] Final query: 
+    SELECT ea.assignment_id,
+           ea.employee_id,
+           e.full_name,
+           TRIM(ea.day_of_week) AS day_of_week
+    FROM employee_assignments ea
+    JOIN employees e ON ea.employee_id = e.employee_id
+    WHERE ea.company_id = ?
+      AND ea.project_id = ?
+      AND TRIM(ea.day_of_week) = ?
+ (params: company_id=180, project_id=10092, target_date=2025-06-09)
+[12-Jun-2025 03:52:08 UTC] Empleados filtrados encontrados: 26
+[12-Jun-2025 03:52:08 UTC] Empleados devueltos: 1
+[12-Jun-2025 03:52:08 UTC] ==== FIN DEPURACIÓN ====
+[12-Jun-2025 03:52:27 UTC] User Position Range: 10
+[12-Jun-2025 03:52:27 UTC] Empleados filtrados encontrados: 26
+[12-Jun-2025 03:52:31 UTC] User Position Range: 10
+[12-Jun-2025 03:52:31 UTC] Empleados filtrados encontrados: 26
+[12-Jun-2025 03:52:31 UTC] ==== INICIO DEPURACIÓN ====
+[12-Jun-2025 03:52:31 UTC] company_id: 180
+[12-Jun-2025 03:52:31 UTC] project_id: 10104
+[12-Jun-2025 03:52:31 UTC] given_date (day_of_week): 2025-06-11
+[12-Jun-2025 03:52:31 UTC] target_date found: 2025-06-10
+[12-Jun-2025 03:52:31 UTC] Final query: 
+    SELECT ea.assignment_id,
+           ea.employee_id,
+           e.full_name,
+           TRIM(ea.day_of_week) AS day_of_week
+    FROM employee_assignments ea
+    JOIN employees e ON ea.employee_id = e.employee_id
+    WHERE ea.company_id = ?
+      AND ea.project_id = ?
+      AND TRIM(ea.day_of_week) = ?
+ (params: company_id=180, project_id=10104, target_date=2025-06-10)
+[12-Jun-2025 03:52:31 UTC] Empleados devueltos: 1
+[12-Jun-2025 03:52:31 UTC] ==== FIN DEPURACIÓN ====
+[12-Jun-2025 03:52:39 UTC] User Position Range: 10
+[12-Jun-2025 03:52:39 UTC] Empleados filtrados encontrados: 26
+[12-Jun-2025 03:52:52 UTC] ==== INICIO DEPURACIÓN ====
+[12-Jun-2025 03:52:52 UTC] company_id: 180
+[12-Jun-2025 03:52:52 UTC] project_id: 10103
+[12-Jun-2025 03:52:52 UTC] given_date (day_of_week): 2025-06-11
+[12-Jun-2025 03:52:52 UTC] User Position Range: 10
+[12-Jun-2025 03:52:52 UTC] target_date found: 2025-06-10
+[12-Jun-2025 03:52:52 UTC] Final query: 
+    SELECT ea.assignment_id,
+           ea.employee_id,
+           e.full_name,
+           TRIM(ea.day_of_week) AS day_of_week
+    FROM employee_assignments ea
+    JOIN employees e ON ea.employee_id = e.employee_id
+    WHERE ea.company_id = ?
+      AND ea.project_id = ?
+      AND TRIM(ea.day_of_week) = ?
+ (params: company_id=180, project_id=10103, target_date=2025-06-10)
+[12-Jun-2025 03:52:52 UTC] Empleados filtrados encontrados: 26
+[12-Jun-2025 03:52:52 UTC] Empleados devueltos: 1
+[12-Jun-2025 03:52:52 UTC] ==== FIN DEPURACIÓN ====
+[12-Jun-2025 03:53:00 UTC] User Position Range: 10
+[12-Jun-2025 03:53:00 UTC] Empleados filtrados encontrados: 26
+[12-Jun-2025 03:53:10 UTC] User Position Range: 10
+[12-Jun-2025 03:53:10 UTC] User Position Range: 10
+[12-Jun-2025 03:53:10 UTC] Empleados filtrados encontrados: 25
+[12-Jun-2025 03:53:10 UTC] Empleados no asignados encontrados: 1
+[12-Jun-2025 03:58:26 UTC] ==== INICIO DEPURACIÓN ====
+[12-Jun-2025 03:58:26 UTC] company_id: 180
+[12-Jun-2025 03:58:26 UTC] project_id: 46
+[12-Jun-2025 03:58:26 UTC] given_date (day_of_week): 2025-06-12
+[12-Jun-2025 03:58:26 UTC] User Position Range: 10
+[12-Jun-2025 03:58:26 UTC] Empleados filtrados encontrados: 26
+[12-Jun-2025 03:58:26 UTC] target_date found: 2025-06-11
+[12-Jun-2025 03:58:26 UTC] Final query: 
+    SELECT ea.assignment_id,
+           ea.employee_id,
+           e.full_name,
+           TRIM(ea.day_of_week) AS day_of_week
+    FROM employee_assignments ea
+    JOIN employees e ON ea.employee_id = e.employee_id
+    WHERE ea.company_id = ?
+      AND ea.project_id = ?
+      AND TRIM(ea.day_of_week) = ?
+ (params: company_id=180, project_id=46, target_date=2025-06-11)
+[12-Jun-2025 03:58:26 UTC] Empleados devueltos: 1
+[12-Jun-2025 03:58:26 UTC] ==== FIN DEPURACIÓN ====
+[12-Jun-2025 03:59:39 UTC] User Position Range: 10
+[12-Jun-2025 03:59:39 UTC] Empleados filtrados encontrados: 26
+[12-Jun-2025 04:05:14 UTC] ==== INICIO DEPURACIÓN ====
+[12-Jun-2025 04:05:14 UTC] User Position Range: 10
+[12-Jun-2025 04:05:14 UTC] company_id: 180
+[12-Jun-2025 04:05:14 UTC] Empleados filtrados encontrados: 26
+[12-Jun-2025 04:05:14 UTC] project_id: 10096
+[12-Jun-2025 04:05:14 UTC] given_date (day_of_week): 2025-06-12
+[12-Jun-2025 04:05:14 UTC] target_date found: 2025-06-11
+[12-Jun-2025 04:05:14 UTC] Final query: 
+    SELECT ea.assignment_id,
+           ea.employee_id,
+           e.full_name,
+           TRIM(ea.day_of_week) AS day_of_week
+    FROM employee_assignments ea
+    JOIN employees e ON ea.employee_id = e.employee_id
+    WHERE ea.company_id = ?
+      AND ea.project_id = ?
+      AND TRIM(ea.day_of_week) = ?
+ (params: company_id=180, project_id=10096, target_date=2025-06-11)
+[12-Jun-2025 04:05:14 UTC] Empleados devueltos: 1
+[12-Jun-2025 04:05:14 UTC] ==== FIN DEPURACIÓN ====
+[12-Jun-2025 04:05:43 UTC] User Position Range: 10
+[12-Jun-2025 04:05:43 UTC] Empleados filtrados encontrados: 26
+[12-Jun-2025 04:05:54 UTC] ==== INICIO DEPURACIÓN ====
+[12-Jun-2025 04:05:54 UTC] company_id: 180
+[12-Jun-2025 04:05:54 UTC] project_id: 10074
+[12-Jun-2025 04:05:54 UTC] given_date (day_of_week): 2025-06-12
+[12-Jun-2025 04:05:54 UTC] User Position Range: 10
+[12-Jun-2025 04:05:54 UTC] Empleados filtrados encontrados: 26
+[12-Jun-2025 04:05:54 UTC] target_date found: 2025-06-11
+[12-Jun-2025 04:05:54 UTC] Final query: 
+    SELECT ea.assignment_id,
+           ea.employee_id,
+           e.full_name,
+           TRIM(ea.day_of_week) AS day_of_week
+    FROM employee_assignments ea
+    JOIN employees e ON ea.employee_id = e.employee_id
+    WHERE ea.company_id = ?
+      AND ea.project_id = ?
+      AND TRIM(ea.day_of_week) = ?
+ (params: company_id=180, project_id=10074, target_date=2025-06-11)
+[12-Jun-2025 04:05:54 UTC] Empleados devueltos: 1
+[12-Jun-2025 04:05:54 UTC] ==== FIN DEPURACIÓN ====
+[12-Jun-2025 04:06:04 UTC] User Position Range: 10
+[12-Jun-2025 04:06:04 UTC] Empleados filtrados encontrados: 26
+[12-Jun-2025 04:06:26 UTC] ==== INICIO DEPURACIÓN ====
+[12-Jun-2025 04:06:26 UTC] company_id: 180
+[12-Jun-2025 04:06:26 UTC] project_id: 10082
+[12-Jun-2025 04:06:26 UTC] given_date (day_of_week): 2025-06-12
+[12-Jun-2025 04:06:26 UTC] User Position Range: 10
+[12-Jun-2025 04:06:26 UTC] Empleados filtrados encontrados: 26
+[12-Jun-2025 04:06:26 UTC] target_date found: 2025-06-11
+[12-Jun-2025 04:06:26 UTC] Final query: 
+    SELECT ea.assignment_id,
+           ea.employee_id,
+           e.full_name,
+           TRIM(ea.day_of_week) AS day_of_week
+    FROM employee_assignments ea
+    JOIN employees e ON ea.employee_id = e.employee_id
+    WHERE ea.company_id = ?
+      AND ea.project_id = ?
+      AND TRIM(ea.day_of_week) = ?
+ (params: company_id=180, project_id=10082, target_date=2025-06-11)
+[12-Jun-2025 04:06:26 UTC] Empleados devueltos: 1
+[12-Jun-2025 04:06:26 UTC] ==== FIN DEPURACIÓN ====
+[12-Jun-2025 04:06:39 UTC] User Position Range: 10
+[12-Jun-2025 04:06:39 UTC] Empleados filtrados encontrados: 26
+[12-Jun-2025 04:07:05 UTC] ==== INICIO DEPURACIÓN ====
+[12-Jun-2025 04:07:05 UTC] company_id: 180
+[12-Jun-2025 04:07:05 UTC] project_id: 10055
+[12-Jun-2025 04:07:05 UTC] given_date (day_of_week): 2025-06-12
+[12-Jun-2025 04:07:05 UTC] target_date found: 2025-06-11
+[12-Jun-2025 04:07:05 UTC] Final query: 
+    SELECT ea.assignment_id,
+           ea.employee_id,
+           e.full_name,
+           TRIM(ea.day_of_week) AS day_of_week
+    FROM employee_assignments ea
+    JOIN employees e ON ea.employee_id = e.employee_id
+    WHERE ea.company_id = ?
+      AND ea.project_id = ?
+      AND TRIM(ea.day_of_week) = ?
+ (params: company_id=180, project_id=10055, target_date=2025-06-11)
+[12-Jun-2025 04:07:05 UTC] User Position Range: 10
+[12-Jun-2025 04:07:05 UTC] Empleados filtrados encontrados: 26
+[12-Jun-2025 04:07:05 UTC] Empleados devueltos: 1
+[12-Jun-2025 04:07:05 UTC] ==== FIN DEPURACIÓN ====
+[12-Jun-2025 04:07:16 UTC] User Position Range: 10
+[12-Jun-2025 04:07:16 UTC] Empleados filtrados encontrados: 26
+[12-Jun-2025 04:07:23 UTC] User Position Range: 10
+[12-Jun-2025 04:07:23 UTC] ==== INICIO DEPURACIÓN ====
+[12-Jun-2025 04:07:23 UTC] company_id: 180
+[12-Jun-2025 04:07:23 UTC] project_id: 52
+[12-Jun-2025 04:07:23 UTC] given_date (day_of_week): 2025-06-12
+[12-Jun-2025 04:07:23 UTC] Empleados filtrados encontrados: 26
+[12-Jun-2025 04:07:23 UTC] target_date found: 2025-06-11
+[12-Jun-2025 04:07:23 UTC] Final query: 
+    SELECT ea.assignment_id,
+           ea.employee_id,
+           e.full_name,
+           TRIM(ea.day_of_week) AS day_of_week
+    FROM employee_assignments ea
+    JOIN employees e ON ea.employee_id = e.employee_id
+    WHERE ea.company_id = ?
+      AND ea.project_id = ?
+      AND TRIM(ea.day_of_week) = ?
+ (params: company_id=180, project_id=52, target_date=2025-06-11)
+[12-Jun-2025 04:07:23 UTC] Empleados devueltos: 1
+[12-Jun-2025 04:07:23 UTC] ==== FIN DEPURACIÓN ====
+[12-Jun-2025 04:07:45 UTC] User Position Range: 10
+[12-Jun-2025 04:07:45 UTC] Empleados filtrados encontrados: 26
+[12-Jun-2025 04:07:58 UTC] ==== INICIO DEPURACIÓN ====
+[12-Jun-2025 04:07:58 UTC] company_id: 180
+[12-Jun-2025 04:07:58 UTC] project_id: 10089
+[12-Jun-2025 04:07:58 UTC] given_date (day_of_week): 2025-06-12
+[12-Jun-2025 04:07:58 UTC] User Position Range: 10
+[12-Jun-2025 04:07:58 UTC] target_date found: 2025-06-11
+[12-Jun-2025 04:07:58 UTC] Final query: 
+    SELECT ea.assignment_id,
+           ea.employee_id,
+           e.full_name,
+           TRIM(ea.day_of_week) AS day_of_week
+    FROM employee_assignments ea
+    JOIN employees e ON ea.employee_id = e.employee_id
+    WHERE ea.company_id = ?
+      AND ea.project_id = ?
+      AND TRIM(ea.day_of_week) = ?
+ (params: company_id=180, project_id=10089, target_date=2025-06-11)
+[12-Jun-2025 04:07:58 UTC] Empleados filtrados encontrados: 26
+[12-Jun-2025 04:07:58 UTC] Empleados devueltos: 1
+[12-Jun-2025 04:07:58 UTC] ==== FIN DEPURACIÓN ====
+[12-Jun-2025 04:08:13 UTC] User Position Range: 10
+[12-Jun-2025 04:08:13 UTC] Empleados filtrados encontrados: 26
+[12-Jun-2025 04:08:20 UTC] User Position Range: 10
+[12-Jun-2025 04:08:20 UTC] ==== INICIO DEPURACIÓN ====
+[12-Jun-2025 04:08:20 UTC] company_id: 180
+[12-Jun-2025 04:08:20 UTC] project_id: 10088
+[12-Jun-2025 04:08:20 UTC] given_date (day_of_week): 2025-06-12
+[12-Jun-2025 04:08:20 UTC] Empleados filtrados encontrados: 26
+[12-Jun-2025 04:08:20 UTC] target_date found: 2025-06-11
+[12-Jun-2025 04:08:20 UTC] Final query: 
+    SELECT ea.assignment_id,
+           ea.employee_id,
+           e.full_name,
+           TRIM(ea.day_of_week) AS day_of_week
+    FROM employee_assignments ea
+    JOIN employees e ON ea.employee_id = e.employee_id
+    WHERE ea.company_id = ?
+      AND ea.project_id = ?
+      AND TRIM(ea.day_of_week) = ?
+ (params: company_id=180, project_id=10088, target_date=2025-06-11)
+[12-Jun-2025 04:08:20 UTC] Empleados devueltos: 1
+[12-Jun-2025 04:08:20 UTC] ==== FIN DEPURACIÓN ====
+[12-Jun-2025 04:08:31 UTC] User Position Range: 10
+[12-Jun-2025 04:08:31 UTC] Empleados filtrados encontrados: 26
+[12-Jun-2025 04:08:39 UTC] User Position Range: 10
+[12-Jun-2025 04:08:39 UTC] ==== INICIO DEPURACIÓN ====
+[12-Jun-2025 04:08:39 UTC] company_id: 180
+[12-Jun-2025 04:08:39 UTC] project_id: 10101
+[12-Jun-2025 04:08:39 UTC] given_date (day_of_week): 2025-06-12
+[12-Jun-2025 04:08:39 UTC] Empleados filtrados encontrados: 26
+[12-Jun-2025 04:08:39 UTC] target_date found: 2025-06-11
+[12-Jun-2025 04:08:39 UTC] Final query: 
+    SELECT ea.assignment_id,
+           ea.employee_id,
+           e.full_name,
+           TRIM(ea.day_of_week) AS day_of_week
+    FROM employee_assignments ea
+    JOIN employees e ON ea.employee_id = e.employee_id
+    WHERE ea.company_id = ?
+      AND ea.project_id = ?
+      AND TRIM(ea.day_of_week) = ?
+ (params: company_id=180, project_id=10101, target_date=2025-06-11)
+[12-Jun-2025 04:08:39 UTC] Empleados devueltos: 1
+[12-Jun-2025 04:08:39 UTC] ==== FIN DEPURACIÓN ====
+[12-Jun-2025 04:08:52 UTC] User Position Range: 10
+[12-Jun-2025 04:08:52 UTC] Empleados filtrados encontrados: 26
+[12-Jun-2025 04:08:56 UTC] ==== INICIO DEPURACIÓN ====
+[12-Jun-2025 04:08:56 UTC] company_id: 180
+[12-Jun-2025 04:08:56 UTC] project_id: 10087
+[12-Jun-2025 04:08:56 UTC] given_date (day_of_week): 2025-06-12
+[12-Jun-2025 04:08:56 UTC] target_date found: 2025-06-11
+[12-Jun-2025 04:08:56 UTC] Final query: 
+    SELECT ea.assignment_id,
+           ea.employee_id,
+           e.full_name,
+           TRIM(ea.day_of_week) AS day_of_week
+    FROM employee_assignments ea
+    JOIN employees e ON ea.employee_id = e.employee_id
+    WHERE ea.company_id = ?
+      AND ea.project_id = ?
+      AND TRIM(ea.day_of_week) = ?
+ (params: company_id=180, project_id=10087, target_date=2025-06-11)
+[12-Jun-2025 04:08:56 UTC] Empleados devueltos: 1
+[12-Jun-2025 04:08:56 UTC] ==== FIN DEPURACIÓN ====
+[12-Jun-2025 04:08:56 UTC] User Position Range: 10
+[12-Jun-2025 04:08:56 UTC] Empleados filtrados encontrados: 26
+[12-Jun-2025 04:09:13 UTC] User Position Range: 10
+[12-Jun-2025 04:09:13 UTC] Empleados filtrados encontrados: 26
+[12-Jun-2025 04:09:22 UTC] ==== INICIO DEPURACIÓN ====
+[12-Jun-2025 04:09:22 UTC] company_id: 180
+[12-Jun-2025 04:09:22 UTC] project_id: 10102
+[12-Jun-2025 04:09:22 UTC] given_date (day_of_week): 2025-06-12
+[12-Jun-2025 04:09:22 UTC] target_date found: 2025-06-11
+[12-Jun-2025 04:09:22 UTC] Final query: 
+    SELECT ea.assignment_id,
+           ea.employee_id,
+           e.full_name,
+           TRIM(ea.day_of_week) AS day_of_week
+    FROM employee_assignments ea
+    JOIN employees e ON ea.employee_id = e.employee_id
+    WHERE ea.company_id = ?
+      AND ea.project_id = ?
+      AND TRIM(ea.day_of_week) = ?
+ (params: company_id=180, project_id=10102, target_date=2025-06-11)
+[12-Jun-2025 04:09:22 UTC] Empleados devueltos: 1
+[12-Jun-2025 04:09:22 UTC] ==== FIN DEPURACIÓN ====
+[12-Jun-2025 04:09:22 UTC] User Position Range: 10
+[12-Jun-2025 04:09:22 UTC] Empleados filtrados encontrados: 26
+[12-Jun-2025 04:09:35 UTC] User Position Range: 10
+[12-Jun-2025 04:09:35 UTC] Empleados filtrados encontrados: 26
+[12-Jun-2025 04:09:42 UTC] ==== INICIO DEPURACIÓN ====
+[12-Jun-2025 04:09:42 UTC] company_id: 180
+[12-Jun-2025 04:09:42 UTC] project_id: 10099
+[12-Jun-2025 04:09:42 UTC] given_date (day_of_week): 2025-06-12
+[12-Jun-2025 04:09:42 UTC] target_date found: 2025-06-11
+[12-Jun-2025 04:09:42 UTC] Final query: 
+    SELECT ea.assignment_id,
+           ea.employee_id,
+           e.full_name,
+           TRIM(ea.day_of_week) AS day_of_week
+    FROM employee_assignments ea
+    JOIN employees e ON ea.employee_id = e.employee_id
+    WHERE ea.company_id = ?
+      AND ea.project_id = ?
+      AND TRIM(ea.day_of_week) = ?
+ (params: company_id=180, project_id=10099, target_date=2025-06-11)
+[12-Jun-2025 04:09:42 UTC] Empleados devueltos: 2
+[12-Jun-2025 04:09:42 UTC] ==== FIN DEPURACIÓN ====
+[12-Jun-2025 04:09:42 UTC] User Position Range: 10
+[12-Jun-2025 04:09:42 UTC] Empleados filtrados encontrados: 26
+[12-Jun-2025 04:10:07 UTC] User Position Range: 10
+[12-Jun-2025 04:10:07 UTC] Empleados filtrados encontrados: 26
+[12-Jun-2025 04:10:11 UTC] User Position Range: 10
+[12-Jun-2025 04:10:11 UTC] Empleados filtrados encontrados: 26
+[12-Jun-2025 04:10:11 UTC] ==== INICIO DEPURACIÓN ====
+[12-Jun-2025 04:10:11 UTC] company_id: 180
+[12-Jun-2025 04:10:11 UTC] project_id: 10094
+[12-Jun-2025 04:10:11 UTC] given_date (day_of_week): 2025-06-12
+[12-Jun-2025 04:10:11 UTC] target_date found: 2025-06-11
+[12-Jun-2025 04:10:11 UTC] Final query: 
+    SELECT ea.assignment_id,
+           ea.employee_id,
+           e.full_name,
+           TRIM(ea.day_of_week) AS day_of_week
+    FROM employee_assignments ea
+    JOIN employees e ON ea.employee_id = e.employee_id
+    WHERE ea.company_id = ?
+      AND ea.project_id = ?
+      AND TRIM(ea.day_of_week) = ?
+ (params: company_id=180, project_id=10094, target_date=2025-06-11)
+[12-Jun-2025 04:10:11 UTC] Empleados devueltos: 2
+[12-Jun-2025 04:10:11 UTC] ==== FIN DEPURACIÓN ====
+[12-Jun-2025 04:10:26 UTC] User Position Range: 10
+[12-Jun-2025 04:10:26 UTC] Empleados filtrados encontrados: 26
+[12-Jun-2025 04:10:33 UTC] User Position Range: 10
+[12-Jun-2025 04:10:33 UTC] Empleados filtrados encontrados: 26
+[12-Jun-2025 04:10:33 UTC] ==== INICIO DEPURACIÓN ====
+[12-Jun-2025 04:10:33 UTC] company_id: 180
+[12-Jun-2025 04:10:33 UTC] project_id: 10097
+[12-Jun-2025 04:10:33 UTC] given_date (day_of_week): 2025-06-12
+[12-Jun-2025 04:10:33 UTC] target_date found: 2025-06-11
+[12-Jun-2025 04:10:33 UTC] Final query: 
+    SELECT ea.assignment_id,
+           ea.employee_id,
+           e.full_name,
+           TRIM(ea.day_of_week) AS day_of_week
+    FROM employee_assignments ea
+    JOIN employees e ON ea.employee_id = e.employee_id
+    WHERE ea.company_id = ?
+      AND ea.project_id = ?
+      AND TRIM(ea.day_of_week) = ?
+ (params: company_id=180, project_id=10097, target_date=2025-06-11)
+[12-Jun-2025 04:10:33 UTC] Empleados devueltos: 2
+[12-Jun-2025 04:10:33 UTC] ==== FIN DEPURACIÓN ====
+[12-Jun-2025 04:11:00 UTC] User Position Range: 10
+[12-Jun-2025 04:11:00 UTC] Empleados filtrados encontrados: 26
+[12-Jun-2025 04:11:06 UTC] ==== INICIO DEPURACIÓN ====
+[12-Jun-2025 04:11:06 UTC] company_id: 180
+[12-Jun-2025 04:11:06 UTC] project_id: 10100
+[12-Jun-2025 04:11:06 UTC] given_date (day_of_week): 2025-06-12
+[12-Jun-2025 04:11:06 UTC] target_date found: 2025-06-11
+[12-Jun-2025 04:11:06 UTC] Final query: 
+    SELECT ea.assignment_id,
+           ea.employee_id,
+           e.full_name,
+           TRIM(ea.day_of_week) AS day_of_week
+    FROM employee_assignments ea
+    JOIN employees e ON ea.employee_id = e.employee_id
+    WHERE ea.company_id = ?
+      AND ea.project_id = ?
+      AND TRIM(ea.day_of_week) = ?
+ (params: company_id=180, project_id=10100, target_date=2025-06-11)
+[12-Jun-2025 04:11:06 UTC] User Position Range: 10
+[12-Jun-2025 04:11:06 UTC] Empleados filtrados encontrados: 26
+[12-Jun-2025 04:11:06 UTC] Empleados devueltos: 1
+[12-Jun-2025 04:11:06 UTC] ==== FIN DEPURACIÓN ====
+[12-Jun-2025 04:11:26 UTC] User Position Range: 10
+[12-Jun-2025 04:11:26 UTC] Empleados filtrados encontrados: 26
+[12-Jun-2025 04:11:34 UTC] User Position Range: 10
+[12-Jun-2025 04:11:34 UTC] Empleados filtrados encontrados: 26
+[12-Jun-2025 04:11:34 UTC] ==== INICIO DEPURACIÓN ====
+[12-Jun-2025 04:11:34 UTC] company_id: 180
+[12-Jun-2025 04:11:34 UTC] project_id: 10086
+[12-Jun-2025 04:11:34 UTC] given_date (day_of_week): 2025-06-12
+[12-Jun-2025 04:11:34 UTC] target_date found: 2025-06-11
+[12-Jun-2025 04:11:34 UTC] Final query: 
+    SELECT ea.assignment_id,
+           ea.employee_id,
+           e.full_name,
+           TRIM(ea.day_of_week) AS day_of_week
+    FROM employee_assignments ea
+    JOIN employees e ON ea.employee_id = e.employee_id
+    WHERE ea.company_id = ?
+      AND ea.project_id = ?
+      AND TRIM(ea.day_of_week) = ?
+ (params: company_id=180, project_id=10086, target_date=2025-06-11)
+[12-Jun-2025 04:11:34 UTC] Empleados devueltos: 2
+[12-Jun-2025 04:11:34 UTC] ==== FIN DEPURACIÓN ====
+[12-Jun-2025 04:11:57 UTC] User Position Range: 10
+[12-Jun-2025 04:11:57 UTC] Empleados filtrados encontrados: 26
+[12-Jun-2025 04:12:01 UTC] ==== INICIO DEPURACIÓN ====
+[12-Jun-2025 04:12:01 UTC] company_id: 180
+[12-Jun-2025 04:12:01 UTC] project_id: 10098
+[12-Jun-2025 04:12:01 UTC] given_date (day_of_week): 2025-06-12
+[12-Jun-2025 04:12:01 UTC] target_date found: 2025-06-11
+[12-Jun-2025 04:12:01 UTC] Final query: 
+    SELECT ea.assignment_id,
+           ea.employee_id,
+           e.full_name,
+           TRIM(ea.day_of_week) AS day_of_week
+    FROM employee_assignments ea
+    JOIN employees e ON ea.employee_id = e.employee_id
+    WHERE ea.company_id = ?
+      AND ea.project_id = ?
+      AND TRIM(ea.day_of_week) = ?
+ (params: company_id=180, project_id=10098, target_date=2025-06-11)
+[12-Jun-2025 04:12:01 UTC] Empleados devueltos: 1
+[12-Jun-2025 04:12:01 UTC] ==== FIN DEPURACIÓN ====
+[12-Jun-2025 04:12:01 UTC] User Position Range: 10
+[12-Jun-2025 04:12:01 UTC] Empleados filtrados encontrados: 26
+[12-Jun-2025 04:12:10 UTC] User Position Range: 10
+[12-Jun-2025 04:12:10 UTC] Empleados filtrados encontrados: 26
+[12-Jun-2025 04:12:15 UTC] ==== INICIO DEPURACIÓN ====
+[12-Jun-2025 04:12:15 UTC] company_id: 180
+[12-Jun-2025 04:12:15 UTC] project_id: 10093
+[12-Jun-2025 04:12:15 UTC] given_date (day_of_week): 2025-06-12
+[12-Jun-2025 04:12:15 UTC] target_date found: 2025-06-11
+[12-Jun-2025 04:12:15 UTC] Final query: 
+    SELECT ea.assignment_id,
+           ea.employee_id,
+           e.full_name,
+           TRIM(ea.day_of_week) AS day_of_week
+    FROM employee_assignments ea
+    JOIN employees e ON ea.employee_id = e.employee_id
+    WHERE ea.company_id = ?
+      AND ea.project_id = ?
+      AND TRIM(ea.day_of_week) = ?
+ (params: company_id=180, project_id=10093, target_date=2025-06-11)
+[12-Jun-2025 04:12:15 UTC] Empleados devueltos: 1
+[12-Jun-2025 04:12:15 UTC] ==== FIN DEPURACIÓN ====
+[12-Jun-2025 04:12:15 UTC] User Position Range: 10
+[12-Jun-2025 04:12:15 UTC] Empleados filtrados encontrados: 26
+[12-Jun-2025 04:12:22 UTC] User Position Range: 10
+[12-Jun-2025 04:12:22 UTC] Empleados filtrados encontrados: 26
+[12-Jun-2025 04:12:42 UTC] User Position Range: 10
+[12-Jun-2025 04:12:42 UTC] Empleados filtrados encontrados: 26
+[12-Jun-2025 04:12:50 UTC] User Position Range: 10
+[12-Jun-2025 04:12:50 UTC] Empleados filtrados encontrados: 26
+[12-Jun-2025 04:12:50 UTC] ==== INICIO DEPURACIÓN ====
+[12-Jun-2025 04:12:50 UTC] company_id: 180
+[12-Jun-2025 04:12:50 UTC] project_id: 10104
+[12-Jun-2025 04:12:50 UTC] given_date (day_of_week): 2025-06-12
+[12-Jun-2025 04:12:50 UTC] target_date found: 2025-06-11
+[12-Jun-2025 04:12:50 UTC] Final query: 
+    SELECT ea.assignment_id,
+           ea.employee_id,
+           e.full_name,
+           TRIM(ea.day_of_week) AS day_of_week
+    FROM employee_assignments ea
+    JOIN employees e ON ea.employee_id = e.employee_id
+    WHERE ea.company_id = ?
+      AND ea.project_id = ?
+      AND TRIM(ea.day_of_week) = ?
+ (params: company_id=180, project_id=10104, target_date=2025-06-11)
+[12-Jun-2025 04:12:50 UTC] Empleados devueltos: 1
+[12-Jun-2025 04:12:50 UTC] ==== FIN DEPURACIÓN ====
+[12-Jun-2025 04:12:57 UTC] User Position Range: 10
+[12-Jun-2025 04:12:57 UTC] Empleados filtrados encontrados: 26
+[12-Jun-2025 04:13:02 UTC] ==== INICIO DEPURACIÓN ====
+[12-Jun-2025 04:13:02 UTC] company_id: 180
+[12-Jun-2025 04:13:02 UTC] project_id: 10103
+[12-Jun-2025 04:13:02 UTC] given_date (day_of_week): 2025-06-12
+[12-Jun-2025 04:13:02 UTC] target_date found: 2025-06-11
+[12-Jun-2025 04:13:02 UTC] Final query: 
+    SELECT ea.assignment_id,
+           ea.employee_id,
+           e.full_name,
+           TRIM(ea.day_of_week) AS day_of_week
+    FROM employee_assignments ea
+    JOIN employees e ON ea.employee_id = e.employee_id
+    WHERE ea.company_id = ?
+      AND ea.project_id = ?
+      AND TRIM(ea.day_of_week) = ?
+ (params: company_id=180, project_id=10103, target_date=2025-06-11)
+[12-Jun-2025 04:13:02 UTC] User Position Range: 10
+[12-Jun-2025 04:13:02 UTC] Empleados devueltos: 1
+[12-Jun-2025 04:13:02 UTC] ==== FIN DEPURACIÓN ====
+[12-Jun-2025 04:13:02 UTC] Empleados filtrados encontrados: 26
+[12-Jun-2025 04:13:08 UTC] User Position Range: 10
+[12-Jun-2025 04:13:08 UTC] Empleados filtrados encontrados: 26
+[12-Jun-2025 04:13:12 UTC] User Position Range: 10
+[12-Jun-2025 04:13:12 UTC] Empleados filtrados encontrados: 26
+[12-Jun-2025 04:13:12 UTC] ==== INICIO DEPURACIÓN ====
+[12-Jun-2025 04:13:12 UTC] company_id: 180
+[12-Jun-2025 04:13:12 UTC] project_id: 10092
+[12-Jun-2025 04:13:12 UTC] given_date (day_of_week): 2025-06-12
+[12-Jun-2025 04:13:12 UTC] target_date found: 2025-06-11
+[12-Jun-2025 04:13:12 UTC] Final query: 
+    SELECT ea.assignment_id,
+           ea.employee_id,
+           e.full_name,
+           TRIM(ea.day_of_week) AS day_of_week
+    FROM employee_assignments ea
+    JOIN employees e ON ea.employee_id = e.employee_id
+    WHERE ea.company_id = ?
+      AND ea.project_id = ?
+      AND TRIM(ea.day_of_week) = ?
+ (params: company_id=180, project_id=10092, target_date=2025-06-11)
+[12-Jun-2025 04:13:12 UTC] Empleados devueltos: 1
+[12-Jun-2025 04:13:12 UTC] ==== FIN DEPURACIÓN ====
+[12-Jun-2025 04:13:17 UTC] User Position Range: 10
+[12-Jun-2025 04:13:17 UTC] Empleados filtrados encontrados: 26
+[12-Jun-2025 16:48:31 UTC] User Position Range: 10
+[12-Jun-2025 16:48:31 UTC] ==== INICIO DEPURACIÓN ====
+[12-Jun-2025 16:48:31 UTC] company_id: 180
+[12-Jun-2025 16:48:31 UTC] project_id: 10100
+[12-Jun-2025 16:48:31 UTC] given_date (day_of_week): 2025-06-12
+[12-Jun-2025 16:48:31 UTC] Empleados filtrados encontrados: 26
+[12-Jun-2025 16:48:31 UTC] target_date found: 2025-06-11
+[12-Jun-2025 16:48:31 UTC] Final query: 
+    SELECT ea.assignment_id,
+           ea.employee_id,
+           e.full_name,
+           TRIM(ea.day_of_week) AS day_of_week
+    FROM employee_assignments ea
+    JOIN employees e ON ea.employee_id = e.employee_id
+    WHERE ea.company_id = ?
+      AND ea.project_id = ?
+      AND TRIM(ea.day_of_week) = ?
+ (params: company_id=180, project_id=10100, target_date=2025-06-11)
+[12-Jun-2025 16:48:31 UTC] Empleados devueltos: 1
+[12-Jun-2025 16:48:31 UTC] ==== FIN DEPURACIÓN ====
+[12-Jun-2025 16:48:48 UTC] User Position Range: 10
+[12-Jun-2025 16:48:48 UTC] Empleados filtrados encontrados: 26
+[12-Jun-2025 16:50:59 UTC] User Position Range: 10
+[12-Jun-2025 16:50:59 UTC] Empleados no asignados encontrados: 0
+[12-Jun-2025 17:29:06 UTC] User Position Range: 10
+[12-Jun-2025 17:29:06 UTC] User Position Range: 10
+[12-Jun-2025 17:29:06 UTC] Empleados no asignados encontrados: 1
+[12-Jun-2025 17:29:06 UTC] Empleados filtrados encontrados: 25
+[12-Jun-2025 17:31:00 UTC] User Position Range: 10
+[12-Jun-2025 17:31:00 UTC] Empleados no asignados encontrados: 1
+[12-Jun-2025 18:20:46 UTC] PHP Notice:  Undefined index: processed in /home/siinadmx/public_html/php/process-week.php on line 35
+[13-Jun-2025 15:14:49 UTC] PHP Fatal error:  Uncaught Error: Call to a member function bind_param() on bool in /home/siinadmx/public_html/php/company_files.php:601
+Stack trace:
+#0 {main}
+  thrown in /home/siinadmx/public_html/php/company_files.php on line 601
+[13-Jun-2025 15:14:49 UTC] PHP Fatal error:  Uncaught Error: Call to a member function bind_param() on bool in /home/siinadmx/public_html/php/company_files.php:601
+Stack trace:
+#0 {main}
+  thrown in /home/siinadmx/public_html/php/company_files.php on line 601
+[13-Jun-2025 15:14:55 UTC] PHP Fatal error:  Uncaught Error: Call to a member function bind_param() on bool in /home/siinadmx/public_html/php/company_files.php:601
+Stack trace:
+#0 {main}
+  thrown in /home/siinadmx/public_html/php/company_files.php on line 601
+[13-Jun-2025 15:14:55 UTC] PHP Fatal error:  Uncaught Error: Call to a member function bind_param() on bool in /home/siinadmx/public_html/php/company_files.php:601
+Stack trace:
+#0 {main}
+  thrown in /home/siinadmx/public_html/php/company_files.php on line 601
+[13-Jun-2025 15:14:56 UTC] PHP Fatal error:  Uncaught Error: Call to a member function bind_param() on bool in /home/siinadmx/public_html/php/company_files.php:601
+Stack trace:
+#0 {main}
+  thrown in /home/siinadmx/public_html/php/company_files.php on line 601
+[13-Jun-2025 15:15:15 UTC] PHP Fatal error:  Uncaught Error: Call to a member function bind_param() on bool in /home/siinadmx/public_html/php/company_files.php:601
+Stack trace:
+#0 {main}
+  thrown in /home/siinadmx/public_html/php/company_files.php on line 601
+[13-Jun-2025 15:15:15 UTC] PHP Fatal error:  Uncaught Error: Call to a member function bind_param() on bool in /home/siinadmx/public_html/php/company_files.php:601
+Stack trace:
+#0 {main}
+  thrown in /home/siinadmx/public_html/php/company_files.php on line 601
+[13-Jun-2025 15:27:49 UTC] PHP Fatal error:  Uncaught Error: Call to a member function bind_param() on bool in /home/siinadmx/public_html/php/company_files.php:601
+Stack trace:
+#0 {main}
+  thrown in /home/siinadmx/public_html/php/company_files.php on line 601
+[13-Jun-2025 15:27:49 UTC] PHP Fatal error:  Uncaught Error: Call to a member function bind_param() on bool in /home/siinadmx/public_html/php/company_files.php:601
+Stack trace:
+#0 {main}
+  thrown in /home/siinadmx/public_html/php/company_files.php on line 601
+[13-Jun-2025 15:31:37 UTC] PHP Fatal error:  Uncaught Error: Call to a member function bind_param() on bool in /home/siinadmx/public_html/php/company_files.php:601
+Stack trace:
+#0 {main}
+  thrown in /home/siinadmx/public_html/php/company_files.php on line 601
+[13-Jun-2025 15:31:37 UTC] PHP Fatal error:  Uncaught Error: Call to a member function bind_param() on bool in /home/siinadmx/public_html/php/company_files.php:601
+Stack trace:
+#0 {main}
+  thrown in /home/siinadmx/public_html/php/company_files.php on line 601
+[13-Jun-2025 15:31:43 UTC] PHP Fatal error:  Uncaught Error: Call to a member function bind_param() on bool in /home/siinadmx/public_html/php/company_files.php:601
+Stack trace:
+#0 {main}
+  thrown in /home/siinadmx/public_html/php/company_files.php on line 601
+[13-Jun-2025 15:31:43 UTC] PHP Fatal error:  Uncaught Error: Call to a member function bind_param() on bool in /home/siinadmx/public_html/php/company_files.php:601
+Stack trace:
+#0 {main}
+  thrown in /home/siinadmx/public_html/php/company_files.php on line 601
+[13-Jun-2025 15:41:29 UTC] PHP Fatal error:  Uncaught Error: Call to a member function bind_param() on bool in /home/siinadmx/public_html/php/company_files.php:601
+Stack trace:
+#0 {main}
+  thrown in /home/siinadmx/public_html/php/company_files.php on line 601
+[13-Jun-2025 15:41:29 UTC] PHP Fatal error:  Uncaught Error: Call to a member function bind_param() on bool in /home/siinadmx/public_html/php/company_files.php:601
+Stack trace:
+#0 {main}
+  thrown in /home/siinadmx/public_html/php/company_files.php on line 601
+[13-Jun-2025 15:43:27 UTC] PHP Fatal error:  Uncaught Error: Call to a member function bind_param() on bool in /home/siinadmx/public_html/php/company_files.php:601
+Stack trace:
+#0 {main}
+  thrown in /home/siinadmx/public_html/php/company_files.php on line 601
+[13-Jun-2025 15:43:27 UTC] PHP Fatal error:  Uncaught Error: Call to a member function bind_param() on bool in /home/siinadmx/public_html/php/company_files.php:601
+Stack trace:
+#0 {main}
+  thrown in /home/siinadmx/public_html/php/company_files.php on line 601
+[13-Jun-2025 15:43:45 UTC] PHP Fatal error:  Uncaught Error: Call to a member function bind_param() on bool in /home/siinadmx/public_html/php/company_files.php:601
+Stack trace:
+#0 {main}
+  thrown in /home/siinadmx/public_html/php/company_files.php on line 601
+[13-Jun-2025 15:43:45 UTC] PHP Fatal error:  Uncaught Error: Call to a member function bind_param() on bool in /home/siinadmx/public_html/php/company_files.php:601
+Stack trace:
+#0 {main}
+  thrown in /home/siinadmx/public_html/php/company_files.php on line 601
+[13-Jun-2025 15:49:30 UTC] PHP Fatal error:  Uncaught Error: Call to a member function bind_param() on bool in /home/siinadmx/public_html/php/company_files.php:601
+Stack trace:
+#0 {main}
+  thrown in /home/siinadmx/public_html/php/company_files.php on line 601
+[13-Jun-2025 15:49:30 UTC] PHP Fatal error:  Uncaught Error: Call to a member function bind_param() on bool in /home/siinadmx/public_html/php/company_files.php:601
+Stack trace:
+#0 {main}
+  thrown in /home/siinadmx/public_html/php/company_files.php on line 601
+[13-Jun-2025 16:45:44 UTC] User Position Range: 10
+[13-Jun-2025 16:45:44 UTC] User Position Range: 10
+[13-Jun-2025 16:45:44 UTC] Empleados no asignados encontrados: 26
+[13-Jun-2025 16:45:44 UTC] Empleados filtrados encontrados: 0
+[13-Jun-2025 16:49:20 UTC] User Position Range: 10
+[13-Jun-2025 16:49:20 UTC] User Position Range: 10
+[13-Jun-2025 16:49:20 UTC] Empleados no asignados encontrados: 2
+[13-Jun-2025 16:49:20 UTC] Empleados filtrados encontrados: 24
+[13-Jun-2025 16:51:23 UTC] User Position Range: 10
+[13-Jun-2025 16:51:23 UTC] Empleados no asignados encontrados: 2
+[13-Jun-2025 17:24:30 UTC] PHP Fatal error:  Uncaught Error: Call to a member function bind_param() on bool in /home/siinadmx/public_html/php/company_files.php:674
+Stack trace:
+#0 {main}
+  thrown in /home/siinadmx/public_html/php/company_files.php on line 674
+[13-Jun-2025 17:24:30 UTC] PHP Fatal error:  Uncaught Error: Call to a member function bind_param() on bool in /home/siinadmx/public_html/php/company_files.php:674
+Stack trace:
+#0 {main}
+  thrown in /home/siinadmx/public_html/php/company_files.php on line 674
+[13-Jun-2025 17:25:07 UTC] PHP Fatal error:  Uncaught Error: Call to a member function bind_param() on bool in /home/siinadmx/public_html/php/company_files.php:674
+Stack trace:
+#0 {main}
+  thrown in /home/siinadmx/public_html/php/company_files.php on line 674
+[13-Jun-2025 17:25:07 UTC] PHP Fatal error:  Uncaught Error: Call to a member function bind_param() on bool in /home/siinadmx/public_html/php/company_files.php:674
+Stack trace:
+#0 {main}
+  thrown in /home/siinadmx/public_html/php/company_files.php on line 674
+[13-Jun-2025 17:25:09 UTC] PHP Fatal error:  Uncaught Error: Call to a member function bind_param() on bool in /home/siinadmx/public_html/php/company_files.php:674
+Stack trace:
+#0 {main}
+  thrown in /home/siinadmx/public_html/php/company_files.php on line 674
+[13-Jun-2025 17:25:37 UTC] PHP Fatal error:  Uncaught Error: Call to a member function bind_param() on bool in /home/siinadmx/public_html/php/company_files.php:674
+Stack trace:
+#0 {main}
+  thrown in /home/siinadmx/public_html/php/company_files.php on line 674
+[13-Jun-2025 17:25:37 UTC] PHP Fatal error:  Uncaught Error: Call to a member function bind_param() on bool in /home/siinadmx/public_html/php/company_files.php:674
+Stack trace:
+#0 {main}
+  thrown in /home/siinadmx/public_html/php/company_files.php on line 674
+[13-Jun-2025 17:25:48 UTC] PHP Fatal error:  Uncaught Error: Call to a member function bind_param() on bool in /home/siinadmx/public_html/php/company_files.php:674
+Stack trace:
+#0 {main}
+  thrown in /home/siinadmx/public_html/php/company_files.php on line 674
+[13-Jun-2025 17:25:48 UTC] PHP Fatal error:  Uncaught Error: Call to a member function bind_param() on bool in /home/siinadmx/public_html/php/company_files.php:674
+Stack trace:
+#0 {main}
+  thrown in /home/siinadmx/public_html/php/company_files.php on line 674
+[13-Jun-2025 17:25:52 UTC] PHP Fatal error:  Uncaught Error: Call to a member function bind_param() on bool in /home/siinadmx/public_html/php/company_files.php:674
+Stack trace:
+#0 {main}
+  thrown in /home/siinadmx/public_html/php/company_files.php on line 674
+[13-Jun-2025 17:25:56 UTC] PHP Fatal error:  Uncaught Error: Call to a member function bind_param() on bool in /home/siinadmx/public_html/php/company_files.php:674
+Stack trace:
+#0 {main}
+  thrown in /home/siinadmx/public_html/php/company_files.php on line 674
+[13-Jun-2025 17:25:56 UTC] PHP Fatal error:  Uncaught Error: Call to a member function bind_param() on bool in /home/siinadmx/public_html/php/company_files.php:674
+Stack trace:
+#0 {main}
+  thrown in /home/siinadmx/public_html/php/company_files.php on line 674
+[13-Jun-2025 18:30:23 UTC] Respuesta JSON: []
