@@ -56,10 +56,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             }
 
             $file = $_FILES['file'];
-            
+
             // Configurar directorio para archivos temporales
             $uploadDir = $_SERVER['DOCUMENT_ROOT'] . '/siindad/documents/temp_uploads/';
-            
+
             // Crear directorio si no existe
             if (!file_exists($uploadDir)) {
                 if (!mkdir($uploadDir, 0777, true)) {
@@ -88,7 +88,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 'issue_date' => $issueDate,
                 'expiry_date' => $expiryDate
             ]);
-            
+
         } catch (Exception $e) {
             // Manejar errores
             http_response_code(500);
@@ -139,7 +139,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $company_id = $company['company_id'];
             $company_name = $company['company_name'] ?: 'UnknownCompany';
             $required_file_name = $company['required_file_name'] ?: 'UnknownFile';
-            
+
             // Sanitizar nombres para rutas
             $company_name = preg_replace('/[^a-zA-Z0-9_-]/', '', str_replace(' ', '_', $company_name));
             $required_file_name = preg_replace('/[^a-zA-Z0-9_-]/', '', str_replace(' ', '_', $required_file_name));
@@ -150,10 +150,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             bind_and_execute($stmt, "i", $periodId);
             $period = $stmt->get_result()->fetch_assoc();
             $stmt->close();
-            
+
             if ($period) {
-                $period_range = ($period['end_date'] === '9999-12-31') 
-                    ? 'sin_periodicidad' 
+                $period_range = ($period['end_date'] === '9999-12-31')
+                    ? 'sin_periodicidad'
                     : $period['start_date'] . '_' . $period['end_date'];
             }
 
@@ -213,16 +213,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 (file_path, issue_date, expiry_date, user_id, status, is_current, period_id, period_coverage, is_expired, file_ext)
                 VALUES (?, ?, ?, ?, 'uploaded', 1, ?, ?, ?, ?)
             ", 'file insert');
-            
+
             bind_and_execute(
-                $stmt, 
-                "sssisiss", 
-                $relative_path, 
-                $final_issue_date, 
-                $final_expiry_date, 
+                $stmt,
+                "sssisiss",
+                $relative_path,
+                $final_issue_date,
+                $final_expiry_date,
                 $user_id,
-                $periodId, 
-                $period_coverage, 
+                $periodId,
+                $period_coverage,
                 $is_expired,
                 $file_ext
             );
@@ -235,7 +235,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 'message' => 'Archivo asociado correctamente',
                 'file_id' => $file_id
             ]);
-            
+
         } catch (Exception $e) {
             http_response_code(500);
             echo json_encode([
@@ -673,6 +673,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
     $period_id = isset($_GET['period_id']) ? intval($_GET['period_id']) : null;
     $period_coverage = $_GET['period_coverage'] ?? null;
     $is_expired = isset($_GET['is_expired']) ? intval($_GET['is_expired']) : null;
+    $company_id = isset($_GET['company_id']) ? intval($_GET['company_id']) : null;
+
 
     $where = [];
     $params = [];
@@ -708,6 +710,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
         $types .= 'i';
         $params[] = $is_expired;
     }
+
+    if ($company_id !== null) {
+        $where[] = "crf.company_id = ?";
+        $types .= 'i';
+        $params[] = $company_id;
+    }
+
 
     $mysqli->query("
         UPDATE company_files

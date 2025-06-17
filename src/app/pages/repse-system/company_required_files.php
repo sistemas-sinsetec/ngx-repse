@@ -316,7 +316,7 @@ switch ($method) {
         $types = str_repeat('i', count($ids));
 
         $fmts = fetchAssoc($mysqli, "SELECT required_file_id, format_code 
-             AS code, min_required, manual_expiry_value, manual_expiry_unit 
+             AS code, min_required, manual_expiry_visible, manual_expiry_value, manual_expiry_unit 
              FROM required_file_formats WHERE required_file_id 
              IN ($placeholders)", $ids, $types);
         $pers = fetchAssoc($mysqli, "SELECT p.period_id, p.required_file_id, p.start_date, p.end_date, COUNT(cf.file_id) 
@@ -349,6 +349,7 @@ switch ($method) {
                 'code' => $f['code'],
                 'min_required' => (int) $f['min_required'],
                 'uploaded_count' => 0,
+                'manual_expiry_visible' => (int) $f['manual_expiry_visible'],
                 'manual_expiry_value' => isset($f['manual_expiry_value']) ? (int) $f['manual_expiry_value'] : null,
                 'manual_expiry_unit' => $f['manual_expiry_unit'] ?? null,
             ];
