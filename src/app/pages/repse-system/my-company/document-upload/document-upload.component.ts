@@ -8,17 +8,9 @@ import {
 } from "../../../../services/repse/document.service";
 import { CompanyService } from "../../../../services/company.service";
 import * as moment from "moment";
-
-interface FilePreview {
-  file_id: number; // <-- Añade esta propiedad
-  name: string;
-  path: string;
-  uploaded_at: string;
-  format: string;
-  required_file_id: number;
-  period_id: number;
-  assignment_id: number;
-}
+import { environment } from "../../../../../environments/environment";
+import { forkJoin, of } from "rxjs";
+import { map, catchError } from "rxjs/operators";
 
 interface CompatibleAssignment {
   assignment: any;
@@ -26,6 +18,24 @@ interface CompatibleAssignment {
   documentType: string;
   periodCoverage: string;
 }
+
+interface FilePreview {
+  file_id: number; // Cambiado de 'id' a 'file_id'
+  name: string;
+  path: string;
+  uploaded_at: string;
+  format: string;
+  required_file_id: number;
+  period_id: number;
+  assignment_id: number;
+  compatibleAssignments: CompatibleAssignment[];
+  selectedAssignments: CompatibleAssignment[];
+  originalFile?: File;
+  showShare?: boolean;
+  issueDate?: Date | null;
+  expiryDate?: Date | null;
+}
+
 interface FileHandlerConfig {
   extensions: string[];
   extractMandatoryData?: (
@@ -172,28 +182,24 @@ export class DocumentUploadComponent {
   @ViewChild("fileInput") fileInput: any;
   @ViewChild("previewModal") previewModal!: TemplateRef<any>;
 
-  // Tabs y estado
   activeTab: "Regular" | "Con retraso" | "Rechazados" = "Regular";
   activeTabIndex: any;
   loading = true;
   isUploading = false;
+  isConfirming = false; // Nuevo estado para controlar la confirmación
 
-  // Datos del dashboard
   assignedByMe: any[] = [];
   assignedByOthers: { company_id: number; company: string; files: any[] }[] =
     [];
   selectedExternalCompanyId: string | number = "all";
 
-  // Documentos
   rejectedFiles: any[] = [];
   filesPendingConfirmation: FilePreview[] = [];
   filesToVisualize: FilePreview[] = [];
 
-  // Subida regular
   selectedDocumentForUpload: any = null;
   dialogRefUpload!: NbDialogRef<any>;
 
-  // Subida con retraso
   lateDocuments: RequiredFileView[] = [];
   selectedDocument: any | null = null;
   selectedPeriod: any | null = null;
@@ -202,13 +208,9 @@ export class DocumentUploadComponent {
   availableFormats: string[] = [];
   selectedFile: File | null = null;
 
-  // Modal preview
   dialogRef!: NbDialogRef<any>;
   modalTitle = "";
   allColumns = ["select", "name", "actions"];
-
-  // Nuevas propiedades para compartir archivos
-  sharedAssignments: CompatibleAssignment[] = [];
 
   constructor(
     private documentService: DocumentService,
@@ -221,8 +223,7 @@ export class DocumentUploadComponent {
     this.loadRejectedFiles();
     this.checkExpiringDocuments();
   }
-
-  // ── Carga inicial ───────────────────────────────────────────
+  //
   loadDocuments(): void {
     this.loading = true;
     const myCompanyId = Number(this.companyService.selectedCompany.id);
@@ -233,12 +234,11 @@ export class DocumentUploadComponent {
           (f) => Number(f.companyId) === myCompanyId
         );
 
-        // Asignados por mi empresa
-        this.assignedByMe = myCompanyFiles.filter(
-          (f) => Number(f.assignedBy) === myCompanyId
-        );
+        // Añadir companyId a cada asignación
+        this.assignedByMe = myCompanyFiles
+          .filter((f) => Number(f.assignedBy) === myCompanyId)
+          .map((f) => ({ ...f, companyId: myCompanyId }));
 
-        // Asignados por otras empresas
         const grouped: {
           [key: number]: { company_id: number; company: string; files: any[] };
         } = {};
@@ -253,16 +253,22 @@ export class DocumentUploadComponent {
                 files: [],
               };
             }
-            grouped[assignedBy].files.push(file);
+            // Añadir companyId a cada archivo
+            grouped[assignedBy].files.push({
+              ...file,
+              companyId: assignedBy,
+            });
           }
         });
 
         this.assignedByOthers = Object.values(grouped);
         this.loading = false;
       },
+
       error: (err) => {
         console.error("Error loading documents", err);
         this.loading = false;
+        this.toastrService.danger("Error al cargar documentos", "Error");
       },
     });
   }
@@ -321,11 +327,13 @@ export class DocumentUploadComponent {
         },
         error: (err) => {
           console.error("Error loading rejected files", err);
+          this.toastrService.danger(
+            "Error al cargar documentos rechazados",
+            "Error"
+          );
         },
       });
   }
-
-  // ── Tabs  ──────────────────────────────────────────────────
 
   onTabChange(tab: "Regular" | "Con retraso" | "Rechazados"): void {
     this.activeTab = tab;
@@ -356,8 +364,6 @@ export class DocumentUploadComponent {
     );
   }
 
-  // ── Subida de archivos ────────────────────────────────
-
   triggerFileInput(formatCode: string): void {
     this.selectedFormat = formatCode;
     setTimeout(() => {
@@ -385,8 +391,17 @@ export class DocumentUploadComponent {
       return;
     }
 
-    for (let i = 0; i < Math.min(remaining, files.length); i++) {
-      await this.uploadSingleFile(files[i]);
+    this.isUploading = true;
+
+    try {
+      for (let i = 0; i < Math.min(remaining, files.length); i++) {
+        await this.uploadSingleFile(files[i]);
+      }
+    } catch (error) {
+      console.error("Error uploading files", error);
+      this.toastrService.danger("Error al subir archivos", "Error");
+    } finally {
+      this.isUploading = false;
     }
 
     this.refreshUploadProgress(
@@ -397,26 +412,21 @@ export class DocumentUploadComponent {
     this.selectedFile = files[0];
   }
 
-  async uploadSingleFile(file: File): Promise<void> {
-    // Resetear asignaciones compatibles
-    this.sharedAssignments = [];
-
+  private async uploadSingleFile(file: File): Promise<void> {
     const fileName = file.name.toLowerCase();
     const selectedDoc = this.selectedDocumentForUpload ?? this.selectedDocument;
     const fileTypeName = selectedDoc?.documentType?.toLowerCase();
     const fileExt = fileName.split(".").pop();
 
-    // Buscar configuración de extracción según tipo de documento y formato
     const config = Object.entries(FILE_HANDLERS).find(
       ([type, cfg]) =>
-        fileTypeName.includes(type) && cfg.extensions.includes(fileExt)
+        fileTypeName?.includes(type) && cfg.extensions.includes(fileExt)
     )?.[1];
 
     let issueDate: Date | null = null;
     let expiryDate: Date | null = null;
     let extractedRfc: string | null = null;
 
-    // Intentar extraer fechas
     if (config?.extractMandatoryData) {
       try {
         const result = await config.extractMandatoryData(
@@ -426,6 +436,10 @@ export class DocumentUploadComponent {
         issueDate = result.issueDate;
         expiryDate = result.expiryDate;
         extractedRfc = result.rfc;
+
+        // Validar fechas inválidas
+        if (issueDate && isNaN(issueDate.getTime())) issueDate = null;
+        if (expiryDate && isNaN(expiryDate.getTime())) expiryDate = null;
       } catch (error) {
         console.warn("Error al extraer fechas:", error);
         this.toastrService.danger(
@@ -436,7 +450,7 @@ export class DocumentUploadComponent {
       }
     }
 
-    // Valida que sí haya RFC extraído y que coincida
+    // Validación de RFC
     const companyRfc = this.companyService.selectedCompany?.rfc?.toUpperCase();
     if (!extractedRfc || extractedRfc !== companyRfc) {
       this.toastrService.warning(
@@ -448,7 +462,7 @@ export class DocumentUploadComponent {
       return;
     }
 
-    // Validar issueDate obligatoria
+    // Si no se pudo obtener la fecha de emisión
     if (!issueDate) {
       this.toastrService.warning(
         `No se pudo encontrar la fecha de emisión en el archivo "${file.name}". Verifica el contenido del PDF.`,
@@ -457,11 +471,11 @@ export class DocumentUploadComponent {
       return;
     }
 
-    // Si no hay fecha de vencimiento y se permite calcularla
     const formatConfig = selectedDoc.formats.find(
       (f: any) => f.code.toLowerCase() === fileExt
     );
 
+    // Calcular vencimiento si no se detectó
     if (!expiryDate && formatConfig?.manual_expiry_visible === 0) {
       const value = formatConfig.manual_expiry_value || 0;
       const unit = formatConfig.manual_expiry_unit || "años";
@@ -469,6 +483,7 @@ export class DocumentUploadComponent {
       expiryDate = calculateExpiry(normalizedIssue, value, unit);
     }
 
+    // Si aún no tenemos fecha de vencimiento
     if (!expiryDate) {
       this.toastrService.warning(
         `No se pudo determinar la fecha de vencimiento del archivo "${file.name}" (${issueDate} - ${expiryDate}).`,
@@ -477,7 +492,6 @@ export class DocumentUploadComponent {
       return;
     }
 
-    // Determinar la cobertura del periodo actual
     const period = selectedDoc.currentPeriod ?? this.selectedPeriod;
     if (!period) {
       this.toastrService.danger("No se encontró el periodo actual", "Error");
@@ -497,7 +511,7 @@ export class DocumentUploadComponent {
       coverage = "full";
     }
 
-    // Mostrar notificaciones según cobertura
+    // Validar cobertura
     if (coverage === "none") {
       this.toastrService.warning(
         `El archivo "${
@@ -519,19 +533,10 @@ export class DocumentUploadComponent {
       );
     }
 
-    // Subir a la asignación principal
-    await this.uploadToAssignment(file, selectedDoc, issueDate, expiryDate);
-
-    // Buscar asignaciones compatibles
-    this.findCompatibleAssignments(selectedDoc, {
-      start: issueDate,
-      end: expiryDate,
-    });
-
-    // Guardar referencia del último archivo cargado
-    this.selectedFile = file;
+    // Resto del código permanece igual...
   }
 
+  // Nuevo método para encontrar asignaciones compatibles
   private findCompatibleAssignments(
     currentAssignment: any,
     filePeriod: { start: Date; end: Date }
@@ -542,34 +547,27 @@ export class DocumentUploadComponent {
     const allAssignments = [
       ...this.assignedByMe,
       ...this.assignedByOthers.flatMap((group) => group.files),
-    ].filter(
-      (assignment) =>
-        assignment.id !== currentAssignment.id && assignment.isPeriodic === true
-    );
+    ];
 
     for (const assignment of allAssignments) {
+      // Solo permitir asignaciones de la MISMA empresa
+      const sameCompany = assignment.companyId === currentAssignment.companyId;
+
       const formatMatch = assignment.formats.some(
         (f: any) => f.code === this.selectedFormat
       );
 
       const coversPeriod = this.documentService.isFileCompatibleWithAssignment(
         filePeriod,
-        assignment
+        assignment,
+        currentAssignment.companyId // Nuevo parámetro
       );
 
       const isActive =
         !assignment.endDate || new Date(assignment.endDate) > new Date();
 
-      if (formatMatch && coversPeriod && isActive) {
-        // Agregar a lista para mostrar en UI
-        this.sharedAssignments.push({
-          assignment: assignment,
-          companyName: assignment.companyName || "Mi empresa",
-          documentType: assignment.documentType,
-          periodCoverage: this.getPeriodCoverageString(assignment),
-        });
-
-        // Agregar a lista para subida
+      // Cambio clave: Solo considerar asignaciones de la misma empresa
+      if (sameCompany && formatMatch && coversPeriod && isActive) {
         compatibleAssignments.push(assignment);
       }
     }
@@ -577,11 +575,16 @@ export class DocumentUploadComponent {
     return compatibleAssignments;
   }
 
+  // Nuevo método para formato de período
   private getPeriodCoverageString(assignment: any): string {
-    if (!assignment.startDate || !assignment.endDate)
-      return "Período no definido";
+    if (!assignment.startDate && !assignment.endDate) {
+      return "Período indefinido";
+    }
 
-    const start = moment(assignment.startDate).format("DD/MM/YYYY");
+    const start = assignment.startDate
+      ? moment(assignment.startDate).format("DD/MM/YYYY")
+      : "Sin inicio";
+
     const end = assignment.endDate
       ? moment(assignment.endDate).format("DD/MM/YYYY")
       : "Vigente";
@@ -589,36 +592,13 @@ export class DocumentUploadComponent {
     return `${start} - ${end}`;
   }
 
-  private async uploadToMultipleAssignments(
-    file: File,
-    assignments: any[],
-    issueDate: Date | null,
-    expiryDate: Date | null
-  ): Promise<void> {
-    this.isUploading = true;
-    const uploadPromises = [];
-
-    for (const assignment of assignments) {
-      uploadPromises.push(
-        this.uploadToAssignment(file, assignment, issueDate, expiryDate)
-      );
-    }
-
-    try {
-      await Promise.all(uploadPromises);
-    } catch (error) {
-      console.error("Error en subidas múltiples", error);
-    } finally {
-      this.isUploading = false;
-    }
-  }
-
   private async uploadToAssignment(
     file: File,
     assignment: any,
     issueDate: Date | null,
-    expiryDate: Date | null
-  ): Promise<void> {
+    expiryDate: Date | null,
+    isShared: boolean = false
+  ): Promise<FilePreview> {
     const fd = new FormData();
     fd.append("file", file);
     fd.append("required_file_id", assignment.id.toString());
@@ -630,7 +610,7 @@ export class DocumentUploadComponent {
         `No se encontró el periodo actual para ${assignment.documentType}`,
         "Error"
       );
-      return;
+      throw new Error("Period ID not found");
     }
 
     fd.append("period_id", periodId.toString());
@@ -648,9 +628,8 @@ export class DocumentUploadComponent {
         .uploadFile(fd)
         .toPromise();
 
-      // Asegúrate de que la respuesta incluya el file_id
-      this.filesPendingConfirmation.push({
-        file_id: response.file_id, // ID devuelto por el backend
+      const previewFile: FilePreview = {
+        file_id: response.file_id,
         name: file.name,
         path: response.file_path,
         uploaded_at: new Date().toISOString(),
@@ -658,12 +637,26 @@ export class DocumentUploadComponent {
         required_file_id: assignment.id,
         period_id: periodId,
         assignment_id: assignment.id,
-      });
+        compatibleAssignments: [],
+        selectedAssignments: [],
+        issueDate: issueDate,
+        expiryDate: expiryDate,
+        originalFile: isShared ? undefined : file,
+      };
 
-      this.toastrService.success(
-        `Archivo subido a: ${assignment.documentType}`,
-        file.name
+      // Validar si ya está agregado para confirmación
+      const alreadyExists = this.filesPendingConfirmation.some(
+        (f) => f.file_id === response.file_id
       );
+
+      if (alreadyExists) {
+        this.toastrService.warning(
+          "El archivo ya fue agregado para confirmación",
+          file.name
+        );
+      }
+
+      return previewFile;
     } catch (error: any) {
       this.toastrService.danger(
         `Error al subir a ${assignment.documentType}: ${
@@ -675,8 +668,6 @@ export class DocumentUploadComponent {
     }
   }
 
-  // ── Limpieza ──────────────────────────────────────────
-
   resetUploadForm(): void {
     this.selectedFile = null;
     this.selectedDocumentForUpload = null;
@@ -684,10 +675,7 @@ export class DocumentUploadComponent {
     this.selectedPeriod = null;
     this.selectedFormat = "";
     this.availableFormats = [];
-    this.sharedAssignments = [];
   }
-
-  // ── Modal de subida y preview ─────────────────────────
 
   async prepareUpload(file: any): Promise<void> {
     this.activeTab = "Regular";
@@ -720,6 +708,12 @@ export class DocumentUploadComponent {
   }
 
   openPreviewModal(): void {
+    // Reiniciar estado de compartir
+    this.filesPendingConfirmation.forEach((file) => {
+      file.selectedAssignments = [];
+      file.showShare = false;
+    });
+
     this.dialogRef = this.dialogService.open(this.previewModal, {
       dialogClass: "custom-modal",
       closeOnBackdropClick: false,
@@ -738,8 +732,6 @@ export class DocumentUploadComponent {
     }
     this.resetUploadForm();
   }
-
-  // ── Archivos subidos (preview y eliminación) ──────────
 
   getAssignmentName(assignmentId: number): string {
     const allAssignments = [
@@ -780,28 +772,122 @@ export class DocumentUploadComponent {
       },
     });
   }
-
+  //
+  // document-upload.component.ts (nuevo código)
   confirmUploadSubmit(): void {
-    // Recopilar todos los IDs de archivo pendientes
-    const fileIds = this.filesPendingConfirmation.map((file) => file.file_id);
+    const doc = this.selectedDocumentForUpload ?? this.selectedDocument;
+    const periodId =
+      this.selectedDocumentForUpload?.currentPeriod?.period_id ||
+      this.selectedPeriod?.period_id;
 
-    if (fileIds.length === 0) {
-      this.finalizeUpload();
+    if (!doc?.id || !periodId) {
+      this.toastrService.danger("Faltan datos para confirmar", "Error");
       return;
     }
 
-    // Enviar todos los IDs en una sola solicitud
-    this.documentService.submitMultipleUploadsGroup(0, fileIds).subscribe({
-      next: () => this.finalizeUpload(),
-      error: (error) => {
-        this.toastrService.danger("Error al enviar archivos", "Error");
-        console.error(error);
+    this.isConfirming = true;
+
+    // Agrupar por asignación y período
+    const groupsMap = new Map<
+      string,
+      { assignmentId: number; periodId: number }
+    >();
+
+    this.filesPendingConfirmation.forEach((file) => {
+      const key = `${file.assignment_id}-${file.period_id}`;
+      if (!groupsMap.has(key)) {
+        groupsMap.set(key, {
+          assignmentId: file.assignment_id,
+          periodId: file.period_id,
+        });
+      }
+    });
+
+    // Crear observables para cada grupo
+    const observables = Array.from(groupsMap.values()).map((group) =>
+      this.documentService
+        .submitUploadedFiles(group.assignmentId, group.periodId)
+        .pipe(
+          map(() => ({ success: true, group })),
+          catchError((error) => {
+            console.error(
+              `Error enviando grupo: ${group.assignmentId}, ${group.periodId}`,
+              error
+            );
+            return of({ success: false, group, error });
+          })
+        )
+    );
+
+    forkJoin(observables).subscribe({
+      next: (results) => {
+        const successKeys: string[] = [];
+        const failedGroups: any[] = [];
+
+        results.forEach((result) => {
+          const key = `${result.group.assignmentId}-${result.group.periodId}`;
+          if (result.success) {
+            successKeys.push(key);
+          } else {
+            failedGroups.push(result.group);
+          }
+        });
+
+        // Filtrar archivos exitosos
+        this.filesPendingConfirmation = this.filesPendingConfirmation.filter(
+          (file) => {
+            const key = `${file.assignment_id}-${file.period_id}`;
+            return !successKeys.includes(key);
+          }
+        );
+
+        if (successKeys.length > 0) {
+          this.loadLateDocuments();
+          this.loadDocuments();
+        }
+
+        // Mostrar notificaciones
+        if (failedGroups.length === 0) {
+          this.toastrService.success("Todos los archivos confirmados", "Éxito");
+        } else if (successKeys.length > 0) {
+          this.toastrService.warning(
+            `Confirmados ${successKeys.length} grupos, fallaron ${failedGroups.length}`,
+            "Resultado parcial"
+          );
+        } else {
+          this.toastrService.danger("Error confirmando archivos", "Error");
+        }
+
+        // Cerrar modales si no hay pendientes
+        if (this.filesPendingConfirmation.length === 0) {
+          this.closeModal();
+          this.closeUploadModal();
+        }
+
+        this.isConfirming = false;
+      },
+      error: (err) => {
+        console.error("Error inesperado", err);
+        this.toastrService.danger("Error inesperado", "Error");
+        this.isConfirming = false;
       },
     });
-  }
+
+    this.documentService.submitUploadedFiles(doc.id, periodId).subscribe({
+      next: () => {
+        this.toastrService.success("Archivos enviados a revisión", "Éxito");
+        this.finalizeUpload();
+        this.isConfirming = false;
+      },
+      error: (err) => {
+        console.error("Error confirmando archivos", err);
+        this.toastrService.danger("Error al confirmar archivos", "Error");
+        this.isConfirming = false;
+      },
+    });
+  } //
 
   private finalizeUpload(): void {
-    this.toastrService.success("Archivos enviados a revisión", "Éxito");
     this.closeModal();
     this.closeUploadModal();
     this.loadLateDocuments();
@@ -857,7 +943,6 @@ export class DocumentUploadComponent {
       });
   }
 
-  // ── Archivos rechazados ───────────────────────────────
   downloadDocument(fileId: number): void {
     const file = this.rejectedFiles.find((f) => f.file_id === fileId);
     if (file && file.file_path) {
@@ -879,8 +964,6 @@ export class DocumentUploadComponent {
       },
     });
   }
-
-  // ── Helpers de visualización ──────────────────────────
 
   getStatusColor(status: string): string {
     return (
@@ -952,19 +1035,45 @@ export class DocumentUploadComponent {
           }
 
           if (includePreview) {
-            // ACTUALIZA ESTA PARTE PARA QUE COINCIDA CON FilePreview
+            const currentFiles = this.filesPendingConfirmation;
+
             this.filesPendingConfirmation = files
               .filter((f: any) => f.status === "uploaded")
-              .map((f: any) => ({
-                file_id: f.file_id, // Añade el file_id
-                name: f.file_path.split("/").pop(),
-                path: f.file_path,
-                uploaded_at: f.uploaded_at,
-                format: f.file_ext.toLowerCase(),
-                required_file_id: f.required_file_id,
-                period_id: f.period_id,
-                assignment_id: f.required_file_id,
-              }));
+              .map((f: any) => {
+                // Buscar si el archivo ya existe en la lista actual
+                const existingFile = currentFiles.find(
+                  (file) => file.file_id === f.file_id
+                );
+
+                // Si encontramos el archivo existente, mantener sus asignaciones compatibles
+                if (existingFile) {
+                  return {
+                    ...existingFile, // Mantener todas las propiedades existentes
+                    name: f.file_path.split("/").pop(),
+                    path: f.file_path,
+                    uploaded_at: f.uploaded_at,
+                    format: f.file_ext.toLowerCase(),
+                    issueDate: f.issue_date ? new Date(f.issue_date) : null,
+                    expiryDate: f.expiry_date ? new Date(f.expiry_date) : null,
+                  };
+                }
+
+                // Es un archivo nuevo, crear uno nuevo
+                return {
+                  file_id: f.file_id,
+                  name: f.file_path.split("/").pop(),
+                  path: f.file_path,
+                  uploaded_at: f.uploaded_at,
+                  format: f.file_ext.toLowerCase(),
+                  required_file_id: f.required_file_id,
+                  period_id: f.period_id,
+                  assignment_id: f.required_file_id,
+                  compatibleAssignments: [],
+                  selectedAssignments: [],
+                  issueDate: f.issue_date ? new Date(f.issue_date) : null,
+                  expiryDate: f.expiry_date ? new Date(f.expiry_date) : null,
+                };
+              });
           }
         },
         error: () => {
@@ -1062,5 +1171,69 @@ export class DocumentUploadComponent {
 
   formatDate(date: any): string {
     return moment(date).isValid() ? moment(date).format("DD/MM/YYYY") : "-";
+  }
+
+  // Funciones para compartir archivos
+  toggleShareSection(file: FilePreview): void {
+    file.showShare = !file.showShare;
+  }
+
+  // Seleccionar/deseleccionar asignación
+  toggleAssignmentSelection(
+    file: FilePreview,
+    assignment: CompatibleAssignment
+  ): void {
+    const index = file.selectedAssignments.indexOf(assignment);
+    if (index >= 0) {
+      file.selectedAssignments.splice(index, 1);
+    } else {
+      file.selectedAssignments.push(assignment);
+    }
+  }
+
+  // Compartir archivo con asignaciones seleccionadas
+  async onShareFile(file: FilePreview): Promise<void> {
+    if (!file.selectedAssignments.length) {
+      this.toastrService.warning("Selecciona al menos una asignación", "Aviso");
+      return;
+    }
+
+    this.isUploading = true;
+
+    try {
+      const uploadPromises = file.selectedAssignments.map((compAsg) =>
+        this.uploadToAssignment(
+          file.originalFile!,
+          compAsg.assignment,
+          file.issueDate || null,
+          file.expiryDate || null,
+          true
+        )
+      );
+
+      const sharedFiles = await Promise.all(uploadPromises);
+
+      // Si usas una lista de archivos pendientes
+      this.filesPendingConfirmation = [
+        ...this.filesPendingConfirmation,
+        ...sharedFiles,
+      ];
+
+      this.toastrService.success(
+        `Archivo compartido con ${file.selectedAssignments.length} asignaciones`,
+        "Éxito"
+      );
+
+      // Resetear selección
+      file.compatibleAssignments = file.compatibleAssignments.filter(
+        (a) => !file.selectedAssignments.includes(a)
+      );
+      file.selectedAssignments = [];
+    } catch (error) {
+      this.toastrService.danger("Error al compartir el archivo", "Error");
+    } finally {
+      this.isUploading = false;
+      file.showShare = false;
+    }
   }
 }

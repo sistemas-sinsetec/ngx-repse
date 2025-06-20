@@ -79,6 +79,8 @@ export interface RequiredFileView extends BaseRequiredFile {
     start_date: string;
     end_date: string;
     uploaded_count: number;
+    documentType: string;
+    companyId: number;
   }>;
   deadline: string | null;
   currentPeriod: {
@@ -180,10 +182,11 @@ export class DocumentService {
 
   submitMultipleUploadsGroup(
     requiredFileId: number,
-    fileIds: number[] // Cambiamos a recibir IDs de archivo directamente
+    fileIds: number[]
   ): Observable<any> {
     const formData = new FormData();
     formData.append("action", "submit_multiple_files");
+    formData.append("required_file_id", requiredFileId.toString());
     formData.append("file_ids", fileIds.join(","));
 
     return this.http.post(`${this.base}/company_files.php`, formData);
@@ -329,10 +332,6 @@ export class DocumentService {
       params,
     });
   }
-
-  /**
-   * GET dashboard of required files for a company.
-   */
 
   getOwnRequiredFiles(
     companyId: number,
@@ -486,6 +485,7 @@ export class DocumentService {
     return this.http.post<any>(`${this.base}/company_files.php`, body);
   }
 
+  // document.service.ts (nuevo código)
   submitUploadedFiles(
     requiredFileId: number,
     periodId: number
@@ -516,7 +516,7 @@ export class DocumentService {
 
   getCompanyFiles(
     companyId: number,
-    statuses: string[] = ["approved", "late"] // Agregar "late" aquí
+    statuses: string[] = ["approved", "late"]
   ): Observable<any> {
     const params = new HttpParams()
       .set("mode", "catalog")
@@ -547,8 +547,6 @@ export class DocumentService {
 
     return this.http.get(`${this.base}/company_files_tree.php`, { params });
   }
-
-  // ─────────────── OBTENCIÓN DE DATOS DE ARCHIVOS ───────────────
 
   async parsePdfData(
     file: File,
@@ -605,25 +603,26 @@ export class DocumentService {
     return result;
   }
 
-  // Nuevo método para verificar compatibilidad de periodicidad
   isFileCompatibleWithAssignment(
     filePeriod: { start: Date; end: Date },
-    assignment: RequiredFileView
+    assignment: any,
+    companyId: number // Nuevo parámetro
   ): boolean {
-    const periodStart = moment(assignment.startDate);
-    const periodEnd = assignment.endDate ? moment(assignment.endDate) : null;
+    // Verificar si pertenecen a la misma empresa
+    if (companyId !== assignment.companyId) {
+      return true; // Empresas diferentes siempre son compatibles
+    }
+    const assignmentStart = moment(assignment.startDate);
+    const assignmentEnd = moment(assignment.endDate);
     const fileStart = moment(filePeriod.start);
     const fileEnd = moment(filePeriod.end);
-
-    // Verificar cobertura del periodo
-    if (periodEnd) {
-      return (
-        fileStart.isSameOrBefore(periodStart) &&
-        fileEnd.isSameOrAfter(periodEnd)
-      );
-    }
-
-    // Para asignaciones sin fecha fin
-    return fileEnd.isSameOrAfter(periodStart);
+    const assignEnd = assignment.endDate ? moment(assignment.endDate) : null;
+    return (
+      (fileStart.isSameOrAfter(assignmentStart) &&
+        fileStart.isSameOrBefore(assignmentEnd)) ||
+      (fileEnd.isSameOrAfter(assignmentStart) &&
+        fileEnd.isSameOrBefore(assignmentEnd)) ||
+      (fileStart.isBefore(assignmentStart) && fileEnd.isAfter(assignmentEnd))
+    );
   }
 }
