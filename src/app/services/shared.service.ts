@@ -1,13 +1,13 @@
 /*
   En este codigo se administra informacion referente a los permisos
 */
-import { Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
-import { AuthService } from './auth.service';
-import { CompanyService } from './company.service';
-import { Observable } from 'rxjs';
-import { tap } from 'rxjs/operators';
-import { environment } from '../../environments/environment';
+import { Injectable } from "@angular/core";
+import { HttpClient } from "@angular/common/http";
+import { AuthService } from "./auth.service";
+import { CompanyService } from "./company.service";
+import { Observable } from "rxjs";
+import { tap } from "rxjs/operators";
+import { environment } from "../../environments/environment";
 
 export interface Permission {
   section: string;
@@ -15,18 +15,17 @@ export interface Permission {
 }
 
 @Injectable({
-  providedIn: 'root'
+  providedIn: "root",
 })
 export class SharedService {
   // Variable para almacenar los permisos cargados
   permissions: Permission[] = [];
   permissionsLoaded: boolean = false;
 
-
   constructor(
     private http: HttpClient,
     private authService: AuthService,
-    private companyService: CompanyService,
+    private companyService: CompanyService
   ) {}
 
   /**
@@ -35,38 +34,43 @@ export class SharedService {
    */
   loadPermissions(): Observable<any> {
     const userId = this.authService.userId;
-    const companyId = this.companyService.selectedCompany?.id || '';
-  
+    const companyId = this.companyService.selectedCompany?.id || "";
+
     if (!userId || !companyId) {
-      console.warn('No se pueden cargar los permisos: falta userId o companyId.');
-      return new Observable(observer => {
+      console.warn(
+        "No se pueden cargar los permisos: falta userId o companyId."
+      );
+      return new Observable((observer) => {
         observer.next({ success: false, permissions: [] });
         observer.complete();
       });
     }
-  
+
     const data = { userId, companyId };
-    return this.http.post<{ success: boolean; permissions: Permission[] }>(`${environment.apiBaseUrl}/loadPermissions.php`, data).pipe(
-      tap(response => {
-        if (response.success) {
-          this.permissions = response.permissions || [];
-          this.permissionsLoaded = true; // Se marcan como cargados
-          console.log('Permisos cargados:', this.permissions);
-        } else {
-          console.warn('Error al cargar permisos:', response);
-          this.permissionsLoaded = false;
-        }
-      })
-    );
+    return this.http
+      .post<{ success: boolean; permissions: Permission[] }>(
+        `${environment.apiBaseUrl}/loadPermissions.php`,
+        data
+      )
+      .pipe(
+        tap((response) => {
+          if (response.success) {
+            this.permissions = response.permissions || [];
+            this.permissionsLoaded = true; // Se marcan como cargados
+            // console.log('Permisos cargados:', this.permissions);
+          } else {
+            console.warn("Error al cargar permisos:", response);
+            this.permissionsLoaded = false;
+          }
+        })
+      );
   }
 
   setPermissions(permissions: Permission[]): void {
     this.permissions = permissions || [];
-    this.permissionsLoaded = true; 
-    console.log('Permisos establecidos:', this.permissions);
+    this.permissionsLoaded = true;
+    console.log("Permisos establecidos:", this.permissions);
   }
-  
-  
 
   /**
    * Sincroniza los permisos con el backend cada vez que cambia la empresa seleccionada.
@@ -76,9 +80,9 @@ export class SharedService {
       this.loadPermissions().subscribe((response: any) => {
         if (response.success) {
           this.permissions = response.permissions || [];
-          console.log('Permisos sincronizados:', this.permissions);
+          console.log("Permisos sincronizados:", this.permissions);
         } else {
-          console.warn('Error al sincronizar permisos:', response.message);
+          console.warn("Error al sincronizar permisos:", response.message);
         }
       });
     });
@@ -89,38 +93,44 @@ export class SharedService {
    * @param section - La sección principal.
    * @param subSection - (Opcional) Sub-sección específica.
    */
-hasPermission(section: string, subSection: string | null = null): boolean {
-  if (subSection === null || subSection === '') {
-    // Verifica permisos sin sub-sección o con sub-sección vacía
-    return this.permissions.some(perm => perm.section === section && (perm.subSection === null || perm.subSection === ''));
-  } else {
-    // Verifica permisos con subsección específica
-    return this.permissions.some(perm => perm.section === section && perm.subSection === subSection);
+  hasPermission(section: string, subSection: string | null = null): boolean {
+    if (subSection === null || subSection === "") {
+      // Verifica permisos sin sub-sección o con sub-sección vacía
+      return this.permissions.some(
+        (perm) =>
+          perm.section === section &&
+          (perm.subSection === null || perm.subSection === "")
+      );
+    } else {
+      // Verifica permisos con subsección específica
+      return this.permissions.some(
+        (perm) => perm.section === section && perm.subSection === subSection
+      );
+    }
   }
-}
 
   /**
    * Establecer el título según el nivel de usuario.
    * @param levelUser - Nivel de usuario de la empresa seleccionada.
    */
   setTitulo(): string {
-    const levelUser = this.companyService.selectedCompany?.levelUser || '';
+    const levelUser = this.companyService.selectedCompany?.levelUser || "";
     switch (levelUser) {
-      case 'adminS':
-        return 'Configuraciones de la empresa para AdminS';
-      case 'adminE':
-        return 'Configuraciones de la empresa para AdminE';
-      case 'adminEE':
-        return 'Configuraciones de la empresa para AdminEE';
-      case 'adminPE':
-        return 'Configuraciones de la empresa para AdminPE';
-      case 'superV':
-        return 'Actualizar solicitudes de empleados';
-      case 'admin':
-      case 'adminU':
-        return 'Solicitudes de empleados';
+      case "adminS":
+        return "Configuraciones de la empresa para AdminS";
+      case "adminE":
+        return "Configuraciones de la empresa para AdminE";
+      case "adminEE":
+        return "Configuraciones de la empresa para AdminEE";
+      case "adminPE":
+        return "Configuraciones de la empresa para AdminPE";
+      case "superV":
+        return "Actualizar solicitudes de empleados";
+      case "admin":
+      case "adminU":
+        return "Solicitudes de empleados";
       default:
-        return 'Configuraciones de la empresa';
+        return "Configuraciones de la empresa";
     }
   }
 }

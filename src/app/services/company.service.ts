@@ -45,10 +45,10 @@ export class CompanyService {
     );
     if (mappedPrincipalCompaniesString) {
       this.principalCompanies = JSON.parse(mappedPrincipalCompaniesString);
-      console.log(
-        "Empresas principales desde localStorage:",
-        this.principalCompanies
-      );
+      // console.log(
+      //   "Empresas principales desde localStorage:",
+      //   this.principalCompanies
+      // );
     } else {
       this.principalCompanies = [];
     }
@@ -69,10 +69,10 @@ export class CompanyService {
 
     this.principalCompanies = mapped;
     localStorage.setItem("mappedPrincipalCompanies", JSON.stringify(mapped));
-    console.log(
-      "Empresas principales actualizadas (mapeadas):",
-      this.principalCompanies
-    );
+    // console.log(
+    //   "Empresas principales actualizadas (mapeadas):",
+    //   this.principalCompanies
+    // );
   }
 
   /**
@@ -80,10 +80,10 @@ export class CompanyService {
    */
   setNonPrincipalCompanies(companies: any[]): void {
     this.nonPrincipalCompanies = companies;
-    console.log(
-      "Empresas no principales actualizadas:",
-      this.nonPrincipalCompanies
-    );
+    // console.log(
+    //   "Empresas no principales actualizadas:",
+    //   this.nonPrincipalCompanies
+    // );
   }
 
   /**
@@ -107,7 +107,7 @@ export class CompanyService {
       logoUrl: company.logoUrl || "", // Se asignará posteriormente
     };
 
-    console.log("Empresa seleccionada:", this.selectedCompany);
+    // console.log("Empresa seleccionada:", this.selectedCompany);
   }
 
   /**
@@ -121,7 +121,7 @@ export class CompanyService {
       .toPromise()
       .then((response: any) => {
         if (response && response.logoUrl) {
-          console.log("Logo cargado:", response.logoUrl);
+          // console.log("Logo cargado:", response.logoUrl);
           return response.logoUrl;
         }
         console.error("Falta el logoUrl:", response);
@@ -152,10 +152,10 @@ export class CompanyService {
           this.selectedCompany.logoUrl || "assets/images/default-logo.png",
       });
 
-      console.log(
-        "Empresa seleccionada cargada desde localStorage:",
-        this.selectedCompany
-      );
+      // console.log(
+      //   "Empresa seleccionada cargada desde localStorage:",
+      //   this.selectedCompany
+      // );
     }
   }
 
@@ -218,10 +218,10 @@ export class CompanyService {
           })
         );
         this.setNonPrincipalCompanies(mappedCompanies);
-        console.log(
-          "Empresas no principales asociadas:",
-          this.nonPrincipalCompanies
-        );
+        // console.log(
+        //   "Empresas no principales asociadas:",
+        //   this.nonPrincipalCompanies
+        // );
       } else {
         console.error(
           "Error cargando empresas no principales:",

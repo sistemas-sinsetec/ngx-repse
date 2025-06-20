@@ -1,14 +1,14 @@
 /*
   En este codigo se obtienen datos referentes a la sesion respecto al periodo actual
 */
-import { Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
-import { BehaviorSubject } from 'rxjs';
-import * as moment from 'moment';
-import { environment } from '../../environments/environment';
+import { Injectable } from "@angular/core";
+import { HttpClient } from "@angular/common/http";
+import { BehaviorSubject } from "rxjs";
+import * as moment from "moment";
+import { environment } from "../../environments/environment";
 
 @Injectable({
-  providedIn: 'root',
+  providedIn: "root",
 })
 export class PeriodService {
   selectedPeriod: any = null;
@@ -29,7 +29,9 @@ export class PeriodService {
    */
   loadPeriodTypes(companyId: string): Promise<any[]> {
     return this.http
-      .get(`${environment.apiBaseUrl}/get_period_types.php?company_id=${companyId}`)
+      .get(
+        `${environment.apiBaseUrl}/get_period_types.php?company_id=${companyId}`
+      )
       .toPromise()
       .then((data: any) => {
         const mapped = data.map((d: any) => ({
@@ -43,7 +45,7 @@ export class PeriodService {
         return this.periodTypes;
       })
       .catch((error) => {
-        console.error('Error al cargar los tipos de periodos:', error);
+        console.error("Error al cargar los tipos de periodos:", error);
         return [];
       });
   }
@@ -55,8 +57,8 @@ export class PeriodService {
    */
   setSelectedPeriod(period: any) {
     this.selectedPeriod = period;
-    localStorage.setItem('selectedPeriod', JSON.stringify(period));
-    console.log('Periodo seleccionado:', this.selectedPeriod);
+    localStorage.setItem("selectedPeriod", JSON.stringify(period));
+    // console.log("Periodo seleccionado:", this.selectedPeriod);
 
     // Emitir el cambio a través del BehaviorSubject
     this.periodChangeSubject.next(this.selectedPeriod);
@@ -66,13 +68,13 @@ export class PeriodService {
    * Cargar el período seleccionado desde el localStorage y emitir el cambio.
    */
   loadSelectedPeriod() {
-    const periodString = localStorage.getItem('selectedPeriod');
-    console.log('Intentando cargar período desde localStorage:', periodString);
+    const periodString = localStorage.getItem("selectedPeriod");
+    // console.log('Intentando cargar período desde localStorage:', periodString);
 
     if (periodString) {
       const storedPeriod = JSON.parse(periodString);
       this.selectedPeriod = storedPeriod;
-      console.log('Período cargado desde localStorage:', this.selectedPeriod);
+      // console.log('Período cargado desde localStorage:', this.selectedPeriod);
 
       this.periodChangeSubject.next(this.selectedPeriod);
     }
@@ -88,7 +90,7 @@ export class PeriodService {
 
   /**
    * Generar los días de la semana entre dos fechas, marcando los días de descanso.
-  * @param startDate Fecha inicial (YYYY-MM-DD)
+   * @param startDate Fecha inicial (YYYY-MM-DD)
    * @param endDate Fecha final (YYYY-MM-DD)
    * @param periodId ID del periodo
    * @param existingDiasSemana Arreglo con datos de días ya existentes (por ejemplo, para status, etc.)
@@ -99,8 +101,8 @@ export class PeriodService {
     startDate: string,
     endDate: string,
     periodId: string,
-    existingDiasSemana: any[],  // corresponde a this.diasSemana en tu componente
-    selectedCompanyId: string   // this.companyService.selectedCompany.id
+    existingDiasSemana: any[], // corresponde a this.diasSemana en tu componente
+    selectedCompanyId: string // this.companyService.selectedCompany.id
   ): any[] {
     const start = moment(startDate);
     const end = moment(endDate);
@@ -114,7 +116,7 @@ export class PeriodService {
 
     // Calculamos las fechas base de descanso
     const baseRestDates: moment.Moment[] = [];
-    restDaysPositions.forEach(pos => {
+    restDaysPositions.forEach((pos) => {
       const dayOfMonth = parseInt(pos, 10);
       const year = periodStart.year();
       const month = periodStart.month();
@@ -126,12 +128,12 @@ export class PeriodService {
     // Recorremos cada día entre startDate y endDate
     while (start.isSameOrBefore(end)) {
       const current = start.clone();
-      const dateStr = current.format('YYYY-MM-DD');
+      const dateStr = current.format("YYYY-MM-DD");
       let isRestDay = false;
 
       // Verificamos si coincide con un "ciclo" de descanso
       for (const base of baseRestDates) {
-        const diff = current.diff(base, 'days');
+        const diff = current.diff(base, "days");
         if (diff >= 0 && diff % cycleLength === 0) {
           isRestDay = true;
           break;
@@ -139,11 +141,11 @@ export class PeriodService {
       }
 
       // Si en existingDiasSemana ya hay información para este día, la usamos (status, etc.)
-      const dayData = existingDiasSemana.find(d => d.day_of_week === dateStr);
+      const dayData = existingDiasSemana.find((d) => d.day_of_week === dateStr);
 
       dias.push({
         date: dateStr,
-        dayLetter: this.getDayLetter(current),      // asignamos la letra del día
+        dayLetter: this.getDayLetter(current), // asignamos la letra del día
         status: dayData?.status || null,
         company_id: dayData?.company_id || selectedCompanyId,
         period_id: dayData?.period_id || periodId,
@@ -151,23 +153,21 @@ export class PeriodService {
       });
 
       // Pasamos al siguiente día
-      start.add(1, 'day');
+      start.add(1, "day");
     }
 
-
     return dias;
-
   }
 
   // Mapeo de índice del día de la semana a letra
   private dayLetters: { [key: number]: string } = {
-    0: 'D',  // Domingo
-    1: 'L',  // Lunes
-    2: 'M',  // Martes
-    3: 'M',  // Miércoles
-    4: 'J',  // Jueves
-    5: 'V',  // Viernes
-    6: 'S',  // Sábado
+    0: "D", // Domingo
+    1: "L", // Lunes
+    2: "M", // Martes
+    3: "M", // Miércoles
+    4: "J", // Jueves
+    5: "V", // Viernes
+    6: "S", // Sábado
   };
 
   /**
@@ -176,8 +176,7 @@ export class PeriodService {
    * @returns Letra del día (D, L, M, M, J, V, S)
    */
   private getDayLetter(date: moment.Moment): string {
-
     const dayIndex = date.day();
-    return this.dayLetters[dayIndex] || '';
+    return this.dayLetters[dayIndex] || "";
   }
 }
