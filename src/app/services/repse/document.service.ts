@@ -606,23 +606,55 @@ export class DocumentService {
   isFileCompatibleWithAssignment(
     filePeriod: { start: Date; end: Date },
     assignment: any,
-    companyId: number // Nuevo parámetro
+    companyId: number
   ): boolean {
-    // Verificar si pertenecen a la misma empresa
-    if (companyId !== assignment.companyId) {
-      return true; // Empresas diferentes siempre son compatibles
-    }
     const assignmentStart = moment(assignment.startDate);
-    const assignmentEnd = moment(assignment.endDate);
+    const assignmentEnd = assignment.endDate
+      ? moment(assignment.endDate)
+      : null;
+
     const fileStart = moment(filePeriod.start);
     const fileEnd = moment(filePeriod.end);
-    const assignEnd = assignment.endDate ? moment(assignment.endDate) : null;
-    return (
-      (fileStart.isSameOrAfter(assignmentStart) &&
-        fileStart.isSameOrBefore(assignmentEnd)) ||
-      (fileEnd.isSameOrAfter(assignmentStart) &&
-        fileEnd.isSameOrBefore(assignmentEnd)) ||
-      (fileStart.isBefore(assignmentStart) && fileEnd.isAfter(assignmentEnd))
-    );
+
+    // Caso 1: Asignación sin fecha de fin (vigente indefinidamente)
+    if (!assignmentEnd) {
+      return fileEnd.isSameOrAfter(assignmentStart);
+    }
+
+    // Caso 2: El archivo cubre completamente la asignación
+    if (
+      fileStart.isSameOrBefore(assignmentStart) &&
+      fileEnd.isSameOrAfter(assignmentEnd)
+    ) {
+      return true;
+    }
+
+    // Caso 3: El archivo está dentro del período de la asignación
+    if (
+      fileStart.isSameOrAfter(assignmentStart) &&
+      fileEnd.isSameOrBefore(assignmentEnd)
+    ) {
+      return true;
+    }
+
+    // Caso 4: Superposición parcial (archivo comienza antes y termina durante)
+    if (
+      fileStart.isBefore(assignmentStart) &&
+      fileEnd.isAfter(assignmentStart) &&
+      fileEnd.isBefore(assignmentEnd)
+    ) {
+      return true;
+    }
+
+    // Caso 5: Superposición parcial (archivo comienza durante y termina después)
+    if (
+      fileStart.isAfter(assignmentStart) &&
+      fileStart.isBefore(assignmentEnd) &&
+      fileEnd.isAfter(assignmentEnd)
+    ) {
+      return true;
+    }
+
+    return false;
   }
 }

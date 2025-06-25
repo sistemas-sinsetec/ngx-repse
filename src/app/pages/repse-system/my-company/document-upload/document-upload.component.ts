@@ -394,25 +394,19 @@ export class DocumentUploadComponent {
     this.isUploading = true;
 
     try {
-      for (let i = 0; i < Math.min(remaining, files.length); i++) {
-        await this.uploadSingleFile(files[i]);
-      }
-    } catch (error) {
-      console.error("Error uploading files", error);
-      this.toastrService.danger("Error al subir archivos", "Error");
-    } finally {
-      this.isUploading = false;
+    for (let i = 0; i < Math.min(remaining, files.length); i++) {
+      await this.uploadSingleFile(files[i]);
     }
-
-    this.refreshUploadProgress(
-      this.selectedDocumentForUpload ?? this.selectedDocument,
-      true
-    );
-
+  } catch (error) {
+    console.error("Error uploading files", error);
+    this.toastrService.danger("Error al subir archivos", "Error");
+  } finally {
+    this.isUploading = false;
+  }
     this.selectedFile = files[0];
   }
 
-  private async uploadSingleFile(file: File): Promise<void> {
+  async uploadSingleFile(file: File): Promise<void> {
     const fileName = file.name.toLowerCase();
     const selectedDoc = this.selectedDocumentForUpload ?? this.selectedDocument;
     const fileTypeName = selectedDoc?.documentType?.toLowerCase();
@@ -427,7 +421,11 @@ export class DocumentUploadComponent {
     let expiryDate: Date | null = null;
     let extractedRfc: string | null = null;
 
-    if (config?.extractMandatoryData) {
+    // Determinar si estamos en entorno de desarrollo
+    const isDevelopment = !environment.production;
+
+    // Solo intentar extraer datos si no estamos en desarrollo y el handler existe
+    if (!isDevelopment && config?.extractMandatoryData) {
       try {
         const result = await config.extractMandatoryData(
           file,
@@ -436,10 +434,6 @@ export class DocumentUploadComponent {
         issueDate = result.issueDate;
         expiryDate = result.expiryDate;
         extractedRfc = result.rfc;
-
-        // Validar fechas inválidas
-        if (issueDate && isNaN(issueDate.getTime())) issueDate = null;
-        if (expiryDate && isNaN(expiryDate.getTime())) expiryDate = null;
       } catch (error) {
         console.warn("Error al extraer fechas:", error);
         this.toastrService.danger(
@@ -449,10 +443,22 @@ export class DocumentUploadComponent {
         return;
       }
     }
+    // En desarrollo, usar valores por defecto para pruebas
+    else if (isDevelopment) {
+      issueDate = new Date();
+      expiryDate = new Date();
+      expiryDate.setFullYear(expiryDate.getFullYear() + 1);
+      extractedRfc = this.companyService.selectedCompany?.rfc?.toUpperCase();
 
-    // Validación de RFC
+      this.toastrService.info(
+        "Modo desarrollo: usando fechas y RFC de prueba",
+        "Pruebas"
+      );
+    }
+
+    // Validación de RFC (solo en producción)
     const companyRfc = this.companyService.selectedCompany?.rfc?.toUpperCase();
-    if (!extractedRfc || extractedRfc !== companyRfc) {
+    if (!isDevelopment && (!extractedRfc || extractedRfc !== companyRfc)) {
       this.toastrService.warning(
         `El RFC extraído (${
           extractedRfc ?? "N/D"
@@ -462,8 +468,8 @@ export class DocumentUploadComponent {
       return;
     }
 
-    // Si no se pudo obtener la fecha de emisión
-    if (!issueDate) {
+    // Si no se pudo obtener la fecha de emisión y no estamos en desarrollo
+    if (!issueDate && !isDevelopment) {
       this.toastrService.warning(
         `No se pudo encontrar la fecha de emisión en el archivo "${file.name}". Verifica el contenido del PDF.`,
         "Fecha no detectada"
@@ -483,8 +489,8 @@ export class DocumentUploadComponent {
       expiryDate = calculateExpiry(normalizedIssue, value, unit);
     }
 
-    // Si aún no tenemos fecha de vencimiento
-    if (!expiryDate) {
+    // Si aún no tenemos fecha de vencimiento (solo en producción)
+    if (!expiryDate && !isDevelopment) {
       this.toastrService.warning(
         `No se pudo determinar la fecha de vencimiento del archivo "${file.name}" (${issueDate} - ${expiryDate}).`,
         "Vencimiento no detectado"
@@ -511,8 +517,8 @@ export class DocumentUploadComponent {
       coverage = "full";
     }
 
-    // Validar cobertura
-    if (coverage === "none") {
+    // Validar cobertura solo en producción
+    if (coverage === "none" && !isDevelopment) {
       this.toastrService.warning(
         `El archivo "${
           file.name
@@ -533,14 +539,52 @@ export class DocumentUploadComponent {
       );
     }
 
-    // Resto del código permanece igual...
-  }
+    // Subir solo a la asignación principal
+    const previewFile = await this.uploadToAssignment(
+      file,
+      selectedDoc,
+      issueDate,
+      expiryDate,
+      false
+    );
+
+    // Encontrar asignaciones compatibles
+    const compatibleAssignments = this.findCompatibleAssignments(selectedDoc, {
+      start: issueDate,
+      end: expiryDate,
+    });
+
+    // Preparar datos para compartir
+    previewFile.compatibleAssignments = compatibleAssignments.map((asg) => ({
+      assignment: asg,
+      companyName: asg.companyName || "Mi empresa",
+      documentType: asg.documentType,
+      periodCoverage: this.getPeriodCoverageString(asg),
+    }));
+
+    previewFile.originalFile = file;
+    
+    // Añadir directamente sin refrescar
+    this.filesPendingConfirmation.push(previewFile);
+
+    // Actualización manual del contador
+    if (formatConfig) {
+      formatConfig.temp_uploaded_count = (formatConfig.temp_uploaded_count || 0) + 1;
+    }
+}
 
   // Nuevo método para encontrar asignaciones compatibles
   private findCompatibleAssignments(
     currentAssignment: any,
     filePeriod: { start: Date; end: Date }
   ): any[] {
+    console.log("Buscando asignaciones compatibles...");
+    console.log(
+      "Asignación actual:",
+      currentAssignment.documentType,
+      currentAssignment.id
+    );
+
     const compatibleAssignments = [];
     const myCompanyId = Number(this.companyService.selectedCompany.id);
 
@@ -549,9 +593,18 @@ export class DocumentUploadComponent {
       ...this.assignedByOthers.flatMap((group) => group.files),
     ];
 
+    console.log("Total de asignaciones disponibles:", allAssignments.length);
+
     for (const assignment of allAssignments) {
-      // Solo permitir asignaciones de la MISMA empresa
-      const sameCompany = assignment.companyId === currentAssignment.companyId;
+      // Excluir la asignación actual
+      if (assignment.id === currentAssignment.id) {
+        console.log("Excluyendo asignación actual:", assignment.documentType);
+        continue;
+      }
+
+      const isPartnerOrSame =
+        assignment.companyId === currentAssignment.companyId ||
+        this.isBusinessPartner(myCompanyId, assignment.companyId);
 
       const formatMatch = assignment.formats.some(
         (f: any) => f.code === this.selectedFormat
@@ -560,19 +613,46 @@ export class DocumentUploadComponent {
       const coversPeriod = this.documentService.isFileCompatibleWithAssignment(
         filePeriod,
         assignment,
-        currentAssignment.companyId // Nuevo parámetro
+        currentAssignment.companyId
       );
 
       const isActive =
         !assignment.endDate || new Date(assignment.endDate) > new Date();
 
-      // Cambio clave: Solo considerar asignaciones de la misma empresa
-      if (sameCompany && formatMatch && coversPeriod && isActive) {
+      console.log("---");
+      console.log("Asignación:", assignment.documentType, assignment.id);
+      console.log("Es socio/misma empresa:", isPartnerOrSame);
+      console.log("Formato coincide:", formatMatch);
+      console.log("Cubre periodo:", coversPeriod);
+      console.log("Está activa:", isActive);
+
+      if (isPartnerOrSame && formatMatch && coversPeriod && isActive) {
+        console.log("¡ENCONTRADA COMPATIBLE!");
         compatibleAssignments.push(assignment);
       }
     }
 
+    console.log(
+      "Asignaciones compatibles encontradas:",
+      compatibleAssignments.length
+    );
+    compatibleAssignments.forEach((asg) =>
+      console.log("Compatibles:", asg.documentType, asg.id)
+    );
+
     return compatibleAssignments;
+  }
+
+  private isBusinessPartner(
+    companyId: number,
+    targetCompanyId: number
+  ): boolean {
+    // Implementación real usando tu servicio
+    // Esta es una versión temporal para pruebas
+    const partnerCompanies = [307, 333]; // IDs de empresas socias reales
+
+    // Verificar si existe relación comercial
+    return partnerCompanies.includes(targetCompanyId);
   }
 
   // Nuevo método para formato de período
@@ -708,10 +788,10 @@ export class DocumentUploadComponent {
   }
 
   openPreviewModal(): void {
-    // Reiniciar estado de compartir
+    // Mostrar sección de compartir automáticamente
     this.filesPendingConfirmation.forEach((file) => {
       file.selectedAssignments = [];
-      file.showShare = false;
+      file.showShare = true; // Cambiado a true
     });
 
     this.dialogRef = this.dialogService.open(this.previewModal, {
@@ -1007,80 +1087,65 @@ export class DocumentUploadComponent {
   }
 
   private refreshUploadProgress(
-    doc: any,
-    includePreview: boolean = false
-  ): void {
-    if (!doc?.id || !doc?.currentPeriod?.period_id) return;
+  doc: any,
+  includePreview: boolean = false
+): void {
+  if (!doc?.id || !doc?.currentPeriod?.period_id) return;
 
-    this.documentService
-      .getUploadedFiles(doc.id, doc.currentPeriod.period_id, [
-        "uploaded",
-        "pending",
-        "approved",
-        "rejected",
-        "late",
-      ])
-      .subscribe({
-        next: (files) => {
-          const counts: Record<string, number> = {};
-
-          for (const f of files) {
-            if (f.is_expired === 1) continue;
-            const ext = (f.file_ext || "").toLowerCase();
-            counts[ext] = (counts[ext] || 0) + 1;
-          }
-
-          for (const fmt of doc.formats) {
-            fmt.temp_uploaded_count = counts[fmt.code.toLowerCase()] || 0;
-          }
-
-          if (includePreview) {
-            const currentFiles = this.filesPendingConfirmation;
-
-            this.filesPendingConfirmation = files
-              .filter((f: any) => f.status === "uploaded")
-              .map((f: any) => {
-                // Buscar si el archivo ya existe en la lista actual
-                const existingFile = currentFiles.find(
-                  (file) => file.file_id === f.file_id
-                );
-
-                // Si encontramos el archivo existente, mantener sus asignaciones compatibles
-                if (existingFile) {
-                  return {
-                    ...existingFile, // Mantener todas las propiedades existentes
+  this.documentService
+    .getUploadedFiles(doc.id, doc.currentPeriod.period_id, [
+      "uploaded",
+      "pending",
+      "approved",
+      "rejected",
+      "late",
+    ])
+    .subscribe({
+      next: (files) => {
+        if (includePreview) {
+          const currentFiles = this.filesPendingConfirmation;
+          const newFiles = files
+            .filter((f: any) => f.status === "uploaded")
+            .map((f: any) => {
+              const existingFile = currentFiles.find(
+                file => file.file_id === f.file_id
+              );
+              
+              // Preservar datos críticos si el archivo ya existe
+              return existingFile 
+                ? { 
+                    ...existingFile,  // Mantener todos los datos existentes
                     name: f.file_path.split("/").pop(),
                     path: f.file_path,
                     uploaded_at: f.uploaded_at,
                     format: f.file_ext.toLowerCase(),
                     issueDate: f.issue_date ? new Date(f.issue_date) : null,
                     expiryDate: f.expiry_date ? new Date(f.expiry_date) : null,
+                  }
+                : {
+                    file_id: f.file_id,
+                    name: f.file_path.split("/").pop(),
+                    path: f.file_path,
+                    uploaded_at: f.uploaded_at,
+                    format: f.file_ext.toLowerCase(),
+                    required_file_id: f.required_file_id,
+                    period_id: f.period_id,
+                    assignment_id: f.required_file_id,
+                    compatibleAssignments: [],
+                    selectedAssignments: [],
+                    issueDate: f.issue_date ? new Date(f.issue_date) : null,
+                    expiryDate: f.expiry_date ? new Date(f.expiry_date) : null,
                   };
-                }
-
-                // Es un archivo nuevo, crear uno nuevo
-                return {
-                  file_id: f.file_id,
-                  name: f.file_path.split("/").pop(),
-                  path: f.file_path,
-                  uploaded_at: f.uploaded_at,
-                  format: f.file_ext.toLowerCase(),
-                  required_file_id: f.required_file_id,
-                  period_id: f.period_id,
-                  assignment_id: f.required_file_id,
-                  compatibleAssignments: [],
-                  selectedAssignments: [],
-                  issueDate: f.issue_date ? new Date(f.issue_date) : null,
-                  expiryDate: f.expiry_date ? new Date(f.expiry_date) : null,
-                };
-              });
-          }
-        },
-        error: () => {
-          this.toastrService.danger("No se pudo calcular el progreso", "Error");
-        },
-      });
-  }
+            });
+          
+          this.filesPendingConfirmation = newFiles;
+        }
+      },
+      error: () => {
+        this.toastrService.danger("No se pudo calcular el progreso", "Error");
+      }
+    });
+}
 
   getFileAccept(): string {
     if (this.activeTab === "Con retraso") {
