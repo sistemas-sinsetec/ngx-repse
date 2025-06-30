@@ -82,22 +82,37 @@ function getInterval(string $type, int $count): ?DateInterval
     }
 }
 
-function isOverlapping(DateTimeInterface $start1, DateTimeInterface $end1, DateTimeInterface $start2, DateTimeInterface $end2): bool
+function isOverlappingWithAssignment(DateTimeInterface $start1, DateTimeInterface $end1, DateTimeInterface $start2, DateTimeInterface $end2, int $assignedBy1, int $assignedBy2): bool
 {
+    if ($assignedBy1 !== $assignedBy2){
+            return false;
+        }if ($assignedBy1 !== $assignedBy2){
+            return false;
+        }
     return $start1 <= $end2 && $end1 >= $start2;
 }
 
-function hasOverlap(array $newPeriod, array $existingPeriods): bool
+function hasOverlap(array $newPeriod, array $existingPeriods, int $newAssignedBy): bool
 {
     foreach ($existingPeriods as $ex) {
         $exStart = new DateTime($ex['start'] ?? $ex['start_date']);
         $exEnd = new DateTime($ex['end'] ?? $ex['end_date']);
-        if (isOverlapping($newPeriod['start'], $newPeriod['end'], $exStart, $exEnd)) {
+        $exAssignedBy = (int) $ex['assigned_by'];
+        if (isOverlapping(
+            $newPeriod['start'], 
+            $newPeriod['end'], 
+            $exStart, 
+            $exEnd,
+            $newAssignedBy,        // assigned_by de la nueva asignación
+            (int)$ex['assigned_by'] // assigned_by del periodo existente
+        )) {
             return true;
+
         }
     }
     return false;
 }
+
 
 function getExistingPeriods(mysqli $mysqli, int $companyId, int $fileTypeId): array
 {
@@ -112,16 +127,16 @@ function getExistingPeriods(mysqli $mysqli, int $companyId, int $fileTypeId): ar
     );
 }
 
-function getExtendedPeriodsForPost(mysqli $mysqli, int $companyId, int $fileTypeId): array
+function getExtendedPeriodsForPost(mysqli $mysqli, int $companyId, int $fileTypeId, int $assignedBy): array
 {
     return fetchAssoc(
         $mysqli,
-        "SELECT dp.start_date AS start, dp.end_date AS end, crf.is_periodic, crf.required_file_id
+        "SELECT dp.start_date AS start, dp.end_date AS end, crf.is_periodic, crf.required_file_id, crf.assigned_by
          FROM document_periods dp
          JOIN company_required_files crf ON crf.required_file_id = dp.required_file_id
-         WHERE crf.company_id = ? AND crf.file_type_id = ?",
-        [$companyId, $fileTypeId],
-        'ii'
+         WHERE crf.company_id = ? AND crf.file_type_id = ? AND crf.assigned_by = ?",
+        [$companyId, $fileTypeId, $assignedBy],
+        'iii'
     );
 }
 
@@ -137,8 +152,6 @@ function tryGenerateNonOverlappingPeriods(array $cfg, array $existingPeriods, bo
         respond(400, ['error' => 'Invalid periodicity_type']);
     }
 
-    // 1. Encontrar la fecha de inicio del periodo existente más cercano en el futuro.
-    // Esto es necesario tanto para la generación manual como para la automática.
     $nextExistingStartDate = null;
     foreach ($existingPeriods as $ex) {
         $exStart = new DateTime($ex['start'] ?? $ex['start_date']);
@@ -152,73 +165,74 @@ function tryGenerateNonOverlappingPeriods(array $cfg, array $existingPeriods, bo
     $today = new DateTimeImmutable('today');
     $current = clone $start;
 
-    if ($manual) {
+     if ($manual) {
         $count = (int) $cfg['manual_range']['period_count'];
         for ($i = 0; $i < $count; $i++) {
             $endOfPeriod = (clone $current)->add($interval);
 
-            // 2. Verificar si el periodo a crear se cruza con el límite del periodo futuro.
-            if ($nextExistingStartDate !== null && $endOfPeriod >= $nextExistingStartDate) {
-                // Si se cruza, el fin de este periodo es un día antes del inicio del siguiente.
+           if ($nextExistingStartDate !== null && $endOfPeriod >= $nextExistingStartDate) {
                 $finalEndDate = (clone $nextExistingStartDate)->modify('-1 day');
                 if ($current <= $finalEndDate) {
                     $lastPeriod = ['start' => clone $current, 'end' => $finalEndDate];
-                    if (!hasOverlap($lastPeriod, $existingPeriods)) {
+                    // VERIFICACIÓN ACTUALIZADA CON assigned_by
+                    if (!hasOverlap($lastPeriod, $existingPeriods, (int)$cfg['assigned_by'])) {
                         $periods[] = $lastPeriod;
                     }
                 }
-                break; // Detener la generación, hemos llegado al límite.
+                break;
             }
 
-            // Generación de periodo normal (sin colisión futura).
-            // Se resta 1 día para que los periodos no se toquen (ej: termina el 31/01, el siguiente empieza el 01/02).
+
+
             $end = (clone $endOfPeriod)->modify('-1 day');
             $period = ['start' => clone $current, 'end' => $end];
 
-            if (hasOverlap($period, $existingPeriods)) {
+           if (hasOverlap($period, $existingPeriods, (int)$cfg['assigned_by'])) {
                 respond(409, ['error' => 'Uno o más periodos propuestos se solapan con una configuración existente.']);
             }
 
             $periods[] = $period;
-            $current = $endOfPeriod; // Avanzar al inicio del siguiente periodo.
+            $current = $endOfPeriod;
         }
     } else { // Generación automática
         while (true) {
             $endOfPeriod = (clone $current)->add($interval);
 
-            // 2. Misma verificación para la colisión con un periodo futuro.
+            // 2. Misma verificación para la colisión con un periodo futuro
             if ($nextExistingStartDate !== null && $endOfPeriod >= $nextExistingStartDate) {
                 $finalEndDate = (clone $nextExistingStartDate)->modify('-1 day');
                 if ($current <= $finalEndDate) {
                     $lastPeriod = ['start' => clone $current, 'end' => $finalEndDate];
-                    if (!hasOverlap($lastPeriod, $existingPeriods)) {
+                    // VERIFICACIÓN ACTUALIZADA CON assigned_by
+                    if (!hasOverlap($lastPeriod, $existingPeriods, (int)$cfg['assigned_by'])) {
                         $periods[] = $lastPeriod;
                     } else if (empty($periods)) {
                         respond(409, ['error' => 'El periodo inicial se solapa con una configuración existente.']);
                     }
                 }
-                break; // Detener la generación.
+                break;
             }
 
             // Generación de periodo normal (sin colisión futura)
-            $end = (clone $endOfPeriod)->modify('-1 day');
+             $end = (clone $endOfPeriod)->modify('-1 day');
             $period = ['start' => clone $current, 'end' => $end];
 
-            if (hasOverlap($period, $existingPeriods)) {
+            // VERIFICACIÓN ACTUALIZADA CON assigned_by
+            if (hasOverlap($period, $existingPeriods, (int)$cfg['assigned_by'])) {
                 if (empty($periods)) {
                     respond(409, ['error' => 'El periodo propuesto se solapa con una configuración existente.']);
                 }
                 break;
             }
 
-            $periods[] = $period;
+           $periods[] = $period;
 
-            // Detener si el periodo que acabamos de crear ya es futuro.
+            // Detener si el periodo que acabamos de crear ya es futuro
             if ($endOfPeriod >= $today) {
                 break;
             }
 
-            $current = $endOfPeriod; // Avanzar al inicio del siguiente periodo.
+            $current = $endOfPeriod;
         }
     }
 
@@ -435,7 +449,7 @@ switch ($method) {
         $companyId = (int) $data['company_id'];
         $fileTypeId = (int) $data['file_type_id'];
 
-        $existingPeriods = getExtendedPeriodsForPost($mysqli, $companyId, $fileTypeId);
+        $existingPeriods = getExtendedPeriodsForPost($mysqli, $companyId, $fileTypeId, $data ['assigned_by']);
         $newPeriods = [];
 
         $start = new DateTimeImmutable($data['start_date']);
@@ -462,8 +476,7 @@ switch ($method) {
                     $updatePeriod->execute();
                     $updatePeriod->close();
 
-                    $existingPeriods = getExtendedPeriodsForPost($mysqli, $companyId, $fileTypeId);
-
+$existingPeriods = getExtendedPeriodsForPost($mysqli, $companyId, $fileTypeId, $data['assigned_by']);
                 } else {
                     respond(409, ['error' => 'Debe haber al menos una semana de separación con el requisito anterior sin periodicidad.']);
                 }
