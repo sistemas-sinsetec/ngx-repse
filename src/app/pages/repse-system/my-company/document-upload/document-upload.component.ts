@@ -421,10 +421,8 @@ export class DocumentUploadComponent {
     let expiryDate: Date | null = null;
     let extractedRfc: string | null = null;
 
-    // Determinar si estamos en entorno de desarrollo
     const isDevelopment = !environment.production;
 
-    // Solo intentar extraer datos si no estamos en desarrollo y el handler existe
     if (!isDevelopment && config?.extractMandatoryData) {
       try {
         const result = await config.extractMandatoryData(
@@ -442,21 +440,13 @@ export class DocumentUploadComponent {
         );
         return;
       }
-    }
-    // En desarrollo, usar valores por defecto para pruebas
-    else if (isDevelopment) {
+    } else if (isDevelopment) {
       issueDate = new Date();
       expiryDate = new Date();
       expiryDate.setFullYear(expiryDate.getFullYear() + 1);
       extractedRfc = this.companyService.selectedCompany?.rfc?.toUpperCase();
-
-      this.toastrService.info(
-        "Modo desarrollo: usando fechas y RFC de prueba",
-        "Pruebas"
-      );
     }
 
-    // Validación de RFC (solo en producción)
     const companyRfc = this.companyService.selectedCompany?.rfc?.toUpperCase();
     if (!isDevelopment && (!extractedRfc || extractedRfc !== companyRfc)) {
       this.toastrService.warning(
@@ -468,7 +458,6 @@ export class DocumentUploadComponent {
       return;
     }
 
-    // Si no se pudo obtener la fecha de emisión y no estamos en desarrollo
     if (!issueDate && !isDevelopment) {
       this.toastrService.warning(
         `No se pudo encontrar la fecha de emisión en el archivo "${file.name}". Verifica el contenido del PDF.`,
@@ -481,7 +470,6 @@ export class DocumentUploadComponent {
       (f: any) => f.code.toLowerCase() === fileExt
     );
 
-    // Calcular vencimiento si no se detectó
     if (!expiryDate && formatConfig?.manual_expiry_visible === 0) {
       const value = formatConfig.manual_expiry_value || 0;
       const unit = formatConfig.manual_expiry_unit || "años";
@@ -489,7 +477,6 @@ export class DocumentUploadComponent {
       expiryDate = calculateExpiry(normalizedIssue, value, unit);
     }
 
-    // Si aún no tenemos fecha de vencimiento (solo en producción)
     if (!expiryDate && !isDevelopment) {
       this.toastrService.warning(
         `No se pudo determinar la fecha de vencimiento del archivo "${file.name}" (${issueDate} - ${expiryDate}).`,
@@ -517,7 +504,6 @@ export class DocumentUploadComponent {
       coverage = "full";
     }
 
-    // Validar cobertura solo en producción
     if (coverage === "none" && !isDevelopment) {
       this.toastrService.warning(
         `El archivo "${
@@ -539,7 +525,6 @@ export class DocumentUploadComponent {
       );
     }
 
-    // Subir solo a la asignación principal
     const previewFile = await this.uploadToAssignment(
       file,
       selectedDoc,
@@ -548,26 +533,34 @@ export class DocumentUploadComponent {
       false
     );
 
-    // Encontrar asignaciones compatibles
-    const compatibleAssignments = this.findCompatibleAssignments(selectedDoc, {
-      start: issueDate,
-      end: expiryDate,
-    });
+    const isDuplicate = this.filesPendingConfirmation.some(
+      (f) =>
+        f.name === file.name && f.assignment_id === previewFile.assignment_id
+    );
 
-    // Preparar datos para compartir
-    previewFile.compatibleAssignments = compatibleAssignments.map((asg) => ({
-      assignment: asg,
-      companyName: asg.companyName || "Mi empresa",
-      documentType: asg.documentType,
-      periodCoverage: this.getPeriodCoverageString(asg),
-    }));
+    if (!isDuplicate) {
+      previewFile.compatibleAssignments = this.findCompatibleAssignments(
+        selectedDoc,
+        {
+          start: issueDate,
+          end: expiryDate,
+        }
+      ).map((asg) => ({
+        assignment: asg,
+        companyName: asg.companyName || "Mi empresa",
+        documentType: asg.documentType,
+        periodCoverage: this.getPeriodCoverageString(asg),
+      }));
 
-    previewFile.originalFile = file;
+      previewFile.originalFile = file;
+      this.filesPendingConfirmation.push(previewFile);
 
-    // Añadir directamente sin refrescar
-    this.filesPendingConfirmation.push(previewFile);
+      this.toastrService.success(
+        `Archivo ${file.name} cargado correctamente`,
+        "Éxito"
+      );
+    }
 
-    // Actualización manual del contador
     if (formatConfig) {
       formatConfig.temp_uploaded_count =
         (formatConfig.temp_uploaded_count || 0) + 1;
@@ -741,18 +734,6 @@ export class DocumentUploadComponent {
         expiryDate: expiryDate,
         originalFile: isShared ? undefined : file,
       };
-
-      // Validar si ya está agregado para confirmación
-      const alreadyExists = this.filesPendingConfirmation.some(
-        (f) => f.file_id === response.file_id
-      );
-
-      if (alreadyExists) {
-        this.toastrService.warning(
-          "El archivo ya fue agregado para confirmación",
-          file.name
-        );
-      }
 
       return previewFile;
     } catch (error: any) {
@@ -1286,38 +1267,41 @@ export class DocumentUploadComponent {
     }
 
     this.isUploading = true;
+    let sharedCount = 0;
 
     try {
-      const uploadPromises = file.selectedAssignments.map((compAsg) =>
-        this.uploadToAssignment(
-          file.originalFile!,
-          compAsg.assignment,
-          file.issueDate || null,
-          file.expiryDate || null,
-          true
-        )
-      );
+      for (const compAsg of file.selectedAssignments) {
+        try {
+          const sharedFile = await this.uploadToAssignment(
+            file.originalFile!,
+            compAsg.assignment,
+            file.issueDate || null,
+            file.expiryDate || null,
+            true
+          );
 
-      const sharedFiles = await Promise.all(uploadPromises);
+          this.filesPendingConfirmation.push(sharedFile);
+          sharedCount++;
+        } catch (error) {
+          console.error(`Error compartiendo con ${compAsg.companyName}`, error);
+          this.toastrService.warning(
+            `Error al compartir con ${compAsg.companyName}`,
+            "Advertencia"
+          );
+        }
+      }
 
-      // Si usas una lista de archivos pendientes
-      this.filesPendingConfirmation = [
-        ...this.filesPendingConfirmation,
-        ...sharedFiles,
-      ];
+      if (sharedCount > 0) {
+        this.toastrService.success(
+          `Archivo compartido con ${sharedCount} asignación(es)`,
+          "Éxito"
+        );
+      }
 
-      this.toastrService.success(
-        `Archivo compartido con ${file.selectedAssignments.length} asignaciones`,
-        "Éxito"
-      );
-
-      // Resetear selección
       file.compatibleAssignments = file.compatibleAssignments.filter(
         (a) => !file.selectedAssignments.includes(a)
       );
       file.selectedAssignments = [];
-    } catch (error) {
-      this.toastrService.danger("Error al compartir el archivo", "Error");
     } finally {
       this.isUploading = false;
       file.showShare = false;
