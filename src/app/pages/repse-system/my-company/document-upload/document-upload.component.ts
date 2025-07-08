@@ -20,7 +20,7 @@ interface CompatibleAssignment {
 }
 
 interface FilePreview {
-  file_id: number; // Cambiado de 'id' a 'file_id'
+  file_id: number;
   name: string;
   path: string;
   uploaded_at: string;
@@ -32,8 +32,10 @@ interface FilePreview {
   selectedAssignments: CompatibleAssignment[];
   originalFile?: File;
   showShare?: boolean;
+  showCompatibleAssignments?: boolean;
   issueDate?: Date | null;
   expiryDate?: Date | null;
+  hasBeenShared?: boolean; // <-- Añade esta línea
 }
 
 interface FileHandlerConfig {
@@ -733,6 +735,7 @@ export class DocumentUploadComponent {
         issueDate: issueDate,
         expiryDate: expiryDate,
         originalFile: isShared ? undefined : file,
+        showCompatibleAssignments: true, // Añade esta línea
       };
 
       return previewFile;
@@ -787,15 +790,14 @@ export class DocumentUploadComponent {
   }
 
   openPreviewModal(): void {
-    // Mostrar sección de compartir automáticamente
     this.filesPendingConfirmation.forEach((file) => {
       file.selectedAssignments = [];
-      file.showShare = true; // Cambiado a true
+      file.showCompatibleAssignments = true; // Asegura que se muestre inicialmente
     });
 
     this.dialogRef = this.dialogService.open(this.previewModal, {
+      context: "this is some additional data passed to dialog",
       dialogClass: "custom-modal",
-      closeOnBackdropClick: false,
     });
   }
 
@@ -1110,10 +1112,9 @@ export class DocumentUploadComponent {
                   (file) => file.file_id === f.file_id
                 );
 
-                // Preservar datos críticos si el archivo ya existe
                 return existingFile
                   ? {
-                      ...existingFile, // Mantener todos los datos existentes
+                      ...existingFile,
                       name: f.file_path.split("/").pop(),
                       path: f.file_path,
                       uploaded_at: f.uploaded_at,
@@ -1138,6 +1139,7 @@ export class DocumentUploadComponent {
                       expiryDate: f.expiry_date
                         ? new Date(f.expiry_date)
                         : null,
+                      showCompatibleAssignments: true,
                     };
               });
 
@@ -1261,7 +1263,7 @@ export class DocumentUploadComponent {
 
   // Compartir archivo con asignaciones seleccionadas
   async onShareFile(file: FilePreview): Promise<void> {
-    if (!file.selectedAssignments.length) {
+    if (!file.selectedAssignments?.length) {
       this.toastrService.warning("Selecciona al menos una asignación", "Aviso");
       return;
     }
@@ -1280,6 +1282,8 @@ export class DocumentUploadComponent {
             true
           );
 
+          // Marcar el archivo compartido como no mostrable
+          sharedFile.showCompatibleAssignments = false;
           this.filesPendingConfirmation.push(sharedFile);
           sharedCount++;
         } catch (error) {
@@ -1296,15 +1300,14 @@ export class DocumentUploadComponent {
           `Archivo compartido con ${sharedCount} asignación(es)`,
           "Éxito"
         );
-      }
 
-      file.compatibleAssignments = file.compatibleAssignments.filter(
-        (a) => !file.selectedAssignments.includes(a)
-      );
-      file.selectedAssignments = [];
+        // Ocultar completamente la sección de asignaciones compatibles para este archivo
+        file.showCompatibleAssignments = false;
+        file.selectedAssignments = [];
+        file.hasBeenShared = true; // Nueva propiedad para marcar como compartido
+      }
     } finally {
       this.isUploading = false;
-      file.showShare = false;
     }
   }
 }

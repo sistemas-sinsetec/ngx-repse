@@ -554,7 +554,10 @@
       <!-- SECCIÓN PARA COMPARTIR ARCHIVOS -->
       <!-- En previewModal -->
       <div *ngFor="let file of filesPendingConfirmation">
-        <nb-card class="mt-4">
+        <nb-card
+          class="mt-4"
+          *ngIf="file.showCompatibleAssignments && !file.hasBeenShared"
+        >
           <nb-card-header>
             <h5>Asignaciones compatibles</h5>
           </nb-card-header>
