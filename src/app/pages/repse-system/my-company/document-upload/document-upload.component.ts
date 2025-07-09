@@ -1260,7 +1260,7 @@ export class DocumentUploadComponent {
       file.selectedAssignments.push(assignment);
     }
   }
-
+  //creccion del regustro multiple
   // Compartir archivo con asignaciones seleccionadas
   async onShareFile(file: FilePreview): Promise<void> {
     if (!file.selectedAssignments?.length) {
