@@ -10,3 +10,71 @@ td {
 nb-select {
   width: 50%;
 }
+
+/* process-weekly-lists.component.scss */
+.custom-export-alert {
+  .alert-wrapper {
+    border-radius: 8px;
+    max-width: 350px;
+  }
+
+  .alert-head {
+    text-align: center;
+    padding-bottom: 10px;
+
+    .alert-title {
+      font-size: 1.2rem;
+      font-weight: 600;
+      color: #3366ff;
+    }
+  }
+
+  .alert-message {
+    text-align: center;
+    font-size: 1rem;
+    color: #555;
+    margin-bottom: 20px;
+  }
+
+  .alert-button-group {
+    flex-direction: column;
+    padding: 0 20px 20px;
+
+    button {
+      margin: 5px 0;
+      border-radius: 6px;
+      height: 44px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      transition: all 0.3s ease;
+
+      &.pdf-button {
+        background-color: #ff3d71;
+        color: white;
+
+        &:hover {
+          background-color: darken(#ff3d71, 10%);
+        }
+      }
+
+      &.excel-button {
+        background-color: #00d68f;
+        color: white;
+
+        &:hover {
+          background-color: darken(#00d68f, 10%);
+        }
+      }
+
+      &.cancel-button {
+        background-color: #f7f9fc;
+        color: #8f9bb3;
+
+        &:hover {
+          background-color: darken(#f7f9fc, 5%);
+        }
+      }
+    }
+  }
+}

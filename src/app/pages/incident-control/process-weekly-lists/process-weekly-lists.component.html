@@ -4,7 +4,6 @@
     <div class="d-flex justify-content-between align-items-center">
       <span class="title">Semanas Procesadas</span>
       <!-- Botón para ver Listas Semanales Procesadas -->
-
       <button nbButton status="info" (click)="openProcessedListsModal()">
         Listas Semanales Procesadas
       </button>
@@ -110,10 +109,10 @@
           nbButton
           status="success"
           size="medium"
-          (click)="generatePDF()"
+          (click)="openExportOptions()"
           class="mb-2 mb-sm-2 mr-2"
         >
-          <nb-icon icon="printer-outline" class="me-2"></nb-icon> Imprimir
+          <nb-icon icon="download-outline" class="me-2"></nb-icon> Exportar
         </button>
 
         <button

@@ -1,8 +1,3 @@
-/*
-  En este codigo se procesan las semanas para mandarlas al siguiente estado de revision, tambien se visualiza
-  una tabla en la que tenemos los datos de la lista de asistencia
-*/
-
 import { Component, OnInit } from "@angular/core";
 import { HttpClient } from "@angular/common/http";
 import {
@@ -21,6 +16,7 @@ import { environment } from "../../../../environments/environment";
 import jsPDF from "jspdf";
 import * as moment from "moment";
 import autoTable from "jspdf-autotable";
+import * as XLSX from "xlsx";
 
 @Component({
   selector: "ngx-process-weekly-lists",
@@ -253,6 +249,47 @@ export class ProcessWeeklyListsComponent {
     );
   }
 
+  // Mostrar opciones de exportación (PDF o Excel)
+  async openExportOptions() {
+    if (!this.selectedWeek) {
+      this.toastrService.showWarning(
+        "Debes seleccionar una semana para exportar.",
+        "Aviso"
+      );
+      return;
+    }
+
+    const alert = await this.alertController.create({
+      header: "Exportar lista de asistencia",
+      cssClass: "custom-export-alert",
+      message: "Selecciona el formato de exportación:",
+      buttons: [
+        {
+          text: "PDF",
+          cssClass: "pdf-button",
+          handler: () => {
+            this.generatePDF();
+          },
+        },
+        {
+          text: "Excel",
+          cssClass: "excel-button",
+
+          handler: () => {
+            this.generateExcel();
+          },
+        },
+        {
+          text: "Cancelar",
+          role: "cancel",
+          cssClass: "cancel-button",
+        },
+      ],
+    });
+
+    await alert.present();
+  }
+
   generatePDF(): void {
     const pdf = new jsPDF("l", "mm", "a4");
     const pageWidth = pdf.internal.pageSize.getWidth();
@@ -397,6 +434,203 @@ export class ProcessWeeklyListsComponent {
     }
 
     pdf.save(`asistencia-semana-${this.selectedWeek?.week_number || "X"}.pdf`);
+  }
+
+  generateExcel(): void {
+    // Crear un nuevo libro de Excel
+    const wb = XLSX.utils.book_new();
+
+    // Definir estilos comunes
+    const headerStyle = {
+      font: { bold: true, color: { rgb: "000000" } },
+      fill: { fgColor: { rgb: "D3D3D3" } },
+      alignment: { horizontal: "center", vertical: "center" },
+      border: {
+        top: { style: "thin", color: { rgb: "000000" } },
+        bottom: { style: "thin", color: { rgb: "000000" } },
+        left: { style: "thin", color: { rgb: "000000" } },
+        right: { style: "thin", color: { rgb: "000000" } },
+      },
+    };
+
+    const cellStyle = {
+      border: {
+        top: { style: "thin", color: { rgb: "000000" } },
+        bottom: { style: "thin", color: { rgb: "000000" } },
+        left: { style: "thin", color: { rgb: "000000" } },
+        right: { style: "thin", color: { rgb: "000000" } },
+      },
+    };
+
+    const centerAlignedStyle = {
+      ...cellStyle,
+      alignment: { horizontal: "center" },
+    };
+
+    // Procesar cada día de la semana
+    this.diasSemana.forEach((dia) => {
+      const showSecondMeal = this.empleadosSemana.some((emp) => {
+        const wh = emp.work_hours[dia.date] || {};
+        return wh.second_lunch_start_time || wh.second_lunch_end_time;
+      });
+
+      // Preparar los datos
+      const data = [];
+
+      // Primera fila: Título
+      data.push([
+        {
+          v: `Lista de Asistencia para ${dia.display} (${dia.date})`,
+          t: "s",
+          s: {
+            font: { bold: true, sz: 14 },
+            alignment: { horizontal: "center" },
+            fill: { fgColor: { rgb: "D3D3D3" } },
+          },
+        },
+      ]);
+
+      // Segunda fila vacía para separar
+      data.push([]);
+
+      // Tercera fila: Encabezados
+      const headers = [
+        { v: "Código", t: "s", s: headerStyle },
+        { v: "Empleado", t: "s", s: headerStyle },
+        { v: "Entrada", t: "s", s: headerStyle },
+        { v: "Entrada C", t: "s", s: headerStyle },
+        { v: "Salida C", t: "s", s: headerStyle },
+        ...(showSecondMeal
+          ? [
+              { v: "Entrada 2da C", t: "s", s: headerStyle },
+              { v: "Salida 2da C", t: "s", s: headerStyle },
+            ]
+          : []),
+        { v: "Salida", t: "s", s: headerStyle },
+        { v: "Incidencia", t: "s", s: headerStyle },
+        { v: "Descripción", t: "s", s: headerStyle },
+        { v: "Empresa y Obra", t: "s", s: headerStyle },
+        { v: "Firma", t: "s", s: headerStyle },
+      ];
+      data.push(headers);
+
+      // Agregar datos de empleados
+      this.empleadosSemana.forEach((emp) => {
+        const wh = emp.work_hours[dia.date] || {};
+        const entry = this.formatHour(wh.entry_time) || "--:--";
+        const lunchStart = this.formatHour(wh.lunch_start_time) || "--:--";
+        const lunchEnd = this.formatHour(wh.lunch_end_time) || "--:--";
+        const secondLunchStart =
+          this.formatHour(wh.second_lunch_start_time) || "--:--";
+        const secondLunchEnd =
+          this.formatHour(wh.second_lunch_end_time) || "--:--";
+        const exit = this.formatHour(wh.exit_time) || "--:--";
+
+        // Manejo de incidencias
+        let incidentText = wh.incident || "N/A";
+        let descriptionText = wh.description || "Sin descripción";
+
+        if (wh.incident === "Falta") {
+          incidentText = "Falta";
+          descriptionText = "no se presentó a trabajar";
+        } else if (wh.incident === "Horas Extras") {
+          incidentText = "Horas Extras";
+          descriptionText = wh.description || "horas extras";
+        }
+
+        const rowData = [
+          {
+            v: emp.employee_code?.toString() || "",
+            t: "s",
+            s: centerAlignedStyle,
+          },
+          {
+            v: `${emp.first_name} ${emp.last_name} ${
+              emp.middle_name || ""
+            }`.trim(),
+            t: "s",
+            s: cellStyle,
+          },
+          { v: entry, t: "s", s: centerAlignedStyle },
+          { v: lunchStart, t: "s", s: centerAlignedStyle },
+          { v: lunchEnd, t: "s", s: centerAlignedStyle },
+          ...(showSecondMeal
+            ? [
+                { v: secondLunchStart, t: "s", s: centerAlignedStyle },
+                { v: secondLunchEnd, t: "s", s: centerAlignedStyle },
+              ]
+            : []),
+          { v: exit, t: "s", s: centerAlignedStyle },
+          { v: incidentText, t: "s", s: centerAlignedStyle },
+          { v: descriptionText, t: "s", s: cellStyle },
+          { v: wh.project_name || "No Asignado", t: "s", s: cellStyle },
+          { v: "", t: "s", s: cellStyle }, // Espacio para firma
+        ];
+
+        // Si hay incidencia especial, limpiar campos de tiempo
+        if (
+          wh.incident &&
+          wh.incident !== "N/A" &&
+          wh.incident !== "Asistencia sin proyecto"
+        ) {
+          rowData[2].v = ""; // Entrada
+          rowData[3].v = ""; // Entrada C
+          rowData[4].v = ""; // Salida C
+          if (showSecondMeal) {
+            rowData[5].v = ""; // Entrada 2da C
+            rowData[6].v = ""; // Salida 2da C
+          }
+          rowData[showSecondMeal ? 7 : 5].v = ""; // Salida
+        }
+
+        data.push(rowData);
+      });
+
+      // Crear la hoja de cálculo
+      const ws = XLSX.utils.aoa_to_sheet(data);
+
+      // Combinar celdas para el título
+      if (!ws["!merges"]) ws["!merges"] = [];
+      ws["!merges"].push({
+        s: { r: 0, c: 0 },
+        e: { r: 0, c: 10 + (showSecondMeal ? 2 : 0) },
+      });
+
+      // Ajustar el ancho de las columnas
+      const colWidths = [
+        { wch: 8 }, // Código
+        { wch: 30 }, // Empleado
+        { wch: 10 }, // Entrada
+        { wch: 10 }, // Entrada C
+        { wch: 10 }, // Salida C
+        ...(showSecondMeal
+          ? [
+              { wch: 12 }, // Entrada 2da C
+              { wch: 12 }, // Salida 2da C
+            ]
+          : []),
+        { wch: 10 }, // Salida
+        { wch: 12 }, // Incidencia
+        { wch: 20 }, // Descripción
+        { wch: 25 }, // Empresa y Obra
+        { wch: 15 }, // Firma
+      ];
+
+      ws["!cols"] = colWidths;
+
+      // Congelar la fila de encabezados (fila 2, ya que la 0 es el título)
+      ws["!freeze"] = { x: 0, y: 2 };
+
+      // Agregar la hoja al libro
+      const sheetName = dia.display.substring(0, 3) + dia.date.split("-")[2];
+      XLSX.utils.book_append_sheet(wb, ws, sheetName);
+    });
+
+    // Generar el archivo Excel
+    const fileName = `asistencia-semana-${
+      this.selectedWeek?.week_number || "X"
+    }.xlsx`;
+    XLSX.writeFile(wb, fileName);
   }
 
   formatHour(hour: string): string | null {
