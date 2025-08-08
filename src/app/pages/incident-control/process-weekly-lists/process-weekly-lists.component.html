@@ -1,16 +1,13 @@
-<!-- Selector de Semana Confirmada -->
 <nb-card>
   <nb-card-header>
     <div class="d-flex justify-content-between align-items-center">
       <span class="title">Semanas Procesadas</span>
-      <!-- Botón para ver Listas Semanales Procesadas -->
       <button nbButton status="info" (click)="openProcessedListsModal()">
         Listas Semanales Procesadas
       </button>
     </div>
   </nb-card-header>
   <nb-card-body>
-    <!-- Selector de Semana Confirmada -->
     <div class="col-md-5 col-sm-12 mb-3 mb-sm-3 px-0">
       <nb-select
         [(selected)]="selectedWeek"
@@ -32,7 +29,6 @@
       </nb-select>
     </div>
 
-    <!-- Tabla de Asistencia de la Semana Confirmada -->
     <div class="table-responsive mt-4" *ngIf="selectedWeek">
       <h5 class="text-center">
         Lista de Asistencia de la Semana {{ selectedWeek.week_number }} ({{
@@ -46,7 +42,7 @@
             <th rowspan="2" class="text-center align-middle">Código</th>
             <th rowspan="2" class="text-center align-middle">Empleado</th>
             <ng-container *ngFor="let dia of diasSemana">
-              <th colspan="9" class="text-center">
+              <th colspan="11" class="text-center">
                 {{ dia.display }} ({{ dia.date | date : "dd/MM/yyyy" }})
               </th>
             </ng-container>
@@ -61,7 +57,9 @@
               <th class="text-center">Salida</th>
               <th class="text-center">Incidencia</th>
               <th class="text-center">Descripción</th>
+              <th class="text-center">ID del proyecto</th>
               <th class="text-center">Empresa y Obra</th>
+              <th class="text-center">Estatus del proyecto</th>
             </ng-container>
           </tr>
         </thead>
@@ -97,8 +95,27 @@
               <td>
                 {{ emp.work_hours?.[dia.date]?.description || 'Sin descripción' }}
               </td>
+              <td class="text-center">
+                {{ emp.work_hours?.[dia.date]?.project_id || 'N/A' }}
+              </td>
               <td>
                 {{ emp.work_hours?.[dia.date]?.project_name || 'No Asignado' }}
+              </td>
+              <td class="text-center project-status-cell">
+                <div
+                  *ngIf="emp.work_hours?.[dia.date]?.project_status; else noStatus"
+                >
+                  <div
+                    *ngFor="
+                      let line of getProjectStatusLines(
+                        emp.work_hours[dia.date]
+                      )
+                    "
+                  >
+                    {{ line }}
+                  </div>
+                </div>
+                <ng-template #noStatus>N/A</ng-template>
               </td>
             </ng-container>
           </tr>

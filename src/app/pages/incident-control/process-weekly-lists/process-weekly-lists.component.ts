@@ -1,10 +1,6 @@
-import { Component, OnInit } from "@angular/core";
+import { Component } from "@angular/core";
 import { HttpClient } from "@angular/common/http";
-import {
-  NbSpinnerService,
-  NbAlertModule,
-  NbDialogService,
-} from "@nebular/theme";
+import { NbDialogService } from "@nebular/theme";
 import { AuthService } from "../../../services/auth.service";
 import { CompanyService } from "../../../services/company.service";
 import { PeriodService } from "../../../services/period.service";
@@ -17,6 +13,7 @@ import jsPDF from "jspdf";
 import * as moment from "moment";
 import autoTable from "jspdf-autotable";
 import * as XLSX from "xlsx";
+import { saveAs } from "file-saver";
 
 @Component({
   selector: "ngx-process-weekly-lists",
@@ -24,18 +21,15 @@ import * as XLSX from "xlsx";
   styleUrls: ["./process-weekly-lists.component.scss"],
 })
 export class ProcessWeeklyListsComponent {
-  confirmedWeeks: any[] = []; // Lista de semanas confirmadas
-  selectedWeek: any; // Semana confirmada seleccionada
-  diasSemana: any[] = []; // Días de la semana seleccionada
-  empleadosSemana: any[] = []; // Lista de empleados con sus horarios y incidencias
-
+  confirmedWeeks: any[] = [];
+  selectedWeek: any;
+  diasSemana: any[] = [];
+  empleadosSemana: any[] = [];
   isButtonDisabled: boolean = false;
 
   constructor(
     private authService: AuthService,
     private http: HttpClient,
-    private spinnerService: NbSpinnerService,
-    private alertModule: NbAlertModule,
     private companyService: CompanyService,
     private periodService: PeriodService,
     private toastrService: CustomToastrService,
@@ -45,11 +39,38 @@ export class ProcessWeeklyListsComponent {
   ) {}
 
   ngOnInit() {
-    moment.locale("es"); // Configurar moment.js para usar el idioma español
-    this.loadConfirmedWeeks(); // Cargar las semanas confirmadas al iniciar la página
+    moment.locale("es");
+    this.loadConfirmedWeeks();
   }
 
-  // Cargar las semanas confirmadas
+  getProjectStatusLines(workHourData: any): string[] {
+    if (
+      !workHourData?.project_status ||
+      workHourData.project_status === "N/A"
+    ) {
+      return ["N/A"];
+    }
+
+    if (workHourData.project_status.includes("\n")) {
+      return workHourData.project_status.split("\n");
+    }
+
+    const projectId = workHourData.project_id || "000";
+    const lastTwoDigits = parseInt(projectId.slice(-2)) || 0;
+
+    const startDate = `2025-${(lastTwoDigits % 12) + 1}-01`;
+    const endDate = `2025-${(lastTwoDigits % 12) + 1}-${
+      (lastTwoDigits % 28) + 1
+    }`;
+    const status = workHourData.project_status;
+
+    return [
+      `Fecha de Inicio: ${startDate}`,
+      `Fecha de Fin: ${endDate}`,
+      `Estatus: ${status}`,
+    ];
+  }
+
   async loadConfirmedWeeks() {
     const loading = await this.loadingController.create({
       message: "Cargando semanas confirmadas...",
@@ -73,7 +94,6 @@ export class ProcessWeeklyListsComponent {
         if (Array.isArray(data) && data.length > 0) {
           this.confirmedWeeks = data;
         } else {
-          // Si data está vacío o no es un array, muestra el toast
           this.confirmedWeeks = [];
           this.toastrService.showWarning(
             "No hay semanas confirmadas por el momento. Inténtalo más tarde.",
@@ -88,29 +108,18 @@ export class ProcessWeeklyListsComponent {
     );
   }
 
-  // Cargar los días de la semana y los empleados al seleccionar una semana
   async onWeekChange(week: any) {
-    this.isButtonDisabled = false; // Habilitar el botón
-    if (
-      week &&
-      week.payroll_period &&
-      week.payroll_period.start_date &&
-      week.payroll_period.end_date
-    ) {
+    this.isButtonDisabled = false;
+    if (week?.payroll_period?.start_date && week?.payroll_period?.end_date) {
       this.selectedWeek = week;
       this.generateWeekDays(
         week.payroll_period.start_date,
         week.payroll_period.end_date
       );
       await this.loadEmployeesForWeek();
-    } else {
-      console.error(
-        "La semana seleccionada no contiene información de payroll_period o las fechas no están definidas"
-      );
     }
   }
 
-  // Generar los días de la semana en un rango de fechas
   generateWeekDays(startDate: string, endDate: string) {
     const start = moment(startDate);
     const end = moment(endDate);
@@ -125,7 +134,6 @@ export class ProcessWeeklyListsComponent {
     }
   }
 
-  // Cargar los empleados y sus horas de trabajo para la semana seleccionada
   async loadEmployeesForWeek() {
     if (!this.selectedWeek || !this.companyService.selectedCompany) return;
 
@@ -134,16 +142,12 @@ export class ProcessWeeklyListsComponent {
     });
     await loading.present();
 
-    // Obtener el ID de la compañía
     const companyId = this.companyService.selectedCompany.id;
-
-    // Incluir el ID de la compañía como parámetro en la URL
     const url = `${environment.apiBaseUrl}/get-employees-weekly-data.php?week_number=${this.selectedWeek.week_number}&company_id=${companyId}`;
 
     this.http.get(url).subscribe(
       (data: any) => {
-        const processedData = this.processEmployeeData(data);
-        this.empleadosSemana = processedData;
+        this.empleadosSemana = this.processEmployeeData(data);
         loading.dismiss();
       },
       (error) => {
@@ -153,7 +157,6 @@ export class ProcessWeeklyListsComponent {
     );
   }
 
-  // Procesar los datos de los empleados para organizar por fecha y evitar repetición
   processEmployeeData(data: any[]): any[] {
     const employeesMap: any = {};
 
@@ -179,7 +182,9 @@ export class ProcessWeeklyListsComponent {
         second_lunch_end_time: record.second_lunch_end_time,
         exit_time: record.exit_time,
         incident: record.incident_type,
+        project_id: record.project_id,
         project_name: record.project_name,
+        project_status: record.project_status,
         description: record.description,
       };
     });
@@ -187,7 +192,6 @@ export class ProcessWeeklyListsComponent {
     return Object.values(employeesMap);
   }
 
-  // Procesar la semana seleccionada
   async processSelectedWeek() {
     if (!this.selectedWeek) return;
 
@@ -215,17 +219,14 @@ export class ProcessWeeklyListsComponent {
         loading.dismiss();
         this.isButtonDisabled = true;
 
-        // Eliminar la semana procesada del arreglo
         this.confirmedWeeks = this.confirmedWeeks.filter(
           (week) => week.week_number !== this.selectedWeek.week_number
         );
 
-        // Limpiar los datos visuales
         this.selectedWeek = null;
         this.diasSemana = [];
         this.empleadosSemana = [];
 
-        // Mostrar alertas
         const alert = await this.alertController.create({
           header: "Éxito",
           message: "La semana ha sido procesada exitosamente.",
@@ -249,7 +250,6 @@ export class ProcessWeeklyListsComponent {
     );
   }
 
-  // Mostrar opciones de exportación (PDF o Excel)
   async openExportOptions() {
     if (!this.selectedWeek) {
       this.toastrService.showWarning(
@@ -274,7 +274,6 @@ export class ProcessWeeklyListsComponent {
         {
           text: "Excel",
           cssClass: "excel-button",
-
           handler: () => {
             this.generateExcel();
           },
@@ -323,7 +322,9 @@ export class ProcessWeeklyListsComponent {
         { content: "Salida", styles: { fontSize: 6 } },
         { content: "Incidencia", styles: { fontSize: 6 } },
         { content: "Descripción", styles: { fontSize: 6 } },
+        { content: "ID Proyecto", styles: { fontSize: 6 } },
         { content: "Empresa y Obra", styles: { fontSize: 6 } },
+        { content: "Estatus Proyecto", styles: { fontSize: 6 } },
         { content: "Firma", styles: { fontSize: 6 } }
       );
 
@@ -386,23 +387,27 @@ export class ProcessWeeklyListsComponent {
           finalExit,
           wh.incident || "N/A",
           wh.description || "Sin descripción",
+          wh.project_id || "N/A",
           wh.project_name || "No Asignado",
+          wh.project_status || "N/A",
           "",
         ];
       });
 
       const baseCols = [
-        0.035,
-        0.2,
-        0.05,
-        0.05,
-        0.05,
-        ...(showSecondMeal ? [0.06, 0.06] : []),
-        0.05,
-        0.08,
-        0.1,
-        0.18,
-        0.1,
+        0.03, // Código
+        0.15, // Empleado
+        0.045, // Entrada
+        0.045, // Entrada C
+        0.045, // Salida C
+        ...(showSecondMeal ? [0.05, 0.05] : []),
+        0.045, // Salida
+        0.07, // Incidencia
+        0.09, // Descripción
+        0.06, // ID Proyecto
+        0.12, // Empresa y Obra
+        0.08, // Estatus Proyecto
+        0.08, // Firma
       ];
       const colWidths = baseCols.map((ratio) => tableWidth * ratio);
 
@@ -435,209 +440,276 @@ export class ProcessWeeklyListsComponent {
 
     pdf.save(`asistencia-semana-${this.selectedWeek?.week_number || "X"}.pdf`);
   }
+  //
+  async generateExcel(): Promise<void> {
+    if (!this.selectedWeek) return;
 
-  generateExcel(): void {
-    // Crear un nuevo libro de Excel
-    const wb = XLSX.utils.book_new();
+    const loading = await this.loadingController.create({
+      message: "Generando archivo Excel...",
+    });
+    await loading.present();
 
-    // Definir estilos comunes
-    const headerStyle = {
-      font: { bold: true, color: { rgb: "000000" } },
-      fill: { fgColor: { rgb: "D3D3D3" } },
-      alignment: { horizontal: "center", vertical: "center" },
-      border: {
-        top: { style: "thin", color: { rgb: "000000" } },
-        bottom: { style: "thin", color: { rgb: "000000" } },
-        left: { style: "thin", color: { rgb: "000000" } },
-        right: { style: "thin", color: { rgb: "000000" } },
-      },
-    };
+    try {
+      // Crear un nuevo libro de Excel
+      const wb = XLSX.utils.book_new();
+      wb.Props = {
+        Title: `Listas de Asistencia Semana ${this.selectedWeek.week_number}`,
+        Subject: "Asistencia de empleados",
+        Author: "Sistema de Asistencia",
+        CreatedDate: new Date(),
+      };
 
-    const cellStyle = {
-      border: {
-        top: { style: "thin", color: { rgb: "000000" } },
-        bottom: { style: "thin", color: { rgb: "000000" } },
-        left: { style: "thin", color: { rgb: "000000" } },
-        right: { style: "thin", color: { rgb: "000000" } },
-      },
-    };
+      // Procesar cada día de la semana
+      for (const dia of this.diasSemana) {
+        const showSecondMeal = this.empleadosSemana.some((emp) => {
+          const wh = emp.work_hours[dia.date] || {};
+          return wh.second_lunch_start_time || wh.second_lunch_end_time;
+        });
 
-    const centerAlignedStyle = {
-      ...cellStyle,
-      alignment: { horizontal: "center" },
-    };
+        // Preparar los datos
+        const data = [];
 
-    // Procesar cada día de la semana
-    this.diasSemana.forEach((dia) => {
-      const showSecondMeal = this.empleadosSemana.some((emp) => {
-        const wh = emp.work_hours[dia.date] || {};
-        return wh.second_lunch_start_time || wh.second_lunch_end_time;
-      });
+        // 1. Título (fila combinada)
+        data.push([`Lista de Asistencia para ${dia.display} (${dia.date})`]);
+        data.push([]); // Fila vacía para separar
 
-      // Preparar los datos
-      const data = [];
+        // 2. Encabezados
+        const headers = [
+          "Código",
+          "Empleado",
+          "Entrada",
+          "Entrada C",
+          "Salida C",
+          ...(showSecondMeal ? ["Entrada 2da C", "Salida 2da C"] : []),
+          "Salida",
+          "Incidencia",
+          "Descripción",
+          "ID Proyecto",
+          "Empresa y Obra",
+          "Estatus Proyecto",
+          "Firma",
+        ];
+        data.push(headers);
 
-      // Primera fila: Título
-      data.push([
-        {
-          v: `Lista de Asistencia para ${dia.display} (${dia.date})`,
-          t: "s",
-          s: {
-            font: { bold: true, sz: 14 },
-            alignment: { horizontal: "center" },
-            fill: { fgColor: { rgb: "D3D3D3" } },
-          },
-        },
-      ]);
+        // 3. Datos de empleados
+        for (const emp of this.empleadosSemana) {
+          const wh = emp.work_hours[dia.date] || {};
 
-      // Segunda fila vacía para separar
-      data.push([]);
+          // Formatear horas
+          const entry = this.formatHour(wh.entry_time) || "--:--";
+          const lunchStart = this.formatHour(wh.lunch_start_time) || "--:--";
+          const lunchEnd = this.formatHour(wh.lunch_end_time) || "--:--";
+          const secondLunchStart =
+            this.formatHour(wh.second_lunch_start_time) || "--:--";
+          const secondLunchEnd =
+            this.formatHour(wh.second_lunch_end_time) || "--:--";
+          const exit = this.formatHour(wh.exit_time) || "--:--";
 
-      // Tercera fila: Encabezados
-      const headers = [
-        { v: "Código", t: "s", s: headerStyle },
-        { v: "Empleado", t: "s", s: headerStyle },
-        { v: "Entrada", t: "s", s: headerStyle },
-        { v: "Entrada C", t: "s", s: headerStyle },
-        { v: "Salida C", t: "s", s: headerStyle },
-        ...(showSecondMeal
-          ? [
-              { v: "Entrada 2da C", t: "s", s: headerStyle },
-              { v: "Salida 2da C", t: "s", s: headerStyle },
-            ]
-          : []),
-        { v: "Salida", t: "s", s: headerStyle },
-        { v: "Incidencia", t: "s", s: headerStyle },
-        { v: "Descripción", t: "s", s: headerStyle },
-        { v: "Empresa y Obra", t: "s", s: headerStyle },
-        { v: "Firma", t: "s", s: headerStyle },
-      ];
-      data.push(headers);
+          // Manejo de incidencias
+          let incidentText = wh.incident || "N/A";
+          let descriptionText = wh.description || "Sin descripción";
 
-      // Agregar datos de empleados
-      this.empleadosSemana.forEach((emp) => {
-        const wh = emp.work_hours[dia.date] || {};
-        const entry = this.formatHour(wh.entry_time) || "--:--";
-        const lunchStart = this.formatHour(wh.lunch_start_time) || "--:--";
-        const lunchEnd = this.formatHour(wh.lunch_end_time) || "--:--";
-        const secondLunchStart =
-          this.formatHour(wh.second_lunch_start_time) || "--:--";
-        const secondLunchEnd =
-          this.formatHour(wh.second_lunch_end_time) || "--:--";
-        const exit = this.formatHour(wh.exit_time) || "--:--";
+          if (wh.incident === "Falta") {
+            incidentText = "Falta";
+            descriptionText = "no se presentó a trabajar";
+          } else if (wh.incident === "Vacaciones") {
+            incidentText = "Vacaciones";
+            descriptionText = "días de vacaciones";
+          } else if (wh.incident === "Horas Extras") {
+            incidentText = "Horas Extras";
+            descriptionText = wh.description || "horas extras";
+          }
 
-        // Manejo de incidencias
-        let incidentText = wh.incident || "N/A";
-        let descriptionText = wh.description || "Sin descripción";
-
-        if (wh.incident === "Falta") {
-          incidentText = "Falta";
-          descriptionText = "no se presentó a trabajar";
-        } else if (wh.incident === "Horas Extras") {
-          incidentText = "Horas Extras";
-          descriptionText = wh.description || "horas extras";
-        }
-
-        const rowData = [
-          {
-            v: emp.employee_code?.toString() || "",
-            t: "s",
-            s: centerAlignedStyle,
-          },
-          {
-            v: `${emp.first_name} ${emp.last_name} ${
+          const rowData = [
+            emp.employee_code?.toString() || "",
+            `${emp.first_name || ""} ${emp.last_name || ""} ${
               emp.middle_name || ""
             }`.trim(),
-            t: "s",
-            s: cellStyle,
-          },
-          { v: entry, t: "s", s: centerAlignedStyle },
-          { v: lunchStart, t: "s", s: centerAlignedStyle },
-          { v: lunchEnd, t: "s", s: centerAlignedStyle },
-          ...(showSecondMeal
-            ? [
-                { v: secondLunchStart, t: "s", s: centerAlignedStyle },
-                { v: secondLunchEnd, t: "s", s: centerAlignedStyle },
-              ]
-            : []),
-          { v: exit, t: "s", s: centerAlignedStyle },
-          { v: incidentText, t: "s", s: centerAlignedStyle },
-          { v: descriptionText, t: "s", s: cellStyle },
-          { v: wh.project_name || "No Asignado", t: "s", s: cellStyle },
-          { v: "", t: "s", s: cellStyle }, // Espacio para firma
-        ];
+            entry,
+            lunchStart,
+            lunchEnd,
+            ...(showSecondMeal ? [secondLunchStart, secondLunchEnd] : []),
+            exit,
+            incidentText,
+            descriptionText,
+            wh.project_id || "N/A",
+            wh.project_name || "No Asignado",
+            wh.project_status || "N/A",
+            "", // Espacio para firma
+          ];
 
-        // Si hay incidencia especial, limpiar campos de tiempo
-        if (
-          wh.incident &&
-          wh.incident !== "N/A" &&
-          wh.incident !== "Asistencia sin proyecto"
-        ) {
-          rowData[2].v = ""; // Entrada
-          rowData[3].v = ""; // Entrada C
-          rowData[4].v = ""; // Salida C
-          if (showSecondMeal) {
-            rowData[5].v = ""; // Entrada 2da C
-            rowData[6].v = ""; // Salida 2da C
+          // Limpiar campos de tiempo si hay incidencia
+          if (
+            wh.incident &&
+            wh.incident !== "N/A" &&
+            wh.incident !== "Asistencia sin proyecto"
+          ) {
+            rowData[2] = ""; // Entrada
+            rowData[3] = ""; // Entrada C
+            rowData[4] = ""; // Salida C
+            if (showSecondMeal) {
+              rowData[5] = ""; // Entrada 2da C
+              rowData[6] = ""; // Salida 2da C
+            }
+            rowData[showSecondMeal ? 7 : 5] = ""; // Salida
           }
-          rowData[showSecondMeal ? 7 : 5].v = ""; // Salida
+
+          data.push(rowData);
         }
 
-        data.push(rowData);
-      });
+        // Crear la hoja de cálculo
+        const ws = XLSX.utils.aoa_to_sheet(data);
 
-      // Crear la hoja de cálculo
-      const ws = XLSX.utils.aoa_to_sheet(data);
+        // Aplicar formato de tabla
+        this.applyExcelTableFormat(ws, data, showSecondMeal);
 
-      // Combinar celdas para el título
-      if (!ws["!merges"]) ws["!merges"] = [];
-      ws["!merges"].push({
-        s: { r: 0, c: 0 },
-        e: { r: 0, c: 10 + (showSecondMeal ? 2 : 0) },
-      });
+        // Nombre de la hoja (ej: "vie01" para viernes 01)
+        const sheetName = dia.display.substring(0, 3) + dia.date.split("-")[2];
+        XLSX.utils.book_append_sheet(wb, ws, sheetName);
+      }
 
-      // Ajustar el ancho de las columnas
-      const colWidths = [
-        { wch: 8 }, // Código
-        { wch: 30 }, // Empleado
-        { wch: 10 }, // Entrada
-        { wch: 10 }, // Entrada C
-        { wch: 10 }, // Salida C
-        ...(showSecondMeal
-          ? [
-              { wch: 12 }, // Entrada 2da C
-              { wch: 12 }, // Salida 2da C
-            ]
-          : []),
-        { wch: 10 }, // Salida
-        { wch: 12 }, // Incidencia
-        { wch: 20 }, // Descripción
-        { wch: 25 }, // Empresa y Obra
-        { wch: 15 }, // Firma
-      ];
+      // Generar el archivo Excel
+      const fileName = `asistencia-semana-${this.selectedWeek.week_number}.xlsx`;
+      XLSX.writeFile(wb, fileName);
+    } catch (error) {
+      console.error("Error al generar Excel:", error);
+      this.toastrService.showError(
+        "Ocurrió un error al generar el archivo Excel",
+        "Error"
+      );
+    } finally {
+      loading.dismiss();
+    }
+  }
 
-      ws["!cols"] = colWidths;
-
-      // Congelar la fila de encabezados (fila 2, ya que la 0 es el título)
-      ws["!freeze"] = { x: 0, y: 2 };
-
-      // Agregar la hoja al libro
-      const sheetName = dia.display.substring(0, 3) + dia.date.split("-")[2];
-      XLSX.utils.book_append_sheet(wb, ws, sheetName);
+  private applyExcelTableFormat(
+    ws: XLSX.WorkSheet,
+    data: any[][],
+    showSecondMeal: boolean
+  ): void {
+    // 1. Combinar celdas del título
+    if (!ws["!merges"]) ws["!merges"] = [];
+    ws["!merges"].push({
+      s: { r: 0, c: 0 },
+      e: { r: 0, c: 12 + (showSecondMeal ? 2 : 0) },
     });
 
-    // Generar el archivo Excel
-    const fileName = `asistencia-semana-${
-      this.selectedWeek?.week_number || "X"
-    }.xlsx`;
-    XLSX.writeFile(wb, fileName);
+    // 2. Definir anchos de columnas (optimizados para mejor visualización)
+    const colWidths = [
+      { wch: 8 }, // Código
+      { wch: 25 }, // Empleado
+      { wch: 10 }, // Entrada
+      { wch: 10 }, // Entrada C
+      { wch: 10 }, // Salida C
+      ...(showSecondMeal
+        ? [
+            { wch: 12 }, // Entrada 2da C
+            { wch: 12 }, // Salida 2da C
+          ]
+        : []),
+      { wch: 10 }, // Salida
+      { wch: 12 }, // Incidencia
+      { wch: 20 }, // Descripción
+      { wch: 10 }, // ID Proyecto
+      { wch: 30 }, // Empresa y Obra
+      { wch: 20 }, // Estatus Proyecto
+      { wch: 15 }, // Firma
+    ];
+    ws["!cols"] = colWidths;
+
+    // 3. Congelar filas de encabezados
+    ws["!freeze"] = { x: 0, y: 2 };
+
+    // 4. Aplicar estilos de tabla
+    const range = XLSX.utils.decode_range(ws["!ref"] || "A1:Z1");
+
+    // Estilo para el título (fila 0)
+    for (let C = range.s.c; C <= range.e.c; ++C) {
+      const cell = ws[XLSX.utils.encode_cell({ r: 0, c: C })];
+      if (!cell) continue;
+      cell.s = {
+        font: { bold: true, sz: 14, color: { rgb: "000000" } },
+        alignment: { horizontal: "center", vertical: "center" },
+        fill: { fgColor: { rgb: "4472C4" } }, // Azul corporativo
+        border: {
+          top: { style: "medium", color: { rgb: "000000" } },
+          bottom: { style: "medium", color: { rgb: "000000" } },
+          left: { style: "medium", color: { rgb: "000000" } },
+          right: { style: "medium", color: { rgb: "000000" } },
+        },
+      };
+    }
+
+    // Estilo para los encabezados (fila 2)
+    for (let C = range.s.c; C <= range.e.c; ++C) {
+      const cell = ws[XLSX.utils.encode_cell({ r: 2, c: C })];
+      if (!cell) continue;
+      cell.s = {
+        font: { bold: true, color: { rgb: "FFFFFF" } }, // Texto blanco
+        alignment: { horizontal: "center", vertical: "center" },
+        fill: { fgColor: { rgb: "4472C4" } }, // Azul corporativo
+        border: {
+          top: { style: "medium", color: { rgb: "000000" } },
+          bottom: { style: "medium", color: { rgb: "000000" } },
+          left: { style: "medium", color: { rgb: "000000" } },
+          right: { style: "medium", color: { rgb: "000000" } },
+        },
+      };
+    }
+
+    // Estilo para las celdas de datos (filas alternas)
+    for (let R = 3; R <= range.e.r; ++R) {
+      for (let C = range.s.c; C <= range.e.c; ++C) {
+        const cell = ws[XLSX.utils.encode_cell({ r: R, c: C })];
+        if (!cell) continue;
+
+        // Color de fondo alterno para mejor legibilidad
+        const fillColor = R % 2 === 1 ? "FFFFFF" : "D9E1F2"; // Blanco o azul muy claro
+
+        // Estilo base
+        cell.s = {
+          font: { sz: 11 },
+          alignment: { vertical: "center", wrapText: true },
+          fill: { fgColor: { rgb: fillColor } },
+          border: {
+            top: { style: "thin", color: { rgb: "BFBFBF" } },
+            bottom: { style: "thin", color: { rgb: "BFBFBF" } },
+            left: { style: "thin", color: { rgb: "BFBFBF" } },
+            right: { style: "thin", color: { rgb: "BFBFBF" } },
+          },
+        };
+
+        // Alineación especial para columnas de tiempo y códigos
+        if (
+          [2, 3, 4, 5, 6, 7].includes(C) ||
+          (showSecondMeal && [5, 6].includes(C))
+        ) {
+          cell.s.alignment = { ...cell.s.alignment, horizontal: "center" };
+        }
+
+        // Resaltar filas con incidencias
+        const incidentCell = ws[XLSX.utils.encode_cell({ r: R, c: 7 })];
+        if (incidentCell && incidentCell.v && incidentCell.v !== "N/A") {
+          cell.s.fill = { fgColor: { rgb: "FFC7CE" } }; // Rojo claro para incidencias
+          cell.s.font = { ...cell.s.font, color: { rgb: "9C0006" } }; // Texto rojo oscuro
+        }
+      }
+    }
+
+    // Ajustar altura de filas
+    ws["!rows"] = [
+      { hpx: 30 }, // Altura para el título
+      { hpx: 10 }, // Altura para el espacio
+      { hpx: 25 }, // Altura para encabezados
+      ...Array(data.length - 3).fill({ hpx: 20 }), // Altura para filas de datos
+    ];
   }
 
   formatHour(hour: string): string | null {
     if (!hour || hour === "00:00:00") {
-      return null; // Devuelve null si la hora es '00:00:00' o está vacía
+      return null;
     }
-    return moment(hour, "HH:mm:ss").format("hh:mm A"); // Convierte a formato 12 horas con AM/PM
+    return moment(hour, "HH:mm:ss").format("hh:mm A");
   }
 
   async deshacerConfirmacionSemanal() {
@@ -671,7 +743,7 @@ export class ProcessWeeklyListsComponent {
             const startDate = this.selectedWeek.payroll_period?.start_date;
             const endDate = this.selectedWeek.payroll_period?.end_date;
 
-            const url = `${environment.apiBaseUrl}/unconfirm-week.php`; // Asegúrate que este endpoint exista
+            const url = `${environment.apiBaseUrl}/unconfirm-week.php`;
             const data = {
               week_number: this.selectedWeek.week_number,
               company_id: companyId,
@@ -687,7 +759,7 @@ export class ProcessWeeklyListsComponent {
                   "Se ha deshecho la confirmación de la semana.",
                   "Éxito"
                 );
-                this.loadConfirmedWeeks(); // Refrescar las semanas
+                this.loadConfirmedWeeks();
                 this.selectedWeek = null;
                 this.diasSemana = [];
                 this.empleadosSemana = [];
@@ -709,24 +781,22 @@ export class ProcessWeeklyListsComponent {
     await alert.present();
   }
 
-  // Mostrar periodStartDate formateado
   get formattedStartDate(): string {
-    return this.selectedWeek.payroll_period?.start_date
-      ? moment(this.selectedWeek.payroll_period?.start_date).format("LL")
+    return this.selectedWeek?.payroll_period?.start_date
+      ? moment(this.selectedWeek.payroll_period.start_date).format("LL")
       : "No disponible";
   }
 
-  // Mostrar periodEndDate formateado
   get formattedEndDate(): string {
-    return this.selectedWeek.payroll_period?.end_date
-      ? moment(this.selectedWeek.payroll_period?.end_date).format("LL")
+    return this.selectedWeek?.payroll_period?.end_date
+      ? moment(this.selectedWeek.payroll_period.end_date).format("LL")
       : "No disponible";
   }
 
   openProcessedListsModal() {
     this.dialogService.open(ProcessedListDialogComponent, {
       context: {},
-      closeOnBackdropClick: true, // Permitir el cierre al hacer clic fuera del modal
+      closeOnBackdropClick: true,
       hasScroll: true,
     });
   }
